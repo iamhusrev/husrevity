@@ -1,6 +1,6 @@
 # Monitoring & backup verification (first-week checklist)
 
-Backups are wired up via LaunchAgents (`ops/com.husrev.husrevitybackup-prod.plist`); this doc covers what to verify and what to add on top.
+Backups are wired up via the infra repo's per-app LaunchAgent (`~/iamhusrev-prod/launchagents/com.iamhusrev.backup.husrevity.plist`); this doc covers what to verify and what to add on top.
 
 ## Uptime monitoring (free tier)
 

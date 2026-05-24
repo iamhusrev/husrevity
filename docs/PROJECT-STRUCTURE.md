@@ -739,16 +739,16 @@ bash scripts/deploy.sh --no-pull  # skip git pull (for runner use)
 
 ### Backups
 
-`scripts/pg-backup.sh` does a `pg_dump -Fc` and keeps 14 days. Dumps land in `~/Backup/husrevity-db-dumps/`, auto-synced to Google Drive Desktop.
+Backup ownership moved to the shared infra repo at `~/iamhusrev-prod/` (one place for every app on this Mac). A generic `pg-backup.sh` driven by per-app env vars (`PG_CONTAINER`, `PG_DB`, `BACKUP_DIR`, …) is invoked by per-app LaunchAgents.
 
-| Job | Target DB | Schedule | LaunchAgent plist |
+| Job | Target DB | Schedule | LaunchAgent |
 |---|---|---|---|
-| dev | `husrevity_nest` (shared-infra) | daily 03:00 | `ops/com.husrev.husrevitybackup.plist` |
-| prod | `husrevity_prod` (compose) | daily 04:00 | `ops/com.husrev.husrevitybackup-prod.plist` |
+| prod | `husrevity_prod` (compose) | daily 04:00 | `~/iamhusrev-prod/launchagents/com.iamhusrev.backup.husrevity.plist` |
+| dev | `husrevity_nest` (shared-infra) | manual only | `bun run db:backup` (calls infra script with dev env) |
 
-Install once: `cp ops/com.husrev.husrevitybackup*.plist ~/Library/LaunchAgents/ && launchctl load …`.
+Install (handled by infra repo's `bootstrap.sh` — idempotent symlink + `launchctl load`).
 
-Restore: `pg_restore -h localhost -U postgres -d husrevity_nest_restore <dump>.dump`.
+Manual restore: see `~/iamhusrev-prod/RUNBOOK.md` → "Daily ops" → `pg-restore.sh latest`.
 
 ### Health endpoint
 
@@ -819,7 +819,7 @@ Set up an external monitor (UptimeRobot / BetterStack) checking `https://api.iam
 | Debug notification not firing | Check `notification` table: `dispatched_at IS NULL AND scheduled_at <= now()`. Check `push_subscription` table for the user. Check API logs for the `notification-dispatch` cron. |
 | Add an i18n key | Add to both `apps/web/src/messages/en.json` and `apps/web/src/messages/tr.json` under the relevant namespace. |
 | Change throttle limits | Global: `ThrottlerModule.forRoot` in `apps/api/src/app.module.ts`. Per-route: `@Throttle({ default: { limit: N, ttl: M } })` on the controller method. |
-| First-time prod deploy | Follow `ops/PROD-RUNBOOK.md` in full, then `bash scripts/deploy.sh`. |
+| First-time prod deploy | Follow `~/iamhusrev-prod/RUNBOOK.md` in full, then `bash scripts/deploy.sh`. |
 | Rotate JWT secret | Generate new value → update `~/.husrevity/api.env` → restart api container. See `ops/SECRETS.md`. |
 | Rotate crypto key | Read `ops/SECRETS.md` first. There is no migration — rotation means vault data loss. |
 | Add a design system component | Read existing utilities in `apps/web/src/app/globals.css`. Use `husrev-*` token names, `shadow-card-warm`, `grain`, and the animation helpers. Do not introduce new color values. |

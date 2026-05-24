@@ -3,7 +3,8 @@
 # Topology: Cloudflare Tunnel terminates TLS at the edge and forwards to
 # 127.0.0.1 on this host. There is no Caddy, no nginx, no open inbound port.
 # The host's static public IP is reserved for ops (SSH and a future mobile-API
-# direct path). See ops/PROD-RUNBOOK.md for the full bring-up.
+# direct path). See ~/iamhusrev-prod/RUNBOOK.md for the full bring-up (the
+# infra repo owns host-level config — tunnel, launchagents, backup scripts).
 #
 # Prerequisites:
 #   1. apps/api/.env.prod exists (symlink to ~/.husrevity/api.env recommended)
@@ -12,7 +13,8 @@
 #         ln -s ~/.husrevity/api.env .env
 #         ln -s ~/.husrevity/api.env apps/api/.env.prod
 #   3. Cloudflare Tunnel "husrevity" is provisioned and running (LaunchAgent
-#      ops/launchagents/com.iamhusrev.cloudflared.plist) with ingress:
+#      ~/iamhusrev-prod/launchagents/com.iamhusrev.cloudflared.plist) with
+#      ingress:
 #         app.iamhusrev.com → http://127.0.0.1:3090
 #         api.iamhusrev.com → http://127.0.0.1:4090
 #

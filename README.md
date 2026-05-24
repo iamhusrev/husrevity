@@ -95,17 +95,17 @@ The static public IP `85.104.115.220` is reserved for ops (SSH today, future mob
 
 ### First-time deploy (one-time human steps)
 
-Follow [`ops/PROD-RUNBOOK.md`](./ops/PROD-RUNBOOK.md) — it's the authoritative runbook. High level:
+Host-level setup (Cloudflare Tunnel, LaunchAgents, secrets dirs, runner, monitoring) lives in the **sibling infra repo `~/iamhusrev-prod/`** — one repo serves every personal app on this Mac. Read `~/iamhusrev-prod/RUNBOOK.md` for the full bring-up; husrevity-specific high-level summary:
 
-1. `brew install cloudflared jq gh gnupg` (plus Docker Desktop installer).
+1. `bash ~/iamhusrev-prod/bootstrap.sh` (idempotent — installs brew packages, creates dirs, links LaunchAgents, prints TODOs for what needs human input).
 2. **Cloudflare Tunnel** — `cloudflared tunnel login` → `tunnel create husrevity` → `tunnel route dns husrevity {app,api}.iamhusrev.com`. Move credentials to `~/.config/husrevity/cloudflared/credentials.json` (mode 600).
 3. **Secrets** — fill `~/.husrevity/api.env` (chmod 600) from `apps/api/.env.prod.example`, generate strong secrets, then symlink:
    ```bash
    ln -s ~/.husrevity/api.env apps/api/.env.prod   # mounted into api container
    ln -s ~/.husrevity/api.env .env                 # docker compose ${VAR} interpolation
    ```
-4. **LaunchAgents** — install `ops/launchagents/com.iamhusrev.cloudflared.plist` and `ops/com.husrev.husrevitybackup-prod.plist`. `sudo pmset -a sleep 0 disablesleep 1`.
-5. **Off-machine secrets backup** — copy `api.env` into the Drive-synced backup folder. ⚠️ Losing `HUSREVITY_CRYPTO_KEY` = all vault data unrecoverable. See [`ops/SECRETS.md`](./ops/SECRETS.md) and [`ops/SECURITY-CHECKLIST.md`](./ops/SECURITY-CHECKLIST.md).
+4. **LaunchAgents** — `bootstrap.sh` symlinks every plist in `~/iamhusrev-prod/launchagents/` (currently: cloudflared, husrevity backup) into `~/Library/LaunchAgents/` and loads them. Then `sudo pmset -a sleep 0 disablesleep 1`.
+5. **Off-machine secrets backup** — copy `api.env` into the Drive-synced backup folder. ⚠️ Losing `HUSREVITY_CRYPTO_KEY` = all vault data unrecoverable. See [`ops/SECRETS.md`](./ops/SECRETS.md) (husrevity-specific) and `~/iamhusrev-prod/SECURITY-CHECKLIST.md` (server-wide).
 
 Then run the first deploy manually:
 
@@ -128,7 +128,7 @@ Full secret rotation/recovery playbook: [`ops/SECRETS.md`](./ops/SECRETS.md).
 
 ### Continuous deploy (after first deploy)
 
-A GitHub Actions **self-hosted runner on the prod Mac** redeploys on every push to `main` (`.github/workflows/deploy.yml`): build images → `compose up -d` → wait for `/api/health` → public HTTPS smoke test. One-time runner setup: [`ops/RUNNER-SETUP.md`](./ops/RUNNER-SETUP.md). Rollback = revert the PR and push; the `prod-deploy` concurrency group serializes deploys.
+A GitHub Actions **self-hosted runner on the prod Mac** redeploys on every push to `main` (`.github/workflows/deploy.yml`): build images → `compose up -d` → wait for `/api/health` → public HTTPS smoke test. One-time runner setup: `~/iamhusrev-prod/RUNNER-SETUP.md`. The same runner serves every personal app — registered under the `iamhusrev-prod` label. Rollback = revert the PR and push; the `prod-deploy` concurrency group serializes deploys.
 
 Manual fallback any time: `bash scripts/deploy.sh`.
 
@@ -140,25 +140,15 @@ Health endpoint does a real DB ping (`GET /api/health` → `{ status, db }`, 503
 
 ## Backups
 
-`scripts/pg-backup.sh` runs `pg_dump -Fc` into `/Users/husrev/Backup/husrevity-db-dumps/` (auto-synced to Google Drive Desktop). Two LaunchAgents:
+Daily prod backup runs from the **infra repo** (`~/iamhusrev-prod/`): the LaunchAgent `com.iamhusrev.backup.husrevity` calls a generic `pg-backup.sh` with husrevity env vars baked into its plist. Output: `~/Backup/husrevity-db-dumps/` (auto-synced to Google Drive Desktop), 30-day retention.
 
-| Job  | DB                              | Schedule    | Plist                                       |
-| ---- | ------------------------------- | ----------- | ------------------------------------------- |
-| dev  | `husrevity_nest` (shared-infra) | daily 03:00 | `ops/com.husrev.husrevitybackup.plist`      |
-| prod | `husrevity_prod` (compose)      | daily 04:00 | `ops/com.husrev.husrevitybackup-prod.plist` |
+Dev backup is no longer automatic — dev data is reseedable. For a one-off snapshot of the dev DB:
 
 ```bash
-# install (one-time)
-cp ops/com.husrev.husrevitybackup*.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.husrev.husrevitybackup.plist
-launchctl load ~/Library/LaunchAgents/com.husrev.husrevitybackup-prod.plist
-
-# manual dev backup
-bun run db:backup
-
-# restore a dump
-pg_restore -h localhost -U postgres -d husrevity_nest_restore <dump>.dump
+bun run db:backup     # → husrevity_nest-<timestamp>.dump in ~/Backup/husrevity-db-dumps/
 ```
+
+Manual prod backup, restore, or secret rotation: see `~/iamhusrev-prod/RUNBOOK.md` → "Daily ops".
 
 ---
 

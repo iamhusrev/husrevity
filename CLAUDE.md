@@ -25,7 +25,7 @@ bun run test                # api unit tests (jest, --passWithNoTests)
 bun run test:e2e            # api e2e (jest with apps/api/test/jest-e2e.json)
 bun run migration:run       # apply TypeORM migrations
 bun run migration:generate  # generate new migration from entity diff
-bun run db:backup           # manual pg_dump (scripts/pg-backup.sh)
+bun run db:backup           # manual pg_dump of dev DB (calls ~/iamhusrev-prod/scripts/pg-backup.sh)
 ```
 
 API-only scripts (run from `apps/api/`):
@@ -122,7 +122,7 @@ JWT defaults: 15-min access tokens, 30-day opaque refresh tokens (SHA-256 hashed
 
 ## Backup
 
-`scripts/pg-backup.sh` (`pg_dump -Fc` of `husrevity_nest` from the `shared-postgres` container) → `/Users/husrev/Backup/husrevity-db-dumps/`. 14-day retention. Auto-synced to Google Drive Desktop. Daily at 03:00 via LaunchAgent (`ops/com.husrev.husrevitybackup.plist`). Manual: `bun run db:backup`.
+Backup ownership lives in the infra repo (`~/iamhusrev-prod/`). Prod DB is backed up daily 04:00 by the LaunchAgent `com.iamhusrev.backup.husrevity` (env-driven generic `pg-backup.sh`) → `~/Backup/husrevity-db-dumps/`, 30-day retention, Drive-synced. Dev backup is not automatic anymore — use `bun run db:backup` for a one-off (targets `husrevity_nest` on the shared-postgres container, 14-day retention).
 
 ## Workflow tips
 
