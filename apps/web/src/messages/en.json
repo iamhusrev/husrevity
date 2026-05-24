@@ -1,0 +1,993 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "openFull": "Open full page",
+    "error": "An error occurred",
+    "home": "Home",
+    "noData": "No data to display",
+    "notFound": "Not found",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "select": "Select",
+    "back": "Back",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "search": "Search",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "confirmDelete": "Are you sure you want to delete this record?",
+    "noAccess": "You do not have access to this page.",
+    "required": "This field is required.",
+    "save": "Save",
+    "create": "Create",
+    "creating": "Creating…",
+    "saving": "Saving…",
+    "deleting": "Deleting…",
+    "untitled": "(Untitled)",
+    "all": "All",
+    "more": "More",
+    "add": "Add",
+    "send": "Send",
+    "compose": "Compose",
+    "sync": "Sync",
+    "deleted": "Deleted",
+    "saved": "Saved",
+    "open": "Open"
+  },
+  "auth": {
+    "backToHome": "Back to Home",
+    "signInTitle": "Sign In",
+    "signInSubtitle": "Enter your credentials to access your account.",
+    "signUpTitle": "Create Account",
+    "signUpSubtitle": "Register to start with a new organization.",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "gender": "Gender",
+    "organizationName": "Organization Name",
+    "organizationPlaceholder": "Company or team name",
+    "signInButton": "Sign In",
+    "signingIn": "Signing in…",
+    "signUpButton": "Sign Up",
+    "signingUp": "Signing up…",
+    "noAccount": "Don't have an account?",
+    "registerHere": "Register here",
+    "haveAccount": "Already have an account?",
+    "signInHere": "Sign in",
+    "loginSuccessTitle": "Login Successful",
+    "loginSuccessMessage": "Welcome back! Redirecting…",
+    "registerSuccessTitle": "Registration Successful",
+    "registerSuccessMessage": "Welcome! Your account has been created.",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "validEmail": "Enter a valid email",
+    "passwordMin": "At least 8 characters",
+    "passwordMismatch": "Passwords don't match",
+    "createAccount": "Create account",
+    "welcomeText": "Welcome to Husrevity.",
+    "emailPlaceholder": "you@example.com"
+  },
+  "errors": {
+    "common": { "backHome": "Back Home", "goBack": "Go Back" },
+    "notFound": {
+      "title": "Page Not Found",
+      "message": "We couldn't find the page you were looking for."
+    },
+    "internal": {
+      "title": "Server Error",
+      "message": "Something went wrong.",
+      "tryAgain": "Try Again"
+    },
+    "maintenance": {
+      "title": "Service Unavailable",
+      "message": "The server is currently unavailable."
+    },
+    "maintenanceMode": {
+      "title": "Maintenance",
+      "message": "Our site is currently under planned maintenance."
+    },
+    "comingSoon": {
+      "title": "Coming Soon",
+      "message": "Our website is being prepared.",
+      "emailPlaceholder": "Email address",
+      "notifyMe": "Notify Me",
+      "subscribeText": "Don't want to miss updates?"
+    },
+    "success": { "title": "Success!", "message": "Your action completed." }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "allTasks": "All Tasks",
+    "myTasks": "My Tasks",
+    "archive": "Archive",
+    "users": "Users",
+    "settings": "Settings",
+    "profile": "Profile",
+    "organization": "Organization"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "notes": "Notes",
+    "reminders": "Reminders",
+    "lists": "Lists",
+    "projects": "Projects",
+    "plans": "Plans",
+    "calendar": "Calendar",
+    "gmail": "Mail",
+    "ai": "AI",
+    "vault": "Vault",
+    "evkat": "Evkat",
+    "finance": "Finance",
+    "admin": "Admin",
+    "adminUsers": "Users",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "admin": {
+    "kicker": "Admin",
+    "role": { "user": "User", "admin": "Admin" },
+    "users": {
+      "title": "Users",
+      "flourish": "users",
+      "all": "All users",
+      "empty": "No matches",
+      "searchPlaceholder": "Search by name or email…",
+      "invite": "Send invite",
+      "modalKicker": "User",
+      "enabled": "Account active",
+      "cannotDemoteSelf": "You cannot demote yourself.",
+      "resetPasswordTitle": "Reset password",
+      "newPasswordPlaceholder": "New password…",
+      "resetButton": "Reset",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordReset": "Password updated.",
+      "confirmDelete": "Are you sure you want to delete this user?",
+      "col": {
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "created": "Created"
+      }
+    },
+    "invites": {
+      "kicker": "New invite",
+      "title": "Invite user",
+      "pending": "Pending invites",
+      "email": "Email",
+      "submit": "Create invite",
+      "sending": "Sending…",
+      "hint": "Sends a 7-day invite link. If SMTP is not configured we show you the link to share manually.",
+      "deliveredOk": "Invite email sent successfully.",
+      "deliveredOff": "SMTP is not configured — copy the link below and share it manually.",
+      "inviteUrl": "Invite link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "expiresAt": "Expires: {{date}}",
+      "expired": "Expired"
+    }
+  },
+  "invite": {
+    "kicker": "Husrevity invitation",
+    "titlePrefix": "Create your",
+    "titleFlourish": "account",
+    "invitedAs": "Invited email",
+    "invitedBy": "Invited by {{by}} · expires: {{date}}",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm password",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords don't match.",
+    "submit": "Accept invite",
+    "creating": "Creating account…",
+    "invalid": "Invite not found or expired.",
+    "errorHint": "Contact the inviter and ask for a fresh link."
+  },
+  "finance": {
+    "title": "Finance",
+    "kicker": "Money ledger",
+    "flourish": "economy",
+    "tab": {
+      "overview": "Overview",
+      "transactions": "Transactions",
+      "accounts": "Accounts",
+      "debts": "Debts"
+    },
+    "stat": {
+      "totalBalance": "Total wealth",
+      "monthIncome": "This month income",
+      "monthExpense": "This month expense"
+    },
+    "netLabel": "Net",
+    "newTransaction": "New transaction",
+    "newTransfer": "Transfer",
+    "newAccount": "Add account",
+    "newDebt": "Add debt",
+    "viewAll": "View all",
+    "transfer": "Transfer",
+    "untitled": "(No description)",
+    "uncategorised": "(Uncategorised)",
+    "kind": { "income": "Income", "expense": "Expense", "transfer": "Transfer" },
+    "field": {
+      "name": "Name",
+      "type": "Type",
+      "amount": "Amount (₺)",
+      "account": "Account",
+      "category": "Category",
+      "occurredAt": "Date",
+      "description": "Description",
+      "notifyBefore": "Remind me",
+      "notes": "Notes",
+      "openingBalance": "Opening balance (₺)"
+    },
+    "filter": { "allAccounts": "All accounts", "allKinds": "All kinds" },
+    "column": { "date": "Date", "account": "Account", "description": "Description", "amount": "Amount" },
+    "section": {
+      "accounts": "Accounts",
+      "accountsAll": "All accounts",
+      "recent": "Recent activity",
+      "transactions": "Transactions",
+      "upcoming": "Upcoming debts",
+      "debtsAll": "Debts & receivables",
+      "byCategory": "By category"
+    },
+    "empty": {
+      "accounts": {
+        "title": "Add your first account",
+        "body": "Bank, card or cash wallet — income and expenses get attached to one."
+      },
+      "tx": { "title": "No transactions yet", "body": "Add an income or expense to start." },
+      "debts": { "title": "Nothing due soon", "body": "Debts with upcoming dates show here." }
+    },
+    "modal": {
+      "newKicker": "New",
+      "editKicker": "Edit",
+      "incomeTitle": "Income entry",
+      "expenseTitle": "Expense entry",
+      "invalidAmount": "Enter a valid amount.",
+      "noAccount": "Add an account first."
+    },
+    "transfer": {
+      "kicker": "Between accounts",
+      "title": "Transfer",
+      "from": "From",
+      "to": "To",
+      "submit": "Transfer",
+      "sameAccount": "Source and destination must differ."
+    },
+    "account": {
+      "title": "Account",
+      "archived": "Archive (hidden from summary)",
+      "archivedTag": "Archived",
+      "openingShort": "Opening"
+    },
+    "debt": {
+      "title": "Debt",
+      "iOwe": "I owe",
+      "owedToMe": "Owed to me",
+      "iOweTitle": "I owe",
+      "owedToMeTitle": "Owed to me",
+      "counterparty": "Counterparty",
+      "interest": "Interest (%)",
+      "dueAt": "Due date",
+      "settle": "Mark settled",
+      "reopen": "Reopen",
+      "settledOn": "Settled: {{date}}",
+      "openStatus": "Open",
+      "totalIOwe": "Total I owe",
+      "totalOwedToMe": "Total owed to me",
+      "settledTag": "Settled",
+      "showSettled": "Show settled",
+      "noDueDate": "No due date"
+    },
+    "placeholders": {
+      "accountName": "Bank · Salary",
+      "description": "Optional note",
+      "transferDescription": "e.g. Salary transfer"
+    }
+  },
+  "evkat": {
+    "title": "Evkat",
+    "kicker": "Daily blocks",
+    "flourish": "blocks",
+    "today": "Today",
+    "newBlock": "New block",
+    "error": "Couldn't load blocks.",
+    "completed": "Completed",
+    "empty": {
+      "kicker": "Empty canvas",
+      "body": "Click any hour to drop in your first block. Everything starts here."
+    },
+    "field": {
+      "title": "Title",
+      "start": "Start",
+      "end": "End",
+      "category": "Category",
+      "color": "Color",
+      "notifyBefore": "Remind me",
+      "notes": "Notes"
+    },
+    "category": {
+      "none": "None",
+      "work": "Work",
+      "focus": "Focus",
+      "rest": "Rest",
+      "exercise": "Exercise",
+      "family": "Family",
+      "other": "Other"
+    },
+    "notify": {
+      "off": "Off",
+      "atStart": "At start"
+    },
+    "placeholders": {
+      "title": "Deep work session",
+      "notes": "Optional notes…"
+    },
+    "modal": {
+      "kicker": "Edit",
+      "createTitle": "New time block",
+      "editTitle": "Edit block"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "unreadCount": "{{count}} unread",
+    "error": "Could not load notifications.",
+    "empty": {
+      "kicker": "All quiet",
+      "body": "Nothing to surface right now."
+    },
+    "kind": {
+      "reminder": "Reminder",
+      "task": "Task",
+      "list_item": "List",
+      "calendar_event": "Calendar",
+      "time_block": "Evkat"
+    },
+    "permission": {
+      "title": "Notification permission",
+      "kicker": "New feature",
+      "body": "Get instant alerts when reminders, calendar events, and time blocks come due — even with the tab closed.",
+      "enable": "Enable notifications",
+      "enabling": "Enabling…",
+      "later": "Not now"
+    }
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "newChat": "New chat",
+    "empty": "No conversations yet.",
+    "startHint": "Ask anything about your projects, plans and notes.",
+    "thinking": "Thinking…",
+    "placeholder": "Message the assistant…",
+    "send": "Send"
+  },
+  "sidebarPanel": {
+    "ctaTitle": "What should I do today?",
+    "ctaBody": "Husrevity suggested 3 tasks for you."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your projects and tasks",
+    "welcome": "Welcome, {{name}}",
+    "totalProjects": "Total Projects",
+    "totalTasks": "Total Tasks",
+    "myPending": "My Pending Tasks",
+    "completedTasks": "Completed Tasks",
+    "kicker": "At a glance",
+    "flourish": "today",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night",
+      "withName": "{{greeting}}, {{name}}.",
+      "noName": "{{greeting}}."
+    },
+    "hero": {
+      "subtitleBefore": "Your notes, reminders, tasks, and calendar",
+      "subtitleEm": "all in one place",
+      "subtitleAfter": "— a calm view to help you decide what's next.",
+      "eventsToday_one": "{{count}} event waiting",
+      "eventsToday_other": "{{count}} events waiting",
+      "noEventsToday": "no events today"
+    },
+    "todayAgenda": "Today's Agenda",
+    "calendarLink": "Calendar",
+    "upcomingReminders": "Upcoming Reminders",
+    "remindersLink": "All",
+    "tasksTitle": "Tasks",
+    "projectsLink": "Projects",
+    "recentNotes": "Recent Notes",
+    "notesLink": "All",
+    "noEvents": "No events planned for today.",
+    "noUpcoming": "No upcoming reminders.",
+    "noTasks": "No tasks yet.",
+    "noNotes": "No notes yet.",
+    "allDay": "All day",
+    "stat": {
+      "notes": "Notes",
+      "reminders": "Reminders",
+      "activeTasks": "Active Tasks",
+      "thisWeek": "This Week",
+      "vault": "Vault",
+      "gmail": "Mail",
+      "pinnedHint_one": "{{count}} pinned",
+      "pinnedHint_other": "{{count}} pinned",
+      "dueHint": "today or overdue",
+      "totalHint_one": "{{count}} total",
+      "totalHint_other": "{{count}} total",
+      "events": "events",
+      "vaultHint": "items",
+      "gmailHint": "accounts"
+    },
+    "reminderGroup": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "thisWeek": "This week",
+      "more_one": "+{{count}} more…",
+      "more_other": "+{{count}} more…"
+    },
+    "taskStatus": {
+      "TODO": "To do",
+      "IN_PROGRESS": "Active",
+      "DONE": "Done",
+      "CANCELLED": "Cancelled"
+    },
+    "today": {
+      "kicker": "ask the assistant",
+      "title": "What should I do today?",
+      "subtitle": "A look at your notes, reminders, plans, projects and tasks — distilled to a small next step.",
+      "modeAria": "Suggestion mode",
+      "countAria": "Number of suggestions",
+      "modeTask": "Task",
+      "modeHobby": "Hobby",
+      "refreshAria": "Refresh suggestions",
+      "retry": "Try again",
+      "empty": "Not enough context yet — jot a few notes or reminders and try again.",
+      "error": "Could not generate a suggestion just now.",
+      "unconfigured": "AI is not configured yet. Set GOOGLE_GEMINI_API_KEY in apps/api/.env to enable this.",
+      "openSource": "Open source item",
+      "kind": {
+        "task": "Task",
+        "hobby": "Hobby",
+        "mixed": "Mixed"
+      },
+      "source": {
+        "reminder": "Reminder",
+        "task": "Task",
+        "note": "Note",
+        "plan": "Plan",
+        "project": "Project"
+      }
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "kicker": "Intentions and goals",
+    "flourish": "notebooks",
+    "introBefore": "Every plan grows from notes you take today to reach somewhere tomorrow.",
+    "introEm": "Calmly",
+    "introAfter": "begin — the rest follows.",
+    "newPlan": "New plan",
+    "modal": {
+      "kicker": "Fresh start",
+      "title": "New",
+      "flourish": "plan",
+      "titleField": "Title",
+      "titlePlaceholder": "What will this notebook be about?",
+      "descriptionField": "Description",
+      "descriptionPlaceholder": "A few sentences will do — details can come later.",
+      "targetDate": "Target date",
+      "submit": "Open notebook",
+      "submitting": "Creating…"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "PAUSED": "Paused",
+      "CANCELLED": "Cancelled"
+    },
+    "due": {
+      "overdue_one": "{{count}} day overdue",
+      "overdue_other": "{{count}} days overdue",
+      "today": "today",
+      "remaining_one": "{{count}} day left",
+      "remaining_other": "{{count}} days left"
+    },
+    "empty": {
+      "title": "No",
+      "flourish": "notebooks",
+      "suffix": "yet",
+      "bodyBefore": "Write a goal, break it into small steps, set a date. Keeping a plan is keeping",
+      "bodyEm": "intent",
+      "bodyAfter": ".",
+      "cta": "Create your first plan"
+    },
+    "invalid": "Invalid plan.",
+    "newItemPlaceholder": "Add a new step…",
+    "noItems": "No steps in this plan yet.",
+    "fallbackTitle": "Plan",
+    "deleteAria": "Delete plan"
+  },
+  "projects": {
+    "title": "Projects",
+    "create": "New Project",
+    "edit": "Edit Project",
+    "detail": "Project Detail",
+    "code": "Project Code",
+    "name": "Project Name",
+    "manager": "Project Manager",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "complete": "Complete Project",
+    "createSuccess": "Project created successfully",
+    "updateSuccess": "Project updated successfully",
+    "deleteSuccess": "Project deleted",
+    "completeSuccess": "Project completed",
+    "kicker": "What you're working on",
+    "flourish": "files",
+    "introBefore": "Every project grows from small tasks. Open a file, drop in a",
+    "introEm": "card",
+    "introAfter": ", move it, finish it.",
+    "newProject": "New project",
+    "openBoard": "Open board",
+    "modal": {
+      "kicker": "New file",
+      "title": "New",
+      "flourish": "project",
+      "codeField": "Short code",
+      "codePlaceholder": "e.g. ATL — up to 32 characters",
+      "nameField": "Project name",
+      "namePlaceholder": "A clear, concise title",
+      "descriptionField": "Description",
+      "descriptionPlaceholder": "What will we do in this project?",
+      "submit": "Open file",
+      "submitting": "Creating…"
+    },
+    "empty": {
+      "title": "Empty",
+      "flourish": "shelf",
+      "body": "Open your first project file, launch its kanban board, and move tasks by dragging.",
+      "cta": "Open the first file"
+    },
+    "deleteAria": "Delete project",
+    "invalid": "Invalid project."
+  },
+  "kanban": {
+    "view": { "kanban": "Kanban", "list": "List" },
+    "newTask": "New task",
+    "dropHere": "drop here",
+    "back": "Back to projects",
+    "noTasks": "No tasks in this project yet.",
+    "status": {
+      "TODO": "To do",
+      "IN_PROGRESS": "In progress",
+      "DONE": "Done",
+      "CANCELLED": "Cancelled"
+    },
+    "priority": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "modal": {
+      "kicker": "Card to board",
+      "title": "New",
+      "flourish": "task",
+      "titleField": "Title",
+      "titlePlaceholder": "A one-line summary",
+      "descriptionField": "Description",
+      "descriptionPlaceholder": "Details — optional",
+      "columnField": "Column",
+      "priorityField": "Priority",
+      "submit": "Add task",
+      "submitting": "Adding…"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "create": "New Task",
+    "edit": "Edit Task",
+    "subject": "Subject",
+    "detail": "Description",
+    "project": "Project",
+    "assignedTo": "Assigned To",
+    "assignedDate": "Assigned Date",
+    "status": "Status",
+    "createSuccess": "Task created successfully",
+    "updateSuccess": "Task updated successfully",
+    "deleteSuccess": "Task deleted"
+  },
+  "lists": {
+    "title": "Lists",
+    "kicker": "Reorderable collections",
+    "flourish": "shelves",
+    "introBefore": "Drag the cards to",
+    "introEm": "reorder",
+    "introAfter": "— priority always within reach.",
+    "newList": "New list",
+    "archived": "archived",
+    "openList": "Open list",
+    "modal": {
+      "kicker": "New title",
+      "title": "New",
+      "flourish": "list",
+      "nameField": "List name",
+      "namePlaceholder": "Today's to-dos, groceries…",
+      "colorField": "Color",
+      "submit": "Open list",
+      "submitting": "Creating…"
+    },
+    "empty": {
+      "title": "No",
+      "flourish": "lists",
+      "suffix": "yet",
+      "body": "Create your first collection — pick a color, drag the cards, set the order.",
+      "cta": "Create your first list"
+    },
+    "invalid": "Invalid list.",
+    "newItemPlaceholder": "Type a new line, press Enter…",
+    "noItems": "No items in this list yet.",
+    "toggle": { "complete": "Completed", "incomplete": "Incomplete" },
+    "deleteAria": "Delete",
+    "addAria": "Add"
+  },
+  "reminders": {
+    "title": "Reminders",
+    "newList": "New List",
+    "newReminderPlaceholder": "Add a new reminder…",
+    "noLists": "Create a list to get started.",
+    "selectList": "Select a list.",
+    "noReminders": "No reminders in this list yet.",
+    "modal": {
+      "title": "New List",
+      "nameField": "List name"
+    },
+    "priority": {
+      "NONE": "None",
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High"
+    },
+    "toggle": { "complete": "Completed", "incomplete": "Incomplete" },
+    "deleteAria": "Delete",
+    "addDue": "Add date",
+    "flagAria": "Toggle flag",
+    "priorityAria": "Cycle priority",
+    "group": {
+      "all": "All",
+      "today": "Today",
+      "scheduled": "Scheduled",
+      "flagged": "Flagged",
+      "completed": "Completed"
+    }
+  },
+  "notes": {
+    "title": "Notes",
+    "newNote": "New Note",
+    "deletedTitle": "Deleted",
+    "deletedMessage": "Note deleted.",
+    "savedTitle": "Saved",
+    "createdMessage": "Note created.",
+    "searchPlaceholder": "Search…",
+    "allTags": "All tags",
+    "manageTags": "Manage tags",
+    "tagName": "Tag name",
+    "addTag": "Add",
+    "noTags": "No tags yet.",
+    "archived": "Archived",
+    "titleRequired": "Title required",
+    "empty": {
+      "before": "Nothing here",
+      "flourish": "yet"
+    },
+    "deleteAria": "Delete",
+    "updatedMessage": "Note updated.",
+    "editTitle": "Edit Note",
+    "quickAddPlaceholder": "Take a note…",
+    "pinAria": "Pin note",
+    "unpinAria": "Unpin note",
+    "colorNone": "No color",
+    "field": {
+      "title": "Title",
+      "body": "Content (Markdown)",
+      "pinned": "Pin",
+      "archived": "Archive",
+      "tags": "Tags",
+      "color": "Color"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "googleSource": "Google calendars:",
+    "refresh": "Refresh",
+    "newEvent": "New Event",
+    "editEvent": "Edit Event",
+    "field": {
+      "title": "Title",
+      "description": "Description (optional)",
+      "location": "Location (optional)",
+      "start": "Start",
+      "end": "End",
+      "allDay": "All day",
+      "color": "Color"
+    }
+  },
+  "vault": {
+    "title": "Vault",
+    "newEntity": "New Entity",
+    "editEntity": "Edit Entity",
+    "namePlaceholder": "Production .env, AWS, Vercel…",
+    "categoryPlaceholder": "Category (environment, credentials…)",
+    "newItem": "New Field",
+    "editItem": "Edit Field",
+    "addField": "Add Field",
+    "import": "Import",
+    "export": "Export",
+    "field": {
+      "keyLabel": "Key *",
+      "keyPlaceholder": "DATABASE_URL",
+      "valueLabel": "Value",
+      "valueHintEdit": "(blank = unchanged)",
+      "valueHintRequired": "*",
+      "valuePlaceholderNew": "Secret value",
+      "valuePlaceholderEdit": "New value (optional)",
+      "descriptionPlaceholder": "Description (optional)"
+    },
+    "table": {
+      "key": "Key",
+      "description": "Description",
+      "value": "Value",
+      "actions": "Actions"
+    },
+    "action": {
+      "show": "Show",
+      "hide": "Hide",
+      "copy": "Copy",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "submit": {
+      "edit": "Save",
+      "create": "Create",
+      "addItem": "Add"
+    },
+    "import_modal": {
+      "title": "Import .env",
+      "hint": "Each KEY=VALUE line is encrypted as a separate field. Lines starting with # are skipped.",
+      "placeholder": "DATABASE_URL=postgres://...\nAPI_SECRET=abc123\n# comment skipped",
+      "submitting": "Importing…",
+      "submit": "Import",
+      "successTitle": "Imported",
+      "successMessage": ".env content encrypted."
+    },
+    "copy": {
+      "successTitle": "Copied",
+      "successMessage": "{{label}} copied to clipboard.",
+      "envSuccessMessage": ".env content copied to clipboard.",
+      "errorTitle": "Error",
+      "errorMessage": "Could not copy."
+    },
+    "confirmDeleteItem": "Delete \"{{label}}\"?",
+    "confirmDeleteEntity": "Delete this entity and all its fields?",
+    "noItems": "No fields yet.",
+    "noItemsHint": "Add a field or import a .env.",
+    "noEntities": "No entities yet.",
+    "startNew": "Create an entity to get started.",
+    "selectEntity": "Select an entity."
+  },
+  "gmail": {
+    "title": "Mail",
+    "newMessage": "New Message",
+    "addAccount": "Add Account",
+    "addGoogle": "Add Gmail",
+    "addOutlook": "Add Outlook",
+    "compose": "Compose",
+    "sync": "Sync",
+    "send": "Send",
+    "to": "To",
+    "cc": "Cc",
+    "bcc": "Bcc",
+    "subject": "Subject",
+    "body": "Message…",
+    "sendAsHtml": "Send as HTML",
+    "star": "Star",
+    "noBody": "(No content)",
+    "fromLabel": "From:",
+    "toLabel": "To:",
+    "dateLabel": "Date:",
+    "noAccounts": "No accounts yet.",
+    "selectAccount": "Select an account.",
+    "noMessages": "No messages.",
+    "selectMessage": "Select a message.",
+    "noSubject": "(No subject)",
+    "loadMore": "Load more",
+    "sentTitle": "Sent",
+    "sentMessage": "Message sent.",
+    "syncedTitle": "Synced",
+    "syncedMessage": "Account synced.",
+    "connectedTitle": "Connected",
+    "connectedMessage": "Google account connected.",
+    "contacts": "Contacts",
+    "contactsTitle": "Contacts",
+    "noContacts": "No contacts.",
+    "drive": "Drive",
+    "driveTitle": "Google Drive",
+    "noFiles": "No files.",
+    "googleReconnect": "Reconnect this account to enable Calendar, Contacts & Drive."
+  },
+  "users": {
+    "title": "Users",
+    "create": "New User",
+    "edit": "Edit User",
+    "fullName": "Full Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "userName": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "phone": "Phone",
+    "gender": "Gender",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "createSuccess": "User created successfully",
+    "updateSuccess": "User updated successfully",
+    "deleteSuccess": "User deleted"
+  },
+  "profile": {
+    "title": "Profile",
+    "accountInfo": "Account Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "userName": "Username",
+    "email": "Email",
+    "phone": "Phone",
+    "gender": "Gender",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "organization": "Organization ID",
+    "kicker": "You, on Husrevity",
+    "flourish": "trace",
+    "introBefore": "Who you are and which roles you carry are",
+    "introEm": "on record",
+    "introAfter": "— we can edit them later if you wish.",
+    "fallbackInitial": "?",
+    "namePlaceholder": "Unnamed",
+    "userIdLabel": "User ID",
+    "editProfile": "Edit Profile",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "profileUpdated": "Your profile has been updated.",
+    "passwordUpdated": "Your password has been changed."
+  },
+  "organization": {
+    "title": "Organization",
+    "currentOrg": "Current Organization",
+    "id": "Organization ID",
+    "member": "Member",
+    "helpText": "Organizations are used to isolate your data in the multi-tenant system."
+  },
+  "settings": {
+    "notifications": {
+      "kicker": "Notifications",
+      "title": "Notification preferences",
+      "emailLabel": "Also send notifications by email",
+      "emailDescription": "When a notification fires, also delivers a copy to {{email}} alongside the push. Silently disabled if SMTP isn't configured on the server.",
+      "emailEnabledHint": "Notification emails will now be sent.",
+      "emailDisabledHint": "Notification emails are off."
+    }
+  },
+  "status": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In Progress",
+    "UAT_TEST": "UAT Test",
+    "COMPLETE": "Complete"
+  },
+  "gender": {
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "appheader": {
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "search": "Search…",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "dataTable": {
+    "searchPlaceholder": "Search…",
+    "noEntries": "No entries found.",
+    "show": "Show",
+    "entries": "entries",
+    "showing": "Showing",
+    "to": "-",
+    "of": "/",
+    "previous": "Previous",
+    "next": "Next",
+    "actions": "Actions",
+    "noData": "No records found.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDeleteTitle": "Delete Record",
+    "confirmDeleteMessage": "Are you sure you want to delete this record?",
+    "rowsPerPage": "Rows per page"
+  },
+  "landing": {
+    "menu": {
+      "home": "Home",
+      "about": "About",
+      "features": "Features",
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "login": "Sign In"
+    },
+    "home": {
+      "badge": "Open Source Issue Tracker",
+      "title1": "Manage",
+      "title2": "Your Team's Work",
+      "title3": "in One Place",
+      "description": "Multi-tenant, secure and fast issue tracker.",
+      "cta": "Get Started",
+      "featuresTitle": "Everything You Need",
+      "featuresDesc": "Keep your projects and tasks organized.",
+      "cta2Title": "Ready to start?",
+      "cta2Description": "Sign up and create your organization now.",
+      "cta2Button": "Sign Up"
+    },
+    "features": {
+      "title": "Features",
+      "description": "Production-ready features.",
+      "list": {
+        "auth": { "title": "Authentication", "desc": "JWT-based login and token refresh." },
+        "users": { "title": "User Management", "desc": "CRUD with roles and permissions." },
+        "tables": { "title": "Data Tables", "desc": "Sorting, filtering, pagination." },
+        "theme": { "title": "Dark Mode", "desc": "Light and dark theme support." },
+        "i18n": { "title": "i18n", "desc": "Turkish and English." },
+        "dashboard": { "title": "Dashboard", "desc": "Real-time analytics dashboard." }
+      },
+      "ctaTitle": "More Coming Soon",
+      "ctaDescription": "New modules on the way."
+    },
+    "about": {
+      "title": "About",
+      "description": "Multi-tenant issue tracker.",
+      "visionTitle": "Why This Project?",
+      "visionText": "Clean architecture and fast development for a modern issue tracker.",
+      "visionAlt": "Preview"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Reach out with questions.",
+      "fullName": "Full Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send",
+      "sending": "Sending…"
+    }
+  }
+}

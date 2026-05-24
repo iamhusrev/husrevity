@@ -1,0 +1,43 @@
+# Husrevity UI — continuous integration.
+# Verifies lint + production build on every push and PR to main.
+# (No test runner is configured yet; add a `npm test` step here when tests land.)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20 with npm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # NOTE: no test runner configured in package.json yet.
+      # When tests are added, insert `- name: Test \n run: npm test` here.
+
+      - name: Build (production)
+        # NEXT_PUBLIC_API_URL is inlined at build time; using the production URL
+        # so the bundle inspected in CI matches what would ship in a release.
+        env:
+          NEXT_PUBLIC_API_URL: https://api.iamhusrev.com/api
+          NEXT_PUBLIC_APP_NAME: Husrevity
+        run: npm run build

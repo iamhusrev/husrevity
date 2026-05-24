@@ -1,0 +1,17 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": "apps/api/**/*.{ts,js}",
+      "options": {
+        "singleQuote": true
+      }
+    }
+  ]
+}

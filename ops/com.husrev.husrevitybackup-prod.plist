@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <!--
+    Daily husrevity_prod backup at 04:00 local time (offset 1h from dev plist
+    at 03:00 to avoid contention). 30-day retention.
+
+    Install:
+      cp ops/com.husrev.husrevitybackup-prod.plist ~/Library/LaunchAgents/
+      launchctl load ~/Library/LaunchAgents/com.husrev.husrevitybackup-prod.plist
+    Uninstall:
+      launchctl unload ~/Library/LaunchAgents/com.husrev.husrevitybackup-prod.plist
+      rm ~/Library/LaunchAgents/com.husrev.husrevitybackup-prod.plist
+    Manual trigger:
+      launchctl start com.husrev.husrevitybackup-prod
+  -->
+  <dict>
+    <key>Label</key>
+    <string>com.husrev.husrevitybackup-prod</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>/Users/husrev/Projects (Personal)/husrevity/scripts/pg-backup.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+      <key>Hour</key>
+      <integer>4</integer>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/Users/husrev/Library/Logs/husrevity-backup-prod.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/husrev/Library/Logs/husrevity-backup-prod.err.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+      <key>HUSREVITY_BACKUP_CONTAINER</key>
+      <string>husrevity-prod-postgres</string>
+      <key>HUSREVITY_DB_NAME</key>
+      <string>husrevity_prod</string>
+      <key>HUSREVITY_BACKUP_RETENTION_DAYS</key>
+      <string>30</string>
+    </dict>
+  </dict>
+</plist>

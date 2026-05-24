@@ -1,0 +1,37 @@
+# Build context expected: monorepo root.
+# Build: `docker compose -f docker-compose.prod.yml build web`
+
+# ---- Builder ----
+FROM oven/bun:1.3 AS builder
+WORKDIR /repo
+
+COPY package.json bun.lock tsconfig.base.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
+
+RUN bun install --frozen-lockfile
+
+COPY apps/web ./apps/web
+
+# NEXT_PUBLIC_* must exist at build time so Next.js inlines them into the client bundle.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+RUN cd apps/web && bun run build
+
+# ---- Runner ----
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=3090
+ENV HOSTNAME=0.0.0.0
+
+# Next.js standalone bundles a minimal node_modules. The output preserves the
+# monorepo path, so server.js lives at apps/web/server.js inside the image.
+COPY --from=builder /repo/apps/web/.next/standalone ./
+COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /repo/apps/web/public ./apps/web/public
+
+EXPOSE 3090
+
+CMD ["node", "apps/web/server.js"]

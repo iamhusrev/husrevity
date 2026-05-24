@@ -1,0 +1,36 @@
+# Keep build context lean. .gitignore-style; applies to every Dockerfile build.
+
+# deps + build outputs
+**/node_modules
+**/dist
+**/.next
+**/.bun
+**/build
+**/coverage
+**/*.tsbuildinfo
+
+# vcs / editor / OS
+.git
+.gitignore
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# secrets & local env (never enter the image)
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.prod
+.env
+*.local
+
+# logs
+**/*.log
+
+# docs / ops (not needed at build time)
+docs
+ops
+README.md
+CLAUDE.md
+**/CLAUDE.md
