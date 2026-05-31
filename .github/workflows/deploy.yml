@@ -24,18 +24,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify env files exist
+      - name: Ensure env symlinks (idempotent)
         run: |
-          if [[ ! -f apps/api/.env.prod ]]; then
-            echo "::error::apps/api/.env.prod missing on the runner host."
-            echo "Expected symlink: ln -s ~/.husrevity/api.env apps/api/.env.prod"
+          # ~/.husrevity/api.env is the canonical secrets file (chmod 600).
+          # actions/checkout's default `clean: true` runs `git clean -ffdx`
+          # which would delete our gitignored symlinks — so we recreate them
+          # at the top of every deploy. Symlink target is the same file used
+          # by compose's env_file (api) and ${VAR} interpolation (root .env).
+          if [[ ! -f "$HOME/.husrevity/api.env" ]]; then
+            echo "::error::$HOME/.husrevity/api.env missing on this host. Provision secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
             exit 1
           fi
-          if [[ ! -f .env ]]; then
-            echo "::error::repo root .env missing on the runner host."
-            echo "Expected symlink: ln -s ~/.husrevity/api.env .env"
-            exit 1
-          fi
+          ln -sfn "$HOME/.husrevity/api.env" apps/api/.env.prod
+          ln -sfn "$HOME/.husrevity/api.env" .env
+          ls -la apps/api/.env.prod .env
 
       - name: Build images
         run: docker compose -f docker-compose.prod.yml build
