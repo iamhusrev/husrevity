@@ -24,6 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup runner PATH (Homebrew + system bins)
+        run: |
+          # launchd starts with a minimal PATH (/usr/bin:/bin:/usr/sbin:/sbin)
+          # that misses Homebrew and /usr/local/bin — so `docker`, `bun`, etc.
+          # aren't found. Push the missing dirs onto every later step's PATH.
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
+          # Sanity check (current step's PATH is still launchd's, so call docker by full path)
+          /opt/homebrew/bin/docker --version || /usr/local/bin/docker --version
+
       - name: Ensure env symlinks (idempotent)
         run: |
           # ~/.husrevity/api.env is the canonical secrets file (chmod 600).
