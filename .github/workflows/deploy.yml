@@ -24,15 +24,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup runner PATH (Homebrew + system bins)
+      - name: Setup runner PATH (Docker Desktop + Homebrew)
         run: |
-          # launchd starts with a minimal PATH (/usr/bin:/bin:/usr/sbin:/sbin)
-          # that misses Homebrew and /usr/local/bin — so `docker`, `bun`, etc.
-          # aren't found. Push the missing dirs onto every later step's PATH.
-          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          # launchd starts the runner with a minimal PATH
+          # (/usr/bin:/bin:/usr/sbin:/sbin) that misses Homebrew, /usr/local/bin,
+          # and Docker Desktop's binary. Push the missing dirs onto every
+          # later step's PATH. Last echo takes precedence — Docker Desktop
+          # first so it wins over any (possibly broken) /usr/local/bin/docker
+          # symlink.
           echo "/usr/local/bin" >> "$GITHUB_PATH"
-          # Sanity check (current step's PATH is still launchd's, so call docker by full path)
-          /opt/homebrew/bin/docker --version || /usr/local/bin/docker --version
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "/Applications/Docker.app/Contents/Resources/bin" >> "$GITHUB_PATH"
+          # Sanity check using absolute paths (current step inherits launchd's PATH).
+          /Applications/Docker.app/Contents/Resources/bin/docker --version
 
       - name: Ensure env symlinks (idempotent)
         run: |

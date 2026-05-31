@@ -1,5 +1,7 @@
 # husrevity
 
+[![Deploy](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml/badge.svg?branch=release/1.0)](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml)
+
 Personal productivity monorepo — **NestJS** API + **Next.js** web, Bun workspaces. One `bun run dev` boots both.
 
 `apps/api` began as a **port of [`husrevity-api`](../husrevity-api)** (Spring Boot) into NestJS. The **NestJS API is now the source of truth** and `apps/web` is synced to its contract; Spring is historical context only and cross-backend parity is no longer maintained.
