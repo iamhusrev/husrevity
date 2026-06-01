@@ -1,0 +1,56 @@
+name: CI
+
+# Build + lint + test on every push (any branch) and every pull request.
+# Does NOT deploy. Deploys live in deploy.yml (master) and deploy-staging.yml (dev).
+#
+# Runs on the self-hosted Mac runner (same host that serves prod). Concurrency
+# is per-ref so two unrelated branches can build in parallel; pushes to the
+# same branch cancel the older run.
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build + lint + test
+    runs-on: [self-hosted, macOS, iamhusrev-prod]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup runner PATH
+        run: |
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+
+      - name: Sanity check (bun + node)
+        run: |
+          bun --version
+          node --version || echo "node not available — that's OK if not needed"
+
+      - name: Install workspaces (bun)
+        run: bun install --frozen-lockfile
+
+      - name: Build api
+        run: bun --cwd apps/api run build
+
+      - name: Build web
+        env:
+          NEXT_PUBLIC_API_URL: https://api.iamhusrev.com/api
+        run: bun --cwd apps/web run build
+
+      - name: Lint web (next lint)
+        run: bun --cwd apps/web run lint
+        continue-on-error: false
+
+      - name: Test api (jest, passWithNoTests)
+        run: bun --cwd apps/api run test

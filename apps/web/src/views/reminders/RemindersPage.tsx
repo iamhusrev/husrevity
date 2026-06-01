@@ -255,7 +255,7 @@ function ReminderRow({
           className={`rounded-full p-1 transition ${
             reminder.flag
               ? "text-red-500"
-              : "text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500"
+              : "text-gray-400 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100"
           }`}
           aria-label={t("reminders.flagAria")}
         >
@@ -267,7 +267,7 @@ function ReminderRow({
           className={`rounded px-1 text-xs font-medium transition ${
             reminder.priority !== "NONE"
               ? PRIORITY_COLORS[reminder.priority]
-              : "text-gray-400 opacity-0 group-hover:opacity-100"
+              : "text-gray-400 md:opacity-0 md:group-hover:opacity-100"
           }`}
           aria-label={t("reminders.priorityAria")}
         >
@@ -276,7 +276,7 @@ function ReminderRow({
         <button
           type="button"
           onClick={handleDelete}
-          className="rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          className="rounded-full p-1 text-gray-400 transition hover:bg-red-50 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 dark:hover:bg-red-500/10"
           aria-label={t("reminders.deleteAria")}
         >
           <BiTrash size={14} />
@@ -691,9 +691,72 @@ export default function RemindersPage({
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <PageBreadcrumb pageTitle={t("reminders.title")} />
 
+        {/* Mobile list selector — horizontal scrolling pills (sidebar is hidden < md) */}
+        <div className="md:hidden">
+          {isLoading ? (
+            <p className="py-2 text-center text-xs text-gray-400">{t("common.loading")}</p>
+          ) : (
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {orderedLists.map((list) => {
+                const isSel = selectedListId === list.id;
+                return (
+                  <div
+                    key={list.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedListId(list.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedListId(list.id);
+                      }
+                    }}
+                    className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+                      isSel
+                        ? "border-brand-500 bg-brand-50 font-medium text-brand-600 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300"
+                        : "border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: list.color }}
+                    />
+                    <span className="max-w-[8rem] truncate">{list.name}</span>
+                    {isSel ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteList(list.id);
+                        }}
+                        className="-mr-1 rounded-full p-0.5 text-brand-500/70 transition hover:text-red-500"
+                        aria-label={t("reminders.deleteAria")}
+                      >
+                        <BiTrash size={13} />
+                      </button>
+                    ) : (
+                      <span className="rounded-full bg-gray-200 px-1.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                        {list.itemCount}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setShowNewListModal(true)}
+                className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-brand-300 px-3 py-1.5 text-sm text-brand-500 transition hover:bg-brand-50 dark:border-brand-500/40 dark:hover:bg-brand-500/10"
+              >
+                <BiPlus size={16} />
+                {t("reminders.newList")}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="flex min-h-0 flex-1 gap-4 rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
-          {/* Left sidebar — list of reminder lists */}
-          <div className="w-56 shrink-0 border-r border-gray-200 p-3 dark:border-gray-700">
+          {/* Left sidebar — list of reminder lists (desktop only; mobile uses the pill selector above) */}
+          <div className="hidden w-56 shrink-0 flex-col border-r border-gray-200 p-3 md:flex dark:border-gray-700">
             {isLoading ? (
               <p className="py-4 text-center text-xs text-gray-400">{t("common.loading")}</p>
             ) : (
@@ -723,11 +786,11 @@ export default function RemindersPage({
           </div>
 
           {/* Right panel — reminders for selected list */}
-          <div className="flex-1 p-5">
+          <div className="min-w-0 flex-1 p-4 md:p-5">
             {selectedList ? (
               <RemindersPanel list={selectedList} />
             ) : (
-              <div className="flex h-full items-center justify-center text-gray-400">
+              <div className="flex h-full items-center justify-center px-4 text-center text-sm text-gray-400">
                 {lists.length === 0 ? t("reminders.noLists") : t("reminders.selectList")}
               </div>
             )}

@@ -1,41 +1,48 @@
-# Production stack for husrevity. Run from repo root.
+# Production + staging stack for husrevity. Run from repo root.
 #
-# Single env-driven compose file. Local development still uses `bun run dev`
-# directly (hot reload); this file is for the prod Mac and the CI runner.
+# Single env-driven compose file. Two stacks live side-by-side on the same Mac
+# without colliding because every container name, port, volume, and network is
+# parameterized by ${STACK_NAME} (and the *_HOST_PORT vars). Local development
+# still uses `bun run dev` directly (hot reload); this file is for the prod Mac
+# and the CI runner.
+#
+# Stacks (master branch → prod, dev branch → staging):
+#   STACK_NAME=husrevity-prod     hosts :4090/:3090/:5490  api/app.iamhusrev.com
+#   STACK_NAME=husrevity-staging  hosts :4091/:3091/:5491  staging-{api,app}.iamhusrev.com
+#
+# Container ports (inside the network) stay the same in both stacks — apps
+# still listen on 4090/3090 inside the container. Only the host-side bindings
+# differ.
 #
 # Topology: Cloudflare Tunnel terminates TLS at the edge and forwards to
 # 127.0.0.1 on this host. There is no Caddy, no nginx, no open inbound port.
-# The host's static public IP is reserved for ops (SSH and a future mobile-API
-# direct path). See ~/iamhusrev-prod/RUNBOOK.md for the full bring-up.
+# See ~/iamhusrev-prod/RUNBOOK.md for the full bring-up.
 #
-# Prerequisites:
-#   1. apps/api/.env.prod exists (symlink to ~/.husrevity/api.env recommended)
-#   2. Repo root has a `.env` symlink to the same file so compose can do
-#      ${VAR} interpolation for postgres credentials.
-#         ln -s ~/.husrevity/api.env .env
-#         ln -s ~/.husrevity/api.env apps/api/.env.prod
-#   3. Cloudflare Tunnel "husrevity" is provisioned and running with ingress:
-#         app.iamhusrev.com → http://127.0.0.1:3090
-#         api.iamhusrev.com → http://127.0.0.1:4090
+# Prerequisites (per stack):
+#   1. apps/api/.env.prod points at the canonical secrets file
+#      (~/.husrevity/api.env for prod; ~/.husrevity/api.staging.env for staging)
+#   2. Repo root .env points at the same file (compose ${VAR} interpolation)
+#   3. Cloudflare Tunnel "husrevity" is provisioned with ingress for both
+#      the prod and staging hostnames.
 #
 # Boot order: postgres → api (runs migrations) → web.
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: husrevity-prod-postgres
+    container_name: ${STACK_NAME:-husrevity-prod}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${HUSREVITY_DB_NAME:-husrevity_prod}
       POSTGRES_USER: ${HUSREVITY_DB_USER:-postgres}
       POSTGRES_PASSWORD: ${HUSREVITY_DB_PASSWORD:?HUSREVITY_DB_PASSWORD must be set}
     volumes:
-      - husrevity_pgdata:/var/lib/postgresql/data
-    # Loopback bind only — owner-policy port (5490, not default 5432).
+      - pgdata:/var/lib/postgresql/data
+    # Loopback bind only — owner-policy port (5490 prod, 5491 staging).
     # NOT reachable from LAN or the internet (Tunnel doesn't know about it).
-    # Use 127.0.0.1:5490 from this Mac for DBeaver/TablePlus/psql access.
+    # Use 127.0.0.1:5490/5491 from this Mac for DBeaver/TablePlus/psql access.
     ports:
-      - "127.0.0.1:5490:5432"
+      - "127.0.0.1:${HUSREVITY_DB_HOST_PORT:-5490}:5432"
     healthcheck:
       test:
         [
@@ -46,25 +53,25 @@ services:
       timeout: 3s
       retries: 20
     networks:
-      - husrevity-prod
+      - app
 
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: husrevity-prod-api
+    container_name: ${STACK_NAME:-husrevity-prod}-api
     restart: unless-stopped
     env_file:
       - apps/api/.env.prod
-    # Loopback bind only — cloudflared on the host hits 127.0.0.1:4090.
+    # Loopback bind only — cloudflared on the host hits this port.
     # No LAN exposure, no public exposure.
     ports:
-      - "127.0.0.1:4090:4090"
+      - "127.0.0.1:${HUSREVITY_API_HOST_PORT:-4090}:4090"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - husrevity-prod
+      - app
 
   web:
     build:
@@ -72,17 +79,18 @@ services:
       dockerfile: apps/web/dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.iamhusrev.com/api}
-    container_name: husrevity-prod-web
+    container_name: ${STACK_NAME:-husrevity-prod}-web
     restart: unless-stopped
-    # Loopback bind only — cloudflared on the host hits 127.0.0.1:3090.
+    # Loopback bind only — cloudflared on the host hits this port.
     ports:
-      - "127.0.0.1:3090:3090"
+      - "127.0.0.1:${HUSREVITY_WEB_HOST_PORT:-3090}:3090"
     networks:
-      - husrevity-prod
+      - app
 
 volumes:
-  husrevity_pgdata:
+  pgdata:
+    name: ${STACK_NAME:-husrevity-prod}_pgdata
 
 networks:
-  husrevity-prod:
-    name: husrevity-prod
+  app:
+    name: ${STACK_NAME:-husrevity-prod}

@@ -1,17 +1,14 @@
-name: Deploy to prod (self-hosted Mac)
+name: Deploy to prod (master)
 
-# Triggers on push to any release/* branch (release/1.0 today; future release/2.0
-# would also fire). The runner lives on the prod Mac itself, so checkout happens
-# directly into the repo working tree the host already has.
-# Manual rerun: gh workflow run deploy.yml --ref release/1.0
+# Triggers on push to master. Deploys the husrevity-prod stack on the
+# self-hosted Mac runner. Manual rerun: gh workflow run deploy.yml --ref master.
 
 on:
   push:
-    branches:
-      - 'release/**'
+    branches: [master]
   workflow_dispatch:
 
-# Prevent concurrent deploys racing each other on the same host.
+# Prod and staging deploys are independent (different concurrency groups).
 concurrency:
   group: prod-deploy
   cancel-in-progress: false
@@ -21,6 +18,12 @@ jobs:
     name: Build + restart prod stack
     runs-on: [self-hosted, macOS, iamhusrev-prod]
     timeout-minutes: 20
+    env:
+      STACK_NAME: husrevity-prod
+      HUSREVITY_API_HOST_PORT: 4090
+      HUSREVITY_WEB_HOST_PORT: 3090
+      HUSREVITY_DB_HOST_PORT: 5490
+      NEXT_PUBLIC_API_URL: https://api.iamhusrev.com/api
 
     steps:
       - name: Checkout
@@ -28,27 +31,20 @@ jobs:
 
       - name: Setup runner PATH (Docker Desktop + Homebrew)
         run: |
-          # launchd starts the runner with a minimal PATH
-          # (/usr/bin:/bin:/usr/sbin:/sbin) that misses Homebrew, /usr/local/bin,
-          # and Docker Desktop's binary. Push the missing dirs onto every
-          # later step's PATH. Last echo takes precedence — Docker Desktop
-          # first so it wins over any (possibly broken) /usr/local/bin/docker
-          # symlink.
           echo "/usr/local/bin" >> "$GITHUB_PATH"
           echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
           echo "/Applications/Docker.app/Contents/Resources/bin" >> "$GITHUB_PATH"
-          # Sanity check using absolute paths (current step inherits launchd's PATH).
           /Applications/Docker.app/Contents/Resources/bin/docker --version
 
-      - name: Ensure env symlinks (idempotent)
+      - name: Point env symlinks at prod secrets
         run: |
-          # ~/.husrevity/api.env is the canonical secrets file (chmod 600).
+          # ~/.husrevity/api.env is the canonical PROD secrets file (chmod 600).
           # actions/checkout's default `clean: true` runs `git clean -ffdx`
-          # which would delete our gitignored symlinks — so we recreate them
-          # at the top of every deploy. Symlink target is the same file used
-          # by compose's env_file (api) and ${VAR} interpolation (root .env).
+          # which deletes our gitignored symlinks — so we recreate them
+          # every deploy. Same file feeds compose env_file (api) and
+          # ${VAR} interpolation (root .env).
           if [[ ! -f "$HOME/.husrevity/api.env" ]]; then
-            echo "::error::$HOME/.husrevity/api.env missing on this host. Provision secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
+            echo "::error::$HOME/.husrevity/api.env missing on this host. Provision prod secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
             exit 1
           fi
           ln -sfn "$HOME/.husrevity/api.env" apps/api/.env.prod
@@ -61,10 +57,10 @@ jobs:
       - name: Apply stack (postgres → api → web)
         run: docker compose up -d
 
-      - name: Wait for api health
+      - name: Wait for api health (loopback)
         run: |
           for i in {1..15}; do
-            if curl -fsS -m 3 http://localhost:4090/api/health > /dev/null; then
+            if curl -fsS -m 3 http://localhost:${HUSREVITY_API_HOST_PORT}/api/health > /dev/null; then
               echo "api healthy ✓"
               exit 0
             fi
@@ -77,9 +73,6 @@ jobs:
 
       - name: Public smoke test (through Cloudflare Tunnel)
         run: |
-          # Hits the edge URL. cloudflared LaunchAgent should already be
-          # connected; if a tunnel connector is flapping `--retry-connrefused`
-          # lets us survive a brief reconnect.
           curl -fsS -m 8 --retry 5 --retry-delay 4 --retry-connrefused \
             https://api.iamhusrev.com/api/health || {
             echo "::warning::public smoke (HTTPS) failed — check cloudflared LaunchAgent status."
