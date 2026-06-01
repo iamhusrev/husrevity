@@ -1,12 +1,14 @@
 name: Deploy to prod (self-hosted Mac)
 
-# Triggers on push to main. The runner lives on the prod Mac itself, so the
-# checkout happens directly into the repo working tree the host already has.
-# Manual rerun: gh workflow run deploy.yml
+# Triggers on push to any release/* branch (release/1.0 today; future release/2.0
+# would also fire). The runner lives on the prod Mac itself, so checkout happens
+# directly into the repo working tree the host already has.
+# Manual rerun: gh workflow run deploy.yml --ref release/1.0
 
 on:
   push:
-    branches: [main]
+    branches:
+      - 'release/**'
   workflow_dispatch:
 
 # Prevent concurrent deploys racing each other on the same host.
@@ -54,10 +56,10 @@ jobs:
           ls -la apps/api/.env.prod .env
 
       - name: Build images
-        run: docker compose -f docker-compose.prod.yml build
+        run: docker compose build
 
       - name: Apply stack (postgres → api → web)
-        run: docker compose -f docker-compose.prod.yml up -d
+        run: docker compose up -d
 
       - name: Wait for api health
         run: |
@@ -70,7 +72,7 @@ jobs:
             sleep 4
           done
           echo "::error::api never became healthy"
-          docker compose -f docker-compose.prod.yml logs api --tail=100
+          docker compose logs api --tail=100
           exit 1
 
       - name: Public smoke test (through Cloudflare Tunnel)

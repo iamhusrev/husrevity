@@ -1,5 +1,5 @@
 # Build context expected: monorepo root.
-# Build: `docker compose -f docker-compose.prod.yml build api`
+# Build: `docker compose build api`
 
 # ---- Builder ----
 FROM oven/bun:1.3 AS builder
@@ -16,16 +16,20 @@ RUN bun install --frozen-lockfile
 COPY apps/api ./apps/api
 RUN cd apps/api && bun run build
 
-# Prune dev deps for runtime image
-RUN bun install --frozen-lockfile --production
+# NOTE: We deliberately do NOT `bun install --production` here. With Bun
+# workspaces that flag flattens node_modules in a way that drops runtime deps
+# (notably reflect-metadata required by TypeORM's data-source).
 
 # ---- Runner ----
 FROM oven/bun:1.3-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Hoisted (production) node_modules + compiled output
+# Bun workspaces split deps across /repo/node_modules (hoisted) and
+# /repo/apps/api/node_modules (sub-workspace). Both are required at runtime;
+# missing either yields "Cannot find package 'reflect-metadata'".
 COPY --from=builder /repo/node_modules ./node_modules
+COPY --from=builder /repo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /repo/apps/api/dist ./apps/api/dist
 COPY --from=builder /repo/apps/api/package.json ./apps/api/package.json
 COPY apps/api/scripts ./apps/api/scripts
@@ -37,4 +41,4 @@ WORKDIR /app/apps/api
 EXPOSE 4090
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "dist/main.js"]
+CMD ["bun", "dist/main.js"]
