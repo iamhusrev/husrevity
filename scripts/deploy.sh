@@ -1,77 +1,55 @@
 #!/usr/bin/env bash
 #
-# Manual deploy of husrevity stack — prod or staging. Used for:
+# Manual deploy of the husrevity prod stack. Used for:
 #   - First deploy (before GH Actions runner is wired up)
 #   - Fallback when the runner is broken
 #   - Quick local rebuild after editing compose or cloudflared config
 #
 # Usage:
-#   bash scripts/deploy.sh prod           # full rebuild + restart of prod stack
-#   bash scripts/deploy.sh staging        # full rebuild + restart of staging stack
-#   bash scripts/deploy.sh prod logs      # tail logs after deploy
-#   bash scripts/deploy.sh staging --no-pull
+#   bash scripts/deploy.sh                # full rebuild + restart
+#   bash scripts/deploy.sh logs           # tail logs after deploy
+#   bash scripts/deploy.sh --no-pull      # skip git pull (useful in CI runner)
 #
 # Overrides:
-#   DEPLOY_ALLOW_ANY_BRANCH=1     skip the branch safety guard
+#   DEPLOY_ALLOW_ANY_BRANCH=1     skip the branch safety guard (must be on a
+#                                 release/* branch by default)
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-TARGET=""
 PULL=true
 TAIL_LOGS=false
 
 for arg in "$@"; do
   case "$arg" in
-    prod|staging) TARGET="$arg" ;;
     logs)         TAIL_LOGS=true ;;
     --no-pull)    PULL=false ;;
     *)            echo "Unknown arg: $arg" >&2
-                  echo "Usage: bash scripts/deploy.sh prod|staging [logs] [--no-pull]" >&2
+                  echo "Usage: bash scripts/deploy.sh [logs] [--no-pull]" >&2
                   exit 2 ;;
   esac
 done
 
-if [[ -z "$TARGET" ]]; then
-  echo "[deploy] ERROR: missing target (prod|staging)." >&2
-  echo "[deploy]        Usage: bash scripts/deploy.sh prod|staging [logs] [--no-pull]" >&2
-  exit 2
-fi
+# Stack configuration. The env vars on the right-hand side are read by
+# docker-compose.yml at parse time (and could be overridden if you ever
+# spin up an extra stack — e.g. a hotfix branch on different ports).
+SECRETS_FILE="$HOME/.husrevity/api.env"
+PUBLIC_HEALTH_URL="https://api.iamhusrev.com/api/health"
+export STACK_NAME="husrevity-prod"
+export HUSREVITY_API_HOST_PORT="4090"
+export HUSREVITY_WEB_HOST_PORT="3090"
+export HUSREVITY_DB_HOST_PORT="5490"
+export NEXT_PUBLIC_API_URL="https://api.iamhusrev.com/api"
 
-# Per-target configuration. The env vars on the right-hand side are read by
-# docker-compose.yml at parse time.
-case "$TARGET" in
-  prod)
-    EXPECTED_BRANCH="master"
-    SECRETS_FILE="$HOME/.husrevity/api.env"
-    PUBLIC_HEALTH_URL="https://api.iamhusrev.com/api/health"
-    export STACK_NAME="husrevity-prod"
-    export HUSREVITY_API_HOST_PORT="4090"
-    export HUSREVITY_WEB_HOST_PORT="3090"
-    export HUSREVITY_DB_HOST_PORT="5490"
-    export NEXT_PUBLIC_API_URL="https://api.iamhusrev.com/api"
-    ;;
-  staging)
-    EXPECTED_BRANCH="dev"
-    SECRETS_FILE="$HOME/.husrevity/api.staging.env"
-    PUBLIC_HEALTH_URL="https://staging-api.iamhusrev.com/api/health"
-    export STACK_NAME="husrevity-staging"
-    export HUSREVITY_API_HOST_PORT="4091"
-    export HUSREVITY_WEB_HOST_PORT="3091"
-    export HUSREVITY_DB_HOST_PORT="5491"
-    export NEXT_PUBLIC_API_URL="https://staging-api.iamhusrev.com/api"
-    ;;
-esac
-
-# Safety: deploying prod from anything but master, or staging from anything
-# but dev, is almost certainly a mistake. Override via DEPLOY_ALLOW_ANY_BRANCH=1.
+# Safety: deploying prod from anything but a release/* branch is almost
+# certainly a mistake. Override via DEPLOY_ALLOW_ANY_BRANCH=1.
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && "$CURRENT_BRANCH" != "$EXPECTED_BRANCH" ]]; then
-  echo "[deploy] ERROR: refusing to deploy '$TARGET' from branch '$CURRENT_BRANCH' (expected '$EXPECTED_BRANCH')." >&2
-  echo "[deploy]        Run:  git checkout $EXPECTED_BRANCH" >&2
-  echo "[deploy]        Or override:  DEPLOY_ALLOW_ANY_BRANCH=1 bash scripts/deploy.sh $TARGET" >&2
+if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && ! "$CURRENT_BRANCH" =~ ^release/ ]]; then
+  echo "[deploy] ERROR: refusing to deploy prod from branch '$CURRENT_BRANCH' (expected release/*)." >&2
+  echo "[deploy]        Run:  git checkout release/1.0" >&2
+  echo "[deploy]        Or override:  DEPLOY_ALLOW_ANY_BRANCH=1 bash scripts/deploy.sh" >&2
   exit 1
 fi
 
@@ -81,11 +59,11 @@ if [[ ! -f "$SECRETS_FILE" ]]; then
   exit 1
 fi
 
-# Point both env handles at the right canonical file.
+# Point both env handles at the canonical secrets file.
 ln -sfn "$SECRETS_FILE" apps/api/.env.prod
 ln -sfn "$SECRETS_FILE" .env
 
-echo "[deploy] starting at $(date)  (target: $TARGET, branch: $CURRENT_BRANCH, stack: $STACK_NAME)"
+echo "[deploy] starting at $(date)  (branch: $CURRENT_BRANCH, stack: $STACK_NAME)"
 
 if $PULL; then
   echo "[deploy] git pull..."
@@ -113,7 +91,7 @@ echo "[deploy] public smoke: $PUBLIC_HEALTH_URL"
 if curl -fsS -m 8 --retry 3 --retry-delay 3 --retry-connrefused "$PUBLIC_HEALTH_URL" > /dev/null; then
   echo "[deploy] public health ✓"
 else
-  echo "[deploy] WARNING: public smoke failed — check cloudflared ingress for $TARGET." >&2
+  echo "[deploy] WARNING: public smoke failed — check cloudflared ingress." >&2
 fi
 
 echo "[deploy] done at $(date)"

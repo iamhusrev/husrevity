@@ -1,11 +1,13 @@
-name: Deploy to prod (master)
+name: Deploy to prod (release/*)
 
-# Triggers on push to master. Deploys the husrevity-prod stack on the
-# self-hosted Mac runner. Manual rerun: gh workflow run deploy.yml --ref master.
+# Triggers on push to any release/* branch (release/1.0, release/2.0, …).
+# Deploys the husrevity-prod stack on the self-hosted Mac runner.
+# Manual rerun: gh workflow run deploy.yml --ref release/1.0
 
 on:
   push:
-    branches: [master]
+    branches:
+      - 'release/**'
   workflow_dispatch:
 
 # Prod and staging deploys are independent (different concurrency groups).

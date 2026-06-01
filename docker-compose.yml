@@ -1,29 +1,27 @@
-# Production + staging stack for husrevity. Run from repo root.
+# Production stack for husrevity. Run from repo root.
 #
-# Single env-driven compose file. Two stacks live side-by-side on the same Mac
-# without colliding because every container name, port, volume, and network is
-# parameterized by ${STACK_NAME} (and the *_HOST_PORT vars). Local development
-# still uses `bun run dev` directly (hot reload); this file is for the prod Mac
-# and the CI runner.
+# Single env-driven compose file. Container names, ports, volume, and network
+# are all parameterized by ${STACK_NAME} (and the *_HOST_PORT vars), defaulting
+# to the prod values — so plain `docker compose up -d` brings prod up. Local
+# development still uses `bun run dev` directly (hot reload); this file is for
+# the prod Mac and the CI runner.
 #
-# Stacks (master branch → prod, dev branch → staging):
-#   STACK_NAME=husrevity-prod     hosts :4090/:3090/:5490  api/app.iamhusrev.com
-#   STACK_NAME=husrevity-staging  hosts :4091/:3091/:5491  staging-{api,app}.iamhusrev.com
+# Stack:
+#   STACK_NAME=husrevity-prod   hosts :4090/:3090/:5490   api/app.iamhusrev.com
 #
-# Container ports (inside the network) stay the same in both stacks — apps
-# still listen on 4090/3090 inside the container. Only the host-side bindings
-# differ.
+# The env-driven parameterization is kept so a future hotfix stack on different
+# ports is a one-liner — but the day-to-day setup is a single prod stack.
 #
 # Topology: Cloudflare Tunnel terminates TLS at the edge and forwards to
 # 127.0.0.1 on this host. There is no Caddy, no nginx, no open inbound port.
 # See ~/iamhusrev-prod/RUNBOOK.md for the full bring-up.
 #
-# Prerequisites (per stack):
+# Prerequisites:
 #   1. apps/api/.env.prod points at the canonical secrets file
-#      (~/.husrevity/api.env for prod; ~/.husrevity/api.staging.env for staging)
+#      (~/.husrevity/api.env)
 #   2. Repo root .env points at the same file (compose ${VAR} interpolation)
-#   3. Cloudflare Tunnel "husrevity" is provisioned with ingress for both
-#      the prod and staging hostnames.
+#   3. Cloudflare Tunnel "husrevity" is provisioned with ingress for
+#      api.iamhusrev.com (→ :4090) and app.iamhusrev.com (→ :3090).
 #
 # Boot order: postgres → api (runs migrations) → web.
 
