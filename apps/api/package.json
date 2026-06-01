@@ -1,6 +1,6 @@
 {
   "name": "@husrevity/api",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Husrevity API — NestJS port of husrevity-api",
   "main": "dist/main.js",
