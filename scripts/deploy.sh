@@ -1,61 +1,91 @@
 #!/usr/bin/env bash
 #
-# Manual deploy of husrevity prod stack. Used for:
+# Manual deploy of husrevity stack — prod or staging. Used for:
 #   - First deploy (before GH Actions runner is wired up)
 #   - Fallback when the runner is broken
 #   - Quick local rebuild after editing compose or cloudflared config
 #
-# Assumes:
-#   - apps/api/.env.prod exists (symlink to ~/.husrevity/api.env recommended)
-#   - .env at repo root exists for compose interpolation (same symlink target)
-#   - Docker Desktop is running
-#
 # Usage:
-#   bash scripts/deploy.sh           # full rebuild + restart
-#   bash scripts/deploy.sh logs      # tail logs after deploy
-#   bash scripts/deploy.sh --no-pull # skip git pull (useful in CI runner)
+#   bash scripts/deploy.sh prod           # full rebuild + restart of prod stack
+#   bash scripts/deploy.sh staging        # full rebuild + restart of staging stack
+#   bash scripts/deploy.sh prod logs      # tail logs after deploy
+#   bash scripts/deploy.sh staging --no-pull
+#
+# Overrides:
+#   DEPLOY_ALLOW_ANY_BRANCH=1     skip the branch safety guard
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-COMPOSE_FILE="docker-compose.yml"
+TARGET=""
 PULL=true
 TAIL_LOGS=false
 
 for arg in "$@"; do
   case "$arg" in
-    logs) TAIL_LOGS=true ;;
-    --no-pull) PULL=false ;;
-    *) echo "Unknown arg: $arg" >&2; exit 2 ;;
+    prod|staging) TARGET="$arg" ;;
+    logs)         TAIL_LOGS=true ;;
+    --no-pull)    PULL=false ;;
+    *)            echo "Unknown arg: $arg" >&2
+                  echo "Usage: bash scripts/deploy.sh prod|staging [logs] [--no-pull]" >&2
+                  exit 2 ;;
   esac
 done
 
-# Safety: only deploy from a release/* branch. Prevents accidentally pushing
-# dev or a feature branch to prod. Override with DEPLOY_ALLOW_ANY_BRANCH=1 if
-# you really know what you're doing (hotfix from a one-off branch, etc).
+if [[ -z "$TARGET" ]]; then
+  echo "[deploy] ERROR: missing target (prod|staging)." >&2
+  echo "[deploy]        Usage: bash scripts/deploy.sh prod|staging [logs] [--no-pull]" >&2
+  exit 2
+fi
+
+# Per-target configuration. The env vars on the right-hand side are read by
+# docker-compose.yml at parse time.
+case "$TARGET" in
+  prod)
+    EXPECTED_BRANCH="master"
+    SECRETS_FILE="$HOME/.husrevity/api.env"
+    PUBLIC_HEALTH_URL="https://api.iamhusrev.com/api/health"
+    export STACK_NAME="husrevity-prod"
+    export HUSREVITY_API_HOST_PORT="4090"
+    export HUSREVITY_WEB_HOST_PORT="3090"
+    export HUSREVITY_DB_HOST_PORT="5490"
+    export NEXT_PUBLIC_API_URL="https://api.iamhusrev.com/api"
+    ;;
+  staging)
+    EXPECTED_BRANCH="dev"
+    SECRETS_FILE="$HOME/.husrevity/api.staging.env"
+    PUBLIC_HEALTH_URL="https://staging-api.iamhusrev.com/api/health"
+    export STACK_NAME="husrevity-staging"
+    export HUSREVITY_API_HOST_PORT="4091"
+    export HUSREVITY_WEB_HOST_PORT="3091"
+    export HUSREVITY_DB_HOST_PORT="5491"
+    export NEXT_PUBLIC_API_URL="https://staging-api.iamhusrev.com/api"
+    ;;
+esac
+
+# Safety: deploying prod from anything but master, or staging from anything
+# but dev, is almost certainly a mistake. Override via DEPLOY_ALLOW_ANY_BRANCH=1.
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && ! "$CURRENT_BRANCH" =~ ^release/ ]]; then
-  echo "[deploy] ERROR: refusing to deploy from non-release branch '$CURRENT_BRANCH'." >&2
-  echo "[deploy]        Run:  git checkout release/1.0" >&2
-  echo "[deploy]        Or override:  DEPLOY_ALLOW_ANY_BRANCH=1 bash scripts/deploy.sh" >&2
+if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && "$CURRENT_BRANCH" != "$EXPECTED_BRANCH" ]]; then
+  echo "[deploy] ERROR: refusing to deploy '$TARGET' from branch '$CURRENT_BRANCH' (expected '$EXPECTED_BRANCH')." >&2
+  echo "[deploy]        Run:  git checkout $EXPECTED_BRANCH" >&2
+  echo "[deploy]        Or override:  DEPLOY_ALLOW_ANY_BRANCH=1 bash scripts/deploy.sh $TARGET" >&2
   exit 1
 fi
 
-echo "[deploy] starting at $(date)  (branch: $CURRENT_BRANCH)"
-
-if [[ ! -f apps/api/.env.prod ]]; then
-  echo "[deploy] ERROR: apps/api/.env.prod missing." >&2
-  echo "[deploy]        Run: ln -s ~/.husrevity/api.env apps/api/.env.prod" >&2
+if [[ ! -f "$SECRETS_FILE" ]]; then
+  echo "[deploy] ERROR: secrets file missing: $SECRETS_FILE" >&2
+  echo "[deploy]        See ~/iamhusrev-prod/RUNBOOK.md for how to provision it." >&2
   exit 1
 fi
 
-if [[ ! -f .env ]]; then
-  echo "[deploy] ERROR: repo root .env missing (needed for compose \${VAR} interpolation)." >&2
-  echo "[deploy]        Run: ln -s ~/.husrevity/api.env .env" >&2
-  exit 1
-fi
+# Point both env handles at the right canonical file.
+ln -sfn "$SECRETS_FILE" apps/api/.env.prod
+ln -sfn "$SECRETS_FILE" .env
+
+echo "[deploy] starting at $(date)  (target: $TARGET, branch: $CURRENT_BRANCH, stack: $STACK_NAME)"
 
 if $PULL; then
   echo "[deploy] git pull..."
@@ -63,15 +93,15 @@ if $PULL; then
 fi
 
 echo "[deploy] building images..."
-docker compose -f "$COMPOSE_FILE" build
+docker compose build
 
 echo "[deploy] starting stack (postgres → api → web)..."
-docker compose -f "$COMPOSE_FILE" up -d
+docker compose up -d
 
-echo "[deploy] waiting for api health..."
+echo "[deploy] waiting for api health on localhost:${HUSREVITY_API_HOST_PORT}..."
 sleep 8
 for i in 1 2 3 4 5 6 7 8 9 10; do
-  if curl -fsS -m 3 http://localhost:4090/api/health > /dev/null 2>&1; then
+  if curl -fsS -m 3 "http://localhost:${HUSREVITY_API_HOST_PORT}/api/health" > /dev/null 2>&1; then
     echo "[deploy] api healthy ✓"
     break
   fi
@@ -79,9 +109,16 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
   sleep 3
 done
 
+echo "[deploy] public smoke: $PUBLIC_HEALTH_URL"
+if curl -fsS -m 8 --retry 3 --retry-delay 3 --retry-connrefused "$PUBLIC_HEALTH_URL" > /dev/null; then
+  echo "[deploy] public health ✓"
+else
+  echo "[deploy] WARNING: public smoke failed — check cloudflared ingress for $TARGET." >&2
+fi
+
 echo "[deploy] done at $(date)"
 
 if $TAIL_LOGS; then
   echo "[deploy] tailing logs (Ctrl-C to exit)..."
-  docker compose -f "$COMPOSE_FILE" logs -f --tail=50
+  docker compose logs -f --tail=50
 fi
