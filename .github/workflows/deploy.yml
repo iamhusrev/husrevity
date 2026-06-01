@@ -1,0 +1,87 @@
+name: Deploy to prod (self-hosted Mac)
+
+# Triggers on push to any release/* branch (release/1.0 today; future release/2.0
+# would also fire). The runner lives on the prod Mac itself, so checkout happens
+# directly into the repo working tree the host already has.
+# Manual rerun: gh workflow run deploy.yml --ref release/1.0
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+
+# Prevent concurrent deploys racing each other on the same host.
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build + restart prod stack
+    runs-on: [self-hosted, macOS, iamhusrev-prod]
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup runner PATH (Docker Desktop + Homebrew)
+        run: |
+          # launchd starts the runner with a minimal PATH
+          # (/usr/bin:/bin:/usr/sbin:/sbin) that misses Homebrew, /usr/local/bin,
+          # and Docker Desktop's binary. Push the missing dirs onto every
+          # later step's PATH. Last echo takes precedence — Docker Desktop
+          # first so it wins over any (possibly broken) /usr/local/bin/docker
+          # symlink.
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "/Applications/Docker.app/Contents/Resources/bin" >> "$GITHUB_PATH"
+          # Sanity check using absolute paths (current step inherits launchd's PATH).
+          /Applications/Docker.app/Contents/Resources/bin/docker --version
+
+      - name: Ensure env symlinks (idempotent)
+        run: |
+          # ~/.husrevity/api.env is the canonical secrets file (chmod 600).
+          # actions/checkout's default `clean: true` runs `git clean -ffdx`
+          # which would delete our gitignored symlinks — so we recreate them
+          # at the top of every deploy. Symlink target is the same file used
+          # by compose's env_file (api) and ${VAR} interpolation (root .env).
+          if [[ ! -f "$HOME/.husrevity/api.env" ]]; then
+            echo "::error::$HOME/.husrevity/api.env missing on this host. Provision secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
+            exit 1
+          fi
+          ln -sfn "$HOME/.husrevity/api.env" apps/api/.env.prod
+          ln -sfn "$HOME/.husrevity/api.env" .env
+          ls -la apps/api/.env.prod .env
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Apply stack (postgres → api → web)
+        run: docker compose up -d
+
+      - name: Wait for api health
+        run: |
+          for i in {1..15}; do
+            if curl -fsS -m 3 http://localhost:4090/api/health > /dev/null; then
+              echo "api healthy ✓"
+              exit 0
+            fi
+            echo "attempt $i/15 — api not ready, sleep 4s"
+            sleep 4
+          done
+          echo "::error::api never became healthy"
+          docker compose logs api --tail=100
+          exit 1
+
+      - name: Public smoke test (through Cloudflare Tunnel)
+        run: |
+          # Hits the edge URL. cloudflared LaunchAgent should already be
+          # connected; if a tunnel connector is flapping `--retry-connrefused`
+          # lets us survive a brief reconnect.
+          curl -fsS -m 8 --retry 5 --retry-delay 4 --retry-connrefused \
+            https://api.iamhusrev.com/api/health || {
+            echo "::warning::public smoke (HTTPS) failed — check cloudflared LaunchAgent status."
+            exit 0
+          }
