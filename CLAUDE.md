@@ -25,8 +25,9 @@ bun run test                # api unit tests (jest, --passWithNoTests)
 bun run test:e2e            # api e2e (jest with apps/api/test/jest-e2e.json)
 bun run migration:run       # apply TypeORM migrations
 bun run migration:generate  # generate new migration from entity diff
-bun run db:backup           # manual pg_dump of dev DB (calls ~/iamhusrev-prod/scripts/pg-backup.sh)
 ```
+
+> Deployment, hosting, secrets, and backups live in the sibling infra repo `~/iamhusrev-prod/`. This file covers local development only.
 
 API-only scripts (run from `apps/api/`):
 
@@ -119,10 +120,6 @@ Next.js 15 App Router + React 19 + Tailwind 4 + TanStack Query. Forked from `../
 - `apps/web/.env.local` (gitignored, copy from `.env.example`) — just `NEXT_PUBLIC_API_URL`.
 
 JWT defaults: 15-min access tokens, 30-day opaque refresh tokens (SHA-256 hashed at rest).
-
-## Backup
-
-Backup ownership lives in the infra repo (`~/iamhusrev-prod/`). Prod DB is backed up daily 04:00 by the LaunchAgent `com.iamhusrev.backup.husrevity` (env-driven generic `pg-backup.sh`) → `~/Backup/husrevity-db-dumps/`, 30-day retention, Drive-synced. Dev backup is not automatic anymore — use `bun run db:backup` for a one-off (targets `husrevity_nest` on the shared-postgres container, 14-day retention).
 
 ## Workflow tips
 

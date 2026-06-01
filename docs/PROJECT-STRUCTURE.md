@@ -1,6 +1,6 @@
 # PROJECT-STRUCTURE.md — husrevity
 
-> 2026-05-20
+> 2026-06-01
 
 ---
 
@@ -10,11 +10,11 @@
 
 Two apps share a Bun workspace: `apps/api` is a NestJS 10 backend with TypeORM, Postgres, JWT auth, global response envelope, soft-delete + audit base entity, per-minute notification cron, and `@nestjs/throttler`. `apps/web` is a Next.js 15 App Router frontend with React 19, Tailwind 4, and TanStack Query, wired exclusively to the NestJS contract. The web is always subordinate to the API — when the two disagree, fix the web.
 
+This document covers application architecture only. Deployment, hosting, and operational concerns live in the separate infra repo (`~/iamhusrev-prod/`).
+
 ---
 
-## 2. System topology
-
-### Dev (local)
+## 2. System topology (dev)
 
 ```
 developer machine
@@ -33,57 +33,23 @@ developer machine
 
 `bun run dev` boots both in parallel via `concurrently --kill-others-on-fail`.
 
-### Prod (self-hosted Mac)
-
-```
-Internet
-  │
-  ▼
-Cloudflare Edge (Universal TLS, WAF, DDoS)
-  │
-  ▼
-Cloudflare Tunnel (named "husrevity", credentials.json @ ~/.config/husrevity/cloudflared/)
-  │  ingress: app.iamhusrev.com → 127.0.0.1:3090
-  │           api.iamhusrev.com → 127.0.0.1:4090
-  │
-  ▼
-prod Mac — no open inbound ports; static public IP 85.104.115.220 reserved for ops (SSH/future mobile API)
-  │
-  ▼
-docker-compose.prod.yml
-  ├── husrevity-prod-web         (Next.js standalone, bind 127.0.0.1:3090)
-  ├── husrevity-prod-api         (NestJS, runs migrations on boot, bind 127.0.0.1:4090)
-  │       └── env_file: apps/api/.env.prod (→ ~/.husrevity/api.env)
-  └── husrevity-prod-postgres    (postgres:16-alpine)
-          volume: husrevity_pgdata
-```
-
-Boot order enforced by `docker-compose.prod.yml`: **postgres** (healthcheck) → **api** (depends_on healthy postgres) → **web**. Cloudflare Tunnel runs natively as a `launchd` LaunchAgent (not a compose service) so it survives Docker Desktop restarts.
-
-The prod Mac must never sleep (System Settings → Battery) and Docker Desktop must auto-start. Prod runs on the same physical machine as the self-hosted GitHub Actions runner.
-
 ---
 
-## 3. Tech stack matrix
+## 3. Tech stack
 
-| Concern | Dev | Prod |
-|---|---|---|
-| Runtime / pkg mgr | Bun 1.3+ (workspaces) | Bun 1.3 in Docker (multi-stage) |
-| API framework | NestJS 10 | same |
-| ORM | TypeORM 0.3 | same |
-| Database | Postgres 16 (shared-infra container) | Postgres 16 (compose service) |
-| Auth | Passport-JWT + `JwtAuthGuard` (APP_GUARD) | same |
-| Migrations | TypeORM TS migrations, `migrationsRun: false`, manual via CLI | run by `docker-entrypoint.sh` on container boot |
-| Scheduler | `@nestjs/schedule` + `ScheduleModule.forRoot()` | same |
-| Web push | `web-push` npm package + VAPID keys (optional; bell works without) | same |
-| Mailer | none | none |
-| Rate limiting | `@nestjs/throttler` (100 req / 60 s window, global) | same |
-| Web framework | Next.js 15 App Router, React 19, Tailwind 4, TanStack Query v5 | Next.js standalone build in Docker |
-| HTTP proxy | — (direct) | Cloudflare Tunnel (named, TLS at CF edge — no open ports on host) |
-| Orchestration | `concurrently` | `docker compose` |
-| CI/CD | — | GitHub Actions self-hosted runner on prod Mac |
-| Monitoring | — | External HTTP monitors (UptimeRobot / BetterStack); `GET /api/health` |
-| Backups | LaunchAgent daily 03:00 → `pg_dump` → Drive | LaunchAgent daily 04:00 (prod DB) |
+| Concern | Tooling |
+|---|---|
+| Runtime / pkg mgr | Bun 1.3+ (workspaces) |
+| API framework | NestJS 10 |
+| ORM | TypeORM 0.3 |
+| Database | Postgres 16 (shared-infra container) |
+| Auth | Passport-JWT + `JwtAuthGuard` (APP_GUARD) |
+| Migrations | TypeORM TS migrations, `migrationsRun: false`, manual via CLI |
+| Scheduler | `@nestjs/schedule` + `ScheduleModule.forRoot()` |
+| Web push | `web-push` npm package + VAPID keys (optional; bell works without) |
+| Rate limiting | `@nestjs/throttler` (100 req / 60 s window, global) |
+| Web framework | Next.js 15 App Router, React 19, Tailwind 4, TanStack Query v5 |
+| Orchestration | `concurrently` |
 
 ---
 
@@ -93,7 +59,7 @@ Traced through `POST /api/reminders` — a guarded endpoint that also enqueues a
 
 ```
 1. HTTP enters main.ts
-   ├── app.set('trust proxy', 1)           # real client IP for throttler (behind Cloudflare Tunnel)
+   ├── app.set('trust proxy', 1)           # real client IP for throttler
    ├── helmet()                            # security headers
    └── bodyParser.text('text/plain')       # vault .env import carve-out (before guards)
 
@@ -430,7 +396,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 **Cross-module deps**: `VaultModule` has no imports of domain modules; `CryptoModule` is `@Global()` so `CryptoService` is injected without explicit import.  
 **Notable invariants**:
 - `POST /api/vault-entities/:id/import-env` accepts `Content-Type: text/plain`. The `bodyParser.text` middleware registered in `main.ts` is mandatory for this path — do not remove it.
-- Encryption is done by `CryptoService.encrypt()` before persisting; decryption on read. The key is `HUSREVITY_CRYPTO_KEY` (32 bytes, base64). Rotating this key = permanent data loss without a re-encrypt migration. See `ops/SECRETS.md`.
+- Encryption is done by `CryptoService.encrypt()` before persisting; decryption on read. The key is `HUSREVITY_CRYPTO_KEY` (32 bytes, base64).
 - Gmail OAuth tokens are also encrypted by `CryptoService` (see `gmail/` below).
 
 ---
@@ -487,7 +453,6 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 - `cancelForSource()` soft-deletes all undispatched rows for a source — call before re-enqueue on update.
 - `NotificationDispatcherService.tick()` runs `@Cron(EVERY_MINUTE)`. It marks rows dispatched **before** fan-out so an overlapping tick never double-fires. 410/404 from a push endpoint = subscription expired → soft-delete it.
 - VAPID keys are optional. When not configured, the dispatcher logs a warning and exits the push path; the bell dropdown still works because it reads the same `notification` table.
-- `VAPID_PRIVATE_KEY` rotation invalidates all existing device subscriptions — users must re-opt-in. See `ops/SECRETS.md`.
 
 ---
 
@@ -519,7 +484,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 **Persisted state**: none (stateless service).  
 **HTTP surface**: none.  
 **Cross-module deps**: `@Global()` module; auto-available to all modules without explicit import. Consumed by `VaultModule` (vault item values) and `GmailModule` (OAuth tokens).  
-**Notable invariants**: `HUSREVITY_CRYPTO_KEY` is 32 bytes base64. There is no key ID or fallback. Rotating the key = all encrypted rows become unreadable. See `ops/SECRETS.md`.
+**Notable invariants**: `HUSREVITY_CRYPTO_KEY` is 32 bytes base64. There is no key ID or fallback.
 
 ---
 
@@ -659,7 +624,7 @@ An edit modal (inline state, no routing) opens on block click, accepting title, 
 
 ## 8. Data lifecycle & migrations
 
-Files in `apps/api/src/db/migrations/`, applied in timestamp order by `bun run migration:run` (dev) or `docker-entrypoint.sh` (prod).
+Files in `apps/api/src/db/migrations/`, applied in timestamp order by `bun run migration:run`.
 
 | File | What it does |
 |---|---|
@@ -681,9 +646,7 @@ Migration invariants:
 
 ---
 
-## 9. Build, run, deploy
-
-### Dev boot order
+## 9. Build & run (dev)
 
 ```bash
 # 1. shared postgres (sibling repo)
@@ -707,75 +670,13 @@ bun run dev
 
 Default login (dev): `admin@admin.com / admin`.
 
-### Prod deploy (CI)
-
-On every push to `main`, `.github/workflows/deploy.yml` runs on the self-hosted Mac runner:
-
-1. Checkout repo into existing working tree.
-2. Assert `apps/api/.env.prod` and repo-root `.env` symlinks exist.
-3. `docker compose -f docker-compose.prod.yml build`
-4. `docker compose -f docker-compose.prod.yml up -d`
-5. Poll `http://localhost:4090/api/health` up to 15 × 4 s.
-6. Public smoke: `curl https://api.iamhusrev.com/api/health` (via Cloudflare Tunnel).
-
-The `prod-deploy` concurrency group (`cancel-in-progress: false`) serialises deploys — a second push waits rather than cancelling.
-
-### Manual fallback
-
-```bash
-bash scripts/deploy.sh            # full rebuild + restart
-bash scripts/deploy.sh logs       # tail logs after deploy
-bash scripts/deploy.sh --no-pull  # skip git pull (for runner use)
-```
-
-### Container build
-
-- **API**: `apps/api/Dockerfile` — multi-stage Bun build → `dist/`. `docker-entrypoint.sh` runs `node dist/db/migrate.js run` then starts the server.
-- **Web**: `apps/web/dockerfile` — `NEXT_PUBLIC_API_URL` injected as build arg; produces Next.js standalone output.
-
----
-
-## 10. Operational concerns
-
-### Backups
-
-Backup ownership moved to the shared infra repo at `~/iamhusrev-prod/` (one place for every app on this Mac). A generic `pg-backup.sh` driven by per-app env vars (`PG_CONTAINER`, `PG_DB`, `BACKUP_DIR`, …) is invoked by per-app LaunchAgents.
-
-| Job | Target DB | Schedule | LaunchAgent |
-|---|---|---|---|
-| prod | `husrevity_prod` (compose) | daily 04:00 | `~/iamhusrev-prod/launchagents/com.iamhusrev.backup.husrevity.plist` |
-| dev | `husrevity_nest` (shared-infra) | manual only | `bun run db:backup` (calls infra script with dev env) |
-
-Install (handled by infra repo's `bootstrap.sh` — idempotent symlink + `launchctl load`).
-
-Manual restore: see `~/iamhusrev-prod/RUNBOOK.md` → "Daily ops" → `pg-restore.sh latest`.
-
 ### Health endpoint
 
 `GET /api/health` (`@Public`) — `apps/api/src/common/health.controller.ts`. Does a real DB ping (`SELECT 1`) with a 500 ms timeout. Returns `{ status: 'UP', db: 'UP' }` on 200 or 503 with `{ status: 'DOWN', db: 'DOWN' }` if the query times out or throws.
 
-Set up an external monitor (UptimeRobot / BetterStack) checking `https://api.iamhusrev.com/api/health` for the string `"db":"UP"` every 3–5 minutes. See `ops/MONITORING.md`.
-
-### Secret rotation rules (from `ops/SECRETS.md`)
-
-| Secret | Rotatable? | Impact of rotation |
-|---|---|---|
-| `HUSREVITY_CRYPTO_KEY` | **No** (without re-encrypt migration) | All vault data permanently unreadable |
-| `HUSREVITY_JWT_SECRET` | Yes | In-flight access tokens (~15 min) rejected; clients auto-refresh transparently |
-| `VAPID_PRIVATE_KEY` | Yes, but destructive | All existing push subscriptions invalidated; users must re-opt-in |
-| `HUSREVITY_DB_PASSWORD` | Yes | Must rotate in Postgres and in env simultaneously |
-| `GOOGLE_CLIENT_SECRET` | Yes (via Google Cloud Console) | Gmail integration breaks until env updated |
-
-### Prod-only env vars (not needed in dev)
-
-- `HUSREVITY_INITIAL_ADMIN_EMAIL` + `HUSREVITY_INITIAL_ADMIN_PASSWORD_HASH` — consumed once by `RemoveDefaultAdmin` migration; delete afterwards.
-- `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` + `VAPID_SUBJECT` — web-push; optional in dev (bell works without).
-- `HUSREVITY_CORS_ORIGINS` — comma-separated allowed origins; defaults to `http://localhost:3001`.
-- `NODE_ENV=production` — disables Swagger UI.
-
 ---
 
-## 11. Known drift / open work
+## 10. Known drift / open work
 
 - **`apps/web/CLAUDE.md` is stale**: it references `npm` commands, port `8080`, a `NEXT_PUBLIC_API_URL=http://localhost:8080/api` default, a non-existent `useVehicles` hook pattern, and an `(admin)` route group that no longer exists. Trust the root `CLAUDE.md` for all conventions.
 
@@ -789,7 +690,7 @@ Set up an external monitor (UptimeRobot / BetterStack) checking `https://api.iam
 
 ---
 
-## 12. Glossary
+## 11. Glossary
 
 | Term | Definition |
 |---|---|
@@ -798,15 +699,14 @@ Set up an external monitor (UptimeRobot / BetterStack) checking `https://api.iam
 | **ResponseInterceptor envelope** | `{ success: boolean, message: string, code: number, data: T }` — the standard HTTP response shape emitted by `ResponseInterceptor` (success paths) and `GlobalExceptionFilter` (error paths). The web's `api-client.ts` and all hooks parse this shape. |
 | **RequestContext** | An `AsyncLocalStorage<{ userId, email }>` entered by `JwtAuthGuard` on every authenticated request. `AuditSubscriber` reads it to populate `createdById`/`updatedById`; services call `getCurrentUserId()` when they need the caller's ID outside of a DI chain. |
 | **AuditSubscriber** | A TypeORM `EntitySubscriberInterface` that fires `beforeInsert` and `beforeUpdate` for every `BaseEntity` subclass, setting `createdById`/`updatedById` from `RequestContext`. Registered in `typeorm.config.ts`. |
-| **Vault** | The encrypted secrets store. `vault_entity` groups `vault_item` rows whose `value_enc` is AES-256-GCM ciphertext. The encryption key (`HUSREVITY_CRYPTO_KEY`) is immutable in production. |
+| **Vault** | The encrypted secrets store. `vault_entity` groups `vault_item` rows whose `value_enc` is AES-256-GCM ciphertext. |
 | **syncNotification()** | Private method on `ReminderService`, `TaskService`, `ListService`, `CalendarService`, and `TimeBlockService`. Called after every create/update/toggle: cancels any prior undispatched notification for the source entity and re-enqueues at `dueAt - notifyMinutesBefore`. Pattern is identical across all five modules. |
 | **Partial unique index** | Postgres `WHERE deleted_at IS NULL` unique index. Used by `notification` (`uq_notification_source_live`), `push_subscription` (`uq_push_subscription_endpoint_live`), and `gmail_account` (`uq_gmail_account_owner_email_provider`) to allow soft-deleted rows to be "resurrected" without colliding on the uniqueness constraint. |
 | **Phase 1 / Phase 2** | The two development phases during which Spring Boot modules were ported to NestJS. Phase 1: auth, user, note, list, common, crypto. Phase 2: project, task, plan, calendar, reminder, vault, gmail. Both are fully shipped as of commit `0f549d1`. |
-| **`HUSREVITY_CRYPTO_KEY`** | 32-byte base64 AES-256-GCM key. Encrypts vault item values and Gmail OAuth tokens. Immutable once prod data exists — there is no re-encrypt migration. Treat as irreplaceable. |
 
 ---
 
-## 13. Entry points index
+## 12. Entry points index
 
 | To work on… | Start at… |
 |---|---|
@@ -819,7 +719,4 @@ Set up an external monitor (UptimeRobot / BetterStack) checking `https://api.iam
 | Debug notification not firing | Check `notification` table: `dispatched_at IS NULL AND scheduled_at <= now()`. Check `push_subscription` table for the user. Check API logs for the `notification-dispatch` cron. |
 | Add an i18n key | Add to both `apps/web/src/messages/en.json` and `apps/web/src/messages/tr.json` under the relevant namespace. |
 | Change throttle limits | Global: `ThrottlerModule.forRoot` in `apps/api/src/app.module.ts`. Per-route: `@Throttle({ default: { limit: N, ttl: M } })` on the controller method. |
-| First-time prod deploy | Follow `~/iamhusrev-prod/RUNBOOK.md` in full, then `bash scripts/deploy.sh`. |
-| Rotate JWT secret | Generate new value → update `~/.husrevity/api.env` → restart api container. See `ops/SECRETS.md`. |
-| Rotate crypto key | Read `ops/SECRETS.md` first. There is no migration — rotation means vault data loss. |
 | Add a design system component | Read existing utilities in `apps/web/src/app/globals.css`. Use `husrev-*` token names, `shadow-card-warm`, `grain`, and the animation helpers. Do not introduce new color values. |
