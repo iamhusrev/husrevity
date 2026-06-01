@@ -1,6 +1,6 @@
 {
   "name": "husrevity",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Husrevity monorepo — NestJS API + Next.js web, Bun workspaces",
   "workspaces": [
