@@ -1,58 +1,34 @@
-# Production stack for husrevity. Run from repo root.
+# Production stack for husrevity (api + web). Run from repo root.
 #
-# Single env-driven compose file. Container names, ports, volume, and network
-# are all parameterized by ${STACK_NAME} (and the *_HOST_PORT vars), defaulting
-# to the prod values — so plain `docker compose up -d` brings prod up. Local
-# development still uses `bun run dev` directly (hot reload); this file is for
-# the prod Mac and the CI runner.
+# Postgres is NOT part of this stack. husrevity connects to the shared, long-
+# lived Postgres server defined in ~/iamhusrev-prod/postgres/docker-compose.yml
+# over the external `iamhusrev-data` network, reaching it at the hostname
+# `postgres` (database husrevity_prod, role husrevity). Bring the shared
+# postgres up FIRST — see ~/iamhusrev-prod/RUNBOOK.md.
+#
+# Container names / host ports stay parameterized by ${STACK_NAME} and the
+# *_HOST_PORT vars (defaults bring prod up with a plain `docker compose up -d`).
 #
 # Stack:
-#   STACK_NAME=husrevity-prod   hosts :4090/:3090/:5490   api/app.iamhusrev.com
-#
-# The env-driven parameterization is kept so a future hotfix stack on different
-# ports is a one-liner — but the day-to-day setup is a single prod stack.
+#   STACK_NAME=husrevity-prod   hosts :4090/:3090   api/app.iamhusrev.com
 #
 # Topology: Cloudflare Tunnel terminates TLS at the edge and forwards to
 # 127.0.0.1 on this host. There is no Caddy, no nginx, no open inbound port.
 # See ~/iamhusrev-prod/RUNBOOK.md for the full bring-up.
 #
 # Prerequisites:
-#   1. apps/api/.env.prod points at the canonical secrets file
-#      (~/.husrevity/api.env)
-#   2. Repo root .env points at the same file (compose ${VAR} interpolation)
-#   3. Cloudflare Tunnel "husrevity" is provisioned with ingress for
-#      api.iamhusrev.com (→ :4090) and app.iamhusrev.com (→ :3090).
+#   1. Shared postgres is up (network `iamhusrev-data` exists, db husrevity_prod
+#      + role husrevity created). See ~/iamhusrev-prod/postgres/.
+#   2. apps/api/.env.prod points at the canonical secrets file (~/.husrevity/api.env)
+#      with HUSREVITY_DB_HOST=postgres, HUSREVITY_DB_USER=husrevity, and the
+#      matching HUSREVITY_DB_PASSWORD from ~/.iamhusrev-postgres/env.
+#   3. Repo root .env points at the same file (compose ${VAR} interpolation).
+#   4. Cloudflare Tunnel "husrevity" has ingress for api.iamhusrev.com (→ :4090)
+#      and app.iamhusrev.com (→ :3090).
 #
-# Boot order: postgres → api (runs migrations) → web.
+# Boot order: (shared postgres) → api (runs migrations) → web.
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: ${STACK_NAME:-husrevity-prod}-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${HUSREVITY_DB_NAME:-husrevity_prod}
-      POSTGRES_USER: ${HUSREVITY_DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${HUSREVITY_DB_PASSWORD:?HUSREVITY_DB_PASSWORD must be set}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    # Loopback bind only — owner-policy port (5490 prod, 5491 staging).
-    # NOT reachable from LAN or the internet (Tunnel doesn't know about it).
-    # Use 127.0.0.1:5490/5491 from this Mac for DBeaver/TablePlus/psql access.
-    ports:
-      - "127.0.0.1:${HUSREVITY_DB_HOST_PORT:-5490}:5432"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${HUSREVITY_DB_USER:-postgres} -d ${HUSREVITY_DB_NAME:-husrevity_prod}",
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    networks:
-      - app
-
   api:
     build:
       context: .
@@ -65,11 +41,9 @@ services:
     # No LAN exposure, no public exposure.
     ports:
       - "127.0.0.1:${HUSREVITY_API_HOST_PORT:-4090}:4090"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    # Reaches the shared Postgres at hostname `postgres` on this network.
     networks:
-      - app
+      - iamhusrev-data
 
   web:
     build:
@@ -82,13 +56,10 @@ services:
     # Loopback bind only — cloudflared on the host hits this port.
     ports:
       - "127.0.0.1:${HUSREVITY_WEB_HOST_PORT:-3090}:3090"
-    networks:
-      - app
-
-volumes:
-  pgdata:
-    name: ${STACK_NAME:-husrevity-prod}_pgdata
 
 networks:
-  app:
-    name: ${STACK_NAME:-husrevity-prod}
+  # Shared data network, owned by ~/iamhusrev-prod/postgres. Must already exist
+  # (`docker compose up` on the shared postgres stack creates it).
+  iamhusrev-data:
+    name: iamhusrev-data
+    external: true
