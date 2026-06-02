@@ -668,12 +668,23 @@
     "addDue": "Add date",
     "flagAria": "Toggle flag",
     "priorityAria": "Cycle priority",
+    "showCompleted": "Show completed",
+    "hideCompleted": "Hide completed",
+    "due": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "clear": "Clear date"
+    },
     "group": {
       "all": "All",
       "today": "Today",
-      "scheduled": "Scheduled",
+      "tomorrow": "Tomorrow",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
       "flagged": "Flagged",
-      "completed": "Completed"
+      "scheduled": "Scheduled"
     }
   },
   "notes": {

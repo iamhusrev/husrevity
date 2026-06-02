@@ -662,12 +662,23 @@
     "addDue": "Tarih ekle",
     "flagAria": "Bayrağı değiştir",
     "priorityAria": "Önceliği değiştir",
+    "showCompleted": "Tamamlananları göster",
+    "hideCompleted": "Tamamlananları gizle",
+    "due": {
+      "today": "Bugün",
+      "tomorrow": "Yarın",
+      "thisWeek": "Bu hafta",
+      "thisMonth": "Bu ay",
+      "clear": "Tarihi temizle"
+    },
     "group": {
       "all": "Tümü",
       "today": "Bugün",
-      "scheduled": "Zamanlanmış",
+      "tomorrow": "Yarın",
+      "thisWeek": "Bu hafta",
+      "thisMonth": "Bu ay",
       "flagged": "Bayraklı",
-      "completed": "Tamamlanan"
+      "scheduled": "Zamanlanmış"
     }
   },
   "notes": {
