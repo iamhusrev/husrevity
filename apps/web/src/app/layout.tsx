@@ -1,16 +1,8 @@
-"use client";
-
-import GlobalAlert from "@/components/alert/GlobalAlert";
-import { SidebarProvider } from "@/providers/SidebarContext";
-import { ThemeProvider } from "@/providers/ThemeContext";
-import { AuthProvider } from "@/providers/AuthProvider";
-import I18nProvider from "@/providers/I18nProvider";
-
+import type { Metadata, Viewport } from "next";
 import { Outfit, Instrument_Serif, JetBrains_Mono } from "next/font/google";
-import { useTranslation } from "react-i18next";
 
 import "./globals.css";
-import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
+import { Providers } from "./providers";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -29,24 +21,38 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--next-font-jetbrains-mono",
 });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const { i18n } = useTranslation();
+export const metadata: Metadata = {
+  applicationName: "husrevity",
+  title: {
+    default: "Husrevity",
+    template: "%s | Husrevity",
+  },
+  description:
+    "Notlar, listeler, projeler, görevler, takvim ve anımsatıcılar için kişisel üretkenlik uygulaması.",
+  appleWebApp: {
+    capable: true,
+    title: "husrevity",
+    statusBarStyle: "default",
+  },
+};
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#2b2823" },
+  ],
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // `lang` starts at the project default (tr); ClientBootstrap syncs it to the
+  // detected i18n language after hydration. suppressHydrationWarning keeps that
+  // attribute swap from logging a mismatch.
   return (
-    <html lang={i18n.language}>
+    <html lang="tr" suppressHydrationWarning>
       <body
         className={`${outfit.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans`}
       >
-        <I18nProvider>
-          <ReactQueryProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <GlobalAlert />
-                <SidebarProvider>{children}</SidebarProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </ReactQueryProvider>
-        </I18nProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
