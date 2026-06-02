@@ -21,7 +21,7 @@ jobs:
     runs-on: [self-hosted, macOS, iamhusrev-prod]
     timeout-minutes: 20
     env:
-      STACK_NAME: husrevity-prod
+      STACK_NAME: husrevity-app
       HUSREVITY_API_HOST_PORT: 4090
       HUSREVITY_WEB_HOST_PORT: 3090
       HUSREVITY_DB_HOST_PORT: 5490
