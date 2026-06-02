@@ -9,10 +9,15 @@
 -->
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
-      <stop offset="0%" stop-color="#5b5f64"/>
-      <stop offset="100%" stop-color="#45484c"/>
+    <radialGradient id="bg" cx="50%" cy="40%" r="78%">
+      <stop offset="0%" stop-color="#3a322b"/>
+      <stop offset="100%" stop-color="#1f1b17"/>
     </radialGradient>
+    <linearGradient id="mark" gradientUnits="userSpaceOnUse" x1="512" y1="300" x2="512" y2="724">
+      <stop offset="0%" stop-color="#f4b063"/>
+      <stop offset="55%" stop-color="#d98233"/>
+      <stop offset="100%" stop-color="#a14d18"/>
+    </linearGradient>
     <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="26" result="b"/>
       <feMerge>
@@ -25,7 +30,7 @@
 
   <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
 
-  <g fill="none" stroke="#2ad4ff" stroke-width="96"
+  <g fill="none" stroke="url(#mark)" stroke-width="96"
      stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
     <!-- left stem (full height) -->
     <path d="M 360 300 L 360 724"/>

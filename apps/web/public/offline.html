@@ -24,14 +24,14 @@
         gap: 1.5rem;
         padding: 2rem;
         text-align: center;
-        background: radial-gradient(120% 100% at 50% 35%, #4f5358 0%, #2b2d30 100%);
-        color: #e8eaed;
+        background: radial-gradient(120% 100% at 50% 35%, #3a322b 0%, #1f1b17 100%);
+        color: #f6f3ec;
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       }
       .mark {
         width: 132px;
         height: 132px;
-        filter: drop-shadow(0 0 18px rgba(42, 212, 255, 0.65));
+        filter: drop-shadow(0 0 18px rgba(216, 130, 51, 0.6));
       }
       h1 {
         margin: 0;
@@ -43,29 +43,37 @@
         margin: 0;
         max-width: 28rem;
         line-height: 1.55;
-        color: #b9bcc1;
+        color: #c9bfae;
       }
       button {
         margin-top: 0.5rem;
         padding: 0.7rem 1.4rem;
         border: 0;
         border-radius: 999px;
-        background: #2ad4ff;
-        color: #0b2027;
+        background: #c8732e;
+        color: #1f1b17;
         font-size: 0.95rem;
         font-weight: 650;
         cursor: pointer;
+        transition: background 0.18s ease-out;
       }
       button:hover {
-        background: #4fdcff;
+        background: #d98233;
       }
     </style>
   </head>
   <body>
     <svg class="mark" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="mark" gradientUnits="userSpaceOnUse" x1="512" y1="300" x2="512" y2="724">
+          <stop offset="0%" stop-color="#f4b063" />
+          <stop offset="55%" stop-color="#d98233" />
+          <stop offset="100%" stop-color="#a14d18" />
+        </linearGradient>
+      </defs>
       <g
         fill="none"
-        stroke="#2ad4ff"
+        stroke="url(#mark)"
         stroke-width="96"
         stroke-linecap="round"
         stroke-linejoin="round"

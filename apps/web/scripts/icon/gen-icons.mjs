@@ -29,27 +29,34 @@ try {
 }
 
 const SIZE = 1024;
-const CYAN = "#2ad4ff";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, "../.."); // apps/web
 
-// Soft gray field, rounded so maskable/any both look intentional.
+// Warm dark field from the brand's ink/shadow family — lets the ember glow read.
 const bgSvg = Buffer.from(`
 <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
-      <stop offset="0%" stop-color="#5b5f64"/>
-      <stop offset="100%" stop-color="#45484c"/>
+    <radialGradient id="bg" cx="50%" cy="40%" r="78%">
+      <stop offset="0%" stop-color="#3a322b"/>
+      <stop offset="100%" stop-color="#1f1b17"/>
     </radialGradient>
   </defs>
   <rect width="${SIZE}" height="${SIZE}" rx="220" fill="url(#bg)"/>
 </svg>`);
 
-// Crisp cyan "h" on a transparent canvas (no filter — glow added via blur).
+// Crisp "h" on a transparent canvas — brand amber→ember gradient stroke,
+// mirroring AppLogo. The glow is added in build() by blurring this copy.
 const letterSvg = Buffer.from(`
 <svg width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
-  <g fill="none" stroke="${CYAN}" stroke-width="96"
+  <defs>
+    <linearGradient id="mark" gradientUnits="userSpaceOnUse" x1="512" y1="300" x2="512" y2="724">
+      <stop offset="0%" stop-color="#f4b063"/>
+      <stop offset="55%" stop-color="#d98233"/>
+      <stop offset="100%" stop-color="#a14d18"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#mark)" stroke-width="96"
      stroke-linecap="round" stroke-linejoin="round">
     <path d="M 360 300 L 360 724"/>
     <path d="M 360 470 Q 360 410 512 410 Q 664 410 664 470 L 664 724"/>
