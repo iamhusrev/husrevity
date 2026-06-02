@@ -1,24 +1,86 @@
 /* eslint-disable no-restricted-globals */
 /**
- * Husrevity service worker — minimal, push-only.
+ * Husrevity service worker — push notifications + a thin PWA offline shell.
  *
- * The backend dispatcher (NotificationDispatcherService) sends a JSON payload
- * via web-push every time a notification's `scheduled_at` hits. We just show
- * it, and on click open the deep-link in an existing tab if one is open or
- * otherwise spawn a new window.
+ * Push: the backend dispatcher (NotificationDispatcherService) sends a JSON
+ * payload via web-push when a notification's `scheduled_at` hits; we show it and
+ * route clicks to the deep-link.
  *
- * Nothing here intercepts fetches or caches assets — Next.js already serves
- * the app shell, and we don't want SW caching to fight Next's revalidation.
+ * Offline: navigations are network-first and fall back to /offline.html when the
+ * network is unreachable. Build assets (/_next/static, /icons) are served
+ * stale-while-revalidate. We deliberately do NOT cache HTML or API responses —
+ * that would fight Next.js revalidation and serve stale app data.
  */
 
+const CACHE = "husrevity-v1";
+const OFFLINE_URL = "/offline.html";
+const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png"];
+
 self.addEventListener("install", (event) => {
-  // Activate immediately on first install so the user gets push without a
-  // hard reload after enabling notifications.
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(CACHE);
+      await cache.addAll(PRECACHE);
+      await self.skipWaiting();
+    })(),
+  );
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+      await self.clients.claim();
+    })(),
+  );
+});
+
+function isCacheableAsset(url) {
+  return (
+    url.origin === self.location.origin &&
+    (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/"))
+  );
+}
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+
+  // App navigations: network-first, fall back to the offline shell.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          return await fetch(request);
+        } catch {
+          const cache = await caches.open(CACHE);
+          return (await cache.match(OFFLINE_URL)) || Response.error();
+        }
+      })(),
+    );
+    return;
+  }
+
+  // Hashed build assets + icons: stale-while-revalidate.
+  if (isCacheableAsset(url)) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE);
+        const cached = await cache.match(request);
+        const network = fetch(request)
+          .then((response) => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          })
+          .catch(() => cached);
+        return cached || network;
+      })(),
+    );
+  }
+  // Everything else: passthrough (no SW interference).
 });
 
 self.addEventListener("push", (event) => {
@@ -32,8 +94,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Husrevity";
   const options = {
     body: payload.body || "",
-    icon: "/images/logo/logo-icon.svg",
-    badge: "/images/logo/logo-icon.svg",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
     tag: payload.id ? `husrevity-${payload.id}` : undefined,
     data: {
       deepLink: payload.deepLink || "/dashboard",

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Husrevity app mark — neon cyan "h" on a soft gray field.
+  Reference/source art for the favicon + PWA icon set.
+  The real PNGs are produced by gen-icons.mjs, which rebuilds the glow with
+  sharp (Gaussian blur on a rasterized copy) so it renders identically across
+  engines. This file is the human-editable master: tweak the geometry/colors
+  here, mirror them in gen-icons.mjs, then re-run the script.
+-->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#5b5f64"/>
+      <stop offset="100%" stop-color="#45484c"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="26" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+
+  <g fill="none" stroke="#2ad4ff" stroke-width="96"
+     stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <!-- left stem (full height) -->
+    <path d="M 360 300 L 360 724"/>
+    <!-- hump + right leg -->
+    <path d="M 360 470 Q 360 410 512 410 Q 664 410 664 470 L 664 724"/>
+  </g>
+</svg>
