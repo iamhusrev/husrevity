@@ -5,6 +5,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { Dropdown } from "@/components/dropdown/Dropdown";
 import {
   useReminderLists,
   useCreateReminderList,
@@ -57,6 +58,55 @@ function fromLocalInput(local: string): string {
   return new Date(local).toISOString();
 }
 
+// ─── Due-date presets (all at 09:00 local) ────────────────────────────────────
+
+type DuePreset = "today" | "tomorrow" | "thisWeek" | "thisMonth";
+
+const DUE_PRESETS: DuePreset[] = ["today", "tomorrow", "thisWeek", "thisMonth"];
+
+function presetDueAt(p: DuePreset): string {
+  const now = new Date();
+  let d: Date;
+  if (p === "today") {
+    d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if (p === "tomorrow") {
+    d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  } else if (p === "thisWeek") {
+    // end of week = this week's Sunday (Monday-started week)
+    const day = now.getDay(); // 0=Sun..6=Sat
+    const untilSunday = (7 - day) % 7; // 0 when today is Sunday
+    d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + untilSunday);
+  } else {
+    // last day of this month
+    d = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+  d.setHours(9, 0, 0, 0);
+  return d.toISOString();
+}
+
+// ─── Date-range filter helpers ────────────────────────────────────────────────
+
+function isSameDay(d: Date, ref: Date): boolean {
+  return (
+    d.getFullYear() === ref.getFullYear() &&
+    d.getMonth() === ref.getMonth() &&
+    d.getDate() === ref.getDate()
+  );
+}
+
+function isThisWeek(d: Date, now: Date): boolean {
+  // Monday-started week containing `now`
+  const day = now.getDay(); // 0=Sun..6=Sat
+  const sinceMonday = (day + 6) % 7; // 0 when Monday
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - sinceMonday);
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+  return d >= start && d < end;
+}
+
+function isThisMonth(d: Date, now: Date): boolean {
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
+
 type ReminderPatch = Partial<{
   dueAt: string | null;
   priority: ReminderPriority;
@@ -75,22 +125,40 @@ function toReminderRequest(r: ReminderResponse, patch: ReminderPatch) {
   };
 }
 
-type SmartGroup = "all" | "today" | "scheduled" | "flagged" | "completed";
+type SmartGroup =
+  | "all"
+  | "today"
+  | "tomorrow"
+  | "thisWeek"
+  | "thisMonth"
+  | "flagged"
+  | "scheduled";
+
+const SMART_GROUPS: SmartGroup[] = [
+  "all",
+  "today",
+  "tomorrow",
+  "thisWeek",
+  "thisMonth",
+  "flagged",
+  "scheduled",
+];
 
 function inSmartGroup(r: ReminderResponse, g: SmartGroup): boolean {
   if (g === "all") return true;
   if (g === "flagged") return r.flag;
-  if (g === "completed") return !!r.completedAt;
   if (g === "scheduled") return !!r.dueAt;
-  // today
   if (!r.dueAt) return false;
   const d = new Date(r.dueAt);
   const now = new Date();
-  return (
-    d.getFullYear() === now.getFullYear() &&
-    d.getMonth() === now.getMonth() &&
-    d.getDate() === now.getDate()
-  );
+  if (g === "today") return isSameDay(d, now);
+  if (g === "tomorrow") {
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    return isSameDay(d, tomorrow);
+  }
+  if (g === "thisWeek") return isThisWeek(d, now);
+  // thisMonth
+  return isThisMonth(d, now);
 }
 
 // ─── Drag types ───────────────────────────────────────────────────────────────
@@ -123,7 +191,7 @@ function ReminderRow({
   const toggleReminder = useToggleReminder();
   const updateReminder = useUpdateReminder();
   const deleteReminder = useDeleteReminder();
-  const [editingDue, setEditingDue] = useState(false);
+  const [dueOpen, setDueOpen] = useState(false);
 
   const commit = async (patch: ReminderPatch) => {
     try {
@@ -209,27 +277,15 @@ function ReminderRow({
         >
           {reminder.title}
         </span>
-        {editingDue ? (
-          <input
-            type="datetime-local"
-            autoFocus
-            defaultValue={toLocalInput(reminder.dueAt)}
-            onPointerDown={(e) => e.stopPropagation()}
-            onBlur={() => setEditingDue(false)}
-            onChange={(e) => {
-              if (e.target.value) commit({ dueAt: fromLocalInput(e.target.value) });
-              setEditingDue(false);
-            }}
-            className="mt-0.5 w-fit rounded border border-gray-200 bg-white px-1 py-0.5 text-xs outline-none focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
-          />
-        ) : (
+        <div className="relative w-fit">
           <button
             type="button"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              setEditingDue(true);
+              setDueOpen((v) => !v);
             }}
-            className="flex w-fit items-center gap-1 text-left text-xs text-gray-400 transition hover:text-brand-500"
+            className="dropdown-toggle flex w-fit items-center gap-1 text-left text-xs text-gray-400 transition hover:text-brand-500"
           >
             {reminder.dueAt ? (
               formatDateTime(reminder.dueAt, {
@@ -244,7 +300,57 @@ function ReminderRow({
               </>
             )}
           </button>
-        )}
+
+          <Dropdown
+            isOpen={dueOpen}
+            onClose={() => setDueOpen(false)}
+            className="left-0 right-auto w-56 p-3"
+          >
+            <div onPointerDown={(e) => e.stopPropagation()}>
+              <div className="flex flex-wrap gap-1.5">
+                {DUE_PRESETS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => {
+                      commit({ dueAt: presetDueAt(p) });
+                      setDueOpen(false);
+                    }}
+                    className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 transition hover:bg-brand-50 hover:text-brand-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
+                  >
+                    {t(`reminders.due.${p}`)}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="datetime-local"
+                value={toLocalInput(reminder.dueAt)}
+                onPointerDown={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    commit({ dueAt: fromLocalInput(e.target.value) });
+                    setDueOpen(false);
+                  }
+                }}
+                className="mt-3 w-full rounded border border-gray-200 bg-white px-2 py-1 text-xs outline-none focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
+              />
+
+              {reminder.dueAt && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    commit({ dueAt: null });
+                    setDueOpen(false);
+                  }}
+                  className="mt-2 w-full rounded px-2 py-1 text-left text-xs text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
+                >
+                  {t("reminders.due.clear")}
+                </button>
+              )}
+            </div>
+          </Dropdown>
+        </div>
         {reminder.notes && <span className="text-xs text-gray-400 truncate">{reminder.notes}</span>}
       </div>
 
@@ -300,9 +406,12 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
   const dragging = useRef(false);
   const [newTitle, setNewTitle] = useState("");
   const [group, setGroup] = useState<SmartGroup>("all");
+  const [showCompleted, setShowCompleted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const visible = ordered.filter((r) => inSmartGroup(r, group));
+  const visible = ordered
+    .filter((r) => inSmartGroup(r, group))
+    .filter((r) => showCompleted || !r.completedAt);
 
   useEffect(() => {
     if (!dragging.current) {
@@ -372,8 +481,8 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
         </button>
       </form>
 
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {(["all", "today", "scheduled", "flagged", "completed"] as SmartGroup[]).map((g) => (
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        {SMART_GROUPS.map((g) => (
           <button
             key={g}
             type="button"
@@ -387,6 +496,17 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
             {t(`reminders.group.${g}`)}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setShowCompleted((v) => !v)}
+          className={`ml-auto rounded-full px-3 py-1 text-xs font-medium transition ${
+            showCompleted
+              ? "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          }`}
+        >
+          {showCompleted ? t("reminders.hideCompleted") : t("reminders.showCompleted")}
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">

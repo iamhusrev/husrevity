@@ -18,10 +18,7 @@ async function seedAdmin(): Promise<void> {
 
   await dataSource.initialize();
   try {
-    const existing = await dataSource.query(
-      `SELECT id FROM app_user WHERE email = $1`,
-      [email],
-    );
+    const existing = await dataSource.query(`SELECT id FROM app_user WHERE email = $1`, [email]);
     const passwordHash = await bcrypt.hash(password, 10);
 
     if (existing.length > 0) {
