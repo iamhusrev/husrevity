@@ -7,6 +7,7 @@ import {
   AccountRequest,
   AssetRequest,
   CategoryRequest,
+  DebtPaymentRequest,
   DebtRequest,
   LoanRequest,
   TransactionRequest,
@@ -154,6 +155,14 @@ export function useSettleDebt() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => financeService.settleDebt(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function usePayDebt() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: DebtPaymentRequest }) =>
+      financeService.payDebt(id, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
   });
 }

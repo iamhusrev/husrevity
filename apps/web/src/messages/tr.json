@@ -344,11 +344,24 @@
       "reopen": "Tekrar aç",
       "settledOn": "Kapatıldı: {{date}}",
       "openStatus": "Açık borç",
-      "totalIOwe": "Toplam borcum",
-      "totalOwedToMe": "Toplam alacağım",
+      "totalIOwe": "Kalan borcum",
+      "totalOwedToMe": "Kalan alacağım",
       "settledTag": "Kapandı",
       "showSettled": "Kapanmış olanları göster",
-      "noDueDate": "Vade yok"
+      "noDueDate": "Vade yok",
+      "pay": {
+        "title": "Ödeme yap",
+        "collectTitle": "Tahsilat yap",
+        "remaining": "Kalan",
+        "paidSoFar": "Ödenen",
+        "submit": "Öde",
+        "invalidAmount": "Geçerli bir tutar gir.",
+        "exceeds": "Tutar kalan bakiyeyi aşıyor.",
+        "noAccount": "Bir hesap seç.",
+        "noAccountOption": "Hesap yok",
+        "expenseNote": "Bu ödeme seçili hesaptan gider olarak da kaydedilir.",
+        "incomeNote": "Bu tahsilat seçili hesaba gelir olarak da kaydedilir."
+      }
     },
     "placeholders": {
       "accountName": "Vakıfbank · Maaş",

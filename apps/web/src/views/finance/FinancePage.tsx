@@ -580,6 +580,7 @@ export default function FinancePage() {
       {debtModal.open && (
         <DebtModal
           initial={debtModal.initial}
+          accounts={accounts ?? []}
           onClose={() => setDebtModal({ open: false, initial: null })}
         />
       )}
