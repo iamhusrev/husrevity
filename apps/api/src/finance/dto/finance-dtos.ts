@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -24,9 +25,22 @@ import {
   FinanceDebt,
   FinanceDebtDirection,
 } from '../finance-debt.entity';
+import { FinanceAsset } from '../finance-asset.entity';
+import { FinanceLoan } from '../finance-loan.entity';
+import { FinanceInstallment } from '../finance-installment.entity';
 
 export const ACCOUNT_TYPES = ['bank', 'card', 'cash', 'savings'] as const;
 export type FinanceAccountType = (typeof ACCOUNT_TYPES)[number];
+
+export const ASSET_TYPES = [
+  'cash',
+  'property',
+  'vehicle',
+  'gold',
+  'investment',
+  'other',
+] as const;
+export type FinanceAssetType = (typeof ASSET_TYPES)[number];
 
 export const CATEGORY_KINDS: FinanceCategoryKind[] = ['income', 'expense'];
 export const TX_KINDS: FinanceTransactionKind[] = [
@@ -166,8 +180,8 @@ export class TransactionListQueryDto {
   @IsOptional() accountId?: string;
   @IsOptional() categoryId?: string;
   @IsOptional() @IsIn(TX_KINDS) kind?: FinanceTransactionKind;
-  @IsOptional() @IsInt() @Min(1) limit?: number;
-  @IsOptional() @IsInt() @Min(0) offset?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) limit?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) offset?: number;
 }
 
 // ─── Debt ──────────────────────────────────────────────────────────────────
@@ -213,6 +227,140 @@ export class DebtResponseDto {
   }
 }
 
+// ─── Asset ───────────────────────────────────────────────────────────────────
+
+export class AssetRequestDto {
+  @IsNotEmpty() @MaxLength(120) name!: string;
+  @IsOptional() @IsIn([...ASSET_TYPES]) type?: FinanceAssetType;
+  @IsNumber() @Min(0) value!: number;
+  @IsOptional() @Length(3, 3) currency?: string;
+  @IsOptional() @IsDateString() acquiredAt?: string | null;
+  @IsOptional() @MaxLength(24) colorToken?: string | null;
+  @IsOptional() @MaxLength(32) icon?: string | null;
+  @IsOptional() @MaxLength(2000) notes?: string | null;
+}
+
+export class AssetResponseDto {
+  id!: string;
+  name!: string;
+  type!: string;
+  value!: number;
+  currency!: string;
+  acquiredAt!: string | null;
+  colorToken!: string | null;
+  icon!: string | null;
+  notes!: string | null;
+  position!: number;
+  createdAt!: string;
+
+  static from(a: FinanceAsset): AssetResponseDto {
+    return {
+      id: a.id,
+      name: a.name,
+      type: a.type,
+      value: Number(a.value),
+      currency: a.currency,
+      acquiredAt: a.acquiredAt ? a.acquiredAt.toISOString() : null,
+      colorToken: a.colorToken,
+      icon: a.icon,
+      notes: a.notes,
+      position: a.position,
+      createdAt: a.createdAt.toISOString(),
+    };
+  }
+}
+
+// ─── Loan / installments ─────────────────────────────────────────────────────
+
+export class LoanRequestDto {
+  @IsNotEmpty() @MaxLength(160) name!: string;
+  @IsOptional() @MaxLength(160) lender?: string | null;
+  @IsNumber() @Min(0.01) principalAmount!: number;
+  @IsInt() @Min(1) installmentCount!: number;
+  @IsNumber() @Min(0.01) installmentAmount!: number;
+  @IsOptional() @IsNumber() @Min(0) interestRate?: number | null;
+  @IsOptional() @IsBoolean() interestFree?: boolean;
+  @IsDateString() startDate!: string;
+  @IsOptional() @IsInt() notifyMinutesBefore?: number | null;
+  @IsOptional() @Length(3, 3) currency?: string;
+  @IsOptional() @MaxLength(2000) notes?: string | null;
+}
+
+export class InstallmentResponseDto {
+  id!: string;
+  sequence!: number;
+  amount!: number;
+  dueAt!: string;
+  paidAt!: string | null;
+
+  static from(i: FinanceInstallment): InstallmentResponseDto {
+    return {
+      id: i.id,
+      sequence: i.sequence,
+      amount: Number(i.amount),
+      dueAt: i.dueAt.toISOString(),
+      paidAt: i.paidAt ? i.paidAt.toISOString() : null,
+    };
+  }
+}
+
+export class LoanResponseDto {
+  id!: string;
+  name!: string;
+  lender!: string | null;
+  principalAmount!: number;
+  installmentCount!: number;
+  installmentAmount!: number;
+  interestRate!: number | null;
+  interestFree!: boolean;
+  startDate!: string;
+  notifyMinutesBefore!: number | null;
+  currency!: string;
+  notes!: string | null;
+  settledAt!: string | null;
+  // Derived from the installment rows:
+  paidCount!: number;
+  remainingCount!: number;
+  paidAmount!: number;
+  remainingAmount!: number;
+  nextDueAt!: string | null;
+  installments!: InstallmentResponseDto[];
+  createdAt!: string;
+
+  static from(
+    l: FinanceLoan,
+    installments: FinanceInstallment[],
+  ): LoanResponseDto {
+    const sorted = [...installments].sort((a, b) => a.sequence - b.sequence);
+    const paid = sorted.filter((i) => i.paidAt !== null);
+    const paidAmount = paid.reduce((sum, i) => sum + Number(i.amount), 0);
+    const totalAmount = sorted.reduce((sum, i) => sum + Number(i.amount), 0);
+    const nextDue = sorted.find((i) => i.paidAt === null) ?? null;
+    return {
+      id: l.id,
+      name: l.name,
+      lender: l.lender,
+      principalAmount: Number(l.principalAmount),
+      installmentCount: l.installmentCount,
+      installmentAmount: Number(l.installmentAmount),
+      interestRate: l.interestRate !== null ? Number(l.interestRate) : null,
+      interestFree: l.interestFree,
+      startDate: l.startDate.toISOString(),
+      notifyMinutesBefore: l.notifyMinutesBefore,
+      currency: l.currency,
+      notes: l.notes,
+      settledAt: l.settledAt ? l.settledAt.toISOString() : null,
+      paidCount: paid.length,
+      remainingCount: sorted.length - paid.length,
+      paidAmount: Number(paidAmount.toFixed(2)),
+      remainingAmount: Number((totalAmount - paidAmount).toFixed(2)),
+      nextDueAt: nextDue ? nextDue.dueAt.toISOString() : null,
+      installments: sorted.map(InstallmentResponseDto.from),
+      createdAt: l.createdAt.toISOString(),
+    };
+  }
+}
+
 // ─── Summary ───────────────────────────────────────────────────────────────
 
 export class SummaryQueryDto {
@@ -227,6 +375,19 @@ export class CategoryBreakdownEntryDto {
   total!: number;
 }
 
+export class AssetBreakdownEntryDto {
+  type!: string;
+  total!: number;
+}
+
+export class UpcomingInstallmentDto {
+  loanId!: string;
+  loanName!: string;
+  installmentId!: string;
+  amount!: number;
+  dueAt!: string;
+}
+
 export class SummaryResponseDto {
   from!: string;
   to!: string;
@@ -236,4 +397,10 @@ export class SummaryResponseDto {
   byCategory!: CategoryBreakdownEntryDto[];
   accountBalances!: { accountId: string; name: string; balance: number; currency: string }[];
   upcomingDebts!: DebtResponseDto[];
+  // Net-worth panel:
+  totalAssets!: number;
+  totalLiabilities!: number;
+  netWorth!: number;
+  assetsByType!: AssetBreakdownEntryDto[];
+  upcomingInstallments!: UpcomingInstallmentDto[];
 }

@@ -37,12 +37,14 @@ function TaskRow({
   onMove,
   onDrop,
   onDelete,
+  onSelect,
 }: {
   task: TaskResponse;
   index: number;
   onMove: (drag: number, hover: number) => void;
   onDrop: () => void;
   onDelete: (id: number) => void;
+  onSelect: (task: TaskResponse) => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -68,10 +70,14 @@ function TaskRow({
   return (
     <div
       ref={ref}
+      onClick={() => onSelect(task)}
       style={{ opacity: isDragging ? 0.4 : 1 }}
-      className="group flex items-center gap-3 rounded-xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm px-3 py-2 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-white/[0.06]"
+      className="group flex cursor-pointer items-center gap-3 rounded-xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm px-3 py-2 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-white/[0.06]"
     >
-      <span className="cursor-grab text-gray-300 active:cursor-grabbing">
+      <span
+        onClick={(e) => e.stopPropagation()}
+        className="cursor-grab text-gray-300 active:cursor-grabbing"
+      >
         <BiMenu size={14} />
       </span>
       <span className="flex-1 text-sm font-medium text-gray-800 dark:text-white/90 truncate">
@@ -88,7 +94,10 @@ function TaskRow({
         {t(`kanban.priority.${task.priority}`)}
       </span>
       <button
-        onClick={() => onDelete(task.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(task.id);
+        }}
         className="rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
         aria-label={t("common.delete")}
       >
@@ -98,7 +107,15 @@ function TaskRow({
   );
 }
 
-export default function TaskList({ code, tasks }: { code: string; tasks: TaskResponse[] }) {
+export default function TaskList({
+  code,
+  tasks,
+  onSelect,
+}: {
+  code: string;
+  tasks: TaskResponse[];
+  onSelect: (task: TaskResponse) => void;
+}) {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
   const reorderTasks = useReorderTasks();
@@ -170,6 +187,7 @@ export default function TaskList({ code, tasks }: { code: string; tasks: TaskRes
           onMove={onMove}
           onDrop={onDrop}
           onDelete={handleDelete}
+          onSelect={onSelect}
         />
       ))}
     </div>

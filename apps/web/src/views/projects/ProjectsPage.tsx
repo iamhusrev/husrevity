@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
-import DetailModal from "@/components/modal/DetailModal";
-import ProjectDetailPage from "@/views/projects/ProjectDetailPage";
 import { useCreateProject, useDeleteProject, useProjects } from "@/hooks/useProjects";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
@@ -125,8 +123,6 @@ export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
   const remove = useDeleteProject();
   const [showModal, setShowModal] = useState(false);
-  const [openCode, setOpenCode] = useState<string | null>(null);
-  const openProject = projects.find((p) => p.code === openCode);
 
   const handleDelete = async (code: string) => {
     try {
@@ -197,7 +193,7 @@ export default function ProjectsPage() {
 
               <button
                 type="button"
-                onClick={() => setOpenCode(p.code)}
+                onClick={() => router.push(`/projects/${p.code}`)}
                 className="block w-full p-5 pl-6 text-left"
               >
                 <div className="flex items-center gap-2">
@@ -241,18 +237,6 @@ export default function ProjectsPage() {
       )}
 
       {showModal && <NewProjectModal onClose={() => setShowModal(false)} />}
-
-      <DetailModal
-        isOpen={openCode !== null}
-        onClose={() => setOpenCode(null)}
-        onExpand={openCode !== null ? () => router.push(`/projects/${openCode}`) : undefined}
-        title={openProject?.name}
-        className="mx-4 my-6 max-h-[90vh] w-full max-w-5xl overflow-y-auto p-6"
-      >
-        {openCode !== null && (
-          <ProjectDetailPage code={openCode} embedded onClose={() => setOpenCode(null)} />
-        )}
-      </DetailModal>
     </div>
   );
 }

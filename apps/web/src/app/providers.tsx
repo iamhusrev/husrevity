@@ -29,6 +29,23 @@ function ClientBootstrap() {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
+
+    // In development we must NOT keep a service worker around: it caches
+    // hashed `/_next/static/` chunks (stale-while-revalidate), and a chunk
+    // built against a different NEXT_PUBLIC_API_URL would keep calling that
+    // old API. Proactively unregister any leftover worker and drop its caches
+    // so dev always talks to the local API from `.env.local`.
+    if (process.env.NODE_ENV !== "production") {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((regs) => regs.forEach((r) => r.unregister()))
+        .catch(() => {});
+      if (typeof caches !== "undefined") {
+        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+      }
+      return;
+    }
+
     // Idempotent: push-service.ts may register the same worker when the user
     // enables notifications. Registering on load makes the app installable and
     // offline-capable even without push.

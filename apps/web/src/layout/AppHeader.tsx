@@ -168,10 +168,6 @@ const AppHeader: React.FC = () => {
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-husrev-ember ring-1 ring-husrev-sand backdrop-blur transition hover:bg-husrev-amber/15 hover:ring-husrev-amber/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-white/5 dark:text-husrev-amber dark:ring-white/10 dark:hover:bg-white/10 lg:h-11 lg:w-11"
             >
               <HiSparkles className="h-5 w-5" />
-              <span
-                aria-hidden="true"
-                className="absolute -bottom-0.5 left-1/2 h-px w-5 -translate-x-1/2 bg-husrev-amber/70"
-              />
             </button>
             <LanguageDropdown />
             <ThemeToggleButton />
