@@ -31,6 +31,7 @@ import {
   CategoryBreakdownEntryDto,
   CategoryRequestDto,
   CategoryResponseDto,
+  DebtPaymentRequestDto,
   DebtRequestDto,
   DebtResponseDto,
   LoanRequestDto,
@@ -363,6 +364,7 @@ export class FinanceService {
       direction: req.direction,
       counterparty: req.counterparty,
       principalAmount: req.principalAmount,
+      paidAmount: 0,
       currency: req.currency ?? 'TRY',
       interestRate: req.interestRate ?? null,
       dueAt: req.dueAt ? new Date(req.dueAt) : null,
@@ -400,6 +402,82 @@ export class FinanceService {
     const d = await this.requireDebt(ownerId, id);
     d.settledAt = d.settledAt ? null : new Date();
     const saved = await this.debts.save(d);
+    await this.syncDebtNotification(saved);
+    return DebtResponseDto.from(saved);
+  }
+
+  /**
+   * Records a payment against a debt: charges the chosen account with a matching
+   * transaction (expense when I owe, income when collecting a receivable),
+   * accrues `paidAmount`, and auto-settles once fully paid. Atomic so the ledger
+   * entry and the debt update never diverge.
+   */
+  async payDebt(
+    ownerId: string,
+    id: string,
+    req: DebtPaymentRequestDto,
+  ): Promise<DebtResponseDto> {
+    const debt = await this.requireDebt(ownerId, id);
+    const account = await this.requireAccount(ownerId, req.accountId);
+
+    const principal = Number(debt.principalAmount);
+    const alreadyPaid = Number(debt.paidAmount ?? 0);
+    const remaining = Number((principal - alreadyPaid).toFixed(2));
+    if (remaining <= 0) {
+      throw ApiException.badRequest('Debt is already fully paid');
+    }
+    if (req.amount > remaining + 0.001) {
+      throw ApiException.badRequest(
+        `Payment exceeds the remaining balance (${remaining} ${debt.currency})`,
+      );
+    }
+
+    // A repayment of money I owe is cash leaving (expense); collecting a
+    // receivable is cash arriving (income).
+    const kind: 'income' | 'expense' =
+      debt.direction === 'i_owe' ? 'expense' : 'income';
+
+    if (req.categoryId) {
+      const cat = await this.requireCategory(ownerId, req.categoryId);
+      if (cat.kind !== kind) {
+        throw ApiException.badRequest(
+          `Category kind (${cat.kind}) does not match payment kind (${kind})`,
+        );
+      }
+    }
+
+    const occurredAt = req.occurredAt ? new Date(req.occurredAt) : new Date();
+    const label =
+      debt.direction === 'i_owe'
+        ? `Borç ödemesi: ${debt.counterparty}`
+        : `Tahsilat: ${debt.counterparty}`;
+
+    const saved = await this.dataSource.transaction(async (em) => {
+      const txRepo = em.getRepository(FinanceTransaction);
+      const debtRepo = em.getRepository(FinanceDebt);
+
+      await txRepo.save(
+        txRepo.create({
+          ownerId,
+          accountId: account.id,
+          categoryId: req.categoryId ?? null,
+          kind,
+          amount: req.amount,
+          currency: account.currency,
+          occurredAt,
+          description: req.description?.trim() || label,
+          transferPairId: null,
+        }),
+      );
+
+      debt.paidAmount = Number((alreadyPaid + req.amount).toFixed(2));
+      debt.settledAt =
+        debt.paidAmount >= principal - 0.001
+          ? (debt.settledAt ?? new Date())
+          : null;
+      return debtRepo.save(debt);
+    });
+
     await this.syncDebtNotification(saved);
     return DebtResponseDto.from(saved);
   }

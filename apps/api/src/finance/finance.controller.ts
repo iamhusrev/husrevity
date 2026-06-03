@@ -20,6 +20,7 @@ import {
   AssetResponseDto,
   CategoryRequestDto,
   CategoryResponseDto,
+  DebtPaymentRequestDto,
   DebtRequestDto,
   DebtResponseDto,
   LoanRequestDto,
@@ -194,6 +195,15 @@ export class FinanceController {
     @Param('id') id: string,
   ): Promise<DebtResponseDto> {
     return this.finance.settleDebt(u.userId, id);
+  }
+
+  @Post('debts/:id/pay')
+  payDebt(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: DebtPaymentRequestDto,
+  ): Promise<DebtResponseDto> {
+    return this.finance.payDebt(u.userId, id, body);
   }
 
   @Delete('debts/:id')
