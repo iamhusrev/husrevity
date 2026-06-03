@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { BiRefresh, BiTrash } from "react-icons/bi";
 import FullCalendar from "@fullcalendar/react";
@@ -13,6 +13,7 @@ import trLocale from "@fullcalendar/core/locales/tr";
 import enGbLocale from "@fullcalendar/core/locales/en-gb";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 // Stable references — recreating these arrays on every render makes
 // FullCalendar see new prop identities, fire `datesSet` after each
@@ -45,22 +46,9 @@ interface EditingEvent {
   colorHex?: string | null;
 }
 
-function toLocalInput(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours(),
-  )}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalInput(local: string): string {
-  return new Date(local).toISOString();
-}
-
 // Backend requires endAt. When the user leaves it blank, default to start + 1h.
-function defaultEndIso(startLocal: string): string {
-  return new Date(new Date(startLocal).getTime() + 60 * 60 * 1000).toISOString();
+function defaultEndIso(startIso: string): string {
+  return new Date(new Date(startIso).getTime() + 60 * 60 * 1000).toISOString();
 }
 
 function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () => void }) {
@@ -72,8 +60,8 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
 
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description ?? "");
-  const [start, setStart] = useState(toLocalInput(initial.startAt));
-  const [end, setEnd] = useState(toLocalInput(initial.endAt));
+  const [start, setStart] = useState<string | null>(initial.startAt ?? null);
+  const [end, setEnd] = useState<string | null>(initial.endAt ?? null);
   const [allDay, setAllDay] = useState(initial.allDay);
   const [location, setLocation] = useState(initial.location ?? "");
   const [colorHex, setColorHex] = useState(initial.colorHex ?? "#007AFF");
@@ -86,8 +74,8 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
     const body = {
       title: title.trim(),
       description: description || null,
-      startAt: fromLocalInput(start),
-      endAt: end ? fromLocalInput(end) : defaultEndIso(start),
+      startAt: start,
+      endAt: end ?? defaultEndIso(start),
       allDay,
       location: location || null,
       colorHex,
@@ -131,7 +119,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
@@ -179,23 +167,12 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
             />
           </CalField>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <CalField label={t("calendar.field.start")}>
-              <input
-                type="datetime-local"
-                required
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-                className="husrev-input"
-              />
+              <DateTimePicker value={start} onChange={setStart} clearable={false} />
             </CalField>
             <CalField label={t("calendar.field.end")}>
-              <input
-                type="datetime-local"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                className="husrev-input"
-              />
+              <DateTimePicker value={end} onChange={setEnd} />
             </CalField>
           </div>
 
@@ -289,6 +266,24 @@ export default function CalendarPage() {
   const [range, setRange] = useState<{ from?: string; to?: string }>({});
   const [editing, setEditing] = useState<EditingEvent | null>(null);
   const calendarRef = useRef<FullCalendar | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Below md the month grid is unusable (it needs ~718px); fall back to the
+  // agenda list view and a compact toolbar on small screens.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    calendarRef.current
+      ?.getApi()
+      .changeView(isMobile ? "listWeek" : "dayGridMonth");
+  }, [isMobile]);
 
   const qc = useQueryClient();
   const { data: events = [], isFetching } = useCalendarEvents(range);
@@ -400,12 +395,20 @@ export default function CalendarPage() {
         <FullCalendar
           ref={calendarRef}
           plugins={FC_PLUGINS}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-          }}
+          initialView={isMobile ? "listWeek" : "dayGridMonth"}
+          headerToolbar={
+            isMobile
+              ? {
+                  left: "prev,next",
+                  center: "title",
+                  right: "listWeek,dayGridMonth",
+                }
+              : {
+                  left: "prev,next today",
+                  center: "title",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                }
+          }
           locales={FC_LOCALES}
           locale={(i18n.language ?? "en").split("-")[0] === "tr" ? "tr" : "en-gb"}
           firstDay={1}

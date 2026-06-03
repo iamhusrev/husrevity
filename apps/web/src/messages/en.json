@@ -21,6 +21,9 @@
     "noAccess": "You do not have access to this page.",
     "required": "This field is required.",
     "save": "Save",
+    "today": "Today",
+    "clear": "Clear",
+    "done": "Done",
     "create": "Create",
     "creating": "Creating…",
     "saving": "Saving…",
@@ -35,6 +38,15 @@
     "deleted": "Deleted",
     "saved": "Saved",
     "open": "Open"
+  },
+  "datepicker": {
+    "label": "Pick a date",
+    "placeholder": "Pick a date",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minute"
   },
   "auth": {
     "backToHome": "Back to Home",
@@ -361,6 +373,10 @@
         "noAccountOption": "No account",
         "expenseNote": "This payment is also recorded as an expense from the selected account.",
         "incomeNote": "This collection is also recorded as income to the selected account."
+      },
+      "payments": {
+        "title": "Payments",
+        "empty": "No payments yet."
       }
     },
     "placeholders": {

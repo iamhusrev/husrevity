@@ -9,10 +9,7 @@ import { LoanRequest, LoanResponse, formatTRY } from "@/types/finance/finance";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
-
-function toDateInput(iso?: string | null): string {
-  return iso ? iso.slice(0, 10) : new Date().toISOString().slice(0, 10);
-}
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 const NOTIFY_OPTIONS: [string, string][] = [
   ["", "Kapalı"],
@@ -54,7 +51,9 @@ export function LoanModal({
       ? String(initial.interestRate)
       : "",
   );
-  const [startDate, setStartDate] = useState(toDateInput(initial?.startDate));
+  const [startDate, setStartDate] = useState<string>(
+    initial?.startDate ?? new Date().toISOString(),
+  );
   const [notify, setNotify] = useState<string>(
     initial?.notifyMinutesBefore != null ? String(initial.notifyMinutesBefore) : "",
   );
@@ -87,7 +86,7 @@ export function LoanModal({
       installmentAmount: inst,
       interestFree,
       interestRate: interestFree ? 0 : interestRate ? Number(interestRate) : null,
-      startDate: new Date(startDate).toISOString(),
+      startDate: startDate,
       notifyMinutesBefore: notify === "" ? null : Number(notify),
       notes: notes.trim() || null,
     };
@@ -124,7 +123,7 @@ export function LoanModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="mb-5 flex items-start justify-between">
           <div className="space-y-1">
@@ -269,13 +268,12 @@ export function LoanModal({
           )}
 
           <Field label={t("finance.loan.startDate", "İlk taksit tarihi")}>
-            <input
-              type="date"
-              required
-              disabled={locked}
+            <DateTimePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="husrev-input disabled:opacity-60"
+              onChange={(iso) => iso && setStartDate(iso)}
+              mode="date"
+              disabled={locked}
+              clearable={false}
             />
           </Field>
 

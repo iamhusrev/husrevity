@@ -131,6 +131,12 @@ export const financeService = {
     const r = await apiClient.post(FINANCE_ENDPOINTS.DEBT_PAY(id), body);
     return r.data;
   },
+  async listDebtPayments(
+    id: string,
+  ): Promise<ApiResponse<TransactionResponse[]>> {
+    const r = await apiClient.get(FINANCE_ENDPOINTS.DEBT_PAYMENTS(id));
+    return r.data;
+  },
   async deleteDebt(id: string): Promise<ApiResponse<void>> {
     const r = await apiClient.delete(FINANCE_ENDPOINTS.DEBT_BY_ID(id));
     return r.data;

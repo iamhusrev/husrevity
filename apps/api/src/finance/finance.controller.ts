@@ -206,6 +206,14 @@ export class FinanceController {
     return this.finance.payDebt(u.userId, id, body);
   }
 
+  @Get('debts/:id/payments')
+  listDebtPayments(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<TransactionResponseDto[]> {
+    return this.finance.listDebtPayments(u.userId, id);
+  }
+
   @Delete('debts/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteDebt(

@@ -43,7 +43,7 @@ export function LoanDetailModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3">

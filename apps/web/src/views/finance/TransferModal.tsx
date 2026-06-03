@@ -6,11 +6,7 @@ import { useCreateTransfer } from "@/hooks/useFinance";
 import { AccountResponse, TransferRequest } from "@/types/finance/finance";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-
-function toLocalInput(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 export function TransferModal({
   accounts,
@@ -26,7 +22,7 @@ export function TransferModal({
   const [fromId, setFromId] = useState(eligible[0]?.id ?? "");
   const [toId, setToId] = useState(eligible[1]?.id ?? "");
   const [amount, setAmount] = useState("");
-  const [occurredAt, setOccurredAt] = useState(toLocalInput(new Date()));
+  const [occurredAt, setOccurredAt] = useState(new Date().toISOString());
   const [description, setDescription] = useState("");
 
   const submit = async (e: React.FormEvent) => {
@@ -46,7 +42,7 @@ export function TransferModal({
       fromAccountId: fromId,
       toAccountId: toId,
       amount: amt,
-      occurredAt: new Date(occurredAt).toISOString(),
+      occurredAt: occurredAt,
       description: description.trim() || null,
     };
     try {
@@ -63,7 +59,7 @@ export function TransferModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="space-y-1 mb-5">
           <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
@@ -107,12 +103,10 @@ export function TransferModal({
           </Field>
 
           <Field label={t("finance.field.occurredAt", "Tarih")}>
-            <input
-              type="datetime-local"
-              required
+            <DateTimePicker
               value={occurredAt}
-              onChange={(e) => setOccurredAt(e.target.value)}
-              className="husrev-input"
+              onChange={(iso) => iso && setOccurredAt(iso)}
+              clearable={false}
             />
           </Field>
 

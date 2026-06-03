@@ -186,7 +186,7 @@ export default function DashboardPage() {
         flourish={t("dashboard.flourish")}
       />
 
-      <div className="relative overflow-hidden rounded-3xl ring-1 ring-husrev-sand/90 bg-gradient-to-br from-white via-husrev-cream/60 to-husrev-sand/40 p-7 md:p-9 grain dark:from-husrev-shadow dark:via-husrev-ink dark:to-husrev-shadow dark:ring-white/[0.06] husrev-settle">
+      <div className="relative overflow-hidden rounded-3xl ring-1 ring-husrev-sand/90 bg-gradient-to-br from-white via-husrev-cream/60 to-husrev-sand/40 p-5 sm:p-7 md:p-9 grain dark:from-husrev-shadow dark:via-husrev-ink dark:to-husrev-shadow dark:ring-white/[0.06] husrev-settle">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-husrev-amber/10 blur-3xl dark:bg-husrev-amber/15" />
         <div className="pointer-events-none absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-husrev-moss/10 blur-3xl dark:bg-husrev-moss/15" />
 
@@ -195,7 +195,7 @@ export default function DashboardPage() {
             <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
               {dayLabel}
             </span>
-            <h2 className="text-[34px] md:text-[44px] leading-[1.05] tracking-tight font-semibold text-husrev-ink dark:text-husrev-cream">
+            <h2 className="text-[26px] xsm:text-[32px] md:text-[44px] leading-[1.05] tracking-tight font-semibold text-husrev-ink dark:text-husrev-cream">
               <span className="font-instrument-serif italic font-normal word-underline">
                 {t(greetingKey)}
               </span>
@@ -234,7 +234,7 @@ export default function DashboardPage() {
       <TodaySuggestionsCard />
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6 husrev-stagger">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6 husrev-stagger">
         <StatCard
           icon={<BiNote size={22} />}
           label={t("dashboard.stat.notes")}

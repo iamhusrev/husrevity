@@ -13,6 +13,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 export const ASSET_TYPE_LABELS_TR: Record<string, string> = {
   cash: "Nakit",
@@ -22,10 +23,6 @@ export const ASSET_TYPE_LABELS_TR: Record<string, string> = {
   investment: "Yatırım",
   other: "Diğer",
 };
-
-function toDateInput(iso?: string | null): string {
-  return iso ? iso.slice(0, 10) : "";
-}
 
 export function AssetModal({
   initial,
@@ -45,7 +42,9 @@ export function AssetModal({
     (initial?.type as FinanceAssetType) ?? "cash",
   );
   const [value, setValue] = useState(initial ? String(initial.value) : "");
-  const [acquiredAt, setAcquiredAt] = useState(toDateInput(initial?.acquiredAt));
+  const [acquiredAt, setAcquiredAt] = useState<string | null>(
+    initial?.acquiredAt ?? null,
+  );
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -57,7 +56,7 @@ export function AssetModal({
       name: name.trim(),
       type,
       value: val,
-      acquiredAt: acquiredAt ? new Date(acquiredAt).toISOString() : null,
+      acquiredAt: acquiredAt,
       notes: notes.trim() || null,
     };
     try {
@@ -92,7 +91,7 @@ export function AssetModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="mb-5 flex items-start justify-between">
           <div className="space-y-1">
@@ -159,12 +158,7 @@ export function AssetModal({
           </div>
 
           <Field label={t("finance.asset.acquiredAt", "Edinim tarihi")}>
-            <input
-              type="date"
-              value={acquiredAt}
-              onChange={(e) => setAcquiredAt(e.target.value)}
-              className="husrev-input"
-            />
+            <DateTimePicker value={acquiredAt} onChange={setAcquiredAt} mode="date" />
           </Field>
 
           <Field label={t("finance.field.notes", "Not")}>

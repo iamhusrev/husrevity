@@ -53,7 +53,7 @@ const AppHeader: React.FC = () => {
       <div className="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-husrev-sand dark:border-white/5 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 xl:py-4">
           <button
-            className={`flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-300 rounded-lg ring-1 ring-husrev-sand dark:ring-white/[0.06] hover:bg-husrev-sand/40 dark:hover:bg-white/5 z-99999 lg:h-11 lg:w-11 ${
+            className={`flex items-center justify-center w-11 h-11 text-gray-600 dark:text-gray-300 rounded-lg ring-1 ring-husrev-sand dark:ring-white/[0.06] hover:bg-husrev-sand/40 dark:hover:bg-white/5 z-99999 ${
               isMobileOpen ? "bg-husrev-sand/60 dark:bg-white/10" : ""
             }`}
             onClick={handleToggle}
@@ -101,7 +101,7 @@ const AppHeader: React.FC = () => {
 
           <button
             onClick={toggleApplicationMenu}
-            className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden"
+            className="flex items-center justify-center w-11 h-11 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden"
           >
             <svg
               width="24"
@@ -165,7 +165,7 @@ const AppHeader: React.FC = () => {
               onClick={() => setShowSuggestions(true)}
               aria-label={t("sidebarPanel.ctaTitle", "Bugün ne yapsam?")}
               title={t("sidebarPanel.ctaTitle", "Bugün ne yapsam?")}
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-husrev-ember ring-1 ring-husrev-sand backdrop-blur transition hover:bg-husrev-amber/15 hover:ring-husrev-amber/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-white/5 dark:text-husrev-amber dark:ring-white/10 dark:hover:bg-white/10 lg:h-11 lg:w-11"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-husrev-ember ring-1 ring-husrev-sand backdrop-blur transition hover:bg-husrev-amber/15 hover:ring-husrev-amber/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-white/5 dark:text-husrev-amber dark:ring-white/10 dark:hover:bg-white/10"
             >
               <HiSparkles className="h-5 w-5" />
             </button>

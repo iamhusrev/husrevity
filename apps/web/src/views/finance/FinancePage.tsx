@@ -151,14 +151,17 @@ export default function FinancePage() {
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav role="tablist" className="flex flex-wrap gap-1">
+        <nav
+          role="tablist"
+          className="-mx-1 flex max-w-full gap-1 overflow-x-auto px-1 no-scrollbar lg:flex-wrap"
+        >
           {tabs.map((tb) => (
             <button
               key={tb.id}
               role="tab"
               aria-selected={tab === tb.id}
               onClick={() => setTab(tb.id)}
-              className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
                 tab === tb.id
                   ? "bg-husrev-ember text-husrev-cream"
                   : "text-gray-600 hover:bg-husrev-sand/40 dark:text-gray-300 dark:hover:bg-white/[0.04]"

@@ -21,6 +21,9 @@
     "noAccess": "Bu sayfaya erişim izniniz yok.",
     "required": "Bu alan zorunludur.",
     "save": "Kaydet",
+    "today": "Bugün",
+    "clear": "Temizle",
+    "done": "Tamam",
     "create": "Oluştur",
     "creating": "Oluşturuluyor…",
     "saving": "Kaydediliyor…",
@@ -35,6 +38,15 @@
     "deleted": "Silindi",
     "saved": "Kaydedildi",
     "open": "Aç"
+  },
+  "datepicker": {
+    "label": "Tarih seç",
+    "placeholder": "Tarih seç",
+    "prevMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "time": "Saat",
+    "hour": "Saat",
+    "minute": "Dakika"
   },
   "auth": {
     "backToHome": "Ana Sayfaya Dön",
@@ -361,6 +373,10 @@
         "noAccountOption": "Hesap yok",
         "expenseNote": "Bu ödeme seçili hesaptan gider olarak da kaydedilir.",
         "incomeNote": "Bu tahsilat seçili hesaba gelir olarak da kaydedilir."
+      },
+      "payments": {
+        "title": "Ödemeler",
+        "empty": "Henüz ödeme yapılmadı."
       }
     },
     "placeholders": {

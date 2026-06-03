@@ -166,6 +166,14 @@ export function usePayDebt() {
     onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
   });
 }
+export function useDebtPayments(debtId: string | null) {
+  return useQuery({
+    queryKey: ["finance", "debt-payments", debtId] as const,
+    queryFn: () => financeService.listDebtPayments(debtId as string),
+    select: (d) => d.data,
+    enabled: !!debtId,
+  });
+}
 export function useDeleteDebt() {
   const qc = useQueryClient();
   return useMutation({

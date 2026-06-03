@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { BiTrash } from "react-icons/bi";
 import {
   useCreateDebt,
+  useDebtPayments,
   useDeleteDebt,
   usePayDebt,
   useSettleDebt,
@@ -20,13 +21,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
-
-function toLocalInput(iso?: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 const NOTIFY_OPTIONS: [string, string][] = [
   ["", "Kapalı"],
@@ -65,7 +60,7 @@ export function DebtModal({
   const [amount, setAmount] = useState(
     initial ? String(initial.principalAmount) : "",
   );
-  const [dueAt, setDueAt] = useState(toLocalInput(initial?.dueAt));
+  const [dueAt, setDueAt] = useState<string | null>(initial?.dueAt ?? null);
   const [interestRate, setInterestRate] = useState(
     initial?.interestRate != null ? String(initial.interestRate) : "",
   );
@@ -84,7 +79,7 @@ export function DebtModal({
       counterparty: counterparty.trim(),
       principalAmount: amt,
       interestRate: interestRate ? Number(interestRate) : null,
-      dueAt: dueAt ? new Date(dueAt).toISOString() : null,
+      dueAt: dueAt,
       notifyMinutesBefore:
         notifyMinutesBefore === "" ? null : Number(notifyMinutesBefore),
       notes: notes.trim() || null,
@@ -184,12 +179,18 @@ export function DebtModal({
       ? Math.min((initial.paidAmount / initial.principalAmount) * 100, 100)
       : 0;
 
+  const { data: payments, isLoading: paymentsLoading } = useDebtPayments(
+    initial?.id ?? null,
+  );
+  const accountName = (id: string) =>
+    accounts.find((a) => a.id === id)?.name ?? "—";
+
   return (
     <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4" onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between mb-5">
           <div className="space-y-1">
@@ -276,12 +277,7 @@ export function DebtModal({
           </div>
 
           <Field label={t("finance.debt.dueAt", "Vade tarihi")}>
-            <input
-              type="datetime-local"
-              value={dueAt}
-              onChange={(e) => setDueAt(e.target.value)}
-              className="husrev-input"
-            />
+            <DateTimePicker value={dueAt} onChange={setDueAt} />
           </Field>
 
           {dueAt && (
@@ -426,6 +422,60 @@ export function DebtModal({
                     : t("finance.debt.settle", "Kapattım")}
                 </button>
               </div>
+            </div>
+          )}
+
+          {initial && (
+            <div>
+              <div className="husrev-kicker mb-2 text-gray-600 dark:text-gray-300">
+                {t("finance.debt.payments.title", "Ödemeler")}
+              </div>
+              {paymentsLoading ? (
+                <div className="space-y-1.5">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-9 rounded-lg bg-husrev-sand/40 motion-safe:animate-pulse motion-reduce:opacity-50"
+                    />
+                  ))}
+                </div>
+              ) : (payments ?? []).length === 0 ? (
+                <p className="rounded-xl bg-husrev-cream/40 p-3 text-xs text-gray-500 dark:bg-white/[0.03] dark:text-gray-400">
+                  {t("finance.debt.payments.empty", "Henüz ödeme yapılmadı.")}
+                </p>
+              ) : (
+                <ul className="divide-y divide-husrev-sand/40 rounded-xl ring-1 ring-husrev-sand/60 dark:divide-white/[0.04] dark:ring-white/[0.06]">
+                  {(payments ?? []).map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[11px] text-gray-500 dark:text-gray-400 tabular-nums">
+                          {new Date(p.occurredAt).toLocaleDateString("tr-TR", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </div>
+                        <div className="truncate text-[11px] text-gray-500 dark:text-gray-400">
+                          {accountName(p.accountId)}
+                        </div>
+                      </div>
+                      <span
+                        className={`tabular-nums text-sm font-semibold ${
+                          initial.direction === "i_owe"
+                            ? "text-husrev-ember"
+                            : "text-husrev-moss"
+                        }`}
+                      >
+                        {initial.direction === "i_owe" ? "−" : "+"}
+                        {formatTRY(p.amount)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>

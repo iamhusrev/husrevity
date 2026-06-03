@@ -161,6 +161,7 @@ export const FINANCE_ENDPOINTS = {
   DEBT_BY_ID: (id: string) => `/finance/debts/${id}`,
   DEBT_SETTLE: (id: string) => `/finance/debts/${id}/settle`,
   DEBT_PAY: (id: string) => `/finance/debts/${id}/pay`,
+  DEBT_PAYMENTS: (id: string) => `/finance/debts/${id}/payments`,
   ASSETS: "/finance/assets",
   ASSET_BY_ID: (id: string) => `/finance/assets/${id}`,
   LOANS: "/finance/loans",

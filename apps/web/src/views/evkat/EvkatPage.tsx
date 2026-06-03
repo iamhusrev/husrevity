@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 import {
   CATEGORY_COLOR_FALLBACK,
   TIME_BLOCK_CATEGORIES,
@@ -51,15 +52,6 @@ function toDateInputString(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
-}
-
-function toLocalDateTimeInputString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${day}T${hh}:${mm}`;
 }
 
 function resolveColorToken(b: TimeBlockResponse): TimeBlockColorToken {
@@ -433,8 +425,8 @@ function EditTimeBlockModal({
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [startAt, setStartAt] = useState(toLocalDateTimeInputString(initStart));
-  const [endAt, setEndAt] = useState(toLocalDateTimeInputString(initEnd));
+  const [startAt, setStartAt] = useState(initStart.toISOString());
+  const [endAt, setEndAt] = useState(initEnd.toISOString());
   const [category, setCategory] = useState<TimeBlockCategory | "">(
     initial?.category ?? "",
   );
@@ -454,8 +446,8 @@ function EditTimeBlockModal({
     const body: TimeBlockRequest = {
       title: title.trim(),
       notes: notes.trim() || null,
-      startAt: new Date(startAt).toISOString(),
-      endAt: new Date(endAt).toISOString(),
+      startAt: startAt,
+      endAt: endAt,
       category: (category || null) as TimeBlockCategory | null,
       colorToken: (colorToken || null) as TimeBlockColorToken | null,
       notifyMinutesBefore:
@@ -501,7 +493,7 @@ function EditTimeBlockModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
@@ -540,23 +532,19 @@ function EditTimeBlockModal({
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label={t("evkat.field.start", "Başlangıç")}>
-              <input
-                type="datetime-local"
-                required
+              <DateTimePicker
                 value={startAt}
-                onChange={(e) => setStartAt(e.target.value)}
-                className="husrev-input"
+                onChange={(iso) => iso && setStartAt(iso)}
+                clearable={false}
               />
             </Field>
             <Field label={t("evkat.field.end", "Bitiş")}>
-              <input
-                type="datetime-local"
-                required
+              <DateTimePicker
                 value={endAt}
-                onChange={(e) => setEndAt(e.target.value)}
-                className="husrev-input"
+                onChange={(iso) => iso && setEndAt(iso)}
+                clearable={false}
               />
             </Field>
           </div>

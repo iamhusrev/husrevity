@@ -11,6 +11,7 @@ import { PlanResponse } from "@/types/plan/plan";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatMonthShort } from "@/utils/i18n-date";
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 import { BiPlus, BiTrash, BiTargetLock, BiCalendarEvent } from "react-icons/bi";
 
 const STATUS_TONE: Record<string, { bg: string; dot: string }> = {
@@ -56,7 +57,7 @@ function NewPlanModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [targetDate, setTargetDate] = useState("");
+  const [targetDate, setTargetDate] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +66,7 @@ function NewPlanModal({ onClose }: { onClose: () => void }) {
       await create.mutateAsync({
         title: title.trim(),
         description: description || null,
-        targetDate: targetDate || null,
+        targetDate: targetDate,
       });
       onClose();
     } catch (err) {
@@ -86,7 +87,7 @@ function NewPlanModal({ onClose }: { onClose: () => void }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
@@ -136,12 +137,7 @@ function NewPlanModal({ onClose }: { onClose: () => void }) {
             <label className="husrev-kicker text-gray-500 dark:text-gray-400">
               {t("plans.modal.targetDate")}
             </label>
-            <input
-              type="date"
-              value={targetDate}
-              onChange={(e) => setTargetDate(e.target.value)}
-              className="husrev-input"
-            />
+            <DateTimePicker value={targetDate} onChange={setTargetDate} mode="date" />
           </div>
           <div className="flex items-center justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="husrev-btn-ghost">
