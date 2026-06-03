@@ -7,6 +7,7 @@ import {
   AssetResponse,
   CategoryRequest,
   CategoryResponse,
+  DebtPaymentRequest,
   DebtRequest,
   DebtResponse,
   LoanRequest,
@@ -121,6 +122,13 @@ export const financeService = {
   },
   async settleDebt(id: string): Promise<ApiResponse<DebtResponse>> {
     const r = await apiClient.patch(FINANCE_ENDPOINTS.DEBT_SETTLE(id));
+    return r.data;
+  },
+  async payDebt(
+    id: string,
+    body: DebtPaymentRequest,
+  ): Promise<ApiResponse<DebtResponse>> {
+    const r = await apiClient.post(FINANCE_ENDPOINTS.DEBT_PAY(id), body);
     return r.data;
   },
   async deleteDebt(id: string): Promise<ApiResponse<void>> {

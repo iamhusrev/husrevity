@@ -344,11 +344,24 @@
       "reopen": "Reopen",
       "settledOn": "Settled: {{date}}",
       "openStatus": "Open",
-      "totalIOwe": "Total I owe",
-      "totalOwedToMe": "Total owed to me",
+      "totalIOwe": "Remaining I owe",
+      "totalOwedToMe": "Remaining owed to me",
       "settledTag": "Settled",
       "showSettled": "Show settled",
-      "noDueDate": "No due date"
+      "noDueDate": "No due date",
+      "pay": {
+        "title": "Make a payment",
+        "collectTitle": "Collect",
+        "remaining": "Remaining",
+        "paidSoFar": "Paid",
+        "submit": "Pay",
+        "invalidAmount": "Enter a valid amount.",
+        "exceeds": "Amount exceeds the remaining balance.",
+        "noAccount": "Select an account.",
+        "noAccountOption": "No account",
+        "expenseNote": "This payment is also recorded as an expense from the selected account.",
+        "incomeNote": "This collection is also recorded as income to the selected account."
+      }
     },
     "placeholders": {
       "accountName": "Bank · Salary",

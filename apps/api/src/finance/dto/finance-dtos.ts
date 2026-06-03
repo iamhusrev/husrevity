@@ -197,11 +197,22 @@ export class DebtRequestDto {
   @IsOptional() @MaxLength(2000) notes?: string | null;
 }
 
+/** A payment made against a debt: charges an account and reduces the balance. */
+export class DebtPaymentRequestDto {
+  @IsNotEmpty() accountId!: string;
+  @IsNumber() @Min(0.01) amount!: number;
+  @IsOptional() categoryId?: string | null;
+  @IsOptional() @IsDateString() occurredAt?: string;
+  @IsOptional() @MaxLength(2000) description?: string | null;
+}
+
 export class DebtResponseDto {
   id!: string;
   direction!: FinanceDebtDirection;
   counterparty!: string;
   principalAmount!: number;
+  paidAmount!: number;
+  remainingAmount!: number;
   currency!: string;
   interestRate!: number | null;
   dueAt!: string | null;
@@ -211,11 +222,15 @@ export class DebtResponseDto {
   createdAt!: string;
 
   static from(d: FinanceDebt): DebtResponseDto {
+    const principal = Number(d.principalAmount);
+    const paid = Number(d.paidAmount ?? 0);
     return {
       id: d.id,
       direction: d.direction,
       counterparty: d.counterparty,
-      principalAmount: Number(d.principalAmount),
+      principalAmount: principal,
+      paidAmount: Number(paid.toFixed(2)),
+      remainingAmount: Number(Math.max(principal - paid, 0).toFixed(2)),
       currency: d.currency,
       interestRate: d.interestRate !== null ? Number(d.interestRate) : null,
       dueAt: d.dueAt ? d.dueAt.toISOString() : null,

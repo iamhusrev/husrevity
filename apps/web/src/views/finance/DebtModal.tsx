@@ -6,13 +6,16 @@ import { BiTrash } from "react-icons/bi";
 import {
   useCreateDebt,
   useDeleteDebt,
+  usePayDebt,
   useSettleDebt,
   useUpdateDebt,
 } from "@/hooks/useFinance";
 import {
+  AccountResponse,
   DebtRequest,
   DebtResponse,
   FinanceDebtDirection,
+  formatTRY,
 } from "@/types/finance/finance";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
@@ -35,9 +38,11 @@ const NOTIFY_OPTIONS: [string, string][] = [
 
 export function DebtModal({
   initial,
+  accounts,
   onClose,
 }: {
   initial: DebtResponse | null;
+  accounts: AccountResponse[];
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -46,6 +51,12 @@ export function DebtModal({
   const update = useUpdateDebt();
   const settle = useSettleDebt();
   const remove = useDeleteDebt();
+  const pay = usePayDebt();
+
+  const activeAccounts = accounts.filter((a) => !a.archived);
+  const remaining = initial?.remainingAmount ?? 0;
+  const [payAmount, setPayAmount] = useState(remaining > 0 ? String(remaining) : "");
+  const [payAccountId, setPayAccountId] = useState(activeAccounts[0]?.id ?? "");
 
   const [direction, setDirection] = useState<FinanceDebtDirection>(
     initial?.direction ?? "i_owe",
@@ -99,6 +110,51 @@ export function DebtModal({
     }
   };
 
+  const handlePay = async () => {
+    if (!initial) return;
+    const amt = Number(payAmount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      showAlert({
+        title: t("common.error", "Hata"),
+        message: t("finance.debt.pay.invalidAmount", "Geçerli bir tutar gir."),
+        type: "error",
+        position: "top-center",
+      });
+      return;
+    }
+    if (amt > remaining + 0.001) {
+      showAlert({
+        title: t("common.error", "Hata"),
+        message: t(
+          "finance.debt.pay.exceeds",
+          "Tutar kalan bakiyeyi aşıyor.",
+        ),
+        type: "error",
+        position: "top-center",
+      });
+      return;
+    }
+    if (!payAccountId) {
+      showAlert({
+        title: t("common.error", "Hata"),
+        message: t("finance.debt.pay.noAccount", "Bir hesap seç."),
+        type: "error",
+        position: "top-center",
+      });
+      return;
+    }
+    try {
+      await pay.mutateAsync({
+        id: initial.id,
+        body: { accountId: payAccountId, amount: amt },
+      });
+      onClose();
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
   const openDelete = () => {
     if (!initial) return;
     setConfirmingDelete(true);
@@ -117,7 +173,16 @@ export function DebtModal({
   };
 
   const pending =
-    create.isPending || update.isPending || settle.isPending || remove.isPending;
+    create.isPending ||
+    update.isPending ||
+    settle.isPending ||
+    remove.isPending ||
+    pay.isPending;
+
+  const paidPct =
+    initial && initial.principalAmount > 0
+      ? Math.min((initial.paidAmount / initial.principalAmount) * 100, 100)
+      : 0;
 
   return (
     <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4" onClick={onClose}>
@@ -248,6 +313,97 @@ export function DebtModal({
               className="husrev-input resize-none"
             />
           </Field>
+
+          {initial && remaining > 0 && (
+            <div className="rounded-xl bg-husrev-amber/[0.08] p-3 ring-1 ring-husrev-amber/25 dark:bg-husrev-amber/[0.06]">
+              <div className="mb-2 flex items-center justify-between text-xs">
+                <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+                  {initial.direction === "i_owe"
+                    ? t("finance.debt.pay.title", "Ödeme yap")
+                    : t("finance.debt.pay.collectTitle", "Tahsilat yap")}
+                </span>
+                <span className="text-gray-600 dark:text-gray-300">
+                  {t("finance.debt.pay.remaining", "Kalan")}:{" "}
+                  <span className="tabular-nums font-semibold text-husrev-ink dark:text-husrev-cream">
+                    {formatTRY(remaining)}
+                  </span>
+                </span>
+              </div>
+              {initial.paidAmount > 0 && (
+                <div className="mb-2">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-husrev-sand/60 dark:bg-white/[0.08]">
+                    <div
+                      className="h-full bg-husrev-moss"
+                      style={{ width: `${paidPct}%` }}
+                    />
+                  </div>
+                  <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                    {t("finance.debt.pay.paidSoFar", "Ödenen")}:{" "}
+                    <span className="tabular-nums">{formatTRY(initial.paidAmount)}</span>{" "}
+                    / {formatTRY(initial.principalAmount)}
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="flex-1 min-w-[7rem] space-y-1">
+                  <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+                    {t("finance.field.amount", "Tutar (₺)")}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max={remaining}
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    className="husrev-input tabular-nums"
+                  />
+                </label>
+                <label className="flex-1 min-w-[7rem] space-y-1">
+                  <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+                    {t("finance.field.account", "Hesap")}
+                  </span>
+                  <select
+                    value={payAccountId}
+                    onChange={(e) => setPayAccountId(e.target.value)}
+                    className="husrev-input"
+                  >
+                    {activeAccounts.length === 0 && (
+                      <option value="">
+                        {t("finance.debt.pay.noAccountOption", "Hesap yok")}
+                      </option>
+                    )}
+                    {activeAccounts.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={handlePay}
+                  disabled={pending || activeAccounts.length === 0}
+                  className="husrev-btn"
+                >
+                  {pay.isPending
+                    ? t("common.saving", "Kaydediliyor…")
+                    : t("finance.debt.pay.submit", "Öde")}
+                </button>
+              </div>
+              <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                {initial.direction === "i_owe"
+                  ? t(
+                      "finance.debt.pay.expenseNote",
+                      "Bu ödeme seçili hesaptan gider olarak da kaydedilir.",
+                    )
+                  : t(
+                      "finance.debt.pay.incomeNote",
+                      "Bu tahsilat seçili hesaba gelir olarak da kaydedilir.",
+                    )}
+              </p>
+            </div>
+          )}
 
           {initial && (
             <div className="rounded-xl bg-husrev-cream/40 p-3 ring-1 ring-husrev-sand/60 dark:bg-white/[0.03] dark:ring-white/[0.06]">

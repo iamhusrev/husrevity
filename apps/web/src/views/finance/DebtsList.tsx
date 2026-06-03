@@ -25,10 +25,10 @@ export function DebtsList({
 
   const totalIOwe = iOwe
     .filter((d) => !d.settledAt)
-    .reduce((s, d) => s + d.principalAmount, 0);
+    .reduce((s, d) => s + d.remainingAmount, 0);
   const totalOwed = owedToMe
     .filter((d) => !d.settledAt)
-    .reduce((s, d) => s + d.principalAmount, 0);
+    .reduce((s, d) => s + d.remainingAmount, 0);
 
   return (
     <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white p-5 shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
@@ -55,12 +55,12 @@ export function DebtsList({
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2">
         <Stat
-          kicker={t("finance.debt.totalIOwe", "Toplam borcum")}
+          kicker={t("finance.debt.totalIOwe", "Kalan borcum")}
           value={formatTRY(totalIOwe)}
           tone="ember"
         />
         <Stat
-          kicker={t("finance.debt.totalOwedToMe", "Toplam alacağım")}
+          kicker={t("finance.debt.totalOwedToMe", "Kalan alacağım")}
           value={formatTRY(totalOwed)}
           tone="moss"
         />
@@ -140,9 +140,25 @@ function DebtColumn({
                       tone === "ember" ? "text-husrev-ember" : "text-husrev-moss"
                     }`}
                   >
-                    {formatTRY(d.principalAmount)}
+                    {formatTRY(d.settledAt ? d.principalAmount : d.remainingAmount)}
                   </span>
                 </div>
+                {!d.settledAt && d.paidAmount > 0 && (
+                  <div className="mt-1.5">
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-husrev-sand/60 dark:bg-white/[0.08]">
+                      <div
+                        className={`h-full ${tone === "ember" ? "bg-husrev-moss" : "bg-husrev-amber"}`}
+                        style={{
+                          width: `${Math.min((d.paidAmount / d.principalAmount) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-gray-400">
+                      {t("finance.debt.pay.paidSoFar", "Ödenen")}{" "}
+                      {formatTRY(d.paidAmount)} / {formatTRY(d.principalAmount)}
+                    </div>
+                  </div>
+                )}
                 <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
                   <span>
                     {d.dueAt

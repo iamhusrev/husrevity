@@ -92,6 +92,8 @@ export interface DebtResponse {
   direction: FinanceDebtDirection;
   counterparty: string;
   principalAmount: number;
+  paidAmount: number;
+  remainingAmount: number;
   currency: string;
   interestRate: number | null;
   dueAt: string | null;
@@ -99,6 +101,14 @@ export interface DebtResponse {
   notifyMinutesBefore: number | null;
   notes: string | null;
   createdAt: string;
+}
+
+export interface DebtPaymentRequest {
+  accountId: string;
+  amount: number;
+  categoryId?: string | null;
+  occurredAt?: string;
+  description?: string | null;
 }
 
 export interface DebtRequest {

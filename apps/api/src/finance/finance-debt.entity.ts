@@ -31,6 +31,17 @@ export class FinanceDebt extends BaseEntity {
   })
   principalAmount!: number;
 
+  /** Cumulative amount paid against this debt; `remaining = principal − paid`. */
+  @Column({
+    name: 'paid_amount',
+    type: 'numeric',
+    precision: 14,
+    scale: 2,
+    default: 0,
+    transformer: numericTransformer,
+  })
+  paidAmount!: number;
+
   @Column({ type: 'varchar', length: 3, default: 'TRY' })
   currency!: string;
 
