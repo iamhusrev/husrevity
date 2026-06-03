@@ -207,6 +207,7 @@
     "flourish": "ekonomim",
     "tab": {
       "overview": "Özet",
+      "monthly": "Aylık",
       "transactions": "İşlemler",
       "accounts": "Hesaplar",
       "debts": "Borçlar",
@@ -217,9 +218,23 @@
       "totalBalance": "Toplam servet",
       "monthIncome": "Bu ay gelir",
       "monthExpense": "Bu ay gider",
+      "monthNet": "Net",
       "totalAssets": "Toplam varlık",
       "totalLiabilities": "Toplam borç",
       "netWorth": "Net değer"
+    },
+    "month": {
+      "kicker": "Aylık defter",
+      "prev": "Önceki ay",
+      "next": "Sonraki ay",
+      "today": "Bu ay",
+      "movements": "Bu ayki hareketler",
+      "transfersSummary": "Transferler",
+      "empty": {
+        "title": "Bu ay hareket yok",
+        "body": "Seçtiğin ayda gelir, gider veya transfer kaydı bulunmuyor.",
+        "byCategory": "Bu ay kategorili işlem yok."
+      }
     },
     "netLabel": "Net",
     "newTransaction": "Yeni işlem",
@@ -799,6 +814,16 @@
       "thisMonth": "Bu ay",
       "flagged": "Bayraklı",
       "scheduled": "Zamanlanmış"
+    },
+    "editAria": "Düzenle",
+    "edit": {
+      "kicker": "Düzenle",
+      "title": "Anımsatıcı",
+      "titleField": "Başlık",
+      "notesField": "Not",
+      "priorityField": "Öncelik",
+      "dueField": "Tarih",
+      "flagField": "Bayrak"
     }
   },
   "notes": {

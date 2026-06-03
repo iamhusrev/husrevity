@@ -36,13 +36,21 @@ import { DebtModal } from "./DebtModal";
 import { AssetModal } from "./AssetModal";
 import { LoanModal } from "./LoanModal";
 import { LoanDetailModal } from "./LoanDetailModal";
+import { MonthlyView } from "./MonthlyView";
 import { TransactionsTable } from "./TransactionsTable";
 import { DebtsList } from "./DebtsList";
 import { AccountsList } from "./AccountsList";
 import { AssetsList } from "./AssetsList";
 import { LoansList } from "./LoansList";
 
-type Tab = "overview" | "transactions" | "accounts" | "assets" | "loans" | "debts";
+type Tab =
+  | "overview"
+  | "monthly"
+  | "transactions"
+  | "accounts"
+  | "assets"
+  | "loans"
+  | "debts";
 
 const ACCOUNT_TYPE_LABELS_TR: Record<string, string> = {
   bank: "Banka",
@@ -124,6 +132,7 @@ export default function FinancePage() {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: t("finance.tab.overview", "Özet") },
+    { id: "monthly", label: t("finance.tab.monthly", "Aylık") },
     { id: "transactions", label: t("finance.tab.transactions", "İşlemler") },
     { id: "accounts", label: t("finance.tab.accounts", "Hesaplar") },
     { id: "assets", label: t("finance.tab.assets", "Varlıklar") },
@@ -179,7 +188,8 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* Hero — net worth */}
+      {/* Hero — net worth (hidden on the monthly tab, which has its own hero) */}
+      {tab !== "monthly" && (
       <section className="relative overflow-hidden rounded-3xl ring-1 ring-husrev-sand/90 bg-gradient-to-br from-white via-husrev-cream/60 to-husrev-sand/40 p-7 grain dark:from-husrev-shadow dark:via-husrev-ink dark:to-husrev-shadow dark:ring-white/[0.06] husrev-settle">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-husrev-amber/10 blur-3xl dark:bg-husrev-amber/15" />
         <div className="grid gap-6 sm:grid-cols-3">
@@ -235,8 +245,11 @@ export default function FinancePage() {
           />
         </div>
       </section>
+      )}
 
       {/* Tab content */}
+      {tab === "monthly" && <MonthlyView accounts={accounts ?? []} />}
+
       {tab === "overview" && (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Account snapshots */}

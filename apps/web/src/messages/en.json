@@ -207,6 +207,7 @@
     "flourish": "economy",
     "tab": {
       "overview": "Overview",
+      "monthly": "Monthly",
       "transactions": "Transactions",
       "accounts": "Accounts",
       "debts": "Debts",
@@ -217,9 +218,23 @@
       "totalBalance": "Total wealth",
       "monthIncome": "This month income",
       "monthExpense": "This month expense",
+      "monthNet": "Net",
       "totalAssets": "Total assets",
       "totalLiabilities": "Total debt",
       "netWorth": "Net worth"
+    },
+    "month": {
+      "kicker": "Monthly ledger",
+      "prev": "Previous month",
+      "next": "Next month",
+      "today": "This month",
+      "movements": "This month's movements",
+      "transfersSummary": "Transfers",
+      "empty": {
+        "title": "No movement this month",
+        "body": "No income, expense or transfer recorded for the selected month.",
+        "byCategory": "No categorised transactions this month."
+      }
     },
     "netLabel": "Net",
     "newTransaction": "New transaction",
@@ -799,6 +814,16 @@
       "thisMonth": "This Month",
       "flagged": "Flagged",
       "scheduled": "Scheduled"
+    },
+    "editAria": "Edit",
+    "edit": {
+      "kicker": "Edit",
+      "title": "Reminder",
+      "titleField": "Title",
+      "notesField": "Notes",
+      "priorityField": "Priority",
+      "dueField": "Date",
+      "flagField": "Flag"
     }
   },
   "notes": {

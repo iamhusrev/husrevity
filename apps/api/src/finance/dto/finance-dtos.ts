@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -179,8 +180,8 @@ export class TransactionListQueryDto {
   @IsOptional() accountId?: string;
   @IsOptional() categoryId?: string;
   @IsOptional() @IsIn(TX_KINDS) kind?: FinanceTransactionKind;
-  @IsOptional() @IsInt() @Min(1) limit?: number;
-  @IsOptional() @IsInt() @Min(0) offset?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) limit?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0) offset?: number;
 }
 
 // ─── Debt ──────────────────────────────────────────────────────────────────
