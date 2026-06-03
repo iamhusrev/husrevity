@@ -12,7 +12,8 @@ export type NotificationKind =
   | 'list_item'
   | 'calendar_event'
   | 'time_block'
-  | 'debt';
+  | 'debt'
+  | 'finance_installment';
 
 /**
  * Unified notification queue + read log.

@@ -192,6 +192,7 @@ function ReminderRow({
   const updateReminder = useUpdateReminder();
   const deleteReminder = useDeleteReminder();
   const [dueOpen, setDueOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const commit = async (patch: ReminderPatch) => {
     try {
@@ -268,15 +269,22 @@ function ReminderRow({
       </button>
 
       <div className="flex flex-1 flex-col min-w-0">
-        <span
-          className={`truncate text-sm font-medium ${
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditing(true);
+          }}
+          title={t("reminders.editAria", "Düzenle")}
+          className={`truncate text-left text-sm font-medium transition hover:text-brand-500 ${
             isCompleted
               ? "line-through text-gray-400 dark:text-gray-500"
               : "text-gray-800 dark:text-white/90"
           }`}
         >
           {reminder.title}
-        </span>
+        </button>
         <div className="relative w-fit">
           <button
             type="button"
@@ -388,6 +396,212 @@ function ReminderRow({
           <BiTrash size={14} />
         </button>
       </div>
+
+      {editing && (
+        <ReminderEditModal
+          reminder={reminder}
+          listId={listId}
+          onClose={() => setEditing(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Edit reminder modal ───────────────────────────────────────────────────────
+
+function ReminderEditModal({
+  reminder,
+  listId,
+  onClose,
+}: {
+  reminder: ReminderResponse;
+  listId: number;
+  onClose: () => void;
+}) {
+  const showAlert = alertStore((s) => s.show);
+  const { t } = useTranslation();
+  const updateReminder = useUpdateReminder();
+  const deleteReminder = useDeleteReminder();
+
+  const [title, setTitle] = useState(reminder.title);
+  const [notes, setNotes] = useState(reminder.notes ?? "");
+  const [priority, setPriority] = useState<ReminderPriority>(reminder.priority);
+  const [dueAt, setDueAt] = useState(toLocalInput(reminder.dueAt));
+  const [flag, setFlag] = useState(reminder.flag);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    try {
+      await updateReminder.mutateAsync({
+        id: reminder.id,
+        body: {
+          listId: reminder.listId,
+          title: title.trim(),
+          notes: notes.trim() || null,
+          dueAt: dueAt ? fromLocalInput(dueAt) : null,
+          priority,
+          flag,
+        },
+      });
+      onClose();
+    } catch (err) {
+      const { title: errTitle, message } = parseAxiosError(err);
+      showAlert({ title: errTitle, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteReminder.mutateAsync({ id: reminder.id, listId });
+      onClose();
+    } catch (err) {
+      const { title: errTitle, message } = parseAxiosError(err);
+      showAlert({ title: errTitle, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const pending = updateReminder.isPending || deleteReminder.isPending;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      >
+        <div className="mb-5 flex items-start justify-between">
+          <div className="space-y-1">
+            <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+              {t("reminders.edit.kicker", "Düzenle")}
+            </span>
+            <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
+              {t("reminders.edit.title", "Anımsatıcı")}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={pending}
+            aria-label={t("reminders.deleteAria")}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-error-50 hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
+          >
+            <BiTrash className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <label className="block space-y-1.5">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("reminders.edit.titleField", "Başlık")}
+            </span>
+            <input
+              autoFocus
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={255}
+              className="husrev-input"
+            />
+          </label>
+
+          <label className="block space-y-1.5">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("reminders.edit.notesField", "Not")}
+            </span>
+            <textarea
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="husrev-input resize-none"
+            />
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block space-y-1.5">
+              <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+                {t("reminders.edit.priorityField", "Öncelik")}
+              </span>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as ReminderPriority)}
+                className="husrev-input"
+              >
+                <option value="NONE">{t("reminders.priority.NONE", "Yok")}</option>
+                <option value="LOW">{t("reminders.priority.LOW", "Düşük")}</option>
+                <option value="MEDIUM">{t("reminders.priority.MEDIUM", "Orta")}</option>
+                <option value="HIGH">{t("reminders.priority.HIGH", "Yüksek")}</option>
+              </select>
+            </label>
+            <label className="block space-y-1.5">
+              <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+                {t("reminders.edit.dueField", "Tarih")}
+              </span>
+              <input
+                type="datetime-local"
+                value={dueAt}
+                onChange={(e) => setDueAt(e.target.value)}
+                className="husrev-input"
+              />
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setFlag((v) => !v)}
+            aria-pressed={flag}
+            className={`flex w-full items-center justify-between gap-3 rounded-xl p-3 text-left ring-1 transition ${
+              flag
+                ? "bg-red-50 ring-red-200 dark:bg-red-500/10 dark:ring-red-500/30"
+                : "bg-husrev-sand/40 ring-husrev-sand/70 dark:bg-white/[0.04] dark:ring-white/[0.06]"
+            }`}
+          >
+            <span className="flex items-center gap-2 text-sm font-medium text-husrev-ink dark:text-husrev-cream">
+              {flag ? (
+                <BiSolidFlag className="h-4 w-4 text-red-500" />
+              ) : (
+                <BiFlag className="h-4 w-4 text-gray-400" />
+              )}
+              {t("reminders.edit.flagField", "Bayrak")}
+            </span>
+            <span
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+                flag ? "bg-red-500" : "bg-gray-300 dark:bg-white/20"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  flag ? "translate-x-4" : "translate-x-0.5"
+                }`}
+              />
+            </span>
+          </button>
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={pending}
+            className="husrev-btn-ghost"
+          >
+            {t("common.cancel", "İptal")}
+          </button>
+          <button
+            type="submit"
+            disabled={!title.trim() || pending}
+            className="husrev-btn"
+          >
+            {updateReminder.isPending
+              ? t("common.saving", "Kaydediliyor…")
+              : t("common.save", "Kaydet")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

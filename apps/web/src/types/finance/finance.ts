@@ -1,6 +1,16 @@
 export const ACCOUNT_TYPES = ["bank", "card", "cash", "savings"] as const;
 export type FinanceAccountType = (typeof ACCOUNT_TYPES)[number];
 
+export const ASSET_TYPES = [
+  "cash",
+  "property",
+  "vehicle",
+  "gold",
+  "investment",
+  "other",
+] as const;
+export type FinanceAssetType = (typeof ASSET_TYPES)[number];
+
 export type FinanceCategoryKind = "income" | "expense";
 export type FinanceTransactionKind = "income" | "expense" | "transfer";
 export type FinanceDebtDirection = "owed_to_me" | "i_owe";
@@ -102,6 +112,76 @@ export interface DebtRequest {
   notes?: string | null;
 }
 
+export interface AssetResponse {
+  id: string;
+  name: string;
+  type: string;
+  value: number;
+  currency: string;
+  acquiredAt: string | null;
+  colorToken: string | null;
+  icon: string | null;
+  notes: string | null;
+  position: number;
+  createdAt: string;
+}
+
+export interface AssetRequest {
+  name: string;
+  type?: FinanceAssetType;
+  value: number;
+  currency?: string;
+  acquiredAt?: string | null;
+  colorToken?: string | null;
+  icon?: string | null;
+  notes?: string | null;
+}
+
+export interface InstallmentResponse {
+  id: string;
+  sequence: number;
+  amount: number;
+  dueAt: string;
+  paidAt: string | null;
+}
+
+export interface LoanResponse {
+  id: string;
+  name: string;
+  lender: string | null;
+  principalAmount: number;
+  installmentCount: number;
+  installmentAmount: number;
+  interestRate: number | null;
+  interestFree: boolean;
+  startDate: string;
+  notifyMinutesBefore: number | null;
+  currency: string;
+  notes: string | null;
+  settledAt: string | null;
+  paidCount: number;
+  remainingCount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  nextDueAt: string | null;
+  installments: InstallmentResponse[];
+  createdAt: string;
+}
+
+export interface LoanRequest {
+  name: string;
+  lender?: string | null;
+  principalAmount: number;
+  installmentCount: number;
+  installmentAmount: number;
+  interestRate?: number | null;
+  interestFree?: boolean;
+  startDate: string;
+  notifyMinutesBefore?: number | null;
+  currency?: string;
+  notes?: string | null;
+}
+
 export interface SummaryResponse {
   from: string;
   to: string;
@@ -121,6 +201,17 @@ export interface SummaryResponse {
     currency: string;
   }[];
   upcomingDebts: DebtResponse[];
+  totalAssets: number;
+  totalLiabilities: number;
+  netWorth: number;
+  assetsByType: { type: string; total: number }[];
+  upcomingInstallments: {
+    loanId: string;
+    loanName: string;
+    installmentId: string;
+    amount: number;
+    dueAt: string;
+  }[];
 }
 
 export function formatTRY(amount: number): string {

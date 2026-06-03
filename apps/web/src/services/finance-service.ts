@@ -3,10 +3,14 @@ import { ApiResponse } from "@/types/common/api-response";
 import {
   AccountRequest,
   AccountResponse,
+  AssetRequest,
+  AssetResponse,
   CategoryRequest,
   CategoryResponse,
   DebtRequest,
   DebtResponse,
+  LoanRequest,
+  LoanResponse,
   SummaryResponse,
   TransactionRequest,
   TransactionResponse,
@@ -121,6 +125,57 @@ export const financeService = {
   },
   async deleteDebt(id: string): Promise<ApiResponse<void>> {
     const r = await apiClient.delete(FINANCE_ENDPOINTS.DEBT_BY_ID(id));
+    return r.data;
+  },
+
+  // Assets
+  async listAssets(): Promise<ApiResponse<AssetResponse[]>> {
+    const r = await apiClient.get(FINANCE_ENDPOINTS.ASSETS);
+    return r.data;
+  },
+  async createAsset(body: AssetRequest): Promise<ApiResponse<AssetResponse>> {
+    const r = await apiClient.post(FINANCE_ENDPOINTS.ASSETS, body);
+    return r.data;
+  },
+  async updateAsset(
+    id: string,
+    body: AssetRequest,
+  ): Promise<ApiResponse<AssetResponse>> {
+    const r = await apiClient.put(FINANCE_ENDPOINTS.ASSET_BY_ID(id), body);
+    return r.data;
+  },
+  async deleteAsset(id: string): Promise<ApiResponse<void>> {
+    const r = await apiClient.delete(FINANCE_ENDPOINTS.ASSET_BY_ID(id));
+    return r.data;
+  },
+
+  // Loans
+  async listLoans(): Promise<ApiResponse<LoanResponse[]>> {
+    const r = await apiClient.get(FINANCE_ENDPOINTS.LOANS);
+    return r.data;
+  },
+  async createLoan(body: LoanRequest): Promise<ApiResponse<LoanResponse>> {
+    const r = await apiClient.post(FINANCE_ENDPOINTS.LOANS, body);
+    return r.data;
+  },
+  async updateLoan(
+    id: string,
+    body: LoanRequest,
+  ): Promise<ApiResponse<LoanResponse>> {
+    const r = await apiClient.put(FINANCE_ENDPOINTS.LOAN_BY_ID(id), body);
+    return r.data;
+  },
+  async deleteLoan(id: string): Promise<ApiResponse<void>> {
+    const r = await apiClient.delete(FINANCE_ENDPOINTS.LOAN_BY_ID(id));
+    return r.data;
+  },
+  async payInstallment(
+    loanId: string,
+    installmentId: string,
+  ): Promise<ApiResponse<LoanResponse>> {
+    const r = await apiClient.patch(
+      FINANCE_ENDPOINTS.LOAN_INSTALLMENT_PAY(loanId, installmentId),
+    );
     return r.data;
   },
 

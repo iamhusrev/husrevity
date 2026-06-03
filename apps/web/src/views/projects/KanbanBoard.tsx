@@ -40,12 +40,14 @@ function TaskCard({
   onMoveSameColumn,
   onDelete,
   onDropEnd,
+  onSelect,
 }: {
   task: TaskResponse;
   index: number;
   onMoveSameColumn: (status: TaskStatus, drag: number, hover: number) => void;
   onDelete: (id: number) => void;
   onDropEnd: (didDrop: boolean) => void;
+  onSelect: (task: TaskResponse) => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -73,6 +75,7 @@ function TaskCard({
   return (
     <div
       ref={ref}
+      onClick={() => onSelect(task)}
       style={{
         opacity: isDragging ? 0.4 : 1,
         transform: isDragging ? "rotate(-1deg) scale(0.98)" : undefined,
@@ -84,7 +87,10 @@ function TaskCard({
           {task.title}
         </span>
         <button
-          onClick={() => onDelete(task.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(task.id);
+          }}
           className="shrink-0 rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
         >
           <BiTrash size={12} />
@@ -118,6 +124,7 @@ function KanbanColumn({
   onDropOnColumn,
   onDelete,
   onDropEnd,
+  onSelect,
 }: {
   status: TaskStatus;
   tasks: TaskResponse[];
@@ -125,6 +132,7 @@ function KanbanColumn({
   onDropOnColumn: (item: DragItem, status: TaskStatus) => void;
   onDelete: (id: number) => void;
   onDropEnd: (didDrop: boolean) => void;
+  onSelect: (task: TaskResponse) => void;
 }) {
   const { t } = useTranslation();
   const [{ isOver }, dropRef] = useDrop<DragItem, unknown, { isOver: boolean }>({
@@ -165,6 +173,7 @@ function KanbanColumn({
             onMoveSameColumn={onMoveSameColumn}
             onDelete={onDelete}
             onDropEnd={onDropEnd}
+            onSelect={onSelect}
           />
         ))}
         {tasks.length === 0 && (
@@ -177,7 +186,15 @@ function KanbanColumn({
   );
 }
 
-export default function KanbanBoard({ code, tasks }: { code: string; tasks: TaskResponse[] }) {
+export default function KanbanBoard({
+  code,
+  tasks,
+  onSelect,
+}: {
+  code: string;
+  tasks: TaskResponse[];
+  onSelect: (task: TaskResponse) => void;
+}) {
   const showAlert = alertStore((s) => s.show);
   const updateTask = useUpdateTask();
   const reorderTasks = useReorderTasks();
@@ -286,6 +303,7 @@ export default function KanbanBoard({ code, tasks }: { code: string; tasks: Task
           onDropOnColumn={onDropOnColumn}
           onDelete={handleDelete}
           onDropEnd={onDropEnd}
+          onSelect={onSelect}
         />
       ))}
     </div>
