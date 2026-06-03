@@ -5,8 +5,10 @@ import {
 } from "@/services/finance-service";
 import {
   AccountRequest,
+  AssetRequest,
   CategoryRequest,
   DebtRequest,
+  LoanRequest,
   TransactionRequest,
   TransferRequest,
 } from "@/types/finance/finance";
@@ -18,6 +20,8 @@ const FINANCE_KEYS = {
   transactions: (filters: TransactionFilters) =>
     ["finance", "transactions", filters] as const,
   debts: (onlyOpen: boolean) => ["finance", "debts", onlyOpen] as const,
+  assets: ["finance", "assets"] as const,
+  loans: ["finance", "loans"] as const,
   summary: (from?: string, to?: string) =>
     ["finance", "summary", from ?? null, to ?? null] as const,
 };
@@ -157,6 +161,81 @@ export function useDeleteDebt() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => financeService.deleteDebt(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+
+// Assets
+export function useFinanceAssets() {
+  return useQuery({
+    queryKey: FINANCE_KEYS.assets,
+    queryFn: () => financeService.listAssets(),
+    select: (d) => d.data,
+  });
+}
+export function useCreateAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AssetRequest) => financeService.createAsset(body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function useUpdateAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: AssetRequest }) =>
+      financeService.updateAsset(id, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function useDeleteAsset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => financeService.deleteAsset(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+
+// Loans
+export function useFinanceLoans() {
+  return useQuery({
+    queryKey: FINANCE_KEYS.loans,
+    queryFn: () => financeService.listLoans(),
+    select: (d) => d.data,
+  });
+}
+export function useCreateLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: LoanRequest) => financeService.createLoan(body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function useUpdateLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: LoanRequest }) =>
+      financeService.updateLoan(id, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function useDeleteLoan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => financeService.deleteLoan(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
+  });
+}
+export function usePayInstallment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      loanId,
+      installmentId,
+    }: {
+      loanId: string;
+      installmentId: string;
+    }) => financeService.payInstallment(loanId, installmentId),
     onSuccess: () => qc.invalidateQueries({ queryKey: FINANCE_KEYS.all }),
   });
 }

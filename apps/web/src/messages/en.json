@@ -75,7 +75,10 @@
     "emailPlaceholder": "you@example.com"
   },
   "errors": {
-    "common": { "backHome": "Back Home", "goBack": "Go Back" },
+    "common": {
+      "backHome": "Back Home",
+      "goBack": "Go Back"
+    },
     "notFound": {
       "title": "Page Not Found",
       "message": "We couldn't find the page you were looking for."
@@ -100,7 +103,10 @@
       "notifyMe": "Notify Me",
       "subscribeText": "Don't want to miss updates?"
     },
-    "success": { "title": "Success!", "message": "Your action completed." }
+    "success": {
+      "title": "Success!",
+      "message": "Your action completed."
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -134,7 +140,10 @@
   },
   "admin": {
     "kicker": "Admin",
-    "role": { "user": "User", "admin": "Admin" },
+    "role": {
+      "user": "User",
+      "admin": "Admin"
+    },
     "users": {
       "title": "Users",
       "flourish": "users",
@@ -200,12 +209,17 @@
       "overview": "Overview",
       "transactions": "Transactions",
       "accounts": "Accounts",
-      "debts": "Debts"
+      "debts": "Debts",
+      "assets": "Assets",
+      "loans": "Loans"
     },
     "stat": {
       "totalBalance": "Total wealth",
       "monthIncome": "This month income",
-      "monthExpense": "This month expense"
+      "monthExpense": "This month expense",
+      "totalAssets": "Total assets",
+      "totalLiabilities": "Total debt",
+      "netWorth": "Net worth"
     },
     "netLabel": "Net",
     "newTransaction": "New transaction",
@@ -213,10 +227,21 @@
     "newAccount": "Add account",
     "newDebt": "Add debt",
     "viewAll": "View all",
-    "transfer": "Transfer",
+    "transfer": {
+      "kicker": "Between accounts",
+      "title": "Transfer",
+      "from": "From",
+      "to": "To",
+      "submit": "Transfer",
+      "sameAccount": "Source and destination must differ."
+    },
     "untitled": "(No description)",
     "uncategorised": "(Uncategorised)",
-    "kind": { "income": "Income", "expense": "Expense", "transfer": "Transfer" },
+    "kind": {
+      "income": "Income",
+      "expense": "Expense",
+      "transfer": "Transfer"
+    },
     "field": {
       "name": "Name",
       "type": "Type",
@@ -229,8 +254,16 @@
       "notes": "Notes",
       "openingBalance": "Opening balance (₺)"
     },
-    "filter": { "allAccounts": "All accounts", "allKinds": "All kinds" },
-    "column": { "date": "Date", "account": "Account", "description": "Description", "amount": "Amount" },
+    "filter": {
+      "allAccounts": "All accounts",
+      "allKinds": "All kinds"
+    },
+    "column": {
+      "date": "Date",
+      "account": "Account",
+      "description": "Description",
+      "amount": "Amount"
+    },
     "section": {
       "accounts": "Accounts",
       "accountsAll": "All accounts",
@@ -238,15 +271,36 @@
       "transactions": "Transactions",
       "upcoming": "Upcoming debts",
       "debtsAll": "Debts & receivables",
-      "byCategory": "By category"
+      "byCategory": "By category",
+      "assets": "Assets",
+      "loans": "Loans & installments",
+      "upcomingInstallments": "Upcoming installments"
     },
     "empty": {
       "accounts": {
         "title": "Add your first account",
         "body": "Bank, card or cash wallet — income and expenses get attached to one."
       },
-      "tx": { "title": "No transactions yet", "body": "Add an income or expense to start." },
-      "debts": { "title": "Nothing due soon", "body": "Debts with upcoming dates show here." }
+      "tx": {
+        "title": "No transactions yet",
+        "body": "Add an income or expense to start."
+      },
+      "debts": {
+        "title": "Nothing due soon",
+        "body": "Debts with upcoming dates show here."
+      },
+      "assets": {
+        "title": "No assets yet",
+        "body": "Add property, vehicles, gold or investments to see your net worth."
+      },
+      "loans": {
+        "title": "Nothing here",
+        "body": "Add installment purchases or loans — ideally interest-free ones."
+      },
+      "installments": {
+        "title": "No upcoming installments",
+        "body": "Add an installment (preferably interest-free) and it shows up here."
+      }
     },
     "modal": {
       "newKicker": "New",
@@ -255,14 +309,6 @@
       "expenseTitle": "Expense entry",
       "invalidAmount": "Enter a valid amount.",
       "noAccount": "Add an account first."
-    },
-    "transfer": {
-      "kicker": "Between accounts",
-      "title": "Transfer",
-      "from": "From",
-      "to": "To",
-      "submit": "Transfer",
-      "sameAccount": "Source and destination must differ."
     },
     "account": {
       "title": "Account",
@@ -293,6 +339,61 @@
       "accountName": "Bank · Salary",
       "description": "Optional note",
       "transferDescription": "e.g. Salary transfer"
+    },
+    "assetsVsDebts": "Assets / debt balance",
+    "newAsset": "Add asset",
+    "newLoan": "Add loan",
+    "asset": {
+      "title": "Asset",
+      "name": "Name",
+      "namePlaceholder": "House, car, gold…",
+      "type": "Type",
+      "value": "Value (₺)",
+      "acquiredAt": "Acquired on",
+      "confirmDeleteTitle": "Delete asset",
+      "confirmDelete": "Are you sure you want to delete this asset?"
+    },
+    "assetType": {
+      "cash": "Cash",
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "gold": "Gold",
+      "investment": "Investment",
+      "other": "Other"
+    },
+    "loan": {
+      "title": "Loan / Installment",
+      "name": "Name",
+      "namePlaceholder": "Phone installment",
+      "lender": "Lender / store",
+      "lenderPlaceholder": "Garanti BBVA",
+      "principal": "Total amount (₺)",
+      "count": "Installments",
+      "installment": "Monthly payment (₺)",
+      "interestFree": "Interest-free",
+      "interestRate": "Interest rate (%)",
+      "startDate": "First installment date",
+      "evenSplit": "Split evenly",
+      "totalPlanned": "Total payable",
+      "lockedNote": "The plan can't be changed after a payment. Delete and recreate the loan to change it.",
+      "remaining": "Remaining",
+      "remainingTotal": "left",
+      "paidOf": "Paid",
+      "next": "Next",
+      "settled": "Done",
+      "zeroInterest": "0%",
+      "filterAll": "All",
+      "filterFree": "Interest-free",
+      "filterInterest": "With interest",
+      "confirmDeleteTitle": "Delete loan",
+      "confirmDelete": "Delete this loan and all its installments?"
+    },
+    "notify": {
+      "off": "Off",
+      "0": "On time",
+      "1440": "1 day before",
+      "4320": "3 days before",
+      "10080": "1 week before"
     }
   },
   "evkat": {
@@ -567,7 +668,10 @@
     "invalid": "Invalid project."
   },
   "kanban": {
-    "view": { "kanban": "Kanban", "list": "List" },
+    "view": {
+      "kanban": "Kanban",
+      "list": "List"
+    },
     "newTask": "New task",
     "dropHere": "drop here",
     "back": "Back to projects",
@@ -596,6 +700,10 @@
       "priorityField": "Priority",
       "submit": "Add task",
       "submitting": "Adding…"
+    },
+    "detail": {
+      "dueField": "Due date",
+      "created": "Created"
     }
   },
   "tasks": {
@@ -642,7 +750,10 @@
     "invalid": "Invalid list.",
     "newItemPlaceholder": "Type a new line, press Enter…",
     "noItems": "No items in this list yet.",
-    "toggle": { "complete": "Completed", "incomplete": "Incomplete" },
+    "toggle": {
+      "complete": "Completed",
+      "incomplete": "Incomplete"
+    },
     "deleteAria": "Delete",
     "addAria": "Add"
   },
@@ -663,7 +774,10 @@
       "MEDIUM": "Medium",
       "HIGH": "High"
     },
-    "toggle": { "complete": "Completed", "incomplete": "Incomplete" },
+    "toggle": {
+      "complete": "Completed",
+      "incomplete": "Incomplete"
+    },
     "deleteAria": "Delete",
     "addDue": "Add date",
     "flagAria": "Toggle flag",
@@ -973,12 +1087,30 @@
       "title": "Features",
       "description": "Production-ready features.",
       "list": {
-        "auth": { "title": "Authentication", "desc": "JWT-based login and token refresh." },
-        "users": { "title": "User Management", "desc": "CRUD with roles and permissions." },
-        "tables": { "title": "Data Tables", "desc": "Sorting, filtering, pagination." },
-        "theme": { "title": "Dark Mode", "desc": "Light and dark theme support." },
-        "i18n": { "title": "i18n", "desc": "Turkish and English." },
-        "dashboard": { "title": "Dashboard", "desc": "Real-time analytics dashboard." }
+        "auth": {
+          "title": "Authentication",
+          "desc": "JWT-based login and token refresh."
+        },
+        "users": {
+          "title": "User Management",
+          "desc": "CRUD with roles and permissions."
+        },
+        "tables": {
+          "title": "Data Tables",
+          "desc": "Sorting, filtering, pagination."
+        },
+        "theme": {
+          "title": "Dark Mode",
+          "desc": "Light and dark theme support."
+        },
+        "i18n": {
+          "title": "i18n",
+          "desc": "Turkish and English."
+        },
+        "dashboard": {
+          "title": "Dashboard",
+          "desc": "Real-time analytics dashboard."
+        }
       },
       "ctaTitle": "More Coming Soon",
       "ctaDescription": "New modules on the way."

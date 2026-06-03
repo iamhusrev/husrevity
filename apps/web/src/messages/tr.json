@@ -75,8 +75,14 @@
     "emailPlaceholder": "siz@ornek.com"
   },
   "errors": {
-    "common": { "backHome": "Ana Sayfaya Dön", "goBack": "Geri Dön" },
-    "notFound": { "title": "Sayfa Bulunamadı", "message": "Aradığınız sayfayı bulamadık." },
+    "common": {
+      "backHome": "Ana Sayfaya Dön",
+      "goBack": "Geri Dön"
+    },
+    "notFound": {
+      "title": "Sayfa Bulunamadı",
+      "message": "Aradığınız sayfayı bulamadık."
+    },
     "internal": {
       "title": "Sunucu Hatası",
       "message": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin.",
@@ -86,7 +92,10 @@
       "title": "Hizmet Kullanılamıyor",
       "message": "Sunucu şu anda kullanılamıyor."
     },
-    "maintenanceMode": { "title": "Bakım", "message": "Sitemiz şu anda planlı bakım altındadır." },
+    "maintenanceMode": {
+      "title": "Bakım",
+      "message": "Sitemiz şu anda planlı bakım altındadır."
+    },
     "comingSoon": {
       "title": "Çok Yakında",
       "message": "Web sitemiz hazırlanıyor.",
@@ -94,7 +103,10 @@
       "notifyMe": "Beni Bilgilendir",
       "subscribeText": "Güncellemeleri kaçırmak istemiyor musunuz?"
     },
-    "success": { "title": "Başarılı!", "message": "İşleminiz tamamlandı." }
+    "success": {
+      "title": "Başarılı!",
+      "message": "İşleminiz tamamlandı."
+    }
   },
   "sidebar": {
     "dashboard": "Panel",
@@ -128,7 +140,10 @@
   },
   "admin": {
     "kicker": "Yönetim",
-    "role": { "user": "Kullanıcı", "admin": "Yönetici" },
+    "role": {
+      "user": "Kullanıcı",
+      "admin": "Yönetici"
+    },
     "users": {
       "title": "Kullanıcılar",
       "flourish": "kullanıcılar",
@@ -194,12 +209,17 @@
       "overview": "Özet",
       "transactions": "İşlemler",
       "accounts": "Hesaplar",
-      "debts": "Borçlar"
+      "debts": "Borçlar",
+      "assets": "Varlıklar",
+      "loans": "Krediler"
     },
     "stat": {
       "totalBalance": "Toplam servet",
       "monthIncome": "Bu ay gelir",
-      "monthExpense": "Bu ay gider"
+      "monthExpense": "Bu ay gider",
+      "totalAssets": "Toplam varlık",
+      "totalLiabilities": "Toplam borç",
+      "netWorth": "Net değer"
     },
     "netLabel": "Net",
     "newTransaction": "Yeni işlem",
@@ -207,10 +227,21 @@
     "newAccount": "Hesap ekle",
     "newDebt": "Borç ekle",
     "viewAll": "Tümü",
-    "transfer": "Transfer",
+    "transfer": {
+      "kicker": "Hesaplar arası",
+      "title": "Transfer",
+      "from": "Kaynak",
+      "to": "Hedef",
+      "submit": "Aktar",
+      "sameAccount": "Kaynak ve hedef hesap aynı olamaz."
+    },
     "untitled": "(Açıklama yok)",
     "uncategorised": "(Kategorisiz)",
-    "kind": { "income": "Gelir", "expense": "Gider", "transfer": "Transfer" },
+    "kind": {
+      "income": "Gelir",
+      "expense": "Gider",
+      "transfer": "Transfer"
+    },
     "field": {
       "name": "İsim",
       "type": "Tip",
@@ -223,8 +254,16 @@
       "notes": "Not",
       "openingBalance": "Açılış bakiyesi (₺)"
     },
-    "filter": { "allAccounts": "Tüm hesaplar", "allKinds": "Tüm türler" },
-    "column": { "date": "Tarih", "account": "Hesap", "description": "Açıklama", "amount": "Tutar" },
+    "filter": {
+      "allAccounts": "Tüm hesaplar",
+      "allKinds": "Tüm türler"
+    },
+    "column": {
+      "date": "Tarih",
+      "account": "Hesap",
+      "description": "Açıklama",
+      "amount": "Tutar"
+    },
     "section": {
       "accounts": "Hesaplar",
       "accountsAll": "Tüm hesaplar",
@@ -232,15 +271,36 @@
       "transactions": "İşlemler",
       "upcoming": "Yaklaşan borçlar",
       "debtsAll": "Borçlar & alacaklar",
-      "byCategory": "Kategoriye göre"
+      "byCategory": "Kategoriye göre",
+      "assets": "Varlıklar",
+      "loans": "Krediler & taksitler",
+      "upcomingInstallments": "Yaklaşan taksitler"
     },
     "empty": {
       "accounts": {
         "title": "İlk hesabını ekle",
         "body": "Banka, kart veya nakit cüzdan — gelirlerini ve giderlerini onlara bağlayacaksın."
       },
-      "tx": { "title": "Henüz işlem yok", "body": "Bir gelir/gider girerek başla." },
-      "debts": { "title": "Sırada bekleyen borç yok", "body": "Vadesi yaklaşan borçlar burada görünür." }
+      "tx": {
+        "title": "Henüz işlem yok",
+        "body": "Bir gelir/gider girerek başla."
+      },
+      "debts": {
+        "title": "Sırada bekleyen borç yok",
+        "body": "Vadesi yaklaşan borçlar burada görünür."
+      },
+      "assets": {
+        "title": "Henüz varlık yok",
+        "body": "Gayrimenkul, araç, altın ya da yatırımlarını ekleyerek net değerini gör."
+      },
+      "loans": {
+        "title": "Kayıt yok",
+        "body": "Taksitli alışveriş ya da kredilerini ekle; tercihen faizsiz olanları."
+      },
+      "installments": {
+        "title": "Yaklaşan taksit yok",
+        "body": "Tercihen faizsiz bir taksit ekleyince burada görünür."
+      }
     },
     "modal": {
       "newKicker": "Yeni",
@@ -249,14 +309,6 @@
       "expenseTitle": "Gider kaydı",
       "invalidAmount": "Geçerli bir tutar gir.",
       "noAccount": "Önce bir hesap ekle."
-    },
-    "transfer": {
-      "kicker": "Hesaplar arası",
-      "title": "Transfer",
-      "from": "Kaynak",
-      "to": "Hedef",
-      "submit": "Aktar",
-      "sameAccount": "Kaynak ve hedef hesap aynı olamaz."
     },
     "account": {
       "title": "Hesap",
@@ -287,6 +339,61 @@
       "accountName": "Vakıfbank · Maaş",
       "description": "İsteğe bağlı not",
       "transferDescription": "Örn. Maaş transferi"
+    },
+    "assetsVsDebts": "Varlık / borç dengesi",
+    "newAsset": "Varlık ekle",
+    "newLoan": "Kredi ekle",
+    "asset": {
+      "title": "Varlık",
+      "name": "Ad",
+      "namePlaceholder": "Ev, araba, altın…",
+      "type": "Tür",
+      "value": "Değer (₺)",
+      "acquiredAt": "Edinim tarihi",
+      "confirmDeleteTitle": "Varlığı sil",
+      "confirmDelete": "Bu varlık kaydını silmek istediğine emin misin?"
+    },
+    "assetType": {
+      "cash": "Nakit",
+      "property": "Gayrimenkul",
+      "vehicle": "Araç",
+      "gold": "Altın",
+      "investment": "Yatırım",
+      "other": "Diğer"
+    },
+    "loan": {
+      "title": "Kredi / Taksit",
+      "name": "Ad",
+      "namePlaceholder": "Telefon taksiti",
+      "lender": "Kurum / mağaza",
+      "lenderPlaceholder": "Garanti BBVA",
+      "principal": "Toplam tutar (₺)",
+      "count": "Taksit sayısı",
+      "installment": "Aylık taksit (₺)",
+      "interestFree": "Faizsiz",
+      "interestRate": "Faiz oranı (%)",
+      "startDate": "İlk taksit tarihi",
+      "evenSplit": "Eşit böl",
+      "totalPlanned": "Toplam ödeme",
+      "lockedNote": "Ödeme yapıldıktan sonra taksit planı değiştirilemez. Planı değiştirmek için krediyi silip yeniden oluştur.",
+      "remaining": "Kalan",
+      "remainingTotal": "kalan",
+      "paidOf": "Ödenen",
+      "next": "Sıradaki",
+      "settled": "Bitti",
+      "zeroInterest": "%0",
+      "filterAll": "Tümü",
+      "filterFree": "Faizsiz",
+      "filterInterest": "Faizli",
+      "confirmDeleteTitle": "Krediyi sil",
+      "confirmDelete": "Bu krediyi ve tüm taksitlerini silmek istediğine emin misin?"
+    },
+    "notify": {
+      "off": "Kapalı",
+      "0": "Tam saatinde",
+      "1440": "1 gün önce",
+      "4320": "3 gün önce",
+      "10080": "1 hafta önce"
     }
   },
   "evkat": {
@@ -561,7 +668,10 @@
     "invalid": "Geçersiz proje."
   },
   "kanban": {
-    "view": { "kanban": "Kanban", "list": "Liste" },
+    "view": {
+      "kanban": "Kanban",
+      "list": "Liste"
+    },
     "newTask": "Yeni görev",
     "dropHere": "buraya bırak",
     "back": "Projelere dön",
@@ -590,6 +700,10 @@
       "priorityField": "Öncelik",
       "submit": "Görevi ekle",
       "submitting": "Ekleniyor…"
+    },
+    "detail": {
+      "dueField": "Bitiş tarihi",
+      "created": "Oluşturuldu"
     }
   },
   "tasks": {
@@ -636,7 +750,10 @@
     "invalid": "Geçersiz liste.",
     "newItemPlaceholder": "Yeni bir satır yaz, Enter ile ekle…",
     "noItems": "Bu listede henüz öğe yok.",
-    "toggle": { "complete": "Tamamlandı", "incomplete": "Tamamlanmadı" },
+    "toggle": {
+      "complete": "Tamamlandı",
+      "incomplete": "Tamamlanmadı"
+    },
     "deleteAria": "Sil",
     "addAria": "Ekle"
   },
@@ -657,7 +774,10 @@
       "MEDIUM": "Orta",
       "HIGH": "Yüksek"
     },
-    "toggle": { "complete": "Tamamlandı", "incomplete": "Tamamlanmadı" },
+    "toggle": {
+      "complete": "Tamamlandı",
+      "incomplete": "Tamamlanmadı"
+    },
     "deleteAria": "Sil",
     "addDue": "Tarih ekle",
     "flagAria": "Bayrağı değiştir",
@@ -967,12 +1087,30 @@
       "title": "Özellikler",
       "description": "Production-ready özellikler.",
       "list": {
-        "auth": { "title": "Kimlik Doğrulama", "desc": "JWT tabanlı login ve token yenileme." },
-        "users": { "title": "Kullanıcı Yönetimi", "desc": "Roller ve yetkilerle CRUD desteği." },
-        "tables": { "title": "Veri Tabloları", "desc": "Sıralama, filtreleme ve sayfalama." },
-        "theme": { "title": "Karanlık Mod", "desc": "Light ve dark tema desteği." },
-        "i18n": { "title": "Çoklu Dil", "desc": "Türkçe ve İngilizce." },
-        "dashboard": { "title": "Dashboard", "desc": "Gerçek zamanlı analiz paneli." }
+        "auth": {
+          "title": "Kimlik Doğrulama",
+          "desc": "JWT tabanlı login ve token yenileme."
+        },
+        "users": {
+          "title": "Kullanıcı Yönetimi",
+          "desc": "Roller ve yetkilerle CRUD desteği."
+        },
+        "tables": {
+          "title": "Veri Tabloları",
+          "desc": "Sıralama, filtreleme ve sayfalama."
+        },
+        "theme": {
+          "title": "Karanlık Mod",
+          "desc": "Light ve dark tema desteği."
+        },
+        "i18n": {
+          "title": "Çoklu Dil",
+          "desc": "Türkçe ve İngilizce."
+        },
+        "dashboard": {
+          "title": "Dashboard",
+          "desc": "Gerçek zamanlı analiz paneli."
+        }
       },
       "ctaTitle": "Daha Fazlası Çok Yakında",
       "ctaDescription": "Yeni modüller yolda."

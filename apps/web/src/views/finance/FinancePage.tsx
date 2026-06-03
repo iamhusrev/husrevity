@@ -5,13 +5,17 @@ import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import {
   useFinanceAccounts,
+  useFinanceAssets,
   useFinanceDebts,
+  useFinanceLoans,
   useFinanceSummary,
   useFinanceTransactions,
 } from "@/hooks/useFinance";
 import {
   AccountResponse,
+  AssetResponse,
   DebtResponse,
+  LoanResponse,
   TransactionResponse,
   formatTRY,
 } from "@/types/finance/finance";
@@ -21,17 +25,24 @@ import {
   BiTrendingDown,
   BiWallet,
   BiTransfer,
+  BiBuildingHouse,
+  BiCreditCardFront,
 } from "react-icons/bi";
-import { HiArrowRight } from "react-icons/hi2";
+import { HiArrowRight, HiSparkles } from "react-icons/hi2";
 import { TransactionModal } from "./TransactionModal";
 import { TransferModal } from "./TransferModal";
 import { AccountModal } from "./AccountModal";
 import { DebtModal } from "./DebtModal";
+import { AssetModal } from "./AssetModal";
+import { LoanModal } from "./LoanModal";
+import { LoanDetailModal } from "./LoanDetailModal";
 import { TransactionsTable } from "./TransactionsTable";
 import { DebtsList } from "./DebtsList";
 import { AccountsList } from "./AccountsList";
+import { AssetsList } from "./AssetsList";
+import { LoansList } from "./LoansList";
 
-type Tab = "overview" | "transactions" | "accounts" | "debts";
+type Tab = "overview" | "transactions" | "accounts" | "assets" | "loans" | "debts";
 
 const ACCOUNT_TYPE_LABELS_TR: Record<string, string> = {
   bank: "Banka",
@@ -77,13 +88,31 @@ export default function FinancePage() {
     open: boolean;
     initial: DebtResponse | null;
   }>({ open: false, initial: null });
+  const [assetModal, setAssetModal] = useState<{
+    open: boolean;
+    initial: AssetResponse | null;
+  }>({ open: false, initial: null });
+  const [loanModal, setLoanModal] = useState<{
+    open: boolean;
+    initial: LoanResponse | null;
+  }>({ open: false, initial: null });
+  const [loanDetail, setLoanDetail] = useState<LoanResponse | null>(null);
 
   const { data: summary, isLoading: sumLoading } = useFinanceSummary();
   const { data: accounts, isLoading: accLoading } = useFinanceAccounts();
   const { data: openDebts } = useFinanceDebts(true);
+  const { data: assets } = useFinanceAssets();
+  const { data: loans } = useFinanceLoans();
   const { data: recentTx, isLoading: txLoading } = useFinanceTransactions({
     limit: 8,
   });
+
+  // Keep the open loan-detail in sync with refetched data after paying.
+  const liveLoanDetail = useMemo(
+    () =>
+      loanDetail ? (loans ?? []).find((l) => l.id === loanDetail.id) ?? loanDetail : null,
+    [loanDetail, loans],
+  );
 
   const totalBalance = useMemo(
     () =>
@@ -97,8 +126,12 @@ export default function FinancePage() {
     { id: "overview", label: t("finance.tab.overview", "Özet") },
     { id: "transactions", label: t("finance.tab.transactions", "İşlemler") },
     { id: "accounts", label: t("finance.tab.accounts", "Hesaplar") },
+    { id: "assets", label: t("finance.tab.assets", "Varlıklar") },
+    { id: "loans", label: t("finance.tab.loans", "Krediler") },
     { id: "debts", label: t("finance.tab.debts", "Borçlar") },
   ];
+
+  const netWorth = summary?.netWorth ?? 0;
 
   return (
     <div className="space-y-6">
@@ -146,37 +179,61 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* Hero — totals */}
+      {/* Hero — net worth */}
       <section className="relative overflow-hidden rounded-3xl ring-1 ring-husrev-sand/90 bg-gradient-to-br from-white via-husrev-cream/60 to-husrev-sand/40 p-7 grain dark:from-husrev-shadow dark:via-husrev-ink dark:to-husrev-shadow dark:ring-white/[0.06] husrev-settle">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-husrev-amber/10 blur-3xl dark:bg-husrev-amber/15" />
         <div className="grid gap-6 sm:grid-cols-3">
           <HeroStat
-            kicker={t("finance.stat.totalBalance", "Toplam servet")}
-            value={sumLoading ? "—" : formatTRY(totalBalance)}
-            icon={<BiWallet className="h-5 w-5" />}
-            tone="neutral"
-          />
-          <HeroStat
-            kicker={t("finance.stat.monthIncome", "Bu ay gelir")}
-            value={summary ? formatTRY(summary.income) : "—"}
-            icon={<BiTrendingUp className="h-5 w-5" />}
+            kicker={t("finance.stat.totalAssets", "Toplam varlık")}
+            value={summary ? formatTRY(summary.totalAssets) : "—"}
+            icon={<BiBuildingHouse className="h-5 w-5" />}
             tone="moss"
           />
           <HeroStat
-            kicker={t("finance.stat.monthExpense", "Bu ay gider")}
-            value={summary ? formatTRY(summary.expense) : "—"}
-            icon={<BiTrendingDown className="h-5 w-5" />}
+            kicker={t("finance.stat.totalLiabilities", "Toplam borç")}
+            value={summary ? formatTRY(summary.totalLiabilities) : "—"}
+            icon={<BiCreditCardFront className="h-5 w-5" />}
             tone="ember"
+          />
+          <HeroStat
+            kicker={t("finance.stat.netWorth", "Net değer")}
+            value={summary ? formatTRY(netWorth) : "—"}
+            icon={<BiWallet className="h-5 w-5" />}
+            tone={netWorth < 0 ? "ember" : "neutral"}
           />
         </div>
         {summary && (
           <div className="mt-5">
             <div className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80 mb-1.5">
-              {t("finance.netLabel", "Net")} · {formatTRY(summary.net)}
+              {t("finance.assetsVsDebts", "Varlık / borç dengesi")}
             </div>
-            <IncomeExpenseBar income={summary.income} expense={summary.expense} />
+            <IncomeExpenseBar
+              income={summary.totalAssets}
+              expense={summary.totalLiabilities}
+            />
           </div>
         )}
+
+        {/* Secondary — this month's flow */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-husrev-sand/60 pt-4 dark:border-white/[0.06]">
+          <MiniStat
+            kicker={t("finance.stat.totalBalance", "Hesaplarda")}
+            value={sumLoading ? "—" : formatTRY(totalBalance)}
+            tone="neutral"
+          />
+          <MiniStat
+            kicker={t("finance.stat.monthIncome", "Bu ay gelir")}
+            value={summary ? formatTRY(summary.income) : "—"}
+            icon={<BiTrendingUp className="h-3.5 w-3.5" />}
+            tone="moss"
+          />
+          <MiniStat
+            kicker={t("finance.stat.monthExpense", "Bu ay gider")}
+            value={summary ? formatTRY(summary.expense) : "—"}
+            icon={<BiTrendingDown className="h-3.5 w-3.5" />}
+            tone="ember"
+          />
+        </div>
       </section>
 
       {/* Tab content */}
@@ -316,8 +373,64 @@ export default function FinancePage() {
             </Section>
           </div>
 
-          {/* Upcoming debts */}
+          {/* Right column — upcoming obligations */}
           <div className="space-y-6">
+            <Section
+              title={t("finance.section.upcomingInstallments", "Yaklaşan taksitler")}
+              action={
+                <button
+                  type="button"
+                  onClick={() => setTab("loans")}
+                  className="text-xs text-husrev-ember hover:underline rounded inline-flex items-center gap-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
+                >
+                  {t("finance.viewAll", "Tümü")} <HiArrowRight className="h-3 w-3" />
+                </button>
+              }
+            >
+              {(summary?.upcomingInstallments ?? []).length === 0 ? (
+                <Empty
+                  title={t("finance.empty.installments.title", "Yaklaşan taksit yok")}
+                  body={t(
+                    "finance.empty.installments.body",
+                    "Tercihen faizsiz bir taksit ekleyince burada görünür.",
+                  )}
+                />
+              ) : (
+                <ul className="space-y-2">
+                  {(summary?.upcomingInstallments ?? []).map((it) => {
+                    const loan = (loans ?? []).find((l) => l.id === it.loanId);
+                    return (
+                      <li key={it.installmentId}>
+                        <button
+                          type="button"
+                          onClick={() => loan && setLoanDetail(loan)}
+                          disabled={!loan}
+                          className="block w-full rounded-xl bg-husrev-cream/50 p-3 text-left ring-1 ring-husrev-sand/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber disabled:cursor-default dark:bg-white/[0.03] dark:ring-white/[0.06]"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="flex min-w-0 items-center gap-1.5">
+                              {loan && (loan.interestFree || loan.interestRate === 0) && (
+                                <HiSparkles className="h-3 w-3 flex-none text-husrev-moss" />
+                              )}
+                              <span className="truncate text-sm font-medium text-husrev-ink dark:text-husrev-cream">
+                                {it.loanName}
+                              </span>
+                            </span>
+                            <span className="tabular-nums text-sm font-semibold text-husrev-ember dark:text-husrev-amber">
+                              {formatTRY(it.amount)}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-[12px] text-gray-500 dark:text-gray-400">
+                            {new Date(it.dueAt).toLocaleDateString("tr-TR")}
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Section>
+
             <Section
               title={t("finance.section.upcoming", "Yaklaşan borçlar")}
               action={
@@ -408,6 +521,22 @@ export default function FinancePage() {
         />
       )}
 
+      {tab === "assets" && (
+        <AssetsList
+          assets={assets ?? []}
+          onEdit={(a) => setAssetModal({ open: true, initial: a })}
+          onCreate={() => setAssetModal({ open: true, initial: null })}
+        />
+      )}
+
+      {tab === "loans" && (
+        <LoansList
+          loans={loans ?? []}
+          onOpen={(l) => setLoanDetail(l)}
+          onCreate={() => setLoanModal({ open: true, initial: null })}
+        />
+      )}
+
       {tab === "debts" && (
         <DebtsList
           debts={openDebts ?? []}
@@ -439,6 +568,28 @@ export default function FinancePage() {
         <DebtModal
           initial={debtModal.initial}
           onClose={() => setDebtModal({ open: false, initial: null })}
+        />
+      )}
+      {assetModal.open && (
+        <AssetModal
+          initial={assetModal.initial}
+          onClose={() => setAssetModal({ open: false, initial: null })}
+        />
+      )}
+      {loanModal.open && (
+        <LoanModal
+          initial={loanModal.initial}
+          onClose={() => setLoanModal({ open: false, initial: null })}
+        />
+      )}
+      {liveLoanDetail && (
+        <LoanDetailModal
+          loan={liveLoanDetail}
+          onClose={() => setLoanDetail(null)}
+          onEdit={() => {
+            setLoanModal({ open: true, initial: liveLoanDetail });
+            setLoanDetail(null);
+          }}
         />
       )}
     </div>
@@ -476,6 +627,35 @@ function HeroStat({
   );
 }
 
+function MiniStat({
+  kicker,
+  value,
+  icon,
+  tone,
+}: {
+  kicker: string;
+  value: string;
+  icon?: React.ReactNode;
+  tone: "neutral" | "moss" | "ember";
+}) {
+  const toneClass = {
+    neutral: "text-husrev-ink dark:text-husrev-cream",
+    moss: "text-husrev-moss",
+    ember: "text-husrev-ember",
+  }[tone];
+  return (
+    <div>
+      <div className="husrev-kicker flex items-center gap-1 text-gray-500 dark:text-gray-400">
+        {icon}
+        {kicker}
+      </div>
+      <div className={`mt-0.5 tabular-nums text-lg font-semibold ${toneClass}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
 function IncomeExpenseBar({ income, expense }: { income: number; expense: number }) {
   const total = income + expense;
   if (total <= 0) {
@@ -489,12 +669,12 @@ function IncomeExpenseBar({ income, expense }: { income: number; expense: number
       <div
         className="bg-husrev-moss"
         style={{ width: `${incomePct}%` }}
-        aria-label="Gelir oranı"
+        aria-label="Varlık oranı"
       />
       <div
         className="bg-husrev-ember"
         style={{ width: `${100 - incomePct}%` }}
-        aria-label="Gider oranı"
+        aria-label="Borç oranı"
       />
     </div>
   );

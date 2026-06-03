@@ -12,7 +12,8 @@ import { parseAxiosError } from "@/utils/handleError";
 import { BiPlus, BiArrowBack } from "react-icons/bi";
 import KanbanBoard from "./KanbanBoard";
 import TaskList from "./TaskList";
-import { TaskPriority, TaskStatus } from "@/types/project/project";
+import TaskDetailModal from "./TaskDetailModal";
+import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
 
 type ViewMode = "kanban" | "list";
 
@@ -156,6 +157,7 @@ export default function ProjectDetailPage({
   const initialView = (searchParams.get("view") as ViewMode | null) === "list" ? "list" : "kanban";
   const [view, setView] = useState<ViewMode>(initialView);
   const [showModal, setShowModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
 
   const { data: project } = useProject(code);
   const { data: tasks = [], isLoading } = useProjectTasks(code);
@@ -219,12 +221,19 @@ export default function ProjectDetailPage({
         {isLoading ? (
           <p className="text-gray-500">{t("common.loading")}</p>
         ) : view === "kanban" ? (
-          <KanbanBoard code={code} tasks={tasks} />
+          <KanbanBoard code={code} tasks={tasks} onSelect={setSelectedTask} />
         ) : (
-          <TaskList code={code} tasks={tasks} />
+          <TaskList code={code} tasks={tasks} onSelect={setSelectedTask} />
         )}
 
         {showModal && <NewTaskModal code={code} onClose={() => setShowModal(false)} />}
+        {selectedTask && (
+          <TaskDetailModal
+            task={selectedTask}
+            code={code}
+            onClose={() => setSelectedTask(null)}
+          />
+        )}
       </div>
     </DndProvider>
   );

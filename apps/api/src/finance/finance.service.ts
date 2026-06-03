@@ -20,20 +20,28 @@ import { FinanceAccount } from './finance-account.entity';
 import { FinanceCategory } from './finance-category.entity';
 import { FinanceTransaction } from './finance-transaction.entity';
 import { FinanceDebt } from './finance-debt.entity';
+import { FinanceAsset } from './finance-asset.entity';
+import { FinanceLoan } from './finance-loan.entity';
+import { FinanceInstallment } from './finance-installment.entity';
 import {
   AccountRequestDto,
   AccountResponseDto,
+  AssetRequestDto,
+  AssetResponseDto,
   CategoryBreakdownEntryDto,
   CategoryRequestDto,
   CategoryResponseDto,
   DebtRequestDto,
   DebtResponseDto,
+  LoanRequestDto,
+  LoanResponseDto,
   SummaryQueryDto,
   SummaryResponseDto,
   TransactionListQueryDto,
   TransactionRequestDto,
   TransactionResponseDto,
   TransferRequestDto,
+  UpcomingInstallmentDto,
 } from './dto/finance-dtos';
 
 @Injectable()
@@ -47,6 +55,12 @@ export class FinanceService {
     private readonly transactions: Repository<FinanceTransaction>,
     @InjectRepository(FinanceDebt)
     private readonly debts: Repository<FinanceDebt>,
+    @InjectRepository(FinanceAsset)
+    private readonly assets: Repository<FinanceAsset>,
+    @InjectRepository(FinanceLoan)
+    private readonly loans: Repository<FinanceLoan>,
+    @InjectRepository(FinanceInstallment)
+    private readonly installments: Repository<FinanceInstallment>,
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationService,
   ) {}
@@ -396,6 +410,244 @@ export class FinanceService {
     await this.debts.softRemove(d);
   }
 
+  // ─── Assets ──────────────────────────────────────────────────────────────
+
+  async listAssets(ownerId: string): Promise<AssetResponseDto[]> {
+    const rows = await this.assets.find({
+      where: { ownerId },
+      order: { position: 'ASC', id: 'ASC' },
+    });
+    return rows.map(AssetResponseDto.from);
+  }
+
+  async createAsset(
+    ownerId: string,
+    req: AssetRequestDto,
+  ): Promise<AssetResponseDto> {
+    const a = this.assets.create({
+      ownerId,
+      name: req.name,
+      type: req.type ?? 'other',
+      value: req.value,
+      currency: req.currency ?? 'TRY',
+      acquiredAt: req.acquiredAt ? new Date(req.acquiredAt) : null,
+      colorToken: req.colorToken ?? null,
+      icon: req.icon ?? null,
+      notes: req.notes ?? null,
+      position: 0,
+    });
+    return AssetResponseDto.from(await this.assets.save(a));
+  }
+
+  async updateAsset(
+    ownerId: string,
+    id: string,
+    req: AssetRequestDto,
+  ): Promise<AssetResponseDto> {
+    const a = await this.requireAsset(ownerId, id);
+    a.name = req.name;
+    if (req.type !== undefined) a.type = req.type;
+    a.value = req.value;
+    if (req.currency !== undefined) a.currency = req.currency;
+    if (req.acquiredAt !== undefined) {
+      a.acquiredAt = req.acquiredAt ? new Date(req.acquiredAt) : null;
+    }
+    if (req.colorToken !== undefined) a.colorToken = req.colorToken ?? null;
+    if (req.icon !== undefined) a.icon = req.icon ?? null;
+    if (req.notes !== undefined) a.notes = req.notes ?? null;
+    return AssetResponseDto.from(await this.assets.save(a));
+  }
+
+  async deleteAsset(ownerId: string, id: string): Promise<void> {
+    const a = await this.requireAsset(ownerId, id);
+    await this.assets.softRemove(a);
+  }
+
+  // ─── Loans / installments ──────────────────────────────────────────────────
+
+  async listLoans(ownerId: string): Promise<LoanResponseDto[]> {
+    const loans = await this.loans.find({
+      where: { ownerId },
+      order: { position: 'ASC', id: 'ASC' },
+    });
+    if (loans.length === 0) return [];
+    const allInstallments = await this.installments.find({
+      where: { ownerId, loanId: In(loans.map((l) => l.id)) },
+      order: { sequence: 'ASC' },
+    });
+    return loans.map((l) =>
+      LoanResponseDto.from(
+        l,
+        allInstallments.filter((i) => i.loanId === l.id),
+      ),
+    );
+  }
+
+  /**
+   * Creates a loan and its full installment schedule (monthly from
+   * `startDate`), then enqueues a reminder per installment if a lead-time is
+   * set. `interestFree` and a 0% rate are kept consistent.
+   */
+  async createLoan(
+    ownerId: string,
+    req: LoanRequestDto,
+  ): Promise<LoanResponseDto> {
+    const { interestFree, interestRate } = normaliseInterest(req);
+    const start = new Date(req.startDate);
+    const currency = req.currency ?? 'TRY';
+
+    const result = await this.dataSource.transaction(async (em) => {
+      const loanRepo = em.getRepository(FinanceLoan);
+      const instRepo = em.getRepository(FinanceInstallment);
+      const loan = await loanRepo.save(
+        loanRepo.create({
+          ownerId,
+          name: req.name,
+          lender: req.lender ?? null,
+          principalAmount: req.principalAmount,
+          installmentCount: req.installmentCount,
+          installmentAmount: req.installmentAmount,
+          interestRate,
+          interestFree,
+          startDate: start,
+          notifyMinutesBefore: req.notifyMinutesBefore ?? null,
+          currency,
+          notes: req.notes ?? null,
+          settledAt: null,
+          position: 0,
+        }),
+      );
+      const rows = buildSchedule(
+        ownerId,
+        loan.id,
+        start,
+        req.installmentCount,
+        req.installmentAmount,
+      ).map((r) => instRepo.create(r));
+      const saved = await instRepo.save(rows);
+      return { loan, installments: saved };
+    });
+
+    for (const inst of result.installments) {
+      await this.syncInstallmentNotification(result.loan, inst);
+    }
+    return LoanResponseDto.from(result.loan, result.installments);
+  }
+
+  async updateLoan(
+    ownerId: string,
+    id: string,
+    req: LoanRequestDto,
+  ): Promise<LoanResponseDto> {
+    const loan = await this.requireLoan(ownerId, id);
+    const existing = await this.installments.find({
+      where: { ownerId, loanId: loan.id },
+      order: { sequence: 'ASC' },
+    });
+    const hasPaid = existing.some((i) => i.paidAt !== null);
+    const start = new Date(req.startDate);
+    const termsChanged =
+      loan.installmentCount !== req.installmentCount ||
+      Number(loan.installmentAmount) !== req.installmentAmount ||
+      loan.startDate.getTime() !== start.getTime();
+
+    if (termsChanged && hasPaid) {
+      throw ApiException.badRequest(
+        'Cannot change installment plan after a payment — delete and recreate the loan instead.',
+      );
+    }
+
+    const { interestFree, interestRate } = normaliseInterest(req);
+    loan.name = req.name;
+    loan.lender = req.lender ?? null;
+    loan.principalAmount = req.principalAmount;
+    loan.installmentCount = req.installmentCount;
+    loan.installmentAmount = req.installmentAmount;
+    loan.interestRate = interestRate;
+    loan.interestFree = interestFree;
+    loan.startDate = start;
+    loan.notifyMinutesBefore = req.notifyMinutesBefore ?? null;
+    if (req.currency !== undefined) loan.currency = req.currency;
+    loan.notes = req.notes ?? null;
+
+    let installments = existing;
+    if (termsChanged) {
+      // No payments yet — safe to regenerate the schedule wholesale.
+      for (const inst of existing) {
+        await this.notifications.cancelForSource(
+          ownerId,
+          'finance_installment',
+          inst.id,
+        );
+      }
+      await this.installments.remove(existing);
+      const rows = buildSchedule(
+        ownerId,
+        loan.id,
+        start,
+        req.installmentCount,
+        req.installmentAmount,
+      ).map((r) => this.installments.create(r));
+      installments = await this.installments.save(rows);
+    }
+
+    loan.settledAt = installments.every((i) => i.paidAt !== null)
+      ? (loan.settledAt ?? new Date())
+      : null;
+    const saved = await this.loans.save(loan);
+
+    // Re-sync notifications (lead-time or dates may have changed).
+    for (const inst of installments) {
+      await this.syncInstallmentNotification(saved, inst);
+    }
+    return LoanResponseDto.from(saved, installments);
+  }
+
+  async deleteLoan(ownerId: string, id: string): Promise<void> {
+    const loan = await this.requireLoan(ownerId, id);
+    const rows = await this.installments.find({
+      where: { ownerId, loanId: loan.id },
+    });
+    for (const inst of rows) {
+      await this.notifications.cancelForSource(
+        ownerId,
+        'finance_installment',
+        inst.id,
+      );
+    }
+    await this.dataSource.transaction(async (em) => {
+      if (rows.length > 0) await em.getRepository(FinanceInstallment).softRemove(rows);
+      await em.getRepository(FinanceLoan).softRemove(loan);
+    });
+  }
+
+  /** Toggle an installment's paid state; recompute loan settlement + reminder. */
+  async payInstallment(
+    ownerId: string,
+    loanId: string,
+    installmentId: string,
+  ): Promise<LoanResponseDto> {
+    const loan = await this.requireLoan(ownerId, loanId);
+    const inst = await this.installments.findOne({
+      where: { id: installmentId, loanId: loan.id, ownerId },
+    });
+    if (!inst) throw ApiException.notFound('Installment not found');
+
+    inst.paidAt = inst.paidAt ? null : new Date();
+    await this.installments.save(inst);
+    await this.syncInstallmentNotification(loan, inst);
+
+    const all = await this.installments.find({
+      where: { ownerId, loanId: loan.id },
+      order: { sequence: 'ASC' },
+    });
+    loan.settledAt = all.every((i) => i.paidAt !== null)
+      ? (loan.settledAt ?? new Date())
+      : null;
+    const saved = await this.loans.save(loan);
+    return LoanResponseDto.from(saved, all);
+  }
+
   // ─── Summary ─────────────────────────────────────────────────────────────
 
   /**
@@ -469,6 +721,56 @@ export class FinanceService {
       take: 5,
     });
 
+    // ── Net worth ──
+    const liveAccountBalance = accountList
+      .filter((a) => !a.archived)
+      .reduce((sum, a) => sum + a.balance, 0);
+
+    const assetRows = await this.assets.find({ where: { ownerId } });
+    const assetTotal = assetRows.reduce((sum, a) => sum + Number(a.value), 0);
+    const assetsByTypeMap = new Map<string, number>();
+    for (const a of assetRows) {
+      assetsByTypeMap.set(
+        a.type,
+        (assetsByTypeMap.get(a.type) ?? 0) + Number(a.value),
+      );
+    }
+    const assetsByType = [...assetsByTypeMap.entries()]
+      .map(([type, total]) => ({ type, total: Number(total.toFixed(2)) }))
+      .sort((x, y) => y.total - x.total);
+
+    const totalAssets = liveAccountBalance + assetTotal;
+
+    const owedDebts = await this.debts.find({
+      where: { ownerId, direction: 'i_owe', settledAt: IsNull() },
+    });
+    const debtLiability = owedDebts.reduce(
+      (sum, d) => sum + Number(d.principalAmount),
+      0,
+    );
+    const unpaidInstallments = await this.installments.find({
+      where: { ownerId, paidAt: IsNull() },
+      order: { dueAt: 'ASC' },
+    });
+    const loanLiability = unpaidInstallments.reduce(
+      (sum, i) => sum + Number(i.amount),
+      0,
+    );
+    const totalLiabilities = debtLiability + loanLiability;
+
+    const loanNameById = new Map(
+      (await this.loans.find({ where: { ownerId } })).map((l) => [l.id, l.name]),
+    );
+    const upcomingInstallments: UpcomingInstallmentDto[] = unpaidInstallments
+      .slice(0, 5)
+      .map((i) => ({
+        loanId: i.loanId,
+        loanName: loanNameById.get(i.loanId) ?? '',
+        installmentId: i.id,
+        amount: Number(i.amount),
+        dueAt: i.dueAt.toISOString(),
+      }));
+
     return {
       from: from.toISOString(),
       to: to.toISOString(),
@@ -478,6 +780,11 @@ export class FinanceService {
       byCategory,
       accountBalances,
       upcomingDebts: upcomingDebts.map(DebtResponseDto.from),
+      totalAssets: Number(totalAssets.toFixed(2)),
+      totalLiabilities: Number(totalLiabilities.toFixed(2)),
+      netWorth: Number((totalAssets - totalLiabilities).toFixed(2)),
+      assetsByType,
+      upcomingInstallments,
     };
   }
 
@@ -614,6 +921,109 @@ export class FinanceService {
     if (!d) throw ApiException.notFound('Debt not found');
     return d;
   }
+  private async requireAsset(
+    ownerId: string,
+    id: string,
+  ): Promise<FinanceAsset> {
+    const a = await this.assets.findOne({ where: { id, ownerId } });
+    if (!a) throw ApiException.notFound('Asset not found');
+    return a;
+  }
+  private async requireLoan(
+    ownerId: string,
+    id: string,
+  ): Promise<FinanceLoan> {
+    const l = await this.loans.findOne({ where: { id, ownerId } });
+    if (!l) throw ApiException.notFound('Loan not found');
+    return l;
+  }
+
+  /**
+   * Keep an installment's reminder in sync with its state: cancel any existing
+   * one, then (re-)enqueue only if the loan has a lead-time and the installment
+   * is still unpaid.
+   */
+  private async syncInstallmentNotification(
+    loan: FinanceLoan,
+    inst: FinanceInstallment,
+  ): Promise<void> {
+    await this.notifications.cancelForSource(
+      loan.ownerId,
+      'finance_installment',
+      inst.id,
+    );
+    if (inst.paidAt) return;
+    const fireAt = leadTimeFireAt(inst.dueAt, loan.notifyMinutesBefore);
+    if (!fireAt) return;
+    await this.notifications.enqueue({
+      ownerId: loan.ownerId,
+      kind: 'finance_installment',
+      sourceId: inst.id,
+      scheduledAt: fireAt,
+      title: `Taksit vadesi: ${loan.name}`,
+      body: formatLeadTimeBody(
+        inst.dueAt,
+        loan.notifyMinutesBefore ?? 0,
+        `${inst.sequence}/${loan.installmentCount} · ${inst.amount} ${loan.currency}`,
+      ),
+      deepLink: '/finance',
+    });
+  }
+}
+
+/** Coalesce the interest-free flag and rate so a 0% rate ⇒ interest-free. */
+export function normaliseInterest(req: {
+  interestFree?: boolean;
+  interestRate?: number | null;
+}): { interestFree: boolean; interestRate: number | null } {
+  const interestFree =
+    req.interestFree ?? (req.interestRate != null && req.interestRate === 0);
+  const interestRate = interestFree ? 0 : (req.interestRate ?? null);
+  return { interestFree, interestRate };
+}
+
+/** Build a monthly installment schedule starting at `start`. */
+export function buildSchedule(
+  ownerId: string,
+  loanId: string,
+  start: Date,
+  count: number,
+  amount: number,
+): Array<{
+  ownerId: string;
+  loanId: string;
+  sequence: number;
+  amount: number;
+  dueAt: Date;
+  paidAt: null;
+}> {
+  const rows = [];
+  for (let k = 0; k < count; k++) {
+    rows.push({
+      ownerId,
+      loanId,
+      sequence: k + 1,
+      amount,
+      dueAt: addMonths(start, k),
+      paidAt: null,
+    });
+  }
+  return rows;
+}
+
+/** Add `n` months to `d`, clamping the day to the target month's length. */
+export function addMonths(d: Date, n: number): Date {
+  const result = new Date(d.getTime());
+  const targetMonth = result.getMonth() + n;
+  result.setDate(1);
+  result.setMonth(targetMonth);
+  const lastDay = new Date(
+    result.getFullYear(),
+    result.getMonth() + 1,
+    0,
+  ).getDate();
+  result.setDate(Math.min(d.getDate(), lastDay));
+  return result;
 }
 
 function resolveMonthWindow(

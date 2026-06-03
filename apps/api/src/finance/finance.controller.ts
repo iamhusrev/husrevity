@@ -16,10 +16,14 @@ import { FinanceService } from './finance.service';
 import {
   AccountRequestDto,
   AccountResponseDto,
+  AssetRequestDto,
+  AssetResponseDto,
   CategoryRequestDto,
   CategoryResponseDto,
   DebtRequestDto,
   DebtResponseDto,
+  LoanRequestDto,
+  LoanResponseDto,
   SummaryQueryDto,
   SummaryResponseDto,
   TransactionListQueryDto,
@@ -199,6 +203,83 @@ export class FinanceController {
     @Param('id') id: string,
   ): Promise<void> {
     return this.finance.deleteDebt(u.userId, id);
+  }
+
+  // ─── Assets ──────────────────────────────────────────────────────────────
+
+  @Get('assets')
+  listAssets(@CurrentUser() u: AuthenticatedUser): Promise<AssetResponseDto[]> {
+    return this.finance.listAssets(u.userId);
+  }
+
+  @Post('assets')
+  @HttpCode(HttpStatus.CREATED)
+  createAsset(
+    @CurrentUser() u: AuthenticatedUser,
+    @Body() body: AssetRequestDto,
+  ): Promise<AssetResponseDto> {
+    return this.finance.createAsset(u.userId, body);
+  }
+
+  @Put('assets/:id')
+  updateAsset(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: AssetRequestDto,
+  ): Promise<AssetResponseDto> {
+    return this.finance.updateAsset(u.userId, id, body);
+  }
+
+  @Delete('assets/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAsset(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    return this.finance.deleteAsset(u.userId, id);
+  }
+
+  // ─── Loans / installments ──────────────────────────────────────────────────
+
+  @Get('loans')
+  listLoans(@CurrentUser() u: AuthenticatedUser): Promise<LoanResponseDto[]> {
+    return this.finance.listLoans(u.userId);
+  }
+
+  @Post('loans')
+  @HttpCode(HttpStatus.CREATED)
+  createLoan(
+    @CurrentUser() u: AuthenticatedUser,
+    @Body() body: LoanRequestDto,
+  ): Promise<LoanResponseDto> {
+    return this.finance.createLoan(u.userId, body);
+  }
+
+  @Put('loans/:id')
+  updateLoan(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: LoanRequestDto,
+  ): Promise<LoanResponseDto> {
+    return this.finance.updateLoan(u.userId, id, body);
+  }
+
+  @Delete('loans/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteLoan(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    return this.finance.deleteLoan(u.userId, id);
+  }
+
+  @Patch('loans/:id/installments/:installmentId/pay')
+  payInstallment(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('installmentId') installmentId: string,
+  ): Promise<LoanResponseDto> {
+    return this.finance.payInstallment(u.userId, id, installmentId);
   }
 
   // ─── Summary ─────────────────────────────────────────────────────────────
