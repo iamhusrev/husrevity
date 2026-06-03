@@ -17,12 +17,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
-
-function toLocalInput(iso?: string | null): string {
-  const d = iso ? new Date(iso) : new Date();
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 export function TransactionModal({
   initial,
@@ -51,7 +46,7 @@ export function TransactionModal({
     initial ? String(initial.amount) : "",
   );
   const [occurredAt, setOccurredAt] = useState<string>(
-    toLocalInput(initial?.occurredAt),
+    initial?.occurredAt ?? new Date().toISOString(),
   );
   const [description, setDescription] = useState(initial?.description ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -84,7 +79,7 @@ export function TransactionModal({
       categoryId: categoryId || null,
       kind,
       amount: amt,
-      occurredAt: new Date(occurredAt).toISOString(),
+      occurredAt: occurredAt,
       description: description.trim() || null,
     };
     try {
@@ -121,7 +116,7 @@ export function TransactionModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between mb-5">
           <div className="space-y-1">
@@ -220,12 +215,10 @@ export function TransactionModal({
           </Field>
 
           <Field label={t("finance.field.occurredAt", "Tarih")}>
-            <input
-              type="datetime-local"
-              required
+            <DateTimePicker
               value={occurredAt}
-              onChange={(e) => setOccurredAt(e.target.value)}
-              className="husrev-input"
+              onChange={(iso) => iso && setOccurredAt(iso)}
+              clearable={false}
             />
           </Field>
 

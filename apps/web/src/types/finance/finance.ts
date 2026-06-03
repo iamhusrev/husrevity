@@ -65,6 +65,7 @@ export interface TransactionResponse {
   occurredAt: string;
   description: string | null;
   transferPairId: string | null;
+  debtId: string | null;
   createdAt: string;
 }
 

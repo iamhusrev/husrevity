@@ -90,7 +90,7 @@ export function AccountModal({
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
       >
         <div className="flex items-start justify-between mb-5">
           <div className="space-y-1">

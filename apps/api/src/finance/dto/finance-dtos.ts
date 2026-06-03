@@ -156,6 +156,7 @@ export class TransactionResponseDto {
   occurredAt!: string;
   description!: string | null;
   transferPairId!: string | null;
+  debtId!: string | null;
   createdAt!: string;
 
   static from(t: FinanceTransaction): TransactionResponseDto {
@@ -169,6 +170,7 @@ export class TransactionResponseDto {
       occurredAt: t.occurredAt.toISOString(),
       description: t.description,
       transferPairId: t.transferPairId,
+      debtId: t.debtId ?? null,
       createdAt: t.createdAt.toISOString(),
     };
   }

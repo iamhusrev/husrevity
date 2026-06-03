@@ -9,10 +9,7 @@ import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project"
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
-
-function toDateInput(iso?: string | null): string {
-  return iso ? iso.slice(0, 10) : "";
-}
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 
 export default function TaskDetailModal({
   task,
@@ -32,7 +29,7 @@ export default function TaskDetailModal({
   const [description, setDescription] = useState(task.description ?? "");
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
-  const [dueAt, setDueAt] = useState(toDateInput(task.dueAt));
+  const [dueAt, setDueAt] = useState<string | null>(task.dueAt ?? null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +43,7 @@ export default function TaskDetailModal({
           description: description || null,
           status,
           priority,
-          dueAt: dueAt ? new Date(dueAt).toISOString() : null,
+          dueAt: dueAt,
         },
       });
       onClose();
@@ -71,7 +68,7 @@ export default function TaskDetailModal({
       isOpen
       onClose={onClose}
       title={task.title}
-      className="mx-4 my-6 max-h-[90vh] w-full max-w-lg overflow-y-auto p-7"
+      className="mx-4 my-6 max-h-[90vh] w-full max-w-lg overflow-y-auto p-5 sm:p-7"
     >
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-1.5">
@@ -136,12 +133,7 @@ export default function TaskDetailModal({
           <label className="husrev-kicker text-gray-500 dark:text-gray-400">
             {t("kanban.detail.dueField", "Bitiş tarihi")}
           </label>
-          <input
-            type="date"
-            value={dueAt}
-            onChange={(e) => setDueAt(e.target.value)}
-            className="husrev-input"
-          />
+          <DateTimePicker value={dueAt} onChange={setDueAt} mode="date" />
         </div>
 
         {task.createdAt && (

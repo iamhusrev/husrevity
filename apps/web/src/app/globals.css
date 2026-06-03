@@ -325,8 +325,12 @@
   @apply max-w-full overflow-x-auto custom-scrollbar;
 }
 
-.fc-dayGridMonth-view.fc-view.fc-daygrid {
-  @apply min-w-[718px];
+/* The month grid needs room to breathe; only force its min width on ≥md so
+   mobile (which defaults to the list view) never gets a 718px horizontal scroll. */
+@media (min-width: 768px) {
+  .fc-dayGridMonth-view.fc-view.fc-daygrid {
+    @apply min-w-[718px];
+  }
 }
 
 .fc .fc-scrollgrid-section > * {
@@ -824,6 +828,17 @@ span.flatpickr-weekday,
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+/* Husrev — bottom-sheet entrance (mobile date picker). */
+@keyframes husrev-sheet {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 

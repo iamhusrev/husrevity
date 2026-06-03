@@ -38,7 +38,7 @@ export function TransactionsTable({
           <select
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
-            className="husrev-input h-8 text-xs py-0"
+            className="husrev-input h-9 w-auto text-xs"
           >
             <option value="">{t("finance.filter.allAccounts", "Tüm hesaplar")}</option>
             {accounts.map((a) => (
@@ -48,7 +48,7 @@ export function TransactionsTable({
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as typeof kind)}
-            className="husrev-input h-8 text-xs py-0"
+            className="husrev-input h-9 w-auto text-xs"
           >
             <option value="">{t("finance.filter.allKinds", "Tüm türler")}</option>
             <option value="income">{t("finance.kind.income", "Gelir")}</option>
@@ -69,7 +69,51 @@ export function TransactionsTable({
           {t("finance.empty.tx.title", "Henüz işlem yok")}
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <>
+          {/* Mobile — card list (table is hard to scan on narrow screens) */}
+          <ul className="divide-y divide-husrev-sand/40 dark:divide-white/[0.04] sm:hidden">
+            {txs.map((tx) => (
+              <li key={tx.id}>
+                <button
+                  type="button"
+                  onClick={() => tx.kind !== "transfer" && onEdit(tx)}
+                  disabled={tx.kind === "transfer"}
+                  className="flex w-full items-center justify-between gap-3 py-2.5 text-left disabled:cursor-default"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-husrev-ink dark:text-husrev-cream">
+                      {tx.description || (
+                        <span className="italic text-gray-400">
+                          {tx.kind === "transfer"
+                            ? t("finance.transfer", "Transfer")
+                            : t("finance.untitled", "(Açıklama yok)")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                      {new Date(tx.occurredAt).toLocaleDateString("tr-TR")} ·{" "}
+                      {accounts.find((a) => a.id === tx.accountId)?.name ?? "—"}
+                    </div>
+                  </div>
+                  <span
+                    className={`shrink-0 tabular-nums text-sm font-semibold ${
+                      tx.kind === "income"
+                        ? "text-husrev-moss"
+                        : tx.kind === "expense"
+                          ? "text-husrev-ember"
+                          : "text-gray-500"
+                    }`}
+                  >
+                    {tx.kind === "expense" ? "−" : tx.kind === "income" ? "+" : ""}
+                    {formatTRY(tx.amount)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* ≥sm — full table */}
+          <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-sm">
             <thead className="text-left text-[11px] uppercase tracking-wider text-gray-400">
               <tr className="border-b border-husrev-sand/50">
@@ -117,7 +161,8 @@ export function TransactionsTable({
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </section>
   );

@@ -467,6 +467,7 @@ export class FinanceService {
           occurredAt,
           description: req.description?.trim() || label,
           transferPairId: null,
+          debtId: debt.id,
         }),
       );
 
@@ -480,6 +481,19 @@ export class FinanceService {
 
     await this.syncDebtNotification(saved);
     return DebtResponseDto.from(saved);
+  }
+
+  /** The payment transactions recorded against a debt, newest first. */
+  async listDebtPayments(
+    ownerId: string,
+    debtId: string,
+  ): Promise<TransactionResponseDto[]> {
+    await this.requireDebt(ownerId, debtId);
+    const rows = await this.transactions.find({
+      where: { ownerId, debtId },
+      order: { occurredAt: 'DESC', id: 'DESC' },
+    });
+    return rows.map(TransactionResponseDto.from);
   }
 
   async deleteDebt(ownerId: string, id: string): Promise<void> {

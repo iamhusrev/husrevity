@@ -5,6 +5,7 @@ import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import DateTimePicker from "@/components/datetime/DateTimePicker";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import {
   useReminderLists,
@@ -43,19 +44,6 @@ const PRIORITY_CYCLE: ReminderPriority[] = ["NONE", "LOW", "MEDIUM", "HIGH"];
 function nextPriority(p: ReminderPriority): ReminderPriority {
   const i = PRIORITY_CYCLE.indexOf(p);
   return PRIORITY_CYCLE[(i + 1) % PRIORITY_CYCLE.length];
-}
-
-function toLocalInput(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-    d.getHours(),
-  )}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalInput(local: string): string {
-  return new Date(local).toISOString();
 }
 
 // ─── Due-date presets (all at 09:00 local) ────────────────────────────────────
@@ -331,31 +319,12 @@ function ReminderRow({
                 ))}
               </div>
 
-              <input
-                type="datetime-local"
-                value={toLocalInput(reminder.dueAt)}
-                onPointerDown={(e) => e.stopPropagation()}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    commit({ dueAt: fromLocalInput(e.target.value) });
-                    setDueOpen(false);
-                  }
-                }}
-                className="mt-3 w-full rounded border border-gray-200 bg-white px-2 py-1 text-xs outline-none focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
-              />
-
-              {reminder.dueAt && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    commit({ dueAt: null });
-                    setDueOpen(false);
-                  }}
-                  className="mt-2 w-full rounded px-2 py-1 text-left text-xs text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10"
-                >
-                  {t("reminders.due.clear")}
-                </button>
-              )}
+              <div className="mt-3" onPointerDown={(e) => e.stopPropagation()}>
+                <DateTimePicker
+                  value={reminder.dueAt}
+                  onChange={(iso) => commit({ dueAt: iso })}
+                />
+              </div>
             </div>
           </Dropdown>
         </div>
@@ -427,7 +396,7 @@ function ReminderEditModal({
   const [title, setTitle] = useState(reminder.title);
   const [notes, setNotes] = useState(reminder.notes ?? "");
   const [priority, setPriority] = useState<ReminderPriority>(reminder.priority);
-  const [dueAt, setDueAt] = useState(toLocalInput(reminder.dueAt));
+  const [dueAt, setDueAt] = useState<string | null>(reminder.dueAt ?? null);
   const [flag, setFlag] = useState(reminder.flag);
 
   const submit = async (e: React.FormEvent) => {
@@ -440,7 +409,7 @@ function ReminderEditModal({
           listId: reminder.listId,
           title: title.trim(),
           notes: notes.trim() || null,
-          dueAt: dueAt ? fromLocalInput(dueAt) : null,
+          dueAt: dueAt,
           priority,
           flag,
         },
@@ -541,12 +510,7 @@ function ReminderEditModal({
               <span className="husrev-kicker text-gray-600 dark:text-gray-300">
                 {t("reminders.edit.dueField", "Tarih")}
               </span>
-              <input
-                type="datetime-local"
-                value={dueAt}
-                onChange={(e) => setDueAt(e.target.value)}
-                className="husrev-input"
-              />
+              <DateTimePicker value={dueAt} onChange={setDueAt} />
             </label>
           </div>
 

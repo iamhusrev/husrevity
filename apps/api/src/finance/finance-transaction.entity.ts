@@ -48,4 +48,8 @@ export class FinanceTransaction extends BaseEntity {
   /** For transfers: the id of the paired row on the other account. */
   @Column({ name: 'transfer_pair_id', type: 'bigint', nullable: true })
   transferPairId!: string | null;
+
+  /** Set when this row is a payment against a debt — links it to that debt. */
+  @Column({ name: 'debt_id', type: 'bigint', nullable: true })
+  debtId!: string | null;
 }
