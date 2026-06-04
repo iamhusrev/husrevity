@@ -369,6 +369,14 @@ export default function NotesPage() {
 
   const [quickTitle, setQuickTitle] = useState("");
 
+  // Holds the editor's flush() so closing the modal saves the in-progress note.
+  const editorFlushRef = useRef<(() => Promise<void>) | null>(null);
+
+  const handleEditorClose = useCallback(async () => {
+    await editorFlushRef.current?.();
+    setEditingId(null);
+  }, []);
+
   const { data: notes = [], isLoading } = useNotes(filters);
   const { data: tags = [] } = useNoteTags();
   const deleteNote = useDeleteNote();
@@ -506,7 +514,7 @@ export default function NotesPage() {
 
         <DetailModal
           isOpen={editingId !== null}
-          onClose={() => setEditingId(null)}
+          onClose={handleEditorClose}
           onExpand={
             editingId !== null
               ? () =>
@@ -517,6 +525,7 @@ export default function NotesPage() {
           {editingId === "new" ? (
             <NoteEditorPage
               embedded
+              flushRef={editorFlushRef}
               onSaved={() => setEditingId(null)}
               onCancel={() => setEditingId(null)}
             />
@@ -524,6 +533,7 @@ export default function NotesPage() {
             <NoteEditorPage
               id={editingId}
               embedded
+              flushRef={editorFlushRef}
               onSaved={() => setEditingId(null)}
               onCancel={() => setEditingId(null)}
             />

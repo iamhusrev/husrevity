@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { type RefObject, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +21,12 @@ interface Props {
   onSaved?: (id: number) => void;
   onCancel?: () => void;
   embedded?: boolean;
+  /**
+   * When provided, the parent registers a "flush" function here that saves the
+   * current form on close (Keep-style auto-save) so accidentally dismissing the
+   * modal never loses the note. Set to `null` again on unmount.
+   */
+  flushRef?: RefObject<(() => Promise<void>) | null>;
 }
 
 const NOTE_COLORS = [
@@ -33,7 +39,7 @@ const NOTE_COLORS = [
   "#FADADD",
 ];
 
-export default function NoteEditorPage({ id, onSaved, onCancel, embedded }: Props) {
+export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushRef }: Props) {
   const router = useRouter();
   const { t } = useTranslation();
   const isNew = !id;
@@ -60,7 +66,16 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded }: Prop
 
   type FormValues = z.infer<typeof schema>;
 
-  const { control, handleSubmit, reset, register, watch, setValue } = useForm<FormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    register,
+    watch,
+    setValue,
+    getValues,
+    formState: { isDirty },
+  } = useForm<FormValues>({
     mode: "onBlur",
     resolver: zodResolver(schema),
     defaultValues: {
@@ -122,6 +137,52 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded }: Prop
       showAlert({ title, message, type: "error", position: "top-center" });
     }
   };
+
+  // Keep-style auto-save on modal close: persist whatever is typed so an
+  // accidental dismiss (backdrop / Esc / X) never loses the note.
+  const flush = useCallback(async () => {
+    if (createNote.isPending || updateNote.isPending) return;
+    const data = getValues();
+    const titleTrimmed = (data.title ?? "").trim();
+    const bodyTrimmed = (data.bodyMarkdown ?? "").trim();
+
+    try {
+      if (isNew) {
+        // Nothing typed → don't create an empty/junk note.
+        if (!titleTrimmed && !bodyTrimmed) return;
+        // Backend requires a title; derive one from the first body line if absent.
+        const title = titleTrimmed || bodyTrimmed.split("\n")[0].slice(0, 255);
+        await createNote.mutateAsync({ ...data, title });
+        showAlert({
+          title: t("notes.savedTitle"),
+          message: t("notes.createdMessage"),
+          type: "success",
+          position: "top-center",
+        });
+      } else {
+        // Untouched → nothing to save.
+        if (!isDirty) return;
+        await updateNote.mutateAsync({ id: id!, body: data });
+        showAlert({
+          title: t("notes.savedTitle"),
+          message: t("notes.updatedMessage"),
+          type: "success",
+          position: "top-center",
+        });
+      }
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  }, [createNote, updateNote, getValues, isNew, isDirty, id, showAlert, t]);
+
+  useEffect(() => {
+    if (!flushRef) return;
+    flushRef.current = flush;
+    return () => {
+      flushRef.current = null;
+    };
+  }, [flushRef, flush]);
 
   if (!isNew && isLoading) {
     return <p className="text-gray-500">{t("common.loading")}</p>;
