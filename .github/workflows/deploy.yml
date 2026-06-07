@@ -21,11 +21,13 @@ jobs:
     runs-on: [self-hosted, macOS, iamhusrev-prod]
     timeout-minutes: 20
     env:
-      STACK_NAME: husrevity-app
+      STACK_NAME: husrevity-prod
       HUSREVITY_API_HOST_PORT: 4090
       HUSREVITY_WEB_HOST_PORT: 3090
       HUSREVITY_DB_HOST_PORT: 5490
       NEXT_PUBLIC_API_URL: https://api.iamhusrev.com/api
+      # Compose reads its env_file from this handle (docker-compose.yml).
+      HUSREVITY_ENV_FILE: apps/api/.env.prod
 
     steps:
       - name: Checkout
@@ -40,18 +42,19 @@ jobs:
 
       - name: Point env symlinks at prod secrets
         run: |
-          # ~/.husrevity/api.env is the canonical PROD secrets file (chmod 600).
+          # Canonical PROD secrets file (chmod 600) in the central store.
           # actions/checkout's default `clean: true` runs `git clean -ffdx`
           # which deletes our gitignored symlinks — so we recreate them
           # every deploy. Same file feeds compose env_file (api) and
           # ${VAR} interpolation (root .env).
-          if [[ ! -f "$HOME/.husrevity/api.env" ]]; then
-            echo "::error::$HOME/.husrevity/api.env missing on this host. Provision prod secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
+          SECRETS="$HOME/iamhusrev-prod/secrets/husrevity.env"
+          if [[ ! -f "$SECRETS" ]]; then
+            echo "::error::$SECRETS missing on this host. Provision prod secrets first (see ~/iamhusrev-prod/RUNBOOK.md §3)."
             exit 1
           fi
-          ln -sfn "$HOME/.husrevity/api.env" apps/api/.env.prod
-          ln -sfn "$HOME/.husrevity/api.env" .env
-          ls -la apps/api/.env.prod .env
+          ln -sfn "$SECRETS" "$HUSREVITY_ENV_FILE"   # apps/api/.env.prod
+          ln -sfn "$SECRETS" .env
+          ls -la "$HUSREVITY_ENV_FILE" .env
 
       - name: Build images
         run: docker compose build

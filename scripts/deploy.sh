@@ -35,7 +35,9 @@ done
 # Stack configuration. The env vars on the right-hand side are read by
 # docker-compose.yml at parse time (and could be overridden if you ever
 # spin up an extra stack — e.g. a hotfix branch on different ports).
-SECRETS_FILE="$HOME/.husrevity/api.env"
+# Canonical prod secrets live in the central store (~/iamhusrev-prod/secrets/).
+# Override with HUSREVITY_ENV_FILE=... for a one-off stack (e.g. a hotfix).
+SECRETS_FILE="${HUSREVITY_ENV_FILE:-$HOME/iamhusrev-prod/secrets/husrevity.env}"
 PUBLIC_HEALTH_URL="https://api.iamhusrev.com/api/health"
 export STACK_NAME="husrevity-prod"
 export HUSREVITY_API_HOST_PORT="4090"

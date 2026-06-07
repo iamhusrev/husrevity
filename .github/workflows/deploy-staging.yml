@@ -1,0 +1,92 @@
+name: Deploy to staging (master)
+
+# Triggers on every push to master. Deploys the husrevity-staging stack on the
+# self-hosted Mac runner (same host that serves prod, isolated ports/DB/secrets).
+# Manual rerun: gh workflow run deploy-staging.yml --ref master
+#
+# Promotion flow: develop on master → staging auto-deploys → when happy, merge
+# master into a release/* branch → deploy.yml ships prod.
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+# Independent of prod (different concurrency group); staging never cancels prod.
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build + restart staging stack
+    runs-on: [self-hosted, macOS, iamhusrev-prod]
+    timeout-minutes: 20
+    env:
+      # CRITICAL: prod and staging share this repo dir, so they would share
+      # Compose's default project name (the dir basename) and clobber each
+      # other's api/web containers. Pin a distinct project so staging is a
+      # fully separate Compose stack from prod (which uses the default name).
+      COMPOSE_PROJECT_NAME: husrevity-staging
+      STACK_NAME: husrevity-staging
+      HUSREVITY_API_HOST_PORT: 4190
+      HUSREVITY_WEB_HOST_PORT: 3190
+      HUSREVITY_DB_HOST_PORT: 5491
+      NEXT_PUBLIC_API_URL: https://api-staging.iamhusrev.com/api
+      # Compose reads its env_file from this handle (docker-compose.yml).
+      # Distinct symlink name from prod so the two stacks never clobber.
+      HUSREVITY_ENV_FILE: apps/api/.env.staging
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup runner PATH (Docker Desktop + Homebrew)
+        run: |
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "/Applications/Docker.app/Contents/Resources/bin" >> "$GITHUB_PATH"
+          /Applications/Docker.app/Contents/Resources/bin/docker --version
+
+      - name: Point env symlinks at staging secrets
+        run: |
+          # Canonical STAGING secrets file (chmod 600) in the central store.
+          # checkout's `clean: true` removes gitignored symlinks → recreate
+          # them every deploy. Distinct from prod's apps/api/.env.prod.
+          SECRETS="$HOME/iamhusrev-prod/secrets/husrevity-staging.env"
+          if [[ ! -f "$SECRETS" ]]; then
+            echo "::error::$SECRETS missing on this host. Provision staging secrets first (see ~/iamhusrev-prod/RUNBOOK.md § staging)."
+            exit 1
+          fi
+          ln -sfn "$SECRETS" "$HUSREVITY_ENV_FILE"   # apps/api/.env.staging
+          ln -sfn "$SECRETS" .env
+          ls -la "$HUSREVITY_ENV_FILE" .env
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Apply stack (shared postgres → api → web)
+        run: docker compose up -d
+
+      - name: Wait for api health (loopback)
+        run: |
+          for i in {1..15}; do
+            if curl -fsS -m 3 http://localhost:${HUSREVITY_API_HOST_PORT}/api/health > /dev/null; then
+              echo "staging api healthy ✓"
+              exit 0
+            fi
+            echo "attempt $i/15 — api not ready, sleep 4s"
+            sleep 4
+          done
+          echo "::error::staging api never became healthy"
+          docker compose logs api --tail=100
+          exit 1
+
+      - name: Public smoke test (through Cloudflare Tunnel)
+        run: |
+          curl -fsS -m 8 --retry 5 --retry-delay 4 --retry-connrefused \
+            https://api-staging.iamhusrev.com/api/health || {
+            echo "::warning::public smoke (HTTPS) failed — check cloudflared LaunchAgent status."
+            exit 0
+          }

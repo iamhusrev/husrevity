@@ -1,7 +1,11 @@
 name: CI
 
 # Build + lint + test on every push (any branch) and every pull request.
-# Does NOT deploy. Deploys live in deploy.yml (master) and deploy-staging.yml (dev).
+# Does NOT deploy. Deploys live in:
+#   - deploy.yml          → push to release/*  → PROD     (api/app.iamhusrev.com)
+#   - deploy-staging.yml  → push to master     → STAGING  (api-staging/staging.iamhusrev.com)
+# This CI also runs on master/release pushes, providing the lint+test gate the
+# deploy workflows don't run themselves.
 #
 # Runs on the self-hosted Mac runner (same host that serves prod). Concurrency
 # is per-ref so two unrelated branches can build in parallel; pushes to the
