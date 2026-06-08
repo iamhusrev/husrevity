@@ -108,9 +108,12 @@ export default function DateTimePicker({
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = useState<{ top: number; left: number; width: number } | null>(
-    null,
-  );
+  const [coords, setCoords] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
 
   // Track viewport size → popover (desktop) vs bottom-sheet (mobile).
   useEffect(() => {
@@ -127,37 +130,34 @@ export default function DateTimePicker({
     if (open) setCursor(selected ? new Date(selected) : new Date());
   }, [open, selected]);
 
-  // Position the desktop popover relative to the trigger. Open on whichever
-  // side has more room, then CLAMP fully into the viewport — the datetime panel
-  // is tall (~450px) and inside a centred modal it fits neither fully below nor
-  // fully above, which used to push it off the bottom of the screen.
+  // Anchor the popover to the trigger (it must open *at the click point*, not
+  // wherever the viewport has room). Open directly below by default, flip above
+  // only when below can't fit the panel and above has more room. When the
+  // chosen side is shorter than the panel, cap its height to that side and let
+  // it scroll internally — so it always hugs the trigger and never overflows.
   const place = useCallback(() => {
     if (isMobile || !triggerRef.current) return;
-    const margin = 8;
-    const vh = window.innerHeight;
+    const gap = 6; // breathing room between trigger and panel
+    const margin = 8; // min distance from the viewport edges
     const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const r = triggerRef.current.getBoundingClientRect();
-    const panelH = popoverRef.current?.offsetHeight ?? 380;
     const width = 320;
 
-    const spaceBelow = vh - r.bottom;
-    const spaceAbove = r.top;
+    // Natural (unclamped) panel height, so we know if it fits.
+    const panelH = popoverRef.current?.scrollHeight ?? 380;
+    const roomBelow = vh - r.bottom - gap - margin;
+    const roomAbove = r.top - gap - margin;
 
-    // Prefer below the trigger; flip above only when that side has more room.
-    let top =
-      spaceBelow >= panelH + margin || spaceBelow >= spaceAbove
-        ? r.bottom + margin
-        : r.top - panelH - margin;
-    // Keep the whole panel on-screen (maxHeight + overflow handle the rare case
-    // where the panel is taller than the viewport).
-    top = Math.max(margin, Math.min(top, vh - panelH - margin));
-    if (top < margin) top = margin;
+    const openAbove = panelH > roomBelow && roomAbove > roomBelow;
+    const maxHeight = Math.min(panelH, openAbove ? roomAbove : roomBelow);
+    const top = openAbove ? r.top - gap - maxHeight : r.bottom + gap;
 
     let left = r.left;
     if (left + width > vw - margin) left = vw - width - margin;
     if (left < margin) left = margin;
 
-    setCoords({ top, left, width });
+    setCoords({ top, left, width, maxHeight });
   }, [isMobile]);
 
   // Measure + position BEFORE paint so the popover never flashes at a stale /
@@ -306,11 +306,12 @@ export default function DateTimePicker({
               top: coords?.top ?? 0,
               left: coords?.left ?? 0,
               width: 320,
-              // Never taller than the viewport — scroll inside if it would be.
-              maxHeight: "calc(100vh - 16px)",
+              // Cap to the room on the chosen side so it hugs the trigger and
+              // scrolls internally instead of overflowing. While measuring
+              // (coords null) leave it unclamped so scrollHeight is the natural height.
+              maxHeight: coords ? coords.maxHeight : undefined,
               overflowY: "auto",
-              // Keep it laid out (so offsetHeight is measurable at the real
-              // 320px width) but invisible until placed — no first-open flash.
+              // Laid out (measurable) but invisible until placed — no first-open flash.
               visibility: coords ? undefined : "hidden",
             }
       }
