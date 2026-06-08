@@ -127,17 +127,36 @@ export default function DateTimePicker({
     if (open) setCursor(selected ? new Date(selected) : new Date());
   }, [open, selected]);
 
-  // Position the desktop popover relative to the trigger, flipping up if needed.
+  // Position the desktop popover relative to the trigger. Open on whichever
+  // side has more room, then CLAMP fully into the viewport — the datetime panel
+  // is tall (~450px) and inside a centred modal it fits neither fully below nor
+  // fully above, which used to push it off the bottom of the screen.
   const place = useCallback(() => {
     if (isMobile || !triggerRef.current) return;
+    const margin = 8;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
     const r = triggerRef.current.getBoundingClientRect();
     const panelH = popoverRef.current?.offsetHeight ?? 380;
-    const below = window.innerHeight - r.bottom;
-    const top = below < panelH + 12 && r.top > panelH + 12 ? r.top - panelH - 8 : r.bottom + 8;
     const width = 320;
+
+    const spaceBelow = vh - r.bottom;
+    const spaceAbove = r.top;
+
+    // Prefer below the trigger; flip above only when that side has more room.
+    let top =
+      spaceBelow >= panelH + margin || spaceBelow >= spaceAbove
+        ? r.bottom + margin
+        : r.top - panelH - margin;
+    // Keep the whole panel on-screen (maxHeight + overflow handle the rare case
+    // where the panel is taller than the viewport).
+    top = Math.max(margin, Math.min(top, vh - panelH - margin));
+    if (top < margin) top = margin;
+
     let left = r.left;
-    if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
-    if (left < 8) left = 8;
+    if (left + width > vw - margin) left = vw - width - margin;
+    if (left < margin) left = margin;
+
     setCoords({ top, left, width });
   }, [isMobile]);
 
@@ -287,6 +306,9 @@ export default function DateTimePicker({
               top: coords?.top ?? 0,
               left: coords?.left ?? 0,
               width: 320,
+              // Never taller than the viewport — scroll inside if it would be.
+              maxHeight: "calc(100vh - 16px)",
+              overflowY: "auto",
               // Keep it laid out (so offsetHeight is measurable at the real
               // 320px width) but invisible until placed — no first-open flash.
               visibility: coords ? undefined : "hidden",
