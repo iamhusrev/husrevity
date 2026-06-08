@@ -54,9 +54,9 @@ jobs:
           # Canonical STAGING secrets file (chmod 600) in the central store.
           # checkout's `clean: true` removes gitignored symlinks → recreate
           # them every deploy. Distinct from prod's apps/api/.env.prod.
-          SECRETS="$HOME/iamhusrev-prod/secrets/husrevity-staging.env"
+          SECRETS="$HOME/iamhusrev-homelab/secrets/husrevity-staging.env"
           if [[ ! -f "$SECRETS" ]]; then
-            echo "::error::$SECRETS missing on this host. Provision staging secrets first (see ~/iamhusrev-prod/RUNBOOK.md § staging)."
+            echo "::error::$SECRETS missing on this host. Provision staging secrets first (see ~/iamhusrev-homelab/RUNBOOK.md § staging)."
             exit 1
           fi
           ln -sfn "$SECRETS" "$HUSREVITY_ENV_FILE"   # apps/api/.env.staging
