@@ -4,11 +4,16 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+
+// Layout effect on the client, plain effect on the server (avoids the SSR
+// "useLayoutEffect does nothing on the server" warning for this client tree).
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { useTranslation } from "react-i18next";
 import {
   BiCalendar,
@@ -136,8 +141,15 @@ export default function DateTimePicker({
     setCoords({ top, left, width });
   }, [isMobile]);
 
-  useEffect(() => {
-    if (open && !isMobile) place();
+  // Measure + position BEFORE paint so the popover never flashes at a stale /
+  // unmeasured spot on first open (it used to drop to the bottom of the screen).
+  // Reset coords on close so every open re-measures from a clean, hidden state.
+  useIsoLayoutEffect(() => {
+    if (!open || isMobile) {
+      setCoords(null);
+      return;
+    }
+    place();
   }, [open, isMobile, place, cursor]);
 
   useEffect(() => {
@@ -271,9 +283,14 @@ export default function DateTimePicker({
       style={
         isMobile
           ? undefined
-          : coords
-            ? { top: coords.top, left: coords.left, width: coords.width }
-            : { top: -9999, left: -9999 }
+          : {
+              top: coords?.top ?? 0,
+              left: coords?.left ?? 0,
+              width: 320,
+              // Keep it laid out (so offsetHeight is measurable at the real
+              // 320px width) but invisible until placed — no first-open flash.
+              visibility: coords ? undefined : "hidden",
+            }
       }
     >
       {isMobile && (

@@ -102,8 +102,8 @@ export class AuthService {
     em: import('typeorm').EntityManager,
     user: User,
   ): Promise<AuthResponseDto> {
-    const accessTtlMin = Number(this.config.get('HUSREVITY_JWT_ACCESS_TTL_MIN') ?? 15);
-    const refreshTtlDays = Number(this.config.get('HUSREVITY_JWT_REFRESH_TTL_DAYS') ?? 4);
+    const accessTtlMin = Number(this.config.get('HUSREVITY_JWT_ACCESS_TTL_MIN') ?? 10080); // 7 days
+    const refreshTtlDays = Number(this.config.get('HUSREVITY_JWT_REFRESH_TTL_DAYS') ?? 30); // 1 month
     const issuer = this.config.get<string>('HUSREVITY_JWT_ISSUER') ?? 'husrevity-nest';
 
     const accessToken = await this.jwt.signAsync(
