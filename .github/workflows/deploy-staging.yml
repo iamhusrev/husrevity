@@ -42,12 +42,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup runner PATH (Docker Desktop + Homebrew)
+      - name: Setup runner PATH (Homebrew / Colima)
         run: |
-          echo "/usr/local/bin" >> "$GITHUB_PATH"
           echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
-          echo "/Applications/Docker.app/Contents/Resources/bin" >> "$GITHUB_PATH"
-          /Applications/Docker.app/Contents/Resources/bin/docker --version
+          /opt/homebrew/bin/docker --version
+          /opt/homebrew/bin/docker context show   # expected: colima
 
       - name: Point env symlinks at staging secrets
         run: |
