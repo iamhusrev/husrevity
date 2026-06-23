@@ -3,35 +3,35 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
-import DateTimePicker from "@/components/datetime/DateTimePicker";
 import {
-  CATEGORY_COLOR_FALLBACK,
-  TIME_BLOCK_CATEGORIES,
-  TIME_BLOCK_COLOR_TOKENS,
-  TimeBlockCategory,
-  TimeBlockColorToken,
-  TimeBlockRequest,
-  TimeBlockResponse,
-} from "@/types/time-block/time-block";
+  ROUTINE_COLOR_TOKENS,
+  RoutineActivityResponse,
+  RoutineColorToken,
+  RoutineSegmentRequest,
+  RoutineSegmentResponse,
+} from "@/types/routine/routine";
 import {
-  useCreateTimeBlock,
-  useDeleteTimeBlock,
-  useTimeBlocksForDate,
-  useToggleTimeBlockComplete,
-  useUpdateTimeBlock,
-} from "@/hooks/useTimeBlocks";
+  useCreateRoutineActivity,
+  useCreateRoutineSegment,
+  useDeleteRoutineActivity,
+  useDeleteRoutineSegment,
+  useReorderRoutineSegments,
+  useRoutineSegments,
+  useUpdateRoutineSegment,
+} from "@/hooks/useRoutine";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPlus, BiTrash, BiChevronLeft, BiChevronRight } from "react-icons/bi";
-import { HiOutlineCheck } from "react-icons/hi2";
+import {
+  BiPlus,
+  BiTrash,
+  BiPencil,
+  BiChevronUp,
+  BiChevronDown,
+  BiX,
+} from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 
-const DAY_START_HOUR = 6;
-const DAY_END_HOUR = 24;
-const HOUR_PX = 60;
-const TOTAL_HOURS = DAY_END_HOUR - DAY_START_HOUR;
-
-const COLOR_STRIPE_CLASS: Record<TimeBlockColorToken, string> = {
+const COLOR_STRIPE_CLASS: Record<RoutineColorToken, string> = {
   "husrev-amber": "bg-husrev-amber",
   "husrev-ember": "bg-husrev-ember",
   "husrev-moss": "bg-husrev-moss",
@@ -39,7 +39,7 @@ const COLOR_STRIPE_CLASS: Record<TimeBlockColorToken, string> = {
   "husrev-sand": "bg-husrev-sand",
 };
 
-const COLOR_RING_CLASS: Record<TimeBlockColorToken, string> = {
+const COLOR_RING_CLASS: Record<RoutineColorToken, string> = {
   "husrev-amber": "ring-husrev-amber/30",
   "husrev-ember": "ring-husrev-ember/30",
   "husrev-moss": "ring-husrev-moss/30",
@@ -47,260 +47,233 @@ const COLOR_RING_CLASS: Record<TimeBlockColorToken, string> = {
   "husrev-sand": "ring-husrev-sand/60",
 };
 
-function toDateInputString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+/** The owner's real Evkat segments, seeded on demand from the Program sheet. */
+const DEFAULT_TEMPLATE: Array<{
+  segment: RoutineSegmentRequest;
+  activities: string[];
+}> = [
+  {
+    segment: {
+      name: "Güne Hazırlık",
+      startMinute: null,
+      endMinute: 8 * 60,
+      theme: "Hazırlık",
+      colorToken: "husrev-amber",
+    },
+    activities: ["Kuran ve Cevşen", "Okuma", "Dil Öğrenme"],
+  },
+  {
+    segment: {
+      name: "Mobiliz",
+      startMinute: 9 * 60,
+      endMinute: 14 * 60,
+      theme: "İş",
+      colorToken: "husrev-ember",
+    },
+    activities: ["Mobiliz İşleri"],
+  },
+  {
+    segment: {
+      name: "Kendini Geliştirme",
+      startMinute: 14 * 60,
+      endMinute: 19 * 60,
+      theme: "Gelişim",
+      colorToken: "husrev-moss",
+    },
+    activities: ["Nakliya"],
+  },
+  {
+    segment: {
+      name: "Uygulama Geliştirme",
+      startMinute: 19 * 60,
+      endMinute: 23 * 60,
+      theme: "Geliştirme",
+      colorToken: "husrev-ink",
+    },
+    activities: [
+      "Okuma",
+      "Kurslar",
+      "OCP Sertifika",
+      "Spring Sertifika",
+      "AWS Sertifika",
+    ],
+  },
+];
+
+function minutesToTimeInput(m: number | null): string {
+  if (m === null || m === undefined) return "";
+  const h = Math.floor(m / 60);
+  const min = m % 60;
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
-function resolveColorToken(b: TimeBlockResponse): TimeBlockColorToken {
-  if (b.colorToken) return b.colorToken;
-  if (b.category) return CATEGORY_COLOR_FALLBACK[b.category];
-  return "husrev-amber";
+function timeInputToMinutes(v: string): number | null {
+  if (!v) return null;
+  const [h, m] = v.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
 }
 
-interface BlockGeometry {
-  block: TimeBlockResponse;
-  topPx: number;
-  heightPx: number;
-  startsBefore: boolean;
-  endsAfter: boolean;
+function rangeLabel(start: number | null, end: number | null): string {
+  const fmt = minutesToTimeInput;
+  if (start === null && end === null) return "Tüm gün";
+  if (start === null) return `→ ${fmt(end)}`;
+  if (end === null) return `${fmt(start)} →`;
+  return `${fmt(start)} – ${fmt(end)}`;
 }
 
-function geometryFor(b: TimeBlockResponse): BlockGeometry {
-  const start = new Date(b.startAt);
-  const end = new Date(b.endAt);
-  const dayStart = new Date(start);
-  dayStart.setHours(DAY_START_HOUR, 0, 0, 0);
-  const dayEnd = new Date(start);
-  dayEnd.setHours(DAY_END_HOUR, 0, 0, 0);
-
-  const startMs = Math.max(start.getTime(), dayStart.getTime());
-  const endMs = Math.min(end.getTime(), dayEnd.getTime());
-  const startMinutes = (startMs - dayStart.getTime()) / 60_000;
-  const durationMinutes = Math.max(20, (endMs - startMs) / 60_000); // floor at 20min so labels stay readable
-
-  return {
-    block: b,
-    topPx: (startMinutes / 60) * HOUR_PX,
-    heightPx: (durationMinutes / 60) * HOUR_PX,
-    startsBefore: start.getTime() < dayStart.getTime(),
-    endsAfter: end.getTime() > dayEnd.getTime(),
-  };
+function resolveColor(s: RoutineSegmentResponse): RoutineColorToken {
+  return s.colorToken ?? "husrev-amber";
 }
 
 export default function EvkatPage() {
   const { t } = useTranslation();
   const showAlert = alertStore((s) => s.show);
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const { data, isLoading, isError, refetch } = useRoutineSegments();
+  const createSegment = useCreateRoutineSegment();
+  const createActivity = useCreateRoutineActivity();
+  const reorder = useReorderRoutineSegments();
   const [editing, setEditing] = useState<{
-    block: TimeBlockResponse | null;
-    seedStart?: Date;
+    segment: RoutineSegmentResponse | null;
   } | null>(null);
+  const [seeding, setSeeding] = useState(false);
 
-  const dateStr = toDateInputString(selectedDate);
-  const { data, isLoading, isError, refetch } = useTimeBlocksForDate(dateStr);
+  const segments = useMemo(() => data ?? [], [data]);
 
-  const blocks = useMemo(() => data ?? [], [data]);
-  const geometries = useMemo(() => blocks.map(geometryFor), [blocks]);
-  const nowOffsetPx = useMemo(() => {
-    const today = new Date();
-    if (toDateInputString(today) !== dateStr) return null;
-    const dayStart = new Date(today);
-    dayStart.setHours(DAY_START_HOUR, 0, 0, 0);
-    const dayEnd = new Date(today);
-    dayEnd.setHours(DAY_END_HOUR, 0, 0, 0);
-    if (today < dayStart || today > dayEnd) return null;
-    return ((today.getTime() - dayStart.getTime()) / 60_000 / 60) * HOUR_PX;
-  }, [dateStr]);
-
-  const onPrev = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() - 1);
-    setSelectedDate(d);
-  };
-  const onNext = () => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() + 1);
-    setSelectedDate(d);
-  };
-  const onToday = () => setSelectedDate(new Date());
-
-  const dateLabel = selectedDate.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  const onSlotClick = (hour: number) => {
-    const seed = new Date(selectedDate);
-    seed.setHours(hour, 0, 0, 0);
-    setEditing({ block: null, seedStart: seed });
+  const loadDefaultTemplate = async () => {
+    setSeeding(true);
+    try {
+      for (const { segment, activities } of DEFAULT_TEMPLATE) {
+        const created = await createSegment.mutateAsync(segment);
+        const segmentId = created.data.id;
+        for (const text of activities) {
+          await createActivity.mutateAsync({ segmentId, body: { text } });
+        }
+      }
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    } finally {
+      setSeeding(false);
+    }
   };
 
-  const hasError = isError;
+  const moveSegment = async (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= segments.length) return;
+    const next = [...segments];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    try {
+      await reorder.mutateAsync(
+        next.map((s, i) => ({ id: s.id, position: i })),
+      );
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
 
   return (
     <div className="space-y-6">
       <PageBreadcrumb
         pageTitle={t("evkat.title", "Evkat")}
-        kicker={t("evkat.kicker", "Daily time blocks")}
-        flourish={t("evkat.flourish", "blocks")}
+        kicker={t("evkat.kicker", "Günlük rutin")}
+        flourish={t("evkat.flourish", "vakitler")}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onPrev}
-            aria-label="Önceki gün"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-husrev-sand text-husrev-ink hover:bg-husrev-cream focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-husrev-shadow dark:ring-white/10 dark:text-husrev-cream"
-          >
-            <BiChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={onToday}
-            className="husrev-pill text-husrev-ember hover:bg-husrev-amber/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
-          >
-            {t("evkat.today", "Bugün")}
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            aria-label="Sonraki gün"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-husrev-sand text-husrev-ink hover:bg-husrev-cream focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-husrev-shadow dark:ring-white/10 dark:text-husrev-cream"
-          >
-            <BiChevronRight className="h-5 w-5" />
-          </button>
-          <span className="ml-2 text-sm text-gray-600 dark:text-gray-300 capitalize">
-            {dateLabel}
-          </span>
-        </div>
+        <p className="max-w-xl text-sm text-gray-600 dark:text-gray-300">
+          {t(
+            "evkat.intro",
+            "Gününü bölen sabit vakitler ve her vakte bağlı işler. Her gün tekrar eden şablonun.",
+          )}
+        </p>
         <button
           type="button"
-          onClick={() => onSlotClick(new Date().getHours() || 9)}
+          onClick={() => setEditing({ segment: null })}
           className="husrev-btn"
         >
           <BiPlus className="h-4 w-4" />
-          {t("evkat.newBlock", "Yeni blok")}
+          {t("evkat.newSegment", "Yeni vakit")}
         </button>
       </div>
 
-      <div className="rounded-2xl ring-1 ring-husrev-sand bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
-        {hasError && (
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm text-error-500">
-            <span>{t("evkat.error", "Bloklar yüklenemedi.")}</span>
+      {isError && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl ring-1 ring-husrev-sand bg-white px-4 py-3 text-sm text-error-500 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+          <span>{t("evkat.error", "Vakitler yüklenemedi.")}</span>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded px-2 py-1 text-xs text-husrev-ember hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
+          >
+            {t("common.retry", "Tekrar dene")}
+          </button>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-28 rounded-2xl bg-husrev-sand/40 motion-safe:animate-pulse motion-reduce:opacity-50"
+            />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && !isError && segments.length === 0 && (
+        <div className="rounded-2xl ring-1 ring-husrev-sand bg-white px-6 py-12 text-center shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
+          <div className="husrev-kicker text-husrev-amber">
+            {t("evkat.empty.kicker", "Vakitlerin hazır değil")}
+          </div>
+          <p className="mx-auto mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
+            {t(
+              "evkat.empty.body",
+              "Kendi vakitlerini ekleyebilir ya da hazır şablonunla başlayabilirsin.",
+            )}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
-              onClick={() => refetch()}
-              className="rounded px-2 py-1 text-xs text-husrev-ember hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
+              onClick={loadDefaultTemplate}
+              disabled={seeding}
+              className="husrev-btn"
             >
-              {t("common.retry", "Tekrar dene")}
+              {seeding
+                ? t("evkat.seeding", "Yükleniyor…")
+                : t("evkat.loadDefault", "Varsayılan şablonu yükle")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing({ segment: null })}
+              className="husrev-btn-ghost"
+            >
+              {t("evkat.newSegment", "Yeni vakit")}
             </button>
           </div>
-        )}
-
-        <div className="relative px-2 pt-4 pb-3 sm:px-3">
-          {/* Hour stack */}
-          <div
-            className="grid"
-            style={{
-              gridTemplateRows: `repeat(${TOTAL_HOURS}, ${HOUR_PX}px)`,
-              gridTemplateColumns: "64px 1fr",
-            }}
-          >
-            {Array.from({ length: TOTAL_HOURS }, (_, i) => {
-              const hour = DAY_START_HOUR + i;
-              return (
-                <div key={`label-${hour}`} className="row-span-1 col-start-1 relative">
-                  <span className="absolute -top-2 right-3 text-xs text-gray-500 tabular-nums dark:text-gray-400">
-                    {String(hour).padStart(2, "0")}:00
-                  </span>
-                  <div className="absolute inset-y-0 right-0 w-px bg-husrev-sand/70 dark:bg-white/[0.06]" />
-                </div>
-              );
-            })}
-            {Array.from({ length: TOTAL_HOURS }, (_, i) => {
-              const hour = DAY_START_HOUR + i;
-              return (
-                <button
-                  key={`slot-${hour}`}
-                  type="button"
-                  onClick={() => onSlotClick(hour)}
-                  className="row-span-1 col-start-2 relative border-b border-husrev-sand/50 last:border-b-0 hover:bg-husrev-cream/60 focus-visible:outline-hidden focus-visible:bg-husrev-amber/10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-husrev-amber transition-colors dark:border-white/[0.04] dark:hover:bg-white/[0.04]"
-                  aria-label={`${String(hour).padStart(2, "0")}:00 — yeni blok`}
-                />
-              );
-            })}
-
-            {/* Loading skeleton */}
-            {isLoading && (
-              <div className="col-start-2 col-span-1 row-start-1 row-span-full relative pointer-events-none">
-                {[0, 3, 7, 11].map((offset) => (
-                  <div
-                    key={offset}
-                    className="absolute left-2 right-2 rounded-xl bg-husrev-sand/40 motion-safe:animate-pulse motion-reduce:opacity-50"
-                    style={{
-                      top: `${offset * HOUR_PX + 8}px`,
-                      height: `${HOUR_PX * 1.5 - 16}px`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Now indicator */}
-            {nowOffsetPx !== null && (
-              <div
-                className="col-start-2 col-span-1 row-start-1 row-span-full pointer-events-none relative"
-                aria-hidden="true"
-              >
-                <div
-                  className="absolute left-0 right-2 flex items-center"
-                  style={{ top: `${nowOffsetPx}px` }}
-                >
-                  <span className="h-2 w-2 rounded-full bg-husrev-amber" />
-                  <span className="ml-0 h-px flex-1 bg-husrev-amber/70" />
-                </div>
-              </div>
-            )}
-
-            {/* Blocks */}
-            <div
-              className="col-start-2 col-span-1 row-start-1 row-span-full relative pointer-events-none"
-              aria-label="Time blocks"
-            >
-              {geometries.map((g) => (
-                <BlockCard key={g.block.id} geom={g} onClick={() => setEditing({ block: g.block })} />
-              ))}
-            </div>
-          </div>
-
-          {/* Empty state */}
-          {!isLoading && !hasError && blocks.length === 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
-              <div className="husrev-kicker text-husrev-amber">
-                {t("evkat.empty.kicker", "Boş bir tuval")}
-              </div>
-              <p className="mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
-                {t(
-                  "evkat.empty.body",
-                  "Saatlerden birine tıkla, ilk bloğunu ekle. Her şey buradan başlar.",
-                )}
-              </p>
-            </div>
-          )}
         </div>
+      )}
+
+      <div className="space-y-3">
+        {segments.map((segment, index) => (
+          <SegmentCard
+            key={segment.id}
+            segment={segment}
+            isFirst={index === 0}
+            isLast={index === segments.length - 1}
+            onEdit={() => setEditing({ segment })}
+            onMoveUp={() => moveSegment(index, -1)}
+            onMoveDown={() => moveSegment(index, 1)}
+            showAlert={showAlert}
+          />
+        ))}
       </div>
 
       {editing && (
-        <EditTimeBlockModal
-          initial={editing.block}
-          seedStart={editing.seedStart}
-          selectedDate={selectedDate}
+        <EditSegmentModal
+          initial={editing.segment}
           onClose={() => setEditing(null)}
           showAlert={showAlert}
         />
@@ -309,149 +282,214 @@ export default function EvkatPage() {
   );
 }
 
-function BlockCard({
-  geom,
-  onClick,
+function SegmentCard({
+  segment,
+  isFirst,
+  isLast,
+  onEdit,
+  onMoveUp,
+  onMoveDown,
+  showAlert,
 }: {
-  geom: BlockGeometry;
-  onClick: () => void;
+  segment: RoutineSegmentResponse;
+  isFirst: boolean;
+  isLast: boolean;
+  onEdit: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  showAlert: ReturnType<typeof alertStore.getState>["show"];
 }) {
   const { t } = useTranslation();
-  const toggle = useToggleTimeBlockComplete();
-  const color = resolveColorToken(geom.block);
-  const completed = Boolean(geom.block.completedAt);
-  const start = new Date(geom.block.startAt);
-  const end = new Date(geom.block.endAt);
-  const hhmm = (d: Date) =>
-    d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  const color = resolveColor(segment);
+  const createActivity = useCreateRoutineActivity();
+  const deleteActivity = useDeleteRoutineActivity();
+  const [newActivity, setNewActivity] = useState("");
+
+  const addActivity = async () => {
+    const text = newActivity.trim();
+    if (!text) return;
+    try {
+      await createActivity.mutateAsync({
+        segmentId: segment.id,
+        body: { text },
+      });
+      setNewActivity("");
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const removeActivity = async (a: RoutineActivityResponse) => {
+    try {
+      await deleteActivity.mutateAsync(a.id);
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
 
   return (
     <div
-      className="absolute left-1 right-2 pointer-events-auto"
-      style={{ top: `${geom.topPx + 2}px`, height: `${geom.heightPx - 4}px` }}
+      className={`group relative overflow-hidden rounded-2xl bg-white shadow-card-warm ring-1 ${COLOR_RING_CLASS[color]} dark:bg-husrev-shadow`}
     >
-      <button
-        type="button"
-        onClick={onClick}
-        className={`group relative h-full w-full overflow-hidden rounded-xl bg-white text-left shadow-card-warm ring-1 ${COLOR_RING_CLASS[color]} transition hover:-translate-y-px focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber motion-reduce:hover:translate-y-0 dark:bg-husrev-shadow ${
-          completed ? "opacity-60" : ""
-        }`}
-      >
-        <span
-          aria-hidden="true"
-          className={`absolute inset-y-0 left-0 w-[3px] ${COLOR_STRIPE_CLASS[color]}`}
-        />
-        <div className="flex h-full items-start gap-2 pl-3 pr-2 py-2">
-          <div className="min-w-0 flex-1">
-            <div
-              className={`text-sm font-medium text-husrev-ink dark:text-husrev-cream line-clamp-1 ${
-                completed ? "line-through" : ""
-              }`}
-            >
-              {geom.block.title}
-            </div>
-            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 tabular-nums">
-              <span>{hhmm(start)}</span>
-              <span aria-hidden="true">–</span>
-              <span>{hhmm(end)}</span>
-              {geom.block.category && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span className="truncate">
-                    {t(`evkat.category.${geom.block.category}`, geom.block.category)}
-                  </span>
-                </>
+      <span
+        aria-hidden="true"
+        className={`absolute inset-y-0 left-0 w-[4px] ${COLOR_STRIPE_CLASS[color]}`}
+      />
+      <div className="pl-5 pr-3 py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium tabular-nums text-husrev-ember dark:text-husrev-amber">
+                {rangeLabel(segment.startMinute, segment.endMinute)}
+              </span>
+              {segment.theme && (
+                <span className="rounded-full bg-husrev-sand/50 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">
+                  {segment.theme}
+                </span>
               )}
             </div>
-            {geom.heightPx > 90 && geom.block.notes && (
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2 whitespace-pre-line">
-                {geom.block.notes}
-              </p>
-            )}
+            <h3 className="mt-1 text-lg font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
+              {segment.name}
+            </h3>
           </div>
+          <div className="flex flex-none items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+            <IconBtn
+              onClick={onMoveUp}
+              disabled={isFirst}
+              label={t("evkat.moveUp", "Yukarı taşı")}
+            >
+              <BiChevronUp className="h-4 w-4" />
+            </IconBtn>
+            <IconBtn
+              onClick={onMoveDown}
+              disabled={isLast}
+              label={t("evkat.moveDown", "Aşağı taşı")}
+            >
+              <BiChevronDown className="h-4 w-4" />
+            </IconBtn>
+            <IconBtn onClick={onEdit} label={t("common.edit", "Düzenle")}>
+              <BiPencil className="h-4 w-4" />
+            </IconBtn>
+          </div>
+        </div>
+
+        {segment.notes && (
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line">
+            {segment.notes}
+          </p>
+        )}
+
+        <ul className="mt-3 space-y-1">
+          {segment.activities.map((a) => (
+            <li
+              key={a.id}
+              className="group/act flex items-center gap-2 rounded-lg px-2 py-1 text-sm text-husrev-ink hover:bg-husrev-cream/60 dark:text-husrev-cream dark:hover:bg-white/[0.04]"
+            >
+              <span
+                aria-hidden="true"
+                className={`h-1.5 w-1.5 flex-none rounded-full ${COLOR_STRIPE_CLASS[color]}`}
+              />
+              <span className="min-w-0 flex-1 truncate">{a.text}</span>
+              <button
+                type="button"
+                onClick={() => removeActivity(a)}
+                aria-label={t("common.delete", "Sil")}
+                className="flex-none rounded p-0.5 text-gray-400 opacity-0 transition hover:text-error-500 group-hover/act:opacity-100 focus-visible:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500"
+              >
+                <BiX className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-2 flex items-center gap-2 pl-2">
+          <input
+            value={newActivity}
+            onChange={(e) => setNewActivity(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void addActivity();
+              }
+            }}
+            maxLength={300}
+            placeholder={t("evkat.addActivity", "İş ekle…")}
+            className="husrev-input h-9 flex-1 text-sm"
+          />
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggle.mutate(geom.block.id);
-            }}
-            aria-label={t("evkat.completed", "Tamamlandı")}
-            className={`inline-flex h-6 w-6 flex-none items-center justify-center rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
-              completed
-                ? "bg-husrev-moss text-husrev-cream"
-                : "bg-husrev-sand/60 text-gray-500 hover:bg-husrev-moss/30"
-            }`}
+            onClick={addActivity}
+            disabled={!newActivity.trim() || createActivity.isPending}
+            className="husrev-btn-ghost h-9 px-3 text-sm"
           >
-            <HiOutlineCheck className="h-3.5 w-3.5" />
+            <BiPlus className="h-4 w-4" />
           </button>
         </div>
-      </button>
+      </div>
     </div>
   );
 }
 
-function EditTimeBlockModal({
+function IconBtn({
+  onClick,
+  disabled,
+  label,
+  children,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-husrev-cream hover:text-husrev-ink disabled:opacity-30 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:hover:bg-white/[0.06] dark:hover:text-husrev-cream"
+    >
+      {children}
+    </button>
+  );
+}
+
+function EditSegmentModal({
   initial,
-  seedStart,
-  selectedDate,
   onClose,
   showAlert,
 }: {
-  initial: TimeBlockResponse | null;
-  seedStart?: Date;
-  selectedDate: Date;
+  initial: RoutineSegmentResponse | null;
   onClose: () => void;
   showAlert: ReturnType<typeof alertStore.getState>["show"];
 }) {
   const { t } = useTranslation();
-  const create = useCreateTimeBlock();
-  const update = useUpdateTimeBlock();
-  const remove = useDeleteTimeBlock();
+  const create = useCreateRoutineSegment();
+  const update = useUpdateRoutineSegment();
+  const remove = useDeleteRoutineSegment();
 
-  const initStart = initial
-    ? new Date(initial.startAt)
-    : seedStart ?? (() => {
-        const d = new Date(selectedDate);
-        d.setHours(new Date().getHours() || 9, 0, 0, 0);
-        return d;
-      })();
-  const initEnd = initial
-    ? new Date(initial.endAt)
-    : (() => {
-        const d = new Date(initStart);
-        d.setHours(d.getHours() + 1);
-        return d;
-      })();
-
-  const [title, setTitle] = useState(initial?.title ?? "");
-  const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [startAt, setStartAt] = useState(initStart.toISOString());
-  const [endAt, setEndAt] = useState(initEnd.toISOString());
-  const [category, setCategory] = useState<TimeBlockCategory | "">(
-    initial?.category ?? "",
-  );
-  const [colorToken, setColorToken] = useState<TimeBlockColorToken | "">(
+  const [name, setName] = useState(initial?.name ?? "");
+  const [start, setStart] = useState(minutesToTimeInput(initial?.startMinute ?? null));
+  const [end, setEnd] = useState(minutesToTimeInput(initial?.endMinute ?? null));
+  const [theme, setTheme] = useState(initial?.theme ?? "");
+  const [colorToken, setColorToken] = useState<RoutineColorToken | "">(
     initial?.colorToken ?? "",
   );
-  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<string>(
-    initial?.notifyMinutesBefore === null || initial?.notifyMinutesBefore === undefined
-      ? ""
-      : String(initial.notifyMinutesBefore),
-  );
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    const body: TimeBlockRequest = {
-      title: title.trim(),
+    if (!name.trim()) return;
+    const body: RoutineSegmentRequest = {
+      name: name.trim(),
+      startMinute: timeInputToMinutes(start),
+      endMinute: timeInputToMinutes(end),
+      theme: theme.trim() || null,
+      colorToken: (colorToken || null) as RoutineColorToken | null,
       notes: notes.trim() || null,
-      startAt: startAt,
-      endAt: endAt,
-      category: (category || null) as TimeBlockCategory | null,
-      colorToken: (colorToken || null) as TimeBlockColorToken | null,
-      notifyMinutesBefore:
-        notifyMinutesBefore === "" ? null : Number(notifyMinutesBefore),
     };
     try {
       if (initial) {
@@ -461,14 +499,9 @@ function EditTimeBlockModal({
       }
       onClose();
     } catch (err) {
-      const { title: errTitle, message } = parseAxiosError(err);
-      showAlert({ title: errTitle, message, type: "error", position: "top-center" });
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
     }
-  };
-
-  const openDelete = () => {
-    if (!initial) return;
-    setConfirmingDelete(true);
   };
 
   const confirmDelete = async () => {
@@ -478,8 +511,8 @@ function EditTimeBlockModal({
       setConfirmingDelete(false);
       onClose();
     } catch (err) {
-      const { title: errTitle, message } = parseAxiosError(err);
-      showAlert({ title: errTitle, message, type: "error", position: "top-center" });
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
     }
   };
 
@@ -498,18 +531,20 @@ function EditTimeBlockModal({
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
             <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-              {t("evkat.modal.kicker", initial ? "Düzenle" : "Yeni blok")}
+              {initial
+                ? t("evkat.modal.editKicker", "Düzenle")
+                : t("evkat.modal.newKicker", "Yeni vakit")}
             </span>
             <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
               {initial
-                ? t("evkat.modal.editTitle", "Bloğu düzenle")
-                : t("evkat.modal.createTitle", "Yeni zaman bloğu")}
+                ? t("evkat.modal.editTitle", "Vakti düzenle")
+                : t("evkat.modal.createTitle", "Yeni vakit")}
             </h3>
           </div>
           {initial && (
             <button
               type="button"
-              onClick={openDelete}
+              onClick={() => setConfirmingDelete(true)}
               disabled={isPending}
               aria-label={t("common.delete", "Sil")}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-error-50 hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
@@ -520,51 +555,51 @@ function EditTimeBlockModal({
         </div>
 
         <div className="mt-6 space-y-4">
-          <Field label={t("evkat.field.title", "Başlık")}>
+          <Field label={t("evkat.field.name", "Vakit adı")}>
             <input
               required
-              maxLength={200}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="husrev-input"
-              placeholder={t("evkat.placeholders.title", "Odak çalışması")}
+              placeholder={t("evkat.placeholders.name", "Güne Hazırlık")}
               autoFocus
             />
           </Field>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label={t("evkat.field.start", "Başlangıç")}>
-              <DateTimePicker
-                value={startAt}
-                onChange={(iso) => iso && setStartAt(iso)}
-                clearable={false}
+              <input
+                type="time"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+                className="husrev-input"
               />
             </Field>
             <Field label={t("evkat.field.end", "Bitiş")}>
-              <DateTimePicker
-                value={endAt}
-                onChange={(iso) => iso && setEndAt(iso)}
-                clearable={false}
+              <input
+                type="time"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+                className="husrev-input"
               />
             </Field>
           </div>
+          <p className="-mt-2 text-[11px] text-gray-400">
+            {t(
+              "evkat.timeHint",
+              "Saat boş bırakılırsa vakit açık uçlu olur (örn. yalnızca bitiş = ‘öncesi’).",
+            )}
+          </p>
 
-          <Field label={t("evkat.field.category", "Kategori")}>
-            <div className="flex flex-wrap gap-1.5">
-              <CategoryChip
-                active={category === ""}
-                onClick={() => setCategory("")}
-                label={t("evkat.category.none", "Yok")}
-              />
-              {TIME_BLOCK_CATEGORIES.map((c) => (
-                <CategoryChip
-                  key={c}
-                  active={category === c}
-                  onClick={() => setCategory(c)}
-                  label={t(`evkat.category.${c}`, c)}
-                />
-              ))}
-            </div>
+          <Field label={t("evkat.field.theme", "Tema")}>
+            <input
+              maxLength={60}
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="husrev-input"
+              placeholder={t("evkat.placeholders.theme", "Gelişim")}
+            />
           </Field>
 
           <Field label={t("evkat.field.color", "Renk")}>
@@ -572,12 +607,12 @@ function EditTimeBlockModal({
               <button
                 type="button"
                 onClick={() => setColorToken("")}
-                aria-label="Otomatik"
+                aria-label={t("evkat.colorAuto", "Otomatik")}
                 className={`h-7 w-7 rounded-full ring-2 ring-offset-2 ring-offset-husrev-cream dark:ring-offset-husrev-ink transition focus-visible:outline-hidden focus-visible:ring-2 ${
                   colorToken === "" ? "ring-husrev-ember" : "ring-transparent"
                 } bg-gradient-to-br from-husrev-sand to-husrev-amber/40`}
               />
-              {TIME_BLOCK_COLOR_TOKENS.map((tok) => (
+              {ROUTINE_COLOR_TOKENS.map((tok) => (
                 <button
                   key={tok}
                   type="button"
@@ -586,26 +621,6 @@ function EditTimeBlockModal({
                   className={`h-7 w-7 rounded-full ring-2 ring-offset-2 ring-offset-husrev-cream dark:ring-offset-husrev-ink transition focus-visible:outline-hidden focus-visible:ring-2 ${
                     colorToken === tok ? "ring-husrev-ember" : "ring-transparent"
                   } ${COLOR_STRIPE_CLASS[tok]}`}
-                />
-              ))}
-            </div>
-          </Field>
-
-          <Field label={t("evkat.field.notifyBefore", "Hatırlatma")}>
-            <div className="flex flex-wrap gap-1.5">
-              {([
-                ["", t("evkat.notify.off", "Kapalı")],
-                ["0", t("evkat.notify.atStart", "Tam saatinde")],
-                ["5", "5 dk"],
-                ["15", "15 dk"],
-                ["30", "30 dk"],
-                ["60", "1 saat"],
-              ] as const).map(([val, label]) => (
-                <CategoryChip
-                  key={String(val)}
-                  active={notifyMinutesBefore === val}
-                  onClick={() => setNotifyMinutesBefore(val)}
-                  label={label}
                 />
               ))}
             </div>
@@ -646,45 +661,29 @@ function EditTimeBlockModal({
         onClose={() => setConfirmingDelete(false)}
         onConfirm={confirmDelete}
         isPending={remove.isPending}
-        title={t("evkat.confirmDeleteTitle", "Bloğu sil")}
+        title={t("evkat.confirmDeleteTitle", "Vakti sil")}
         message={t(
           "evkat.confirmDelete",
-          "Bu zaman bloğunu silmek istediğine emin misin?",
+          "Bu vakti ve içindeki işleri silmek istediğine emin misin?",
         )}
       />
     </div>
   );
 }
 
-function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="husrev-kicker text-gray-600 dark:text-gray-300">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function CategoryChip({
-  active,
-  onClick,
+function Field({
   label,
+  children,
 }: {
-  active: boolean;
-  onClick: () => void;
   label: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
-        active
-          ? "bg-husrev-ember text-husrev-cream"
-          : "bg-husrev-sand/50 text-gray-700 hover:bg-husrev-amber/15 dark:bg-white/[0.06] dark:text-gray-300"
-      }`}
-    >
-      {label}
-    </button>
+    <label className="block space-y-1.5">
+      <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }

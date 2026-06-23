@@ -124,12 +124,24 @@ export const NOTIFICATION_ENDPOINTS = {
   PUSH_SUBSCRIPTIONS: "/notifications/push-subscriptions",
 };
 
-// ─── Evkat (time blocks) ──────────────────────────────────────────────────────
+// ─── Evkat (time blocks — legacy per-date planner) ────────────────────────────
 
 export const TIME_BLOCK_ENDPOINTS = {
   LIST: "/time-blocks",
   BY_ID: (id: number | string) => `/time-blocks/${id}`,
   COMPLETE: (id: number | string) => `/time-blocks/${id}/complete`,
+};
+
+// ─── Evkat (routine — fixed daily template) ───────────────────────────────────
+
+export const ROUTINE_ENDPOINTS = {
+  SEGMENTS: "/routine/segments",
+  SEGMENT_BY_ID: (id: string) => `/routine/segments/${id}`,
+  SEGMENTS_REORDER: "/routine/segments/reorder",
+  SEGMENT_ACTIVITIES: (id: string) => `/routine/segments/${id}/activities`,
+  SEGMENT_ACTIVITIES_REORDER: (id: string) =>
+    `/routine/segments/${id}/activities/reorder`,
+  ACTIVITY_BY_ID: (id: string) => `/routine/activities/${id}`,
 };
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

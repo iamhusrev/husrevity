@@ -41,24 +41,29 @@ const getNavItems = (t: TFunc, isAdmin: boolean): NavItem[] => [
     path: "/dashboard",
   },
   {
-    icon: <BiNote size={"1.5rem"} />,
-    name: t("nav.notes"),
-    path: "/notes",
-  },
-  {
     icon: <BiBell size={"1.5rem"} />,
     name: t("nav.reminders"),
     path: "/reminders",
   },
   {
-    icon: <BiListUl size={"1.5rem"} />,
-    name: t("nav.lists"),
-    path: "/lists",
+    icon: <BiNote size={"1.5rem"} />,
+    name: t("nav.notes"),
+    path: "/notes",
   },
   {
     icon: <BiFolder size={"1.5rem"} />,
     name: t("nav.projects"),
     path: "/projects",
+  },
+  {
+    icon: <HiOutlineClock size={"1.5rem"} />,
+    name: t("nav.evkat"),
+    path: "/evkat",
+  },
+  {
+    icon: <BiListUl size={"1.5rem"} />,
+    name: t("nav.lists"),
+    path: "/lists",
   },
   {
     icon: <BiTargetLock size={"1.5rem"} />,
@@ -69,11 +74,6 @@ const getNavItems = (t: TFunc, isAdmin: boolean): NavItem[] => [
     icon: <BiCalendar size={"1.5rem"} />,
     name: t("nav.calendar"),
     path: "/calendar",
-  },
-  {
-    icon: <HiOutlineClock size={"1.5rem"} />,
-    name: t("nav.evkat"),
-    path: "/evkat",
   },
   {
     icon: <BiWallet size={"1.5rem"} />,
