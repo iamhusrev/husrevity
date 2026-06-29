@@ -148,7 +148,8 @@
     "admin": "Yönetim",
     "adminUsers": "Kullanıcılar",
     "settings": "Ayarlar",
-    "profile": "Profil"
+    "profile": "Profil",
+    "readings": "Okumalar"
   },
   "admin": {
     "kicker": "Yönetim",
@@ -799,7 +800,19 @@
       "incomplete": "Tamamlanmadı"
     },
     "deleteAria": "Sil",
-    "addAria": "Ekle"
+    "addAria": "Ekle",
+    "sections": {
+      "ungrouped": "Genel",
+      "add": "Bölüm ekle",
+      "namePlaceholder": "Bölüm adı…",
+      "addItemPlaceholder": "Bu bölüme ekle…",
+      "renameAria": "Bölümü yeniden adlandır",
+      "deleteAria": "Bölümü sil",
+      "deleteTitle": "Bölümü sil",
+      "deleteMessage": "Bölüm silinecek; içindeki öğeler 'Genel'e taşınır.",
+      "saveAria": "Kaydet",
+      "cancelAria": "İptal"
+    }
   },
   "reminders": {
     "title": "Anımsatıcılar",
@@ -1185,6 +1198,50 @@
       "message": "Mesaj",
       "send": "Gönder",
       "sending": "Gönderiliyor…"
+    }
+  },
+  "readings": {
+    "title": "Okumalar",
+    "kicker": "Günlük okuma",
+    "flourish": "takip",
+    "intro": "Her günkü okumalarını işaretle — sayfa aralığı, okundu ve dinlenildi.",
+    "newTrack": "Yeni okuma",
+    "prevWeek": "Önceki hafta",
+    "nextWeek": "Sonraki hafta",
+    "today": "Bugün",
+    "error": "Okumalar yüklenemedi.",
+    "trackCol": "Okuma",
+    "listenable": "Dinlenebilir",
+    "editCell": "Günü düzenle",
+    "read": "Okundu",
+    "listened": "Dinlenildi",
+    "pageRange": "Sayfa aralığı",
+    "pagePlaceholder": "örn. 1-10",
+    "clear": "Temizle",
+    "seeding": "Yükleniyor…",
+    "loadDefault": "Varsayılan okumaları yükle",
+    "confirmDeleteTitle": "Okumayı sil",
+    "confirmDelete": "Bu okumayı ve tüm günlük kayıtlarını silmek istediğine emin misin?",
+    "colorAuto": "Otomatik",
+    "empty": {
+      "kicker": "Henüz okuma yok",
+      "body": "Takip etmek istediğin okumaları ekle ya da hazır listeyle başla."
+    },
+    "modal": {
+      "editKicker": "Düzenle",
+      "newKicker": "Yeni okuma",
+      "editTitle": "Okumayı düzenle",
+      "createTitle": "Yeni okuma"
+    },
+    "field": {
+      "name": "Okuma adı",
+      "dailyTarget": "Günlük hedef",
+      "color": "Renk",
+      "tracksListened": "Dinlenildi takibi"
+    },
+    "placeholders": {
+      "name": "Kur'an",
+      "dailyTarget": "10 sayfa"
     }
   }
 }

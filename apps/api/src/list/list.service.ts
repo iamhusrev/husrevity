@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { TodoList } from './todo-list.entity';
 import { ListItem } from './list-item.entity';
+import { ListSection } from './list-section.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
 import {
@@ -15,6 +16,8 @@ import {
   ListRequestDto,
   ListResponseDto,
   ReorderItemDto,
+  SectionRequestDto,
+  SectionResponseDto,
 } from './dto/list-dtos';
 
 @Injectable()
@@ -22,6 +25,7 @@ export class ListService {
   constructor(
     @InjectRepository(TodoList) private readonly lists: Repository<TodoList>,
     @InjectRepository(ListItem) private readonly items: Repository<ListItem>,
+    @InjectRepository(ListSection) private readonly sections: Repository<ListSection>,
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationService,
   ) {}
@@ -94,8 +98,10 @@ export class ListService {
 
   async createItem(ownerId: string, listId: string, req: ItemRequestDto): Promise<ItemResponseDto> {
     await this.requireList(ownerId, listId);
+    if (req.sectionId != null) await this.requireSection(ownerId, req.sectionId, listId);
     const i = this.items.create({
       listId,
+      sectionId: req.sectionId ?? null,
       text: req.text,
       done: req.done ?? false,
       dueAt: req.dueAt ? new Date(req.dueAt) : null,
@@ -110,6 +116,10 @@ export class ListService {
   async updateItem(ownerId: string, itemId: string, req: ItemRequestDto): Promise<ItemResponseDto> {
     const item = await this.requireItem(ownerId, itemId);
     item.text = req.text;
+    if (req.sectionId !== undefined) {
+      if (req.sectionId != null) await this.requireSection(ownerId, req.sectionId, item.listId);
+      item.sectionId = req.sectionId ?? null;
+    }
     if (req.done !== undefined) item.done = req.done;
     if (req.dueAt !== undefined) item.dueAt = req.dueAt ? new Date(req.dueAt) : null;
     if (req.position !== undefined) item.position = req.position;
@@ -148,6 +158,88 @@ export class ListService {
           .execute();
       }
     });
+  }
+
+  // ─── Sections ─────────────────────────────────────────────────────────────
+
+  async listSections(ownerId: string, listId: string): Promise<SectionResponseDto[]> {
+    await this.requireList(ownerId, listId);
+    const rows = await this.sections.find({
+      where: { listId },
+      order: { position: 'ASC', id: 'ASC' },
+    });
+    return rows.map(SectionResponseDto.from);
+  }
+
+  async createSection(
+    ownerId: string,
+    listId: string,
+    req: SectionRequestDto,
+  ): Promise<SectionResponseDto> {
+    await this.requireList(ownerId, listId);
+    const max = await this.sections
+      .createQueryBuilder('s')
+      .select('COALESCE(MAX(s.position), -1)', 'max')
+      .where('s.list_id = :listId', { listId })
+      .getRawOne<{ max: number }>();
+    const s = this.sections.create({
+      listId,
+      name: req.name,
+      position: (max?.max ?? -1) + 1,
+    });
+    return SectionResponseDto.from(await this.sections.save(s));
+  }
+
+  async updateSection(
+    ownerId: string,
+    sectionId: string,
+    req: SectionRequestDto,
+  ): Promise<SectionResponseDto> {
+    const s = await this.requireSection(ownerId, sectionId);
+    s.name = req.name;
+    return SectionResponseDto.from(await this.sections.save(s));
+  }
+
+  async deleteSection(ownerId: string, sectionId: string): Promise<void> {
+    const s = await this.requireSection(ownerId, sectionId);
+    // Ungroup the section's items rather than deleting them.
+    await this.items
+      .createQueryBuilder()
+      .update(ListItem)
+      .set({ sectionId: null })
+      .where('section_id = :sectionId', { sectionId: s.id })
+      .execute();
+    await this.sections.softRemove(s);
+  }
+
+  async reorderSections(ownerId: string, listId: string, items: ReorderItemDto[]): Promise<void> {
+    await this.requireList(ownerId, listId);
+    if (!items.length) return;
+    await this.dataSource.transaction(async (em) => {
+      for (const it of items) {
+        await em
+          .createQueryBuilder()
+          .update(ListSection)
+          .set({ position: it.position })
+          .where('id = :id AND list_id = :listId', { id: it.id, listId })
+          .execute();
+      }
+    });
+  }
+
+  private async requireSection(
+    ownerId: string,
+    sectionId: string,
+    listId?: string,
+  ): Promise<ListSection> {
+    const qb = this.sections
+      .createQueryBuilder('s')
+      .innerJoin(TodoList, 'l', 'l.id = s.list_id AND l.owner_id = :ownerId', { ownerId })
+      .where('s.id = :sectionId', { sectionId });
+    if (listId) qb.andWhere('s.list_id = :listId', { listId });
+    const s = await qb.getOne();
+    if (!s) throw ApiException.notFound('List section not found');
+    return s;
   }
 
   private async syncNotification(ownerId: string, item: ListItem): Promise<void> {

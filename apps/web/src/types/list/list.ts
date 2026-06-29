@@ -18,6 +18,7 @@ export interface TodoListRequest {
 export interface TodoListItemResponse {
   id: number;
   listId: number;
+  sectionId?: number | null;
   text: string;
   done: boolean;
   dueAt?: string | null;
@@ -27,7 +28,20 @@ export interface TodoListItemResponse {
 
 export interface TodoListItemRequest {
   text: string;
+  sectionId?: number | null;
   done?: boolean;
   dueAt?: string | null;
   position?: number;
+}
+
+export interface ListSectionResponse {
+  id: number;
+  listId: number;
+  name: string;
+  position: number;
+  createdAt?: string | null;
+}
+
+export interface ListSectionRequest {
+  name: string;
 }

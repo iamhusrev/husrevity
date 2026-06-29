@@ -18,6 +18,7 @@ import {
   BiEnvelope,
   BiWallet,
   BiShield,
+  BiBookOpen,
 } from "react-icons/bi";
 import { useAuth } from "@/providers/AuthProvider";
 import { HiSparkles, HiOutlineClock } from "react-icons/hi2";
@@ -64,6 +65,11 @@ const getNavItems = (t: TFunc, isAdmin: boolean): NavItem[] => [
     icon: <BiListUl size={"1.5rem"} />,
     name: t("nav.lists"),
     path: "/lists",
+  },
+  {
+    icon: <BiBookOpen size={"1.5rem"} />,
+    name: t("nav.readings"),
+    path: "/readings",
   },
   {
     icon: <BiTargetLock size={"1.5rem"} />,

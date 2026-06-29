@@ -6,12 +6,14 @@ import {
   IsInt,
   IsNotEmpty,
   IsOptional,
+  IsString,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TodoList } from '../todo-list.entity';
 import { ListItem } from '../list-item.entity';
+import { ListSection } from '../list-section.entity';
 
 export class ListRequestDto {
   @IsNotEmpty()
@@ -55,10 +57,41 @@ export class ListResponseDto {
   }
 }
 
+export class SectionRequestDto {
+  @IsNotEmpty()
+  @MaxLength(128)
+  name!: string;
+}
+
+export class SectionResponseDto {
+  id!: string;
+  listId!: string;
+  name!: string;
+  position!: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+
+  static from(s: ListSection): SectionResponseDto {
+    return {
+      id: s.id,
+      listId: s.listId,
+      name: s.name,
+      position: s.position,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+    };
+  }
+}
+
 export class ItemRequestDto {
   @IsNotEmpty()
   @MaxLength(512)
   text!: string;
+
+  /** Group this item under a section; null/omitted = ungrouped. */
+  @IsOptional()
+  @IsString()
+  sectionId?: string | null;
 
   @IsOptional()
   @IsBoolean()
@@ -81,6 +114,7 @@ export class ItemRequestDto {
 export class ItemResponseDto {
   id!: string;
   listId!: string;
+  sectionId!: string | null;
   text!: string;
   done!: boolean;
   dueAt!: Date | null;
@@ -93,6 +127,7 @@ export class ItemResponseDto {
     return {
       id: i.id,
       listId: i.listId,
+      sectionId: i.sectionId,
       text: i.text,
       done: i.done,
       dueAt: i.dueAt,

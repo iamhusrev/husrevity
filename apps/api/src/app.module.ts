@@ -23,6 +23,7 @@ import { CryptoModule } from './crypto/crypto.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimeBlockModule } from './time-block/time-block.module';
 import { RoutineModule } from './routine/routine.module';
+import { ReadingModule } from './reading/reading.module';
 import { FinanceModule } from './finance/finance.module';
 import { AdminModule } from './admin/admin.module';
 import { HealthController } from './common/health.controller';
@@ -49,6 +50,7 @@ import { HealthController } from './common/health.controller';
     NotificationModule,
     TimeBlockModule,
     RoutineModule,
+    ReadingModule,
     FinanceModule,
     AdminModule,
   ],

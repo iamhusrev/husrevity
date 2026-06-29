@@ -4,9 +4,14 @@ import { BaseEntity } from '../common/base.entity';
 @Entity('list_item')
 @Index('idx_list_item_list', ['listId'])
 @Index('idx_list_item_list_position', ['listId', 'position'])
+@Index('idx_list_item_section', ['sectionId'])
 export class ListItem extends BaseEntity {
   @Column({ name: 'list_id', type: 'bigint' })
   listId!: string;
+
+  /** Optional grouping under a {@link ListSection}; NULL = ungrouped. */
+  @Column({ name: 'section_id', type: 'bigint', nullable: true })
+  sectionId!: string | null;
 
   @Column({ type: 'varchar', length: 512 })
   text!: string;

@@ -148,7 +148,8 @@
     "admin": "Admin",
     "adminUsers": "Users",
     "settings": "Settings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "readings": "Readings"
   },
   "admin": {
     "kicker": "Admin",
@@ -799,7 +800,19 @@
       "incomplete": "Incomplete"
     },
     "deleteAria": "Delete",
-    "addAria": "Add"
+    "addAria": "Add",
+    "sections": {
+      "ungrouped": "General",
+      "add": "Add section",
+      "namePlaceholder": "Section name…",
+      "addItemPlaceholder": "Add to this section…",
+      "renameAria": "Rename section",
+      "deleteAria": "Delete section",
+      "deleteTitle": "Delete section",
+      "deleteMessage": "The section will be removed; its items move to 'General'.",
+      "saveAria": "Save",
+      "cancelAria": "Cancel"
+    }
   },
   "reminders": {
     "title": "Reminders",
@@ -1185,6 +1198,50 @@
       "message": "Message",
       "send": "Send",
       "sending": "Sending…"
+    }
+  },
+  "readings": {
+    "title": "Readings",
+    "kicker": "Daily reading",
+    "flourish": "tracker",
+    "intro": "Check off each day's readings — page range, read and listened.",
+    "newTrack": "New reading",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "error": "Could not load readings.",
+    "trackCol": "Reading",
+    "listenable": "Listenable",
+    "editCell": "Edit day",
+    "read": "Read",
+    "listened": "Listened",
+    "pageRange": "Page range",
+    "pagePlaceholder": "e.g. 1-10",
+    "clear": "Clear",
+    "seeding": "Loading…",
+    "loadDefault": "Load default readings",
+    "confirmDeleteTitle": "Delete reading",
+    "confirmDelete": "Delete this reading and all its daily logs?",
+    "colorAuto": "Auto",
+    "empty": {
+      "kicker": "No readings yet",
+      "body": "Add the readings you want to track, or start with a ready-made list."
+    },
+    "modal": {
+      "editKicker": "Edit",
+      "newKicker": "New reading",
+      "editTitle": "Edit reading",
+      "createTitle": "New reading"
+    },
+    "field": {
+      "name": "Reading name",
+      "dailyTarget": "Daily goal",
+      "color": "Color",
+      "tracksListened": "Track listened"
+    },
+    "placeholders": {
+      "name": "Qur'an",
+      "dailyTarget": "10 pages"
     }
   }
 }

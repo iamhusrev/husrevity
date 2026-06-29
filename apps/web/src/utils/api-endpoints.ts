@@ -57,6 +57,9 @@ export const LIST_ENDPOINTS = {
   ITEMS_REORDER: (id: number) => `/lists/${id}/items/reorder`,
   ITEM_BY_ID: (id: number) => `/list-items/${id}`,
   ITEM_TOGGLE: (id: number) => `/list-items/${id}/toggle`,
+  SECTIONS: (id: number) => `/lists/${id}/sections`,
+  SECTIONS_REORDER: (id: number) => `/lists/${id}/sections/reorder`,
+  SECTION_BY_ID: (id: number) => `/list-sections/${id}`,
 };
 
 // ─── Projects & Tasks ─────────────────────────────────────────────────────────
@@ -142,6 +145,18 @@ export const ROUTINE_ENDPOINTS = {
   SEGMENT_ACTIVITIES_REORDER: (id: string) =>
     `/routine/segments/${id}/activities/reorder`,
   ACTIVITY_BY_ID: (id: string) => `/routine/activities/${id}`,
+};
+
+// ─── Okumalar (reading / habit tracker) ───────────────────────────────────────
+
+export const READING_ENDPOINTS = {
+  TRACKS: "/reading-tracks",
+  TRACK_BY_ID: (id: string) => `/reading-tracks/${id}`,
+  TRACKS_REORDER: "/reading-tracks/reorder",
+  LOGS: (from: string, to: string) =>
+    `/reading-tracks/logs?from=${from}&to=${to}`,
+  LOG_FOR_DATE: (id: string, date: string) =>
+    `/reading-tracks/${id}/logs/${date}`,
 };
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

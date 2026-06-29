@@ -1,6 +1,8 @@
 import apiClient from "./api-client";
 import { ApiResponse } from "@/types/common/api-response";
 import {
+  ListSectionRequest,
+  ListSectionResponse,
   TodoListItemRequest,
   TodoListItemResponse,
   TodoListRequest,
@@ -73,6 +75,37 @@ export const listService = {
 
   async reorderItems(listId: number, items: ReorderItem[]): Promise<ApiResponse<void>> {
     const res = await apiClient.patch(LIST_ENDPOINTS.ITEMS_REORDER(listId), { items });
+    return res.data;
+  },
+
+  async listSections(listId: number): Promise<ApiResponse<ListSectionResponse[]>> {
+    const res = await apiClient.get(LIST_ENDPOINTS.SECTIONS(listId));
+    return res.data;
+  },
+
+  async createSection(
+    listId: number,
+    body: ListSectionRequest,
+  ): Promise<ApiResponse<ListSectionResponse>> {
+    const res = await apiClient.post(LIST_ENDPOINTS.SECTIONS(listId), body);
+    return res.data;
+  },
+
+  async updateSection(
+    id: number,
+    body: ListSectionRequest,
+  ): Promise<ApiResponse<ListSectionResponse>> {
+    const res = await apiClient.put(LIST_ENDPOINTS.SECTION_BY_ID(id), body);
+    return res.data;
+  },
+
+  async deleteSection(id: number): Promise<ApiResponse<void>> {
+    const res = await apiClient.delete(LIST_ENDPOINTS.SECTION_BY_ID(id));
+    return res.data;
+  },
+
+  async reorderSections(listId: number, items: ReorderItem[]): Promise<ApiResponse<void>> {
+    const res = await apiClient.patch(LIST_ENDPOINTS.SECTIONS_REORDER(listId), { items });
     return res.data;
   },
 };

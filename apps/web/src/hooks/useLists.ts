@@ -1,12 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listService } from "@/services/list-service";
-import { TodoListItemRequest, TodoListRequest } from "@/types/list/list";
+import {
+  ListSectionRequest,
+  TodoListItemRequest,
+  TodoListRequest,
+} from "@/types/list/list";
 import { ReorderItem } from "@/types/common/reorder";
 
 const LIST_KEYS = {
   all: ["lists"] as const,
   detail: (id: number) => ["lists", id] as const,
   items: (listId: number) => ["list-items", listId] as const,
+  sections: (listId: number) => ["list-sections", listId] as const,
 };
 
 export function useTodoLists() {
@@ -120,6 +125,60 @@ export function useReorderTodoListItems() {
       listService.reorderItems(listId, items),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: LIST_KEYS.items(vars.listId) });
+    },
+  });
+}
+
+export function useListSections(listId: number) {
+  return useQuery({
+    queryKey: LIST_KEYS.sections(listId),
+    queryFn: () => listService.listSections(listId),
+    select: (d) => d.data,
+    enabled: Number.isFinite(listId) && listId > 0,
+  });
+}
+
+export function useCreateListSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listId, body }: { listId: number; body: ListSectionRequest }) =>
+      listService.createSection(listId, body),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: LIST_KEYS.sections(vars.listId) });
+    },
+  });
+}
+
+export function useUpdateListSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; listId: number; body: ListSectionRequest }) =>
+      listService.updateSection(id, body),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: LIST_KEYS.sections(vars.listId) });
+    },
+  });
+}
+
+export function useDeleteListSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number; listId: number }) => listService.deleteSection(id),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: LIST_KEYS.sections(vars.listId) });
+      // Deleting a section ungroups its items — refresh items too.
+      qc.invalidateQueries({ queryKey: LIST_KEYS.items(vars.listId) });
+    },
+  });
+}
+
+export function useReorderListSections() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listId, items }: { listId: number; items: ReorderItem[] }) =>
+      listService.reorderSections(listId, items),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: LIST_KEYS.sections(vars.listId) });
     },
   });
 }

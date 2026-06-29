@@ -18,6 +18,8 @@ import {
   ListRequestDto,
   ListResponseDto,
   ReorderRequestDto,
+  SectionRequestDto,
+  SectionResponseDto,
 } from './dto/list-dtos';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 
@@ -68,6 +70,52 @@ export class ListController {
     @Body() body: ReorderRequestDto,
   ): Promise<void> {
     return this.lists.reorderLists(u.userId, body.items);
+  }
+
+  @Patch('lists/:id/sections/reorder')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  reorderSections(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') listId: string,
+    @Body() body: ReorderRequestDto,
+  ): Promise<void> {
+    return this.lists.reorderSections(u.userId, listId, body.items);
+  }
+
+  @Get('lists/:id/sections')
+  listSections(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') listId: string,
+  ): Promise<SectionResponseDto[]> {
+    return this.lists.listSections(u.userId, listId);
+  }
+
+  @Post('lists/:id/sections')
+  @HttpCode(HttpStatus.CREATED)
+  createSection(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') listId: string,
+    @Body() body: SectionRequestDto,
+  ): Promise<SectionResponseDto> {
+    return this.lists.createSection(u.userId, listId, body);
+  }
+
+  @Put('list-sections/:id')
+  updateSection(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') sectionId: string,
+    @Body() body: SectionRequestDto,
+  ): Promise<SectionResponseDto> {
+    return this.lists.updateSection(u.userId, sectionId, body);
+  }
+
+  @Delete('list-sections/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteSection(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') sectionId: string,
+  ): Promise<void> {
+    return this.lists.deleteSection(u.userId, sectionId);
   }
 
   @Patch('lists/:id/items/reorder')
