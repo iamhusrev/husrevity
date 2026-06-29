@@ -19,6 +19,7 @@ const KINDS: NotificationKind[] = [
   'calendar_event',
   'time_block',
   'debt',
+  'finance_installment',
 ];
 
 export class NotificationResponseDto {

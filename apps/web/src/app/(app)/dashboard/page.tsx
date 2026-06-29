@@ -7,6 +7,9 @@ import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import StatCard from "@/components/dashboard/StatCard";
 import TodaySuggestionsCard from "@/components/dashboard/TodaySuggestionsCard";
+import RoutineNowCard from "@/components/dashboard/RoutineNowCard";
+import TodayReadingsCard from "@/components/dashboard/TodayReadingsCard";
+import ListsOverviewCard from "@/components/dashboard/ListsOverviewCard";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNotes } from "@/hooks/useNotes";
 import { useReminderLists } from "@/hooks/useReminders";
@@ -14,12 +17,24 @@ import { useProjects } from "@/hooks/useProjects";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useVaultEntities } from "@/hooks/useVault";
 import { useGmailAccounts } from "@/hooks/useGmail";
+import { useRoutineSegments } from "@/hooks/useRoutine";
+import { useReadingTracks } from "@/hooks/useReading";
 import { reminderService } from "@/services/reminder-service";
 import { projectService } from "@/services/project-service";
 import { ReminderResponse } from "@/types/reminder/reminder";
 import { TaskResponse, TaskStatus } from "@/types/project/project";
 import { formatDate, formatDateTime, formatTime, formatWeekdayDayMonth } from "@/utils/i18n-date";
-import { BiNote, BiBell, BiTask, BiCalendar, BiLockAlt, BiEnvelope, BiPin } from "react-icons/bi";
+import {
+  BiNote,
+  BiBell,
+  BiTask,
+  BiCalendar,
+  BiLockAlt,
+  BiEnvelope,
+  BiPin,
+  BiBookOpen,
+} from "react-icons/bi";
+import { HiOutlineClock } from "react-icons/hi2";
 
 const TASK_STATUS_TONES: Record<TaskStatus, string> = {
   TODO: "bg-gray-400",
@@ -73,6 +88,8 @@ export default function DashboardPage() {
   const { data: events = [] } = useCalendarEvents(weekRange);
   const { data: vaultEntries = [] } = useVaultEntities();
   const { data: gmailAccounts = [] } = useGmailAccounts();
+  const { data: routineSegments = [] } = useRoutineSegments();
+  const { data: readingTracks = [] } = useReadingTracks();
 
   // Parallel: reminders for every list
   const reminderQueries = useQueries({
@@ -233,8 +250,14 @@ export default function DashboardPage() {
       {/* Today's AI suggestion — the dashboard's actionable focal widget */}
       <TodaySuggestionsCard />
 
+      {/* Daily ritual — what to do right now (routine) + today's readings */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <RoutineNowCard />
+        <TodayReadingsCard />
+      </div>
+
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6 husrev-stagger">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4 husrev-stagger">
         <StatCard
           icon={<BiNote size={22} />}
           label={t("dashboard.stat.notes")}
@@ -285,7 +308,24 @@ export default function DashboardPage() {
           href="/gmail"
           tone="red"
         />
+        <StatCard
+          icon={<HiOutlineClock size={22} />}
+          label={t("dashboard.stat.routineSegments")}
+          value={routineSegments.length}
+          href="/evkat"
+          tone="moss"
+        />
+        <StatCard
+          icon={<BiBookOpen size={22} />}
+          label={t("dashboard.stat.readings")}
+          value={readingTracks.length}
+          href="/readings"
+          tone="amber"
+        />
       </div>
+
+      {/* Lists overview — per-list completion progress */}
+      <ListsOverviewCard />
 
       {/* Today's events + Due reminders */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

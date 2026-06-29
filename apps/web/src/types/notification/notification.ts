@@ -3,7 +3,9 @@ export type NotificationKind =
   | "task"
   | "list_item"
   | "calendar_event"
-  | "time_block";
+  | "time_block"
+  | "debt"
+  | "finance_installment";
 
 export interface NotificationResponse {
   id: string;

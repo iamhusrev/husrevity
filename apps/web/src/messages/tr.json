@@ -499,7 +499,9 @@
       "task": "Görev",
       "list_item": "Liste",
       "calendar_event": "Takvim",
-      "time_block": "Evkat"
+      "time_block": "Evkat",
+      "debt": "Borç",
+      "finance_installment": "Taksit"
     },
     "permission": {
       "title": "Bildirim izni",
@@ -576,7 +578,9 @@
       "totalHint_other": "{{count}} toplam",
       "events": "etkinlik",
       "vaultHint": "kayıt",
-      "gmailHint": "hesap"
+      "gmailHint": "hesap",
+      "routineSegments": "Vakitler",
+      "readings": "Okumalar"
     },
     "reminderGroup": {
       "overdue": "Gecikmiş",
@@ -617,6 +621,30 @@
         "plan": "Plan",
         "project": "Proje"
       }
+    },
+    "routineNow": {
+      "title": "Şu an",
+      "link": "Evkat",
+      "nextUp": "Sırada",
+      "idle": "Şu an aktif bir vakit yok.",
+      "empty": "Günlük rutinini oluştur.",
+      "error": "Vakitler yüklenemedi.",
+      "noActivities": "Bu vakte bağlı iş yok."
+    },
+    "todayReadings": {
+      "title": "Bugünün okumaları",
+      "link": "Okumalar",
+      "empty": "Takip için okuma ekle.",
+      "error": "Okumalar yüklenemedi.",
+      "markRead": "Okundu işaretle",
+      "listened": "Dinlenildi"
+    },
+    "listsOverview": {
+      "title": "Listeler",
+      "link": "Listeler",
+      "empty": "Henüz liste yok.",
+      "error": "Listeler yüklenemedi.",
+      "progress": "{{done}}/{{total}}"
     }
   },
   "plans": {

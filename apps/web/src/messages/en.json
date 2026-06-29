@@ -499,7 +499,9 @@
       "task": "Task",
       "list_item": "List",
       "calendar_event": "Calendar",
-      "time_block": "Evkat"
+      "time_block": "Evkat",
+      "debt": "Debt",
+      "finance_installment": "Installment"
     },
     "permission": {
       "title": "Notification permission",
@@ -576,7 +578,9 @@
       "totalHint_other": "{{count}} total",
       "events": "events",
       "vaultHint": "items",
-      "gmailHint": "accounts"
+      "gmailHint": "accounts",
+      "routineSegments": "Routine",
+      "readings": "Readings"
     },
     "reminderGroup": {
       "overdue": "Overdue",
@@ -617,6 +621,30 @@
         "plan": "Plan",
         "project": "Project"
       }
+    },
+    "routineNow": {
+      "title": "Right now",
+      "link": "Evkat",
+      "nextUp": "Next up",
+      "idle": "No active segment right now.",
+      "empty": "Set up your daily routine.",
+      "error": "Couldn't load your routine.",
+      "noActivities": "No tasks for this segment."
+    },
+    "todayReadings": {
+      "title": "Today's readings",
+      "link": "Readings",
+      "empty": "Add readings to track daily.",
+      "error": "Couldn't load readings.",
+      "markRead": "Mark as read",
+      "listened": "Listened"
+    },
+    "listsOverview": {
+      "title": "Lists",
+      "link": "Lists",
+      "empty": "No lists yet.",
+      "error": "Couldn't load lists.",
+      "progress": "{{done}}/{{total}}"
     }
   },
   "plans": {

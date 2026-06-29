@@ -35,7 +35,12 @@ function ClientBootstrap() {
     // built against a different NEXT_PUBLIC_API_URL would keep calling that
     // old API. Proactively unregister any leftover worker and drop its caches
     // so dev always talks to the local API from `.env.local`.
-    if (process.env.NODE_ENV !== "production") {
+    //
+    // Opt out with NEXT_PUBLIC_ENABLE_SW_DEV=1 to test push/PWA locally (the SW
+    // then registers in dev too). Caveat: stale hashed chunks can linger after
+    // switching NEXT_PUBLIC_API_URL — hard-reload / clear site data if so.
+    const enableSwInDev = process.env.NEXT_PUBLIC_ENABLE_SW_DEV === "1";
+    if (process.env.NODE_ENV !== "production" && !enableSwInDev) {
       navigator.serviceWorker
         .getRegistrations()
         .then((regs) => regs.forEach((r) => r.unregister()))

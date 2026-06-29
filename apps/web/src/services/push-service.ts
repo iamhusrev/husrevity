@@ -39,7 +39,13 @@ export const pushService = {
   async getCurrentSubscription(): Promise<PushSubscription | null> {
     if (!isSupported()) return null;
     try {
-      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      // The SW is registered with scope "/" (see providers.tsx). getRegistration
+      // matches by the document URL within scope, NOT by script URL — passing
+      // "/sw.js" misses the "/"-scoped registration and returns undefined even
+      // when the user is subscribed. The no-arg form resolves the registration
+      // controlling the current page. (Don't use serviceWorker.ready here — it
+      // never resolves when no SW is registered and would hang disablePush.)
+      const reg = await navigator.serviceWorker.getRegistration();
       if (!reg) return null;
       return (await reg.pushManager.getSubscription()) ?? null;
     } catch {
