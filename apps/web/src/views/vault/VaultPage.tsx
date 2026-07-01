@@ -80,6 +80,7 @@ function EntityModal({ initial, onClose }: { initial?: VaultEntityResponse; onCl
       onClick={onClose}
     >
       <form
+        autoComplete="off"
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
         className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
@@ -233,6 +234,7 @@ function ItemModal({
       onClick={onClose}
     >
       <form
+        autoComplete="off"
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
         className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
@@ -271,6 +273,14 @@ function ItemModal({
             <div className="relative">
               <input
                 type={showValue ? "text" : "password"}
+                autoComplete="new-password"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                data-1p-ignore
+                data-lpignore="true"
+                data-bwignore
+                data-form-type="other"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={
