@@ -63,4 +63,11 @@ export const readingService = {
     );
     return res.data;
   },
+
+  async deleteLog(trackId: string, date: string): Promise<ApiResponse<void>> {
+    const res = await apiClient.delete(
+      READING_ENDPOINTS.LOG_FOR_DATE(trackId, date),
+    );
+    return res.data;
+  },
 };

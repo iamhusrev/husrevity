@@ -36,6 +36,10 @@ export class RoutineSegment extends BaseEntity {
   @Column({ name: 'color_token', type: 'varchar', length: 24, nullable: true })
   colorToken!: string | null;
 
+  /** Bitmask of weekdays (bit 0=Mon...6=Sun). Default 127 = every day. */
+  @Column({ name: 'days_of_week', type: 'smallint', default: 127 })
+  daysOfWeek!: number;
+
   @Column({ type: 'text', nullable: true })
   notes!: string | null;
 

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import {
+  ALL_DAYS_MASK,
   ROUTINE_COLOR_TOKENS,
   RoutineActivityResponse,
   RoutineColorToken,
@@ -21,6 +22,7 @@ import {
 } from "@/hooks/useRoutine";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
+import { cn } from "@/utils/utils";
 import {
   BiPlus,
   BiTrash,
@@ -30,6 +32,8 @@ import {
   BiX,
 } from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+
+const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 const COLOR_STRIPE_CLASS: Record<RoutineColorToken, string> = {
   "husrev-amber": "bg-husrev-amber",
@@ -46,59 +50,6 @@ const COLOR_RING_CLASS: Record<RoutineColorToken, string> = {
   "husrev-ink": "ring-husrev-ink/30",
   "husrev-sand": "ring-husrev-sand/60",
 };
-
-/** The owner's real Evkat segments, seeded on demand from the Program sheet. */
-const DEFAULT_TEMPLATE: Array<{
-  segment: RoutineSegmentRequest;
-  activities: string[];
-}> = [
-  {
-    segment: {
-      name: "Güne Hazırlık",
-      startMinute: null,
-      endMinute: 8 * 60,
-      theme: "Hazırlık",
-      colorToken: "husrev-amber",
-    },
-    activities: ["Kuran ve Cevşen", "Okuma", "Dil Öğrenme"],
-  },
-  {
-    segment: {
-      name: "Mobiliz",
-      startMinute: 9 * 60,
-      endMinute: 14 * 60,
-      theme: "İş",
-      colorToken: "husrev-ember",
-    },
-    activities: ["Mobiliz İşleri"],
-  },
-  {
-    segment: {
-      name: "Kendini Geliştirme",
-      startMinute: 14 * 60,
-      endMinute: 19 * 60,
-      theme: "Gelişim",
-      colorToken: "husrev-moss",
-    },
-    activities: ["Nakliya"],
-  },
-  {
-    segment: {
-      name: "Uygulama Geliştirme",
-      startMinute: 19 * 60,
-      endMinute: 23 * 60,
-      theme: "Geliştirme",
-      colorToken: "husrev-ink",
-    },
-    activities: [
-      "Okuma",
-      "Kurslar",
-      "OCP Sertifika",
-      "Spring Sertifika",
-      "AWS Sertifika",
-    ],
-  },
-];
 
 function minutesToTimeInput(m: number | null): string {
   if (m === null || m === undefined) return "";
@@ -130,33 +81,23 @@ export default function EvkatPage() {
   const { t } = useTranslation();
   const showAlert = alertStore((s) => s.show);
   const { data, isLoading, isError, refetch } = useRoutineSegments();
-  const createSegment = useCreateRoutineSegment();
-  const createActivity = useCreateRoutineActivity();
   const reorder = useReorderRoutineSegments();
   const [editing, setEditing] = useState<{
     segment: RoutineSegmentResponse | null;
   } | null>(null);
-  const [seeding, setSeeding] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+
+  const todayIdx = (new Date().getDay() + 6) % 7; // Monday=0, Sunday=6
 
   const segments = useMemo(() => data ?? [], [data]);
 
-  const loadDefaultTemplate = async () => {
-    setSeeding(true);
-    try {
-      for (const { segment, activities } of DEFAULT_TEMPLATE) {
-        const created = await createSegment.mutateAsync(segment);
-        const segmentId = created.data.id;
-        for (const text of activities) {
-          await createActivity.mutateAsync({ segmentId, body: { text } });
-        }
-      }
-    } catch (err) {
-      const { title, message } = parseAxiosError(err);
-      showAlert({ title, message, type: "error", position: "top-center" });
-    } finally {
-      setSeeding(false);
-    }
-  };
+  const visibleSegments = useMemo(
+    () =>
+      selectedDay === null
+        ? segments
+        : segments.filter((s) => (s.daysOfWeek & (1 << selectedDay)) !== 0),
+    [segments, selectedDay],
+  );
 
   const moveSegment = async (index: number, dir: -1 | 1) => {
     const target = index + dir;
@@ -231,24 +172,14 @@ export default function EvkatPage() {
           <p className="mx-auto mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
             {t(
               "evkat.empty.body",
-              "Kendi vakitlerini ekleyebilir ya da hazır şablonunla başlayabilirsin.",
+              "Kendi vakitlerini ekleyerek Evkat'ını oluşturmaya başla.",
             )}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
-              onClick={loadDefaultTemplate}
-              disabled={seeding}
-              className="husrev-btn"
-            >
-              {seeding
-                ? t("evkat.seeding", "Yükleniyor…")
-                : t("evkat.loadDefault", "Varsayılan şablonu yükle")}
-            </button>
-            <button
-              type="button"
               onClick={() => setEditing({ segment: null })}
-              className="husrev-btn-ghost"
+              className="husrev-btn"
             >
               {t("evkat.newSegment", "Yeni vakit")}
             </button>
@@ -256,19 +187,56 @@ export default function EvkatPage() {
         </div>
       )}
 
+      {!isLoading && !isError && segments.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <button
+            type="button"
+            onClick={() => setSelectedDay(null)}
+            className={cn(
+              "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition",
+              selectedDay === null
+                ? "bg-husrev-amber text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300",
+            )}
+          >
+            {t("evkat.allWeek", "Tüm hafta")}
+          </button>
+          {DAY_NAMES.map((name, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setSelectedDay(idx)}
+              className={cn(
+                "whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition",
+                selectedDay === idx
+                  ? "bg-husrev-amber text-white"
+                  : idx === todayIdx
+                    ? "bg-husrev-amber/10 text-husrev-amber hover:bg-husrev-amber/20"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300",
+              )}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="space-y-3">
-        {segments.map((segment, index) => (
-          <SegmentCard
-            key={segment.id}
-            segment={segment}
-            isFirst={index === 0}
-            isLast={index === segments.length - 1}
-            onEdit={() => setEditing({ segment })}
-            onMoveUp={() => moveSegment(index, -1)}
-            onMoveDown={() => moveSegment(index, 1)}
-            showAlert={showAlert}
-          />
-        ))}
+        {visibleSegments.map((segment) => {
+          const realIndex = segments.findIndex((s) => s.id === segment.id);
+          return (
+            <SegmentCard
+              key={segment.id}
+              segment={segment}
+              isFirst={realIndex === 0}
+              isLast={realIndex === segments.length - 1}
+              onEdit={() => setEditing({ segment })}
+              onMoveUp={() => moveSegment(realIndex, -1)}
+              onMoveDown={() => moveSegment(realIndex, 1)}
+              showAlert={showAlert}
+            />
+          );
+        })}
       </div>
 
       {editing && (
@@ -478,6 +446,9 @@ function EditSegmentModal({
     initial?.colorToken ?? "",
   );
   const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [daysOfWeek, setDaysOfWeek] = useState<number>(
+    initial?.daysOfWeek ?? ALL_DAYS_MASK,
+  );
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -490,6 +461,7 @@ function EditSegmentModal({
       theme: theme.trim() || null,
       colorToken: (colorToken || null) as RoutineColorToken | null,
       notes: notes.trim() || null,
+      daysOfWeek,
     };
     try {
       if (initial) {
@@ -625,6 +597,48 @@ function EditSegmentModal({
               ))}
             </div>
           </Field>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+                {t("evkat.field.daysOfWeek", "Günler")}
+              </span>
+              <button
+                type="button"
+                onClick={() => setDaysOfWeek(ALL_DAYS_MASK)}
+                className="text-xs text-husrev-ember hover:underline dark:text-husrev-amber"
+              >
+                {t("evkat.allWeek", "Tüm hafta")}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {DAY_NAMES.map((name, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    const isOnlyDaySet = daysOfWeek === 1 << idx;
+                    if (isOnlyDaySet) return; // keep at least one day selected
+                    setDaysOfWeek((m) => m ^ (1 << idx));
+                  }}
+                  className={cn(
+                    "rounded-full px-2 py-1 text-xs font-medium transition",
+                    (daysOfWeek & (1 << idx)) !== 0
+                      ? "bg-husrev-amber text-white"
+                      : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300",
+                  )}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t(
+                "evkat.daysHint",
+                "Varsayılan olarak her gün gösterilir; belirli günler için sadece onları işaretle.",
+              )}
+            </p>
+          </div>
 
           <Field label={t("evkat.field.notes", "Notlar")}>
             <textarea

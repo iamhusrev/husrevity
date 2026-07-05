@@ -7,12 +7,16 @@ export const READING_COLOR_TOKENS = [
 ] as const;
 export type ReadingColorToken = (typeof READING_COLOR_TOKENS)[number];
 
+export const READING_CADENCES = ["DAILY", "WEEKLY"] as const;
+export type ReadingCadence = (typeof READING_CADENCES)[number];
+
 export interface ReadingTrackResponse {
   id: string;
   name: string;
   colorToken: ReadingColorToken | null;
   tracksListened: boolean;
   dailyTarget: string | null;
+  cadence: ReadingCadence;
   position: number;
   createdAt: string;
   updatedAt: string;
@@ -23,6 +27,7 @@ export interface ReadingTrackRequest {
   colorToken?: ReadingColorToken | null;
   tracksListened?: boolean;
   dailyTarget?: string | null;
+  cadence?: ReadingCadence;
 }
 
 export interface ReadingLogResponse {

@@ -7,6 +7,8 @@ export const ROUTINE_COLOR_TOKENS = [
 ] as const;
 export type RoutineColorToken = (typeof ROUTINE_COLOR_TOKENS)[number];
 
+export const ALL_DAYS_MASK = 127;
+
 export interface RoutineActivityResponse {
   id: string;
   segmentId: string;
@@ -23,6 +25,7 @@ export interface RoutineSegmentResponse {
   colorToken: RoutineColorToken | null;
   notes: string | null;
   position: number;
+  daysOfWeek: number;
   activities: RoutineActivityResponse[];
   createdAt: string;
   updatedAt: string;
@@ -35,6 +38,7 @@ export interface RoutineSegmentRequest {
   theme?: string | null;
   colorToken?: RoutineColorToken | null;
   notes?: string | null;
+  daysOfWeek?: number;
 }
 
 export interface RoutineActivityRequest {

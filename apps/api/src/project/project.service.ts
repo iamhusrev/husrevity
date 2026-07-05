@@ -47,6 +47,8 @@ export class ProjectService {
     if (req.status !== undefined) p.status = req.status;
     if (req.startDate !== undefined) p.startDate = req.startDate ?? null;
     if (req.endDate !== undefined) p.endDate = req.endDate ?? null;
+    if (req.pinned !== undefined) p.pinned = req.pinned;
+    if (req.archived !== undefined) p.archived = req.archived;
     return ProjectResponseDto.from(await this.projects.save(p));
   }
 

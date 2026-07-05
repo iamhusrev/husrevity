@@ -738,7 +738,15 @@
       "cta": "Open the first file"
     },
     "deleteAria": "Delete project",
-    "invalid": "Invalid project."
+    "pinAria": "Pin",
+    "archiveAria": "Archive",
+    "invalid": "Invalid project.",
+    "statuses": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "DONE": "Done",
+      "CANCELLED": "Cancelled"
+    }
   },
   "kanban": {
     "view": {
@@ -829,6 +837,7 @@
     },
     "deleteAria": "Delete",
     "addAria": "Add",
+    "renameAria": "Rename list",
     "sections": {
       "ungrouped": "General",
       "add": "Add section",
@@ -864,6 +873,7 @@
       "incomplete": "Incomplete"
     },
     "deleteAria": "Delete",
+    "renameListAria": "Rename list",
     "addDue": "Add date",
     "flagAria": "Toggle flag",
     "priorityAria": "Cycle priority",
@@ -921,6 +931,7 @@
     "quickAddPlaceholder": "Take a note…",
     "pinAria": "Pin note",
     "unpinAria": "Unpin note",
+    "archiveAria": "Archive",
     "colorNone": "No color",
     "field": {
       "title": "Title",
@@ -1265,7 +1276,12 @@
       "name": "Reading name",
       "dailyTarget": "Daily goal",
       "color": "Color",
-      "tracksListened": "Track listened"
+      "tracksListened": "Track listened",
+      "cadence": "Cadence"
+    },
+    "cadence": {
+      "daily": "Daily",
+      "weekly": "Weekly"
     },
     "placeholders": {
       "name": "Qur'an",

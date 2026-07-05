@@ -39,21 +39,19 @@ export class ReadingService {
       colorToken: req.colorToken ?? null,
       tracksListened: req.tracksListened ?? false,
       dailyTarget: req.dailyTarget ?? null,
+      cadence: req.cadence ?? 'DAILY',
       position: await this.nextTrackPosition(ownerId),
     });
     return TrackResponseDto.from(await this.tracks.save(t));
   }
 
-  async updateTrack(
-    ownerId: string,
-    id: string,
-    req: TrackRequestDto,
-  ): Promise<TrackResponseDto> {
+  async updateTrack(ownerId: string, id: string, req: TrackRequestDto): Promise<TrackResponseDto> {
     const t = await this.requireTrack(ownerId, id);
     t.name = req.name;
     if (req.colorToken !== undefined) t.colorToken = req.colorToken ?? null;
     if (req.tracksListened !== undefined) t.tracksListened = req.tracksListened;
     if (req.dailyTarget !== undefined) t.dailyTarget = req.dailyTarget ?? null;
+    if (req.cadence !== undefined) t.cadence = req.cadence;
     return TrackResponseDto.from(await this.tracks.save(t));
   }
 
@@ -115,6 +113,14 @@ export class ReadingService {
     if (req.read !== undefined) log.read = req.read;
     if (req.listened !== undefined) log.listened = req.listened;
     return LogResponseDto.from(await this.logs.save(log));
+  }
+
+  async deleteLog(ownerId: string, trackId: string, date: string): Promise<void> {
+    this.assertDate(date, 'date');
+    await this.requireTrack(ownerId, trackId);
+    const log = await this.logs.findOne({ where: { trackId, logDate: date } });
+    if (!log) return; // idempotent, no-op if not found
+    await this.logs.softRemove(log);
   }
 
   private assertDate(value: string, field: string): void {

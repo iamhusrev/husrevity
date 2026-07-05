@@ -23,7 +23,7 @@ import {
 } from "@/hooks/useNotes";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPin, BiSolidPin, BiTrash, BiMenu, BiPurchaseTag } from "react-icons/bi";
+import { BiPin, BiSolidPin, BiTrash, BiMenu, BiPurchaseTag, BiArchive } from "react-icons/bi";
 import { NoteRequest } from "@/types/note/note";
 
 /** Build a complete NoteRequest from a note — update() nulls omitted fields. */
@@ -55,6 +55,7 @@ function DraggableNoteCard({
   onDelete,
   onOpen,
   onTogglePin,
+  onToggleArchive,
 }: {
   note: NoteResponse;
   index: number;
@@ -63,6 +64,7 @@ function DraggableNoteCard({
   onDelete: (id: number) => void;
   onOpen: (id: number) => void;
   onTogglePin: (note: NoteResponse) => void;
+  onToggleArchive: (note: NoteResponse) => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -100,6 +102,17 @@ function DraggableNoteCard({
       <span className="absolute left-3 top-5 cursor-grab text-gray-300 opacity-0 transition group-hover:opacity-100 active:cursor-grabbing">
         <BiMenu size={14} />
       </span>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleArchive(note);
+        }}
+        className="absolute right-20 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+        aria-label={t("notes.archiveAria")}
+      >
+        <BiArchive size={16} />
+      </button>
       <button
         type="button"
         onClick={(e) => {
@@ -149,11 +162,13 @@ function PinnedCard({
   onDelete,
   onOpen,
   onTogglePin,
+  onToggleArchive,
 }: {
   note: NoteResponse;
   onDelete: (id: number) => void;
   onOpen: (id: number) => void;
   onTogglePin: (note: NoteResponse) => void;
+  onToggleArchive: (note: NoteResponse) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -161,6 +176,17 @@ function PinnedCard({
       style={{ backgroundColor: note.colorHex ?? undefined }}
       className="group relative rounded-2xl ring-2 ring-husrev-amber/60 bg-husrev-cream/40 shadow-card-warm p-5 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-husrev-amber/40"
     >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleArchive(note);
+        }}
+        className="absolute right-20 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+        aria-label={t("notes.archiveAria")}
+      >
+        <BiArchive size={16} />
+      </button>
       <button
         type="button"
         onClick={(e) => {
@@ -215,11 +241,13 @@ function NotesGrid({
   onDelete,
   onOpen,
   onTogglePin,
+  onToggleArchive,
 }: {
   notes: NoteResponse[];
   onDelete: (id: number) => void;
   onOpen: (id: number) => void;
   onTogglePin: (note: NoteResponse) => void;
+  onToggleArchive: (note: NoteResponse) => void;
 }) {
   const reorderNotes = useReorderNotes();
 
@@ -268,6 +296,7 @@ function NotesGrid({
             onDelete={onDelete}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
+            onToggleArchive={onToggleArchive}
           />
         ))}
         {ordered.map((note, index) => (
@@ -280,6 +309,7 @@ function NotesGrid({
             onDelete={onDelete}
             onOpen={onOpen}
             onTogglePin={onTogglePin}
+            onToggleArchive={onToggleArchive}
           />
         ))}
       </div>
@@ -408,6 +438,18 @@ export default function NotesPage() {
     }
   };
 
+  const handleToggleArchive = async (note: NoteResponse) => {
+    try {
+      await updateNote.mutateAsync({
+        id: note.id,
+        body: toNoteRequest(note, { archived: !note.archived }),
+      });
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
   const onDelete = async () => {
     if (!deletingId) return;
     try {
@@ -500,6 +542,7 @@ export default function NotesPage() {
             onDelete={setDeletingId}
             onOpen={(id) => setEditingId(Number(id))}
             onTogglePin={handleTogglePin}
+            onToggleArchive={handleToggleArchive}
           />
         )}
 

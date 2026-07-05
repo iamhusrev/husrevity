@@ -738,7 +738,15 @@
       "cta": "İlk dosyayı aç"
     },
     "deleteAria": "Projeyi sil",
-    "invalid": "Geçersiz proje."
+    "pinAria": "İğnele",
+    "archiveAria": "Arşivle",
+    "invalid": "Geçersiz proje.",
+    "statuses": {
+      "ACTIVE": "Aktif",
+      "PAUSED": "Duraklatıldı",
+      "DONE": "Tamamlandı",
+      "CANCELLED": "İptal Edildi"
+    }
   },
   "kanban": {
     "view": {
@@ -829,6 +837,7 @@
     },
     "deleteAria": "Sil",
     "addAria": "Ekle",
+    "renameAria": "Listeyi yeniden adlandır",
     "sections": {
       "ungrouped": "Genel",
       "add": "Bölüm ekle",
@@ -864,6 +873,7 @@
       "incomplete": "Tamamlanmadı"
     },
     "deleteAria": "Sil",
+    "renameListAria": "Listeyi yeniden adlandır",
     "addDue": "Tarih ekle",
     "flagAria": "Bayrağı değiştir",
     "priorityAria": "Önceliği değiştir",
@@ -921,6 +931,7 @@
     "quickAddPlaceholder": "Not al…",
     "pinAria": "Notu sabitle",
     "unpinAria": "Sabitlemeyi kaldır",
+    "archiveAria": "Arşivle",
     "colorNone": "Renk yok",
     "field": {
       "title": "Başlık",
@@ -1265,7 +1276,12 @@
       "name": "Okuma adı",
       "dailyTarget": "Günlük hedef",
       "color": "Renk",
-      "tracksListened": "Dinlenildi takibi"
+      "tracksListened": "Dinlenildi takibi",
+      "cadence": "Sıklık"
+    },
+    "cadence": {
+      "daily": "Günlük",
+      "weekly": "Haftalık"
     },
     "placeholders": {
       "name": "Kur'an",

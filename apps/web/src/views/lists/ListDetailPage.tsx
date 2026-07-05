@@ -18,6 +18,7 @@ import {
   useTodoList,
   useTodoListItems,
   useUpdateListSection,
+  useUpdateTodoList,
 } from "@/hooks/useLists";
 import { ListSectionResponse, TodoListItemResponse } from "@/types/list/list";
 import { alertStore } from "@/stores/alert-store";
@@ -361,8 +362,10 @@ export default function ListDetailPage({
   const create = useCreateTodoListItem();
   const reorder = useReorderTodoListItems();
   const createSection = useCreateListSection();
+  const renameList = useUpdateTodoList();
 
   const [sectionDraft, setSectionDraft] = useState("");
+  const [editingListName, setEditingListName] = useState<string | null>(null);
 
   const sorted = useMemo(
     () => [...items].sort((a, b) => a.position - b.position),
@@ -426,6 +429,30 @@ export default function ListDetailPage({
     }
   };
 
+  const handleRenameListStart = () => {
+    if (!list) return;
+    setEditingListName(list.name);
+  };
+
+  const handleRenameListSave = async () => {
+    const trimmed = (editingListName ?? "").trim();
+    if (!trimmed) {
+      setEditingListName(null);
+      return;
+    }
+    try {
+      await renameList.mutateAsync({ id, body: { name: trimmed } });
+      setEditingListName(null);
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleRenameListCancel = () => {
+    setEditingListName(null);
+  };
+
   const sortedSections = useMemo(
     () => [...sections].sort((a, b) => a.position - b.position),
     [sections],
@@ -455,12 +482,58 @@ export default function ListDetailPage({
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/lists")}
-              className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="shrink-0 rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label={t("common.back")}
             >
               <BiArrowBack size={18} />
             </button>
-            <PageBreadcrumb pageTitle={list?.name ?? t("lists.title")} />
+            {editingListName !== null ? (
+              <div className="flex flex-1 items-center gap-2">
+                <input
+                  autoFocus
+                  value={editingListName}
+                  onChange={(e) => setEditingListName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRenameListSave();
+                    if (e.key === "Escape") handleRenameListCancel();
+                  }}
+                  className="husrev-input flex-1 py-2 text-lg font-semibold"
+                />
+                <button
+                  type="button"
+                  onClick={handleRenameListSave}
+                  disabled={renameList.isPending}
+                  className="shrink-0 rounded-full p-2 text-husrev-moss hover:bg-husrev-moss/10"
+                  aria-label={t("lists.sections.saveAria")}
+                >
+                  <BiCheck size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRenameListCancel}
+                  className="shrink-0 rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
+                  aria-label={t("lists.sections.cancelAria")}
+                >
+                  <BiX size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1">
+                  <PageBreadcrumb pageTitle={list?.name ?? t("lists.title")} />
+                </div>
+                {list && (
+                  <button
+                    type="button"
+                    onClick={handleRenameListStart}
+                    className="shrink-0 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-white"
+                    aria-label={t("lists.renameAria")}
+                  >
+                    <BiEditAlt size={16} />
+                  </button>
+                )}
+              </>
+            )}
           </div>
         )}
 

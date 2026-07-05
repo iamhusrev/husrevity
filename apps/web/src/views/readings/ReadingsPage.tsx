@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import {
   READING_COLOR_TOKENS,
+  ReadingCadence,
   ReadingColorToken,
   ReadingLogResponse,
   ReadingTrackRequest,
@@ -12,6 +13,7 @@ import {
 } from "@/types/reading/reading";
 import {
   useCreateReadingTrack,
+  useDeleteReadingLog,
   useDeleteReadingTrack,
   useReadingLogs,
   useReadingTracks,
@@ -20,6 +22,7 @@ import {
 } from "@/hooks/useReading";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
+import { cn } from "@/utils/utils";
 import {
   BiChevronLeft,
   BiChevronRight,
@@ -336,26 +339,37 @@ export default function ReadingsPage() {
                         </div>
                       </div>
                     </td>
-                    {days.map((d) => {
-                      const iso = toISO(d);
-                      const isToday = iso === todayISO;
-                      const log = logIndex.get(`${track.id}|${iso}`);
-                      return (
-                        <td
-                          key={iso}
-                          className={`px-1 py-2 text-center align-middle ${
-                            isToday ? "bg-husrev-amber/[0.06]" : ""
-                          }`}
-                        >
-                          <Cell
-                            color={color}
-                            log={log}
-                            listenable={track.tracksListened}
-                            onClick={() => setEditingCell({ track, date: iso })}
-                          />
-                        </td>
-                      );
-                    })}
+                    {track.cadence === "WEEKLY" ? (
+                      <td colSpan={7} className="px-1 py-2 text-center align-middle">
+                        <Cell
+                          color={color}
+                          log={logIndex.get(`${track.id}|${from}`)}
+                          listenable={track.tracksListened}
+                          onClick={() => setEditingCell({ track, date: from })}
+                        />
+                      </td>
+                    ) : (
+                      days.map((d) => {
+                        const iso = toISO(d);
+                        const isToday = iso === todayISO;
+                        const log = logIndex.get(`${track.id}|${iso}`);
+                        return (
+                          <td
+                            key={iso}
+                            className={`px-1 py-2 text-center align-middle ${
+                              isToday ? "bg-husrev-amber/[0.06]" : ""
+                            }`}
+                          >
+                            <Cell
+                              color={color}
+                              log={log}
+                              listenable={track.tracksListened}
+                              onClick={() => setEditingCell({ track, date: iso })}
+                            />
+                          </td>
+                        );
+                      })
+                    )}
                   </tr>
                 );
               })}
@@ -450,6 +464,7 @@ function CellEditorModal({
 }) {
   const { t } = useTranslation();
   const upsert = useUpsertReadingLog();
+  const del = useDeleteReadingLog();
   const [read, setRead] = useState(log?.read ?? false);
   const [listened, setListened] = useState(log?.listened ?? false);
   const [pageRange, setPageRange] = useState(log?.pageRange ?? "");
@@ -529,8 +544,16 @@ function CellEditorModal({
         <div className="mt-6 flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => save({ read: false, listened: false, pageRange: "" })}
-            disabled={upsert.isPending}
+            onClick={async () => {
+              try {
+                await del.mutateAsync({ trackId: track.id, date });
+                onClose();
+              } catch (err) {
+                const { title, message } = parseAxiosError(err);
+                showAlert({ title, message, type: "error", position: "top-center" });
+              }
+            }}
+            disabled={upsert.isPending || del.isPending}
             className="rounded-full px-3 py-2 text-sm text-gray-500 transition hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
           >
             {t("readings.clear", "Temizle")}
@@ -539,7 +562,7 @@ function CellEditorModal({
             <button
               type="button"
               onClick={onClose}
-              disabled={upsert.isPending}
+              disabled={upsert.isPending || del.isPending}
               className="husrev-btn-ghost"
             >
               {t("common.cancel", "İptal")}
@@ -607,6 +630,9 @@ function EditTrackModal({
     initial?.tracksListened ?? false,
   );
   const [dailyTarget, setDailyTarget] = useState(initial?.dailyTarget ?? "");
+  const [cadence, setCadence] = useState<ReadingCadence>(
+    initial?.cadence ?? "DAILY",
+  );
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -617,6 +643,7 @@ function EditTrackModal({
       colorToken: (colorToken || null) as ReadingColorToken | null,
       tracksListened,
       dailyTarget: dailyTarget.trim() || null,
+      cadence,
     };
     try {
       if (initial) await update.mutateAsync({ id: initial.id, body });
@@ -730,6 +757,31 @@ function EditTrackModal({
                     colorToken === tok ? "ring-husrev-ember" : "ring-transparent"
                   } ${COLOR_STRIPE_CLASS[tok]}`}
                 />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("readings.field.cadence", "Sıklık")}
+            </span>
+            <div className="flex gap-2">
+              {(["DAILY", "WEEKLY"] as ReadingCadence[]).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCadence(c)}
+                  className={cn(
+                    "rounded-full px-3 py-2 text-sm transition",
+                    cadence === c
+                      ? "bg-husrev-amber text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
+                  )}
+                >
+                  {c === "DAILY"
+                    ? t("readings.cadence.daily", "Günlük")
+                    : t("readings.cadence.weekly", "Haftalık")}
+                </button>
               ))}
             </div>
           </div>
