@@ -58,6 +58,13 @@ export class SegmentRequestDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(127)
+  daysOfWeek?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   notes?: string | null;
 }
 
@@ -96,6 +103,7 @@ export class SegmentResponseDto {
   @ApiPropertyOptional() endMinute!: number | null;
   @ApiPropertyOptional() theme!: string | null;
   @ApiPropertyOptional() colorToken!: RoutineColorToken | null;
+  @ApiProperty() daysOfWeek!: number;
   @ApiPropertyOptional() notes!: string | null;
   @ApiProperty() position!: number;
   @ApiProperty({ type: [ActivityResponseDto] }) activities!: ActivityResponseDto[];
@@ -110,6 +118,7 @@ export class SegmentResponseDto {
       endMinute: s.endMinute,
       theme: s.theme,
       colorToken: (s.colorToken ?? null) as RoutineColorToken | null,
+      daysOfWeek: s.daysOfWeek,
       notes: s.notes,
       position: s.position,
       activities: activities.map(ActivityResponseDto.from),

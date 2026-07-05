@@ -4,6 +4,7 @@ interface ButtonProps {
   children: ReactNode; // Button text or content
   size?: "sm" | "md"; // Button size
   variant?: "primary" | "outline"; // Button variant
+  type?: "button" | "submit" | "reset"; // Native button type
   startIcon?: ReactNode; // Icon before the text
   endIcon?: ReactNode; // Icon after the text
   onClick?: () => void; // Click handler
@@ -15,6 +16,7 @@ const Button: React.FC<ButtonProps> = ({
   children,
   size = "md",
   variant = "primary",
+  type = "submit",
   startIcon,
   endIcon,
   onClick,
@@ -36,6 +38,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      type={type}
       className={`inline-flex items-center justify-center font-medium gap-2 rounded-lg transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-husrev-cream dark:focus-visible:ring-offset-husrev-ink ${className} ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${disabled ? "cursor-not-allowed opacity-50" : ""}`}

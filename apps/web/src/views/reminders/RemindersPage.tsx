@@ -10,6 +10,7 @@ import { Dropdown } from "@/components/dropdown/Dropdown";
 import {
   useReminderLists,
   useCreateReminderList,
+  useUpdateReminderList,
   useDeleteReminderList,
   useReminders,
   useCreateReminder,
@@ -27,7 +28,16 @@ import {
   ReminderResponse,
   ReminderPriority,
 } from "@/types/reminder/reminder";
-import { BiTrash, BiFlag, BiSolidFlag, BiPlus, BiCalendarPlus } from "react-icons/bi";
+import {
+  BiTrash,
+  BiFlag,
+  BiSolidFlag,
+  BiPlus,
+  BiCalendarPlus,
+  BiEditAlt,
+  BiCheck,
+  BiX,
+} from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
 // ─── Priority helpers ─────────────────────────────────────────────────────────
@@ -841,6 +851,13 @@ function ReminderListRow({
   onDelete,
   moveList,
   onDrop,
+  editing,
+  editingName,
+  onRenameStart,
+  onRenameChange,
+  onRenameSave,
+  onRenameCancel,
+  renamePending,
 }: {
   list: ReminderListResponse;
   index: number;
@@ -849,6 +866,13 @@ function ReminderListRow({
   onDelete: (id: number) => void;
   moveList: (drag: number, hover: number) => void;
   onDrop: () => void;
+  editing: boolean;
+  editingName: string;
+  onRenameStart: () => void;
+  onRenameChange: (value: string) => void;
+  onRenameSave: () => void;
+  onRenameCancel: () => void;
+  renamePending: boolean;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLLIElement>(null);
@@ -856,6 +880,7 @@ function ReminderListRow({
   const [{ isDragging }, dragRef] = useDrag<DragItem, unknown, { isDragging: boolean }>({
     type: LIST_DRAG_TYPE,
     item: { index, id: list.id },
+    canDrag: () => !editing,
     collect: (m) => ({ isDragging: m.isDragging() }),
     end: (_item, monitor) => {
       if (monitor.didDrop()) onDrop();
@@ -879,14 +904,17 @@ function ReminderListRow({
       <div
         role="button"
         tabIndex={0}
-        onClick={() => onSelect(list.id)}
+        onClick={() => !editing && onSelect(list.id)}
         onKeyDown={(e) => {
+          if (editing) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             onSelect(list.id);
           }
         }}
-        className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+        className={`group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+          editing ? "cursor-default" : "cursor-pointer"
+        } ${
           selected
             ? "bg-brand-50 font-medium text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"
             : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
@@ -896,21 +924,69 @@ function ReminderListRow({
           className="h-3 w-3 rounded-full shrink-0"
           style={{ backgroundColor: list.color }}
         />
-        <span className="flex-1 truncate">{list.name}</span>
-        <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-          {list.itemCount}
-        </span>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(list.id);
-          }}
-          className="ml-auto shrink-0 rounded p-0.5 text-gray-300 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:text-red-500 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
-          aria-label={t("reminders.deleteAria")}
-        >
-          <BiTrash size={13} />
-        </button>
+        {editing ? (
+          <div
+            className="flex flex-1 items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              autoFocus
+              value={editingName}
+              onChange={(e) => onRenameChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onRenameSave();
+                if (e.key === "Escape") onRenameCancel();
+              }}
+              className="min-w-0 flex-1 rounded-md border-2 border-brand-400 bg-white px-1.5 py-0.5 text-sm outline-none dark:bg-gray-900 dark:text-white/90"
+            />
+            <button
+              type="button"
+              onClick={onRenameSave}
+              disabled={renamePending}
+              className="shrink-0 rounded-full p-1 text-husrev-moss hover:bg-husrev-moss/10"
+              aria-label={t("common.save")}
+            >
+              <BiCheck size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={onRenameCancel}
+              className="shrink-0 rounded-full p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.06]"
+              aria-label={t("common.cancel")}
+            >
+              <BiX size={14} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <span className="flex-1 truncate">{list.name}</span>
+            <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+              {list.itemCount}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRenameStart();
+              }}
+              className="ml-auto shrink-0 rounded p-0.5 text-gray-300 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:text-husrev-ink focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:hover:text-white"
+              aria-label={t("reminders.renameListAria")}
+            >
+              <BiEditAlt size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(list.id);
+              }}
+              className="shrink-0 rounded p-0.5 text-gray-300 opacity-0 transition-colors duration-200 group-hover:opacity-100 hover:text-red-500 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              aria-label={t("reminders.deleteAria")}
+            >
+              <BiTrash size={13} />
+            </button>
+          </>
+        )}
       </div>
     </li>
   );
@@ -926,9 +1002,12 @@ export default function RemindersPage({
   const { data: lists = [], isLoading } = useReminderLists();
   const deleteList = useDeleteReminderList();
   const reorderLists = useReorderReminderLists();
+  const renameList = useUpdateReminderList();
 
   const [selectedListId, setSelectedListId] = useState<number | null>(initialListId ?? null);
   const [showNewListModal, setShowNewListModal] = useState(false);
+  const [editingListId, setEditingListId] = useState<number | null>(null);
+  const [editingListName, setEditingListName] = useState("");
 
   const [orderedLists, setOrderedLists] = useState<ReminderListResponse[]>([]);
   const orderedListsRef = useRef<ReminderListResponse[]>([]);
@@ -981,6 +1060,30 @@ export default function RemindersPage({
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
     }
+  };
+
+  const handleRenameListStart = (list: ReminderListResponse) => {
+    setEditingListId(list.id);
+    setEditingListName(list.name);
+  };
+
+  const handleRenameSave = async () => {
+    const trimmed = editingListName.trim();
+    if (editingListId == null || !trimmed) {
+      setEditingListId(null);
+      return;
+    }
+    try {
+      await renameList.mutateAsync({ id: editingListId, body: { name: trimmed } });
+      setEditingListId(null);
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleRenameCancel = () => {
+    setEditingListId(null);
   };
 
   return (
@@ -1069,6 +1172,13 @@ export default function RemindersPage({
                     onDelete={handleDeleteList}
                     moveList={moveList}
                     onDrop={onListDrop}
+                    editing={editingListId === list.id}
+                    editingName={editingListName}
+                    onRenameStart={() => handleRenameListStart(list)}
+                    onRenameChange={setEditingListName}
+                    onRenameSave={handleRenameSave}
+                    onRenameCancel={handleRenameCancel}
+                    renamePending={renameList.isPending}
                   />
                 ))}
               </ul>

@@ -54,7 +54,10 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
   const schema = useMemo(
     () =>
       z.object({
-        title: z.string().min(1, t("notes.titleRequired")).max(255),
+        // Title is optional here — Keep-style, we derive one from the body when
+        // left blank (see persist()). This lets the Save button work with a
+        // body-only note the same way closing the modal does.
+        title: z.string().max(255).optional(),
         bodyMarkdown: z.string().optional(),
         pinned: z.boolean().optional(),
         archived: z.boolean().optional(),
@@ -110,28 +113,50 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
     setValue("tagIds", next, { shouldDirty: true });
   };
 
-  const onSubmit = async (data: FormValues) => {
+  // Single source of truth for writing the note. Derives a title from the first
+  // body line when the title field is blank (Keep-style), so both the explicit
+  // Save button and the auto-save-on-close path behave identically. Returns the
+  // note id on success, or null when there was nothing worth saving.
+  const persist = useCallback(async (): Promise<number | null> => {
+    if (createNote.isPending || updateNote.isPending) return null;
+    const data = getValues();
+    const titleTrimmed = (data.title ?? "").trim();
+    const bodyTrimmed = (data.bodyMarkdown ?? "").trim();
+    const title = titleTrimmed || bodyTrimmed.split("\n")[0]?.slice(0, 255) || "";
+    const payload = { ...data, title };
+
+    if (isNew) {
+      // Nothing typed → don't create an empty/junk note.
+      if (!title) return null;
+      const res = await createNote.mutateAsync(payload);
+      return res.data.id;
+    }
+    await updateNote.mutateAsync({ id: id!, body: payload });
+    return id!;
+  }, [createNote, updateNote, getValues, isNew, id]);
+
+  // Explicit Save button (and full-page form submit).
+  const handleSave = async () => {
     try {
-      if (isNew) {
-        const res = await createNote.mutateAsync(data);
+      const savedId = await persist();
+      if (savedId == null) {
+        // Only reachable for a brand-new, completely empty note.
         showAlert({
-          title: t("notes.savedTitle"),
-          message: t("notes.createdMessage"),
-          type: "success",
+          title: t("notes.titleRequired"),
+          message: t("notes.emptyMessage", "Bir başlık ya da içerik gir."),
+          type: "error",
           position: "top-center",
         });
-        if (onSaved) onSaved(res.data.id);
-        else router.push(`/notes/${res.data.id}`);
-      } else {
-        await updateNote.mutateAsync({ id: id!, body: data });
-        showAlert({
-          title: t("notes.savedTitle"),
-          message: t("notes.updatedMessage"),
-          type: "success",
-          position: "top-center",
-        });
-        if (onSaved) onSaved(id!);
+        return;
       }
+      showAlert({
+        title: t("notes.savedTitle"),
+        message: isNew ? t("notes.createdMessage") : t("notes.updatedMessage"),
+        type: "success",
+        position: "top-center",
+      });
+      if (onSaved) onSaved(savedId);
+      else if (isNew) router.push(`/notes/${savedId}`);
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -139,42 +164,25 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
   };
 
   // Keep-style auto-save on modal close: persist whatever is typed so an
-  // accidental dismiss (backdrop / Esc / X) never loses the note.
+  // accidental dismiss (backdrop / Esc / X) never loses the note. Silent about
+  // "nothing to save" cases since the user is just leaving.
   const flush = useCallback(async () => {
-    if (createNote.isPending || updateNote.isPending) return;
-    const data = getValues();
-    const titleTrimmed = (data.title ?? "").trim();
-    const bodyTrimmed = (data.bodyMarkdown ?? "").trim();
-
+    // Untouched existing note → nothing to save.
+    if (!isNew && !isDirty) return;
     try {
-      if (isNew) {
-        // Nothing typed → don't create an empty/junk note.
-        if (!titleTrimmed && !bodyTrimmed) return;
-        // Backend requires a title; derive one from the first body line if absent.
-        const title = titleTrimmed || bodyTrimmed.split("\n")[0].slice(0, 255);
-        await createNote.mutateAsync({ ...data, title });
-        showAlert({
-          title: t("notes.savedTitle"),
-          message: t("notes.createdMessage"),
-          type: "success",
-          position: "top-center",
-        });
-      } else {
-        // Untouched → nothing to save.
-        if (!isDirty) return;
-        await updateNote.mutateAsync({ id: id!, body: data });
-        showAlert({
-          title: t("notes.savedTitle"),
-          message: t("notes.updatedMessage"),
-          type: "success",
-          position: "top-center",
-        });
-      }
+      const savedId = await persist();
+      if (savedId == null) return;
+      showAlert({
+        title: t("notes.savedTitle"),
+        message: isNew ? t("notes.createdMessage") : t("notes.updatedMessage"),
+        type: "success",
+        position: "top-center",
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
     }
-  }, [createNote, updateNote, getValues, isNew, isDirty, id, showAlert, t]);
+  }, [persist, isNew, isDirty, showAlert, t]);
 
   useEffect(() => {
     if (!flushRef) return;
@@ -198,7 +206,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         <PageBreadcrumb pageTitle={heading} />
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(handleSave)} className="space-y-5">
         <FormFieldText control={control} name="title" label={t("notes.field.title")} required />
 
         <FormFieldTextarea
@@ -270,7 +278,11 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         <input type="hidden" {...register("tagIds")} />
 
         <div className="flex gap-3">
-          <Button size="sm" disabled={createNote.isPending || updateNote.isPending}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={createNote.isPending || updateNote.isPending}
+          >
             {createNote.isPending || updateNote.isPending ? t("common.saving") : t("common.save")}
           </Button>
           <button

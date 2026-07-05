@@ -82,3 +82,12 @@ export function useUpsertReadingLog() {
     onSuccess: () => qc.invalidateQueries({ queryKey: READING_KEYS.logsAll }),
   });
 }
+
+export function useDeleteReadingLog() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ trackId, date }: { trackId: string; date: string }) =>
+      readingService.deleteLog(trackId, date),
+    onSuccess: () => qc.invalidateQueries({ queryKey: READING_KEYS.logsAll }),
+  });
+}

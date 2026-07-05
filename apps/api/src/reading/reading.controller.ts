@@ -86,4 +86,14 @@ export class ReadingController {
   ): Promise<LogResponseDto> {
     return this.reading.upsertLog(u.userId, id, date, body);
   }
+
+  @Delete(':id/logs/:date')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteLog(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('date') date: string,
+  ): Promise<void> {
+    return this.reading.deleteLog(u.userId, id, date);
+  }
 }

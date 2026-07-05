@@ -3,6 +3,7 @@ import { BaseEntity } from '../common/base.entity';
 
 @Entity('project')
 @Index('idx_project_owner', ['ownerId'])
+@Index('idx_project_owner_archived', ['ownerId', 'archived'])
 @Unique('uq_project_owner_code', ['ownerId', 'code'])
 export class Project extends BaseEntity {
   @Column({ name: 'owner_id', type: 'bigint' })
@@ -25,4 +26,10 @@ export class Project extends BaseEntity {
 
   @Column({ name: 'end_date', type: 'date', nullable: true })
   endDate!: string | null;
+
+  @Column({ type: 'boolean', default: false })
+  pinned!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  archived!: boolean;
 }

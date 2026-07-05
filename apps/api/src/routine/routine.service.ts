@@ -51,6 +51,7 @@ export class RoutineService {
       endMinute: req.endMinute ?? null,
       theme: req.theme ?? null,
       colorToken: req.colorToken ?? null,
+      daysOfWeek: req.daysOfWeek ?? 127,
       notes: req.notes ?? null,
       position: nextPosition,
     });
@@ -71,6 +72,7 @@ export class RoutineService {
     s.endMinute = end;
     if (req.theme !== undefined) s.theme = req.theme ?? null;
     if (req.colorToken !== undefined) s.colorToken = req.colorToken ?? null;
+    if (req.daysOfWeek !== undefined) s.daysOfWeek = req.daysOfWeek;
     if (req.notes !== undefined) s.notes = req.notes ?? null;
     const saved = await this.segments.save(s);
     const activities = await this.activities.find({

@@ -4,16 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
-import { useCreateTask, useProject, useProjectTasks } from "@/hooks/useProjects";
+import FormFieldText from "@/components/form/FormFieldText";
+import FormFieldTextarea from "@/components/form/FormFieldTextarea";
+import { useCreateTask, useProject, useProjectTasks, useUpdateProject } from "@/hooks/useProjects";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPlus, BiArrowBack } from "react-icons/bi";
+import { BiPlus, BiArrowBack, BiEditAlt } from "react-icons/bi";
 import KanbanBoard from "./KanbanBoard";
 import TaskList from "./TaskList";
 import TaskDetailModal from "./TaskDetailModal";
-import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
+import { ProjectResponse, TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
 
 type ViewMode = "kanban" | "list";
 
@@ -143,6 +148,169 @@ function NewTaskModal({ code, onClose }: { code: string; onClose: () => void }) 
   );
 }
 
+const PROJECT_STATUSES = ["ACTIVE", "PAUSED", "DONE", "CANCELLED"] as const;
+
+const editProjectSchema = z.object({
+  name: z.string().min(1).max(160),
+  description: z.string().optional(),
+  status: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+type EditProjectFormValues = z.infer<typeof editProjectSchema>;
+
+function EditProjectModal({
+  project,
+  onClose,
+}: {
+  project: ProjectResponse;
+  onClose: () => void;
+}) {
+  const showAlert = alertStore((s) => s.show);
+  const { t } = useTranslation();
+  const updateProject = useUpdateProject();
+
+  const { control, handleSubmit } = useForm<EditProjectFormValues>({
+    resolver: zodResolver(editProjectSchema),
+    defaultValues: {
+      name: project.name,
+      description: project.description ?? "",
+      status: project.status ?? "ACTIVE",
+      startDate: project.startDate ? project.startDate.slice(0, 10) : "",
+      endDate: project.endDate ? project.endDate.slice(0, 10) : "",
+    },
+  });
+
+  const submit = handleSubmit(async (data) => {
+    try {
+      await updateProject.mutateAsync({
+        code: project.code,
+        body: {
+          name: data.name.trim(),
+          description: data.description?.trim() || null,
+          status: data.status || null,
+          startDate: data.startDate || null,
+          endDate: data.endDate || null,
+        },
+      });
+      onClose();
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      >
+        <div className="space-y-1.5">
+          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+            {project.code}
+          </span>
+          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
+            {t("projects.edit")}
+          </h3>
+        </div>
+        <div className="husrev-rule mt-5" />
+
+        <div className="mt-5 space-y-4">
+          <FormFieldText
+            control={control}
+            name="name"
+            label={t("projects.modal.nameField")}
+            required
+          />
+
+          <FormFieldTextarea
+            control={control}
+            name="description"
+            label={t("projects.modal.descriptionField")}
+            rows={3}
+          />
+
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("projects.status")}
+            </label>
+            <Controller
+              control={control}
+              name="status"
+              render={({ field }) => (
+                <select {...field} value={field.value ?? ""} className="husrev-input">
+                  {PROJECT_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {t(`projects.statuses.${s}`)}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+                {t("projects.startDate")}
+              </label>
+              <Controller
+                control={control}
+                name="startDate"
+                render={({ field }) => (
+                  <input
+                    type="date"
+                    {...field}
+                    value={field.value ?? ""}
+                    className="husrev-input"
+                  />
+                )}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+                {t("projects.endDate")}
+              </label>
+              <Controller
+                control={control}
+                name="endDate"
+                render={({ field }) => (
+                  <input
+                    type="date"
+                    {...field}
+                    value={field.value ?? ""}
+                    className="husrev-input"
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={updateProject.isPending}
+            className="husrev-btn-ghost"
+          >
+            {t("common.cancel")}
+          </button>
+          <button type="submit" disabled={updateProject.isPending} className="husrev-btn">
+            {updateProject.isPending ? t("common.saving") : t("common.save")}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function ProjectDetailPage({
   code,
   embedded,
@@ -157,6 +325,7 @@ export default function ProjectDetailPage({
   const initialView = (searchParams.get("view") as ViewMode | null) === "list" ? "list" : "kanban";
   const [view, setView] = useState<ViewMode>(initialView);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
 
   const { data: project } = useProject(code);
@@ -187,6 +356,16 @@ export default function ProjectDetailPage({
             <div className="flex-1">
               <PageBreadcrumb pageTitle={project?.name ?? code} kicker={code} />
             </div>
+            {project && (
+              <button
+                type="button"
+                onClick={() => setShowEditModal(true)}
+                className="shrink-0 rounded-full p-2 text-gray-500 ring-1 ring-husrev-sand/80 bg-white/60 hover:bg-husrev-cream hover:text-husrev-ember dark:bg-husrev-shadow/50 dark:ring-white/10 dark:hover:bg-white/5 dark:hover:text-husrev-amber transition-colors"
+                aria-label={t("projects.edit")}
+              >
+                <BiEditAlt size={18} />
+              </button>
+            )}
           </div>
         )}
 
@@ -227,6 +406,9 @@ export default function ProjectDetailPage({
         )}
 
         {showModal && <NewTaskModal code={code} onClose={() => setShowModal(false)} />}
+        {showEditModal && project && (
+          <EditProjectModal project={project} onClose={() => setShowEditModal(false)} />
+        )}
         {selectedTask && (
           <TaskDetailModal
             task={selectedTask}

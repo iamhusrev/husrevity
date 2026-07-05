@@ -1,10 +1,20 @@
-import { IsDateString, IsNotEmpty, IsOptional, Matches, MaxLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { Project } from '../project.entity';
 
 export class ProjectRequestDto {
   @IsNotEmpty()
   @MaxLength(32)
-  @Matches(/^[A-Za-z0-9_-]+$/, { message: 'code must be alphanumeric, dash, underscore' })
+  @Matches(/^[A-Za-zçÇğĞıİöÖşŞüÜ0-9_-]+$/, {
+    message: 'code must be alphanumeric (including Turkish), dash, underscore',
+  })
   code!: string;
 
   @IsNotEmpty()
@@ -46,6 +56,16 @@ export class ProjectUpdateRequestDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  pinned?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  archived?: boolean;
 }
 
 export class ProjectResponseDto {
@@ -56,6 +76,8 @@ export class ProjectResponseDto {
   status!: string;
   startDate!: string | null;
   endDate!: string | null;
+  @ApiProperty() pinned!: boolean;
+  @ApiProperty() archived!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
 
@@ -68,6 +90,8 @@ export class ProjectResponseDto {
       status: p.status,
       startDate: p.startDate,
       endDate: p.endDate,
+      pinned: p.pinned,
+      archived: p.archived,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
     };

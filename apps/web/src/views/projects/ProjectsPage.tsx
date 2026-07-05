@@ -4,10 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
-import { useCreateProject, useDeleteProject, useProjects } from "@/hooks/useProjects";
+import {
+  useCreateProject,
+  useDeleteProject,
+  useProjects,
+  useUpdateProject,
+} from "@/hooks/useProjects";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPlus, BiTrash, BiFolder, BiRightArrowAlt } from "react-icons/bi";
+import { ProjectResponse } from "@/types/project/project";
+import { BiPlus, BiTrash, BiFolder, BiRightArrowAlt, BiPin, BiSolidPin, BiArchive } from "react-icons/bi";
 
 function NewProjectModal({ onClose }: { onClose: () => void }) {
   const showAlert = alertStore((s) => s.show);
@@ -22,7 +28,7 @@ function NewProjectModal({ onClose }: { onClose: () => void }) {
     if (!code.trim() || !name.trim()) return;
     try {
       await create.mutateAsync({
-        code: code.trim().toUpperCase(),
+        code: code.trim(),
         name: name.trim(),
         description: description || null,
       });
@@ -69,10 +75,10 @@ function NewProjectModal({ onClose }: { onClose: () => void }) {
             <input
               autoFocus
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onChange={(e) => setCode(e.target.value)}
               placeholder={t("projects.modal.codePlaceholder")}
               maxLength={32}
-              className="husrev-input font-mono uppercase tracking-widest"
+              className="husrev-input font-mono tracking-widest"
             />
           </div>
           <div className="space-y-1.5">
@@ -122,11 +128,36 @@ export default function ProjectsPage() {
   const router = useRouter();
   const { data: projects = [], isLoading } = useProjects();
   const remove = useDeleteProject();
+  const updateProject = useUpdateProject();
   const [showModal, setShowModal] = useState(false);
 
   const handleDelete = async (code: string) => {
     try {
       await remove.mutateAsync(code);
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleTogglePin = async (project: ProjectResponse) => {
+    try {
+      await updateProject.mutateAsync({
+        code: project.code,
+        body: { pinned: !project.pinned },
+      });
+    } catch (err) {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleToggleArchive = async (project: ProjectResponse) => {
+    try {
+      await updateProject.mutateAsync({
+        code: project.code,
+        body: { archived: !project.archived },
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -224,13 +255,43 @@ export default function ProjectsPage() {
                 </div>
               </button>
 
-              <button
-                onClick={() => handleDelete(p.code)}
-                className="absolute right-3 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-                aria-label={t("projects.deleteAria")}
-              >
-                <BiTrash size={16} />
-              </button>
+              <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTogglePin(p);
+                  }}
+                  className="rounded-full p-2 text-gray-400 transition hover:bg-husrev-amber/10 hover:text-husrev-amber"
+                  aria-label={t("projects.pinAria")}
+                >
+                  {p.pinned ? <BiSolidPin size={16} /> : <BiPin size={16} />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleArchive(p);
+                  }}
+                  className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                  aria-label={t("projects.archiveAria")}
+                >
+                  <BiArchive size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(p.code);
+                  }}
+                  className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                  aria-label={t("projects.deleteAria")}
+                >
+                  <BiTrash size={16} />
+                </button>
+              </div>
             </article>
           ))}
         </div>

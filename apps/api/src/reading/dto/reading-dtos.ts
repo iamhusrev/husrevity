@@ -23,6 +23,9 @@ export const READING_COLOR_TOKENS = [
 ] as const;
 export type ReadingColorToken = (typeof READING_COLOR_TOKENS)[number];
 
+export const READING_CADENCES = ['DAILY', 'WEEKLY'] as const;
+export type ReadingCadence = (typeof READING_CADENCES)[number];
+
 export class TrackRequestDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -43,6 +46,11 @@ export class TrackRequestDto {
   @IsOptional()
   @MaxLength(120)
   dailyTarget?: string | null;
+
+  @ApiPropertyOptional({ enum: READING_CADENCES })
+  @IsOptional()
+  @IsIn(READING_CADENCES)
+  cadence?: ReadingCadence;
 }
 
 export class TrackResponseDto {
@@ -51,6 +59,7 @@ export class TrackResponseDto {
   @ApiPropertyOptional() colorToken!: ReadingColorToken | null;
   @ApiProperty() tracksListened!: boolean;
   @ApiPropertyOptional() dailyTarget!: string | null;
+  @ApiProperty({ enum: READING_CADENCES }) cadence!: ReadingCadence;
   @ApiProperty() position!: number;
   @ApiProperty() createdAt!: string;
   @ApiProperty() updatedAt!: string;
@@ -62,6 +71,7 @@ export class TrackResponseDto {
       colorToken: (t.colorToken ?? null) as ReadingColorToken | null,
       tracksListened: t.tracksListened,
       dailyTarget: t.dailyTarget,
+      cadence: (t.cadence ?? 'DAILY') as ReadingCadence,
       position: t.position,
       createdAt: t.createdAt.toISOString(),
       updatedAt: t.updatedAt.toISOString(),

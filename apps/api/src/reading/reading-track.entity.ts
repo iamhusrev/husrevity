@@ -29,6 +29,10 @@ export class ReadingTrack extends BaseEntity {
   @Column({ name: 'tracks_listened', type: 'boolean', default: false })
   tracksListened!: boolean;
 
+  /** Logging cadence: 'DAILY' (default, one entry per day) or 'WEEKLY' (one entry per week at week's Monday). */
+  @Column({ type: 'varchar', length: 10, default: 'DAILY' })
+  cadence!: string;
+
   /** Free-form daily goal hint, e.g. "10 sayfa" or "1 cüz". */
   @Column({ name: 'daily_target', type: 'varchar', length: 120, nullable: true })
   dailyTarget!: string | null;

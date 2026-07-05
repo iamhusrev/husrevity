@@ -10,6 +10,8 @@ export interface ProjectResponse {
   status?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  pinned: boolean;
+  archived: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -29,6 +31,8 @@ export interface ProjectUpdateRequest {
   status?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  pinned?: boolean;
+  archived?: boolean;
 }
 
 export interface TaskResponse {
