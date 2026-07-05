@@ -149,7 +149,8 @@
     "adminUsers": "Kullanıcılar",
     "settings": "Ayarlar",
     "profile": "Profil",
-    "readings": "Okumalar"
+    "readings": "Okumalar",
+    "sport": "Spor"
   },
   "admin": {
     "kicker": "Yönetim",
@@ -1006,6 +1007,24 @@
       "successTitle": "İçe Aktarıldı",
       "successMessage": ".env içeriği şifrelendi."
     },
+    "importCsv": {
+      "title": "CSV'yi İçeri Aktar",
+      "kicker": "CSV içe aktar",
+      "hint": "Sütunlar: name, url, username, password.",
+      "dropzone": "CSV dosyasını buraya sürükleyin veya seçmek için tıklayın",
+      "dropzoneActive": "Dosyayı seçmek için bırakın",
+      "changeFile": "Farklı bir dosya seç",
+      "skipDuplicates": "Yinelenen girişleri atla",
+      "cancel": "Vazgeç",
+      "import": "İçeri Aktar",
+      "importing": "İçeri aktarılıyor…",
+      "done": "Tamam",
+      "success": "{{successCount}} içeri aktarıldı, {{skippedCount}} atlandı (toplam {{totalRows}})",
+      "errorsTitle": "Satır hataları",
+      "errorRow": "Satır {{row}}: {{message}}",
+      "error": "İçeri aktarma başarısız",
+      "selectFileFirst": "Önce bir CSV dosyası seçin."
+    },
     "copy": {
       "successTitle": "Kopyalandı",
       "successMessage": "{{label}} panoya kopyalandı.",
@@ -1286,6 +1305,172 @@
     "placeholders": {
       "name": "Kur'an",
       "dailyTarget": "10 sayfa"
+    }
+  },
+  "sport": {
+    "title": "Spor",
+    "kicker": "Antrenman takibi",
+    "flourish": "formunda kal",
+    "intro": "Spor profilini yönet, antrenman programları oluştur, seansları logla ve ilerlemeni takip et.",
+    "tabs": {
+      "profile": "Profil",
+      "programs": "Programlar",
+      "logs": "Antrenman günlüğü",
+      "stats": "İstatistikler"
+    },
+    "fitnessLevel": {
+      "beginner": "Başlangıç",
+      "intermediate": "Orta",
+      "advanced": "İleri"
+    },
+    "activity": {
+      "RUNNING": "Koşu",
+      "YOGA": "Yoga",
+      "SWIMMING": "Yüzme",
+      "STRENGTH": "Kuvvet",
+      "GYM": "Spor salonu",
+      "CYCLING": "Bisiklet",
+      "FOOTBALL": "Futbol",
+      "CUSTOM": "Diğer"
+    },
+    "location": {
+      "EV": "Ev",
+      "SALON": "Salon",
+      "YÜZME": "Yüzme",
+      "DIS": "Dış mekan"
+    },
+    "difficulty": {
+      "EASY": "Kolay",
+      "MODERATE": "Orta",
+      "HARD": "Zor"
+    },
+    "programType": {
+      "WEEKLY": "Haftalık",
+      "MONTHLY": "Aylık"
+    },
+    "day": {
+      "0": "Pazartesi",
+      "1": "Salı",
+      "2": "Çarşamba",
+      "3": "Perşembe",
+      "4": "Cuma",
+      "5": "Cumartesi",
+      "6": "Pazar"
+    },
+    "profile": {
+      "title": "Spor profilim",
+      "editCta": "Profili düzenle",
+      "editKicker": "Profil",
+      "editTitle": "Spor profilini düzenle",
+      "fitnessLevel": "Seviye",
+      "weeklyHours": "Haftalık hedef saat",
+      "hoursShort": "sa",
+      "minutesShort": "dk",
+      "activities": "Tercih edilen aktiviteler",
+      "goals": "Hedefler",
+      "goalsPlaceholder": "Örn. 10km koşu, esneklik…",
+      "notes": "Notlar"
+    },
+    "programs": {
+      "intro": "Antrenman programlarını oluştur, yönet ya da AI ile üret.",
+      "newProgram": "Yeni program",
+      "generateAi": "AI ile oluştur",
+      "aiGenerated": "AI",
+      "active": "Aktif",
+      "activate": "Aktifleştir",
+      "deactivate": "Pasifleştir",
+      "openDetail": "Detayı gör",
+      "confirmDeleteTitle": "Programı sil",
+      "confirmDeleteMessage": "Bu programı ve tüm seanslarını silmek istediğine emin misin?",
+      "card": {
+        "weeks": "{{count}} hafta",
+        "sessions": "{{count}} seans"
+      },
+      "empty": {
+        "title": "Henüz programın yok",
+        "body": "Yeni bir antrenman programı oluştur ya da yapay zekaya bırak."
+      },
+      "modal": {
+        "kicker": "Yeni program",
+        "title": "Antrenman programı oluştur"
+      },
+      "field": {
+        "name": "Program adı",
+        "description": "Açıklama",
+        "weekCount": "Hafta sayısı",
+        "programType": "Tür",
+        "startDate": "Başlangıç",
+        "endDate": "Bitiş"
+      }
+    },
+    "programDetail": {
+      "back": "Geri",
+      "sessions": "Seanslar",
+      "newSession": "Yeni seans",
+      "noSessions": "Bu programda henüz seans yok.",
+      "notFound": "Program bulunamadı."
+    },
+    "sessionModal": {
+      "newKicker": "Yeni seans",
+      "editKicker": "Seansı düzenle",
+      "createTitle": "Yeni seans",
+      "editTitle": "Seansı düzenle",
+      "name": "Seans adı",
+      "activityType": "Aktivite",
+      "location": "Konum",
+      "plannedDayOfWeek": "Gün",
+      "plannedDuration": "Süre (dk)",
+      "difficulty": "Zorluk",
+      "description": "Açıklama",
+      "confirmDeleteTitle": "Seansı sil",
+      "confirmDeleteMessage": "Bu seansı silmek istediğine emin misin?"
+    },
+    "aiModal": {
+      "kicker": "Yapay zeka",
+      "title": "Program üret",
+      "weekCount": "Hafta sayısı (4-16)",
+      "targetWeeklyHours": "Haftalık hedef saat",
+      "activityPreferences": "Tercih edilen aktiviteler",
+      "activityRequired": "En az bir aktivite seç.",
+      "generate": "Üret",
+      "generating": "Üretiliyor…",
+      "resultBody": "Program oluşturuldu ve programlar listesine eklendi.",
+      "close": "Kapat",
+      "viewProgram": "Programı gör"
+    },
+    "logs": {
+      "prevMonth": "Önceki ay",
+      "nextMonth": "Sonraki ay",
+      "newLog": "Antrenman ekle",
+      "empty": "Bu ay için henüz antrenman kaydın yok."
+    },
+    "logModal": {
+      "newKicker": "Antrenman kaydı",
+      "editKicker": "Antrenmanı düzenle",
+      "createTitle": "Antrenman logla",
+      "editTitle": "Kaydı düzenle",
+      "session": "Seans",
+      "none": "Serbest antrenman",
+      "date": "Tarih",
+      "duration": "Süre (dk)",
+      "intensity": "Yoğunluk",
+      "completed": "Tamamlandı",
+      "calories": "Yakılan kalori (opsiyonel)",
+      "notes": "Not"
+    },
+    "stats": {
+      "period": {
+        "30d": "30 gün",
+        "90d": "90 gün",
+        "all": "Tümü"
+      },
+      "totalCompleted": "Tamamlanan antrenman",
+      "avgDuration": "Ortalama süre (dk)",
+      "totalHours": "Toplam saat",
+      "activityBreakdown": "Aktivite dağılımı",
+      "intensityDistribution": "Yoğunluk dağılımı",
+      "weeklyTrend": "Haftalık trend",
+      "empty": "Henüz veri yok."
     }
   }
 }

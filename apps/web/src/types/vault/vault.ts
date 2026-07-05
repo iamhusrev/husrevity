@@ -37,3 +37,24 @@ export interface VaultItemUpdateRequest {
   value?: string;
   description?: string | null;
 }
+
+// ─── CSV import ─────────────────────────────────────────────────────────────
+
+export interface CsvImportErrorDto {
+  row: number;
+  message: string;
+}
+
+export interface ImportedItemSummaryDto {
+  id: string;
+  label: string;
+}
+
+export interface ImportResultDto {
+  totalRows: number;
+  successCount: number;
+  skippedCount: number;
+  errors: CsvImportErrorDto[];
+  importedItems: ImportedItemSummaryDto[];
+  timestamp: string;
+}

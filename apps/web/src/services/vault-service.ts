@@ -1,6 +1,7 @@
 import apiClient from "./api-client";
 import { ApiResponse } from "@/types/common/api-response";
 import {
+  ImportResultDto,
   VaultEntityRequest,
   VaultEntityResponse,
   VaultItemRequest,
@@ -75,6 +76,20 @@ export const vaultService = {
   async exportEnv(entityId: number): Promise<string> {
     const res = await apiClient.get(VAULT_ENDPOINTS.ENTITY_EXPORT(entityId), {
       responseType: "text",
+    });
+    return res.data;
+  },
+
+  async importCsv(
+    entityId: string,
+    file: File,
+    skipDuplicates: boolean,
+  ): Promise<ApiResponse<ImportResultDto>> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("skipDuplicates", String(skipDuplicates));
+    const res = await apiClient.post(VAULT_ENDPOINTS.IMPORT_CSV(entityId), formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },

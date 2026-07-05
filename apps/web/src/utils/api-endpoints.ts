@@ -45,6 +45,7 @@ export const VAULT_ENDPOINTS = {
   ENTITY_IMPORT: (id: number) => `/vault/entities/${id}/import`,
   ENTITY_EXPORT: (id: number) => `/vault/entities/${id}/export`,
   ITEM_BY_ID: (id: number) => `/vault/items/${id}`,
+  IMPORT_CSV: (entityId: string | number) => `/vault/import-csv?entityId=${entityId}`,
 };
 
 // ─── Lists (todo) ─────────────────────────────────────────────────────────────
@@ -172,6 +173,29 @@ export const ADMIN_ENDPOINTS = {
 export const INVITE_PUBLIC_ENDPOINTS = {
   LOOKUP: (token: string) => `/auth/invite/${token}`,
   ACCEPT: (token: string) => `/auth/invite/${token}/accept`,
+};
+
+// ─── Sport ────────────────────────────────────────────────────────────────────
+
+export const SPORT_ENDPOINTS = {
+  PROFILE: "/sport/profile",
+  PROGRAMS: "/sport/programs",
+  PROGRAM_BY_ID: (id: string) => `/sport/programs/${id}`,
+  PROGRAM_ACTIVATE: (id: string) => `/sport/programs/${id}/activate`,
+  PROGRAM_GENERATE_AI: "/sport/programs/generate-ai",
+  SESSIONS: "/sport/sessions",
+  SESSION_BY_ID: (id: string) => `/sport/sessions/${id}`,
+  SESSIONS_REORDER: "/sport/sessions/reorder",
+  LOGS: "/sport/logs",
+  LOG_BY_ID: (id: string) => `/sport/logs/${id}`,
+  LOGS_FOR_PERIOD: (from: string, to: string) => `/sport/logs?from=${from}&to=${to}`,
+  STATS: (from?: string, to?: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    const qs = params.toString();
+    return qs ? `/sport/stats?${qs}` : "/sport/stats";
+  },
 };
 
 // ─── Finance ──────────────────────────────────────────────────────────────────

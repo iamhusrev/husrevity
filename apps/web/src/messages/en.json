@@ -149,7 +149,8 @@
     "adminUsers": "Users",
     "settings": "Settings",
     "profile": "Profile",
-    "readings": "Readings"
+    "readings": "Readings",
+    "sport": "Sport"
   },
   "admin": {
     "kicker": "Admin",
@@ -1006,6 +1007,24 @@
       "successTitle": "Imported",
       "successMessage": ".env content encrypted."
     },
+    "importCsv": {
+      "title": "Import CSV",
+      "kicker": "CSV import",
+      "hint": "Columns: name, url, username, password.",
+      "dropzone": "Drag CSV file here or click to select",
+      "dropzoneActive": "Drop the file to select it",
+      "changeFile": "Choose a different file",
+      "skipDuplicates": "Skip duplicate entries",
+      "cancel": "Cancel",
+      "import": "Import",
+      "importing": "Importing…",
+      "done": "Done",
+      "success": "{{successCount}} imported, {{skippedCount}} skipped of {{totalRows}} total",
+      "errorsTitle": "Row errors",
+      "errorRow": "Row {{row}}: {{message}}",
+      "error": "Import failed",
+      "selectFileFirst": "Select a CSV file first."
+    },
     "copy": {
       "successTitle": "Copied",
       "successMessage": "{{label}} copied to clipboard.",
@@ -1286,6 +1305,172 @@
     "placeholders": {
       "name": "Qur'an",
       "dailyTarget": "10 pages"
+    }
+  },
+  "sport": {
+    "title": "Sport",
+    "kicker": "Workout tracking",
+    "flourish": "stay fit",
+    "intro": "Manage your fitness profile, build training programs, log sessions, and track your progress.",
+    "tabs": {
+      "profile": "Profile",
+      "programs": "Programs",
+      "logs": "Workout log",
+      "stats": "Stats"
+    },
+    "fitnessLevel": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "activity": {
+      "RUNNING": "Running",
+      "YOGA": "Yoga",
+      "SWIMMING": "Swimming",
+      "STRENGTH": "Strength",
+      "GYM": "Gym",
+      "CYCLING": "Cycling",
+      "FOOTBALL": "Football",
+      "CUSTOM": "Custom"
+    },
+    "location": {
+      "EV": "Home",
+      "SALON": "Gym/studio",
+      "YÜZME": "Pool",
+      "DIS": "Outdoor"
+    },
+    "difficulty": {
+      "EASY": "Easy",
+      "MODERATE": "Moderate",
+      "HARD": "Hard"
+    },
+    "programType": {
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly"
+    },
+    "day": {
+      "0": "Monday",
+      "1": "Tuesday",
+      "2": "Wednesday",
+      "3": "Thursday",
+      "4": "Friday",
+      "5": "Saturday",
+      "6": "Sunday"
+    },
+    "profile": {
+      "title": "My sport profile",
+      "editCta": "Edit profile",
+      "editKicker": "Profile",
+      "editTitle": "Edit sport profile",
+      "fitnessLevel": "Level",
+      "weeklyHours": "Weekly target hours",
+      "hoursShort": "h",
+      "minutesShort": "min",
+      "activities": "Preferred activities",
+      "goals": "Goals",
+      "goalsPlaceholder": "e.g. 10km run, flexibility…",
+      "notes": "Notes"
+    },
+    "programs": {
+      "intro": "Create and manage training programs, or let AI generate one.",
+      "newProgram": "New program",
+      "generateAi": "Generate with AI",
+      "aiGenerated": "AI",
+      "active": "Active",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "openDetail": "View details",
+      "confirmDeleteTitle": "Delete program",
+      "confirmDeleteMessage": "Delete this program and all its sessions?",
+      "card": {
+        "weeks": "{{count}} weeks",
+        "sessions": "{{count}} sessions"
+      },
+      "empty": {
+        "title": "No programs yet",
+        "body": "Create a new training program or let AI generate one for you."
+      },
+      "modal": {
+        "kicker": "New program",
+        "title": "Create a training program"
+      },
+      "field": {
+        "name": "Program name",
+        "description": "Description",
+        "weekCount": "Week count",
+        "programType": "Type",
+        "startDate": "Start date",
+        "endDate": "End date"
+      }
+    },
+    "programDetail": {
+      "back": "Back",
+      "sessions": "Sessions",
+      "newSession": "New session",
+      "noSessions": "No sessions in this program yet.",
+      "notFound": "Program not found."
+    },
+    "sessionModal": {
+      "newKicker": "New session",
+      "editKicker": "Edit session",
+      "createTitle": "New session",
+      "editTitle": "Edit session",
+      "name": "Session name",
+      "activityType": "Activity",
+      "location": "Location",
+      "plannedDayOfWeek": "Day",
+      "plannedDuration": "Duration (min)",
+      "difficulty": "Difficulty",
+      "description": "Description",
+      "confirmDeleteTitle": "Delete session",
+      "confirmDeleteMessage": "Delete this session?"
+    },
+    "aiModal": {
+      "kicker": "AI",
+      "title": "Generate program",
+      "weekCount": "Week count (4-16)",
+      "targetWeeklyHours": "Target weekly hours",
+      "activityPreferences": "Preferred activities",
+      "activityRequired": "Pick at least one activity.",
+      "generate": "Generate",
+      "generating": "Generating…",
+      "resultBody": "The program was generated and added to your programs list.",
+      "close": "Close",
+      "viewProgram": "View program"
+    },
+    "logs": {
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "newLog": "Log workout",
+      "empty": "No workouts logged this month yet."
+    },
+    "logModal": {
+      "newKicker": "Workout log",
+      "editKicker": "Edit workout",
+      "createTitle": "Log workout",
+      "editTitle": "Edit log",
+      "session": "Session",
+      "none": "Freestyle workout",
+      "date": "Date",
+      "duration": "Duration (min)",
+      "intensity": "Intensity",
+      "completed": "Completed",
+      "calories": "Calories burned (optional)",
+      "notes": "Notes"
+    },
+    "stats": {
+      "period": {
+        "30d": "30 days",
+        "90d": "90 days",
+        "all": "All time"
+      },
+      "totalCompleted": "Completed workouts",
+      "avgDuration": "Average duration (min)",
+      "totalHours": "Total hours",
+      "activityBreakdown": "Activity breakdown",
+      "intensityDistribution": "Intensity distribution",
+      "weeklyTrend": "Weekly trend",
+      "empty": "No data yet."
     }
   }
 }
