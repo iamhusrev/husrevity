@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
 import { VaultEntry } from '../vault-entity.entity';
 import { VaultItem } from '../vault-item.entity';
 
@@ -92,4 +93,49 @@ export class ItemResponseDto {
       description: i.description,
     };
   }
+}
+
+// ─── CSV import ─────────────────────────────────────────────────────────────
+
+/** One row parsed out of an uploaded CSV file. `password` is only ever held
+ *  in memory long enough to be encrypted — never persisted or returned as-is. */
+export class CsvRecord {
+  name!: string;
+
+  url?: string;
+
+  username!: string;
+
+  password!: string;
+}
+
+export class CsvImportOptionsDto {
+  /** Multipart form fields arrive as strings — coerce "true"/"false"/"1"/"0". */
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string') return !['false', '0', ''].includes(value.toLowerCase());
+    return true;
+  })
+  @IsBoolean()
+  skipDuplicates?: boolean = true;
+}
+
+export class CsvImportErrorDto {
+  row!: number;
+  message!: string;
+}
+
+export class ImportedItemSummaryDto {
+  id!: string;
+  label!: string;
+}
+
+export class ImportResultDto {
+  totalRows!: number;
+  successCount!: number;
+  skippedCount!: number;
+  errors!: CsvImportErrorDto[];
+  importedItems!: ImportedItemSummaryDto[];
+  timestamp!: string;
 }

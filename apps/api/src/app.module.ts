@@ -26,6 +26,7 @@ import { RoutineModule } from './routine/routine.module';
 import { ReadingModule } from './reading/reading.module';
 import { FinanceModule } from './finance/finance.module';
 import { AdminModule } from './admin/admin.module';
+import { SportModule } from './sport/sport.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -53,6 +54,7 @@ import { HealthController } from './common/health.controller';
     ReadingModule,
     FinanceModule,
     AdminModule,
+    SportModule,
   ],
   controllers: [HealthController],
   providers: [

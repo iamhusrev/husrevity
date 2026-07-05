@@ -222,40 +222,7 @@ export default function ProjectsPage() {
               <span className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-husrev-amber/8 blur-2xl transition-opacity duration-500 group-hover:bg-husrev-amber/20" />
               <span className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-husrev-amber via-husrev-ember to-husrev-amber/0 opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
 
-              <button
-                type="button"
-                onClick={() => router.push(`/projects/${p.code}`)}
-                className="block w-full p-5 pl-6 text-left"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
-                    <BiFolder size={18} />
-                  </span>
-                  <span className="rounded-md bg-husrev-sand/60 px-1.5 py-0.5 text-[11px] font-mono uppercase tracking-[0.12em] text-husrev-shadow dark:bg-white/5 dark:text-husrev-cream">
-                    {p.code}
-                  </span>
-                </div>
-                <h3 className="mt-3.5 text-lg font-semibold leading-tight tracking-tight text-husrev-ink dark:text-husrev-cream group-hover:text-husrev-ember dark:group-hover:text-husrev-amber transition-colors">
-                  {p.name}
-                </h3>
-                {p.description && (
-                  <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-gray-500 dark:text-gray-400">
-                    {p.description}
-                  </p>
-                )}
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="husrev-kicker text-gray-400 dark:text-gray-500">
-                    {t("projects.openBoard")}
-                  </span>
-                  <BiRightArrowAlt
-                    size={18}
-                    className="text-husrev-ember dark:text-husrev-amber translate-x-0 transition-transform duration-300 group-hover:translate-x-1"
-                  />
-                </div>
-              </button>
-
-              <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition group-hover:opacity-100">
+              <div className="flex justify-end gap-1 p-3 pb-0">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -292,6 +259,39 @@ export default function ProjectsPage() {
                   <BiTrash size={16} />
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/projects/${p.code}`)}
+                className="block w-full cursor-pointer p-5 pl-6 pt-2 text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
+                    <BiFolder size={18} />
+                  </span>
+                  <span className="rounded-md bg-husrev-sand/60 px-1.5 py-0.5 text-[11px] font-mono uppercase tracking-[0.12em] text-husrev-shadow dark:bg-white/5 dark:text-husrev-cream">
+                    {p.code}
+                  </span>
+                </div>
+                <h3 className="mt-3.5 text-lg font-semibold leading-tight tracking-tight text-husrev-ink dark:text-husrev-cream group-hover:text-husrev-ember dark:group-hover:text-husrev-amber transition-colors">
+                  {p.name}
+                </h3>
+                {p.description && (
+                  <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-gray-500 dark:text-gray-400">
+                    {p.description}
+                  </p>
+                )}
+
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="husrev-kicker text-gray-400 dark:text-gray-500">
+                    {t("projects.openBoard")}
+                  </span>
+                  <BiRightArrowAlt
+                    size={18}
+                    className="text-husrev-ember dark:text-husrev-amber translate-x-0 transition-transform duration-300 group-hover:translate-x-1"
+                  />
+                </div>
+              </button>
             </article>
           ))}
         </div>

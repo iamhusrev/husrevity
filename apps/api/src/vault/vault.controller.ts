@@ -8,20 +8,29 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { VaultService } from './vault.service';
 import {
+  CsvImportOptionsDto,
   EntityRequestDto,
   EntityResponseDto,
+  ImportResultDto,
   ItemRequestDto,
   ItemResponseDto,
   ItemUpdateRequestDto,
 } from './dto/vault-dtos';
+import { ApiException } from '../common/api.exception';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
+
+const CSV_MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 @ApiTags('vault')
 @ApiBearerAuth()
@@ -121,5 +130,38 @@ export class VaultController {
   ): Promise<void> {
     const env = await this.vault.exportEnv(u.userId, id);
     res.type('text/plain').send(env);
+  }
+
+  /** Bulk-imports vault items from an uploaded CSV file (columns: name, url,
+   *  username, password). Multipart form-data — `file` is the CSV, remaining
+   *  fields (e.g. `skipDuplicates`) are bound to CsvImportOptionsDto. */
+  @Post('import-csv')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: CSV_MAX_FILE_SIZE_BYTES },
+      fileFilter: (_req, file, callback) => {
+        const isCsv =
+          file.mimetype === 'text/csv' ||
+          file.mimetype === 'application/vnd.ms-excel' ||
+          file.originalname.toLowerCase().endsWith('.csv');
+        if (!isCsv) {
+          callback(ApiException.badRequest('Only .csv files are allowed'), false);
+          return;
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  importCsv(
+    @CurrentUser() u: AuthenticatedUser,
+    @Query('entityId') entityId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() options: CsvImportOptionsDto,
+  ): Promise<ImportResultDto> {
+    if (!entityId) throw ApiException.badRequest('entityId query parameter is required');
+    if (!file) throw ApiException.badRequest('CSV file is required');
+    return this.vault.importCsv(u.userId, entityId, file.buffer, options);
   }
 }

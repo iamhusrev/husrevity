@@ -102,29 +102,42 @@ function DraggableNoteCard({
       <span className="absolute left-3 top-5 cursor-grab text-gray-300 opacity-0 transition group-hover:opacity-100 active:cursor-grabbing">
         <BiMenu size={14} />
       </span>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleArchive(note);
-        }}
-        className="absolute right-20 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("notes.archiveAria")}
-      >
-        <BiArchive size={16} />
-      </button>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onTogglePin(note);
-        }}
-        className="absolute right-12 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-husrev-amber/10 hover:text-husrev-amber"
-        aria-label={t("notes.pinAria")}
-      >
-        <BiPin size={16} />
-      </button>
-      <button type="button" onClick={() => onOpen(note.id)} className="block w-full pl-4 text-left">
+      <div className="flex justify-end gap-1 mb-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleArchive(note);
+          }}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("notes.archiveAria")}
+        >
+          <BiArchive size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin(note);
+          }}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-husrev-amber/10 hover:text-husrev-amber"
+          aria-label={t("notes.pinAria")}
+        >
+          <BiPin size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(note.id);
+          }}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("notes.deleteAria")}
+        >
+          <BiTrash size={16} />
+        </button>
+      </div>
+      <button type="button" onClick={() => onOpen(note.id)} className="block w-full cursor-pointer pl-4 text-left">
         <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">{note.title}</h3>
         <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm text-gray-500 dark:text-gray-400">
           {note.bodyMarkdown ?? ""}
@@ -141,17 +154,6 @@ function DraggableNoteCard({
             ))}
           </div>
         )}
-      </button>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(note.id);
-        }}
-        className="absolute right-3 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("notes.deleteAria")}
-      >
-        <BiTrash size={16} />
       </button>
     </div>
   );
@@ -176,29 +178,42 @@ function PinnedCard({
       style={{ backgroundColor: note.colorHex ?? undefined }}
       className="group relative rounded-2xl ring-2 ring-husrev-amber/60 bg-husrev-cream/40 shadow-card-warm p-5 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-husrev-amber/40"
     >
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleArchive(note);
-        }}
-        className="absolute right-20 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("notes.archiveAria")}
-      >
-        <BiArchive size={16} />
-      </button>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onTogglePin(note);
-        }}
-        className="absolute right-12 top-3 rounded-full p-2 text-husrev-amber opacity-0 transition group-hover:opacity-100 hover:bg-husrev-amber/10"
-        aria-label={t("notes.unpinAria")}
-      >
-        <BiSolidPin size={16} />
-      </button>
-      <button type="button" onClick={() => onOpen(note.id)} className="block w-full text-left">
+      <div className="flex justify-end gap-1 mb-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleArchive(note);
+          }}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("notes.archiveAria")}
+        >
+          <BiArchive size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin(note);
+          }}
+          className="rounded-full p-2 text-husrev-amber transition hover:bg-husrev-amber/10"
+          aria-label={t("notes.unpinAria")}
+        >
+          <BiSolidPin size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(note.id);
+          }}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("notes.deleteAria")}
+        >
+          <BiTrash size={16} />
+        </button>
+      </div>
+      <button type="button" onClick={() => onOpen(note.id)} className="block w-full cursor-pointer text-left">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-semibold text-husrev-ink dark:text-white/90">
             {note.title}
@@ -220,17 +235,6 @@ function PinnedCard({
             ))}
           </div>
         )}
-      </button>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(note.id);
-        }}
-        className="absolute right-3 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("notes.deleteAria")}
-      >
-        <BiTrash size={16} />
       </button>
     </div>
   );

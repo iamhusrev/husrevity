@@ -275,7 +275,7 @@ function ReminderRow({
             setEditing(true);
           }}
           title={t("reminders.editAria", "Düzenle")}
-          className={`truncate text-left text-sm font-medium transition hover:text-brand-500 ${
+          className={`block w-full truncate text-left text-sm font-medium transition hover:text-brand-500 ${
             isCompleted
               ? "line-through text-gray-400 dark:text-gray-500"
               : "text-gray-800 dark:text-white/90"
@@ -338,7 +338,9 @@ function ReminderRow({
             </div>
           </Dropdown>
         </div>
-        {reminder.notes && <span className="text-xs text-gray-400 truncate">{reminder.notes}</span>}
+        {reminder.notes && (
+          <span className="block w-full truncate text-xs text-gray-400">{reminder.notes}</span>
+        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
