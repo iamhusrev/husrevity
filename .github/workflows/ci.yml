@@ -2,9 +2,9 @@ name: CI
 
 # Build + lint + test on every push (any branch) and every pull request.
 # Does NOT deploy. Deploy lives in:
-#   - deploy.yml          → push to release/*  → PROD     (api/app.iamhusrev.com)
+#   - deploy.yml          → push to master  → PROD     (api/app.iamhusrev.com)
 # Husrevity is prod-only (no staging environment). This CI also runs on
-# master/release pushes, providing the lint+test gate deploy.yml doesn't run itself.
+# master pushes, providing the lint+test gate deploy.yml doesn't run itself.
 #
 # Runs on the self-hosted Mac runner (same host that serves prod). Concurrency
 # is per-ref so two unrelated branches can build in parallel; pushes to the

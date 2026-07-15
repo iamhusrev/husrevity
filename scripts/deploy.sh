@@ -11,8 +11,8 @@
 #   bash scripts/deploy.sh --no-pull      # skip git pull (useful in CI runner)
 #
 # Overrides:
-#   DEPLOY_ALLOW_ANY_BRANCH=1     skip the branch safety guard (must be on a
-#                                 release/* branch by default)
+#   DEPLOY_ALLOW_ANY_BRANCH=1     skip the branch safety guard (must be on
+#                                 master by default)
 
 set -euo pipefail
 
@@ -35,9 +35,9 @@ done
 # Stack configuration. The env vars on the right-hand side are read by
 # docker-compose.yml at parse time (and could be overridden if you ever
 # spin up an extra stack — e.g. a hotfix branch on different ports).
-# Canonical prod secrets live in the central store (~/iamhusrev-prod/secrets/).
+# Canonical prod secrets live in the central store (~/iamhusrev-homelab/secrets/).
 # Override with HUSREVITY_ENV_FILE=... for a one-off stack (e.g. a hotfix).
-SECRETS_FILE="${HUSREVITY_ENV_FILE:-$HOME/iamhusrev-prod/secrets/husrevity.env}"
+SECRETS_FILE="${HUSREVITY_ENV_FILE:-$HOME/iamhusrev-homelab/secrets/husrevity.env}"
 PUBLIC_HEALTH_URL="https://api.iamhusrev.com/api/health"
 export STACK_NAME="husrevity-prod"
 export HUSREVITY_API_HOST_PORT="4090"
@@ -45,19 +45,19 @@ export HUSREVITY_WEB_HOST_PORT="3090"
 export HUSREVITY_DB_HOST_PORT="5490"
 export NEXT_PUBLIC_API_URL="https://api.iamhusrev.com/api"
 
-# Safety: deploying prod from anything but a release/* branch is almost
-# certainly a mistake. Override via DEPLOY_ALLOW_ANY_BRANCH=1.
+# Safety: deploying prod from anything but master is almost certainly a
+# mistake. Override via DEPLOY_ALLOW_ANY_BRANCH=1.
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && ! "$CURRENT_BRANCH" =~ ^release/ ]]; then
-  echo "[deploy] ERROR: refusing to deploy prod from branch '$CURRENT_BRANCH' (expected release/*)." >&2
-  echo "[deploy]        Run:  git checkout release/1.0" >&2
+if [[ "${DEPLOY_ALLOW_ANY_BRANCH:-0}" != "1" && "$CURRENT_BRANCH" != "master" ]]; then
+  echo "[deploy] ERROR: refusing to deploy prod from branch '$CURRENT_BRANCH' (expected master)." >&2
+  echo "[deploy]        Run:  git checkout master" >&2
   echo "[deploy]        Or override:  DEPLOY_ALLOW_ANY_BRANCH=1 bash scripts/deploy.sh" >&2
   exit 1
 fi
 
 if [[ ! -f "$SECRETS_FILE" ]]; then
   echo "[deploy] ERROR: secrets file missing: $SECRETS_FILE" >&2
-  echo "[deploy]        See ~/iamhusrev-prod/RUNBOOK.md for how to provision it." >&2
+  echo "[deploy]        See ~/iamhusrev-homelab/RUNBOOK.md for how to provision it." >&2
   exit 1
 fi
 

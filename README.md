@@ -1,6 +1,6 @@
 # husrevity
 
-[![Deploy](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml/badge.svg?branch=release/1.0)](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml)
+[![Deploy](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml)
 
 Personal productivity monorepo — **NestJS** API + **Next.js** web, Bun workspaces. One `bun run dev` boots both.
 

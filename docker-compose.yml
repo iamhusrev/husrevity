@@ -19,11 +19,11 @@
 # Prerequisites:
 #   1. Shared postgres is up (network `iamhusrev-data` exists, db husrevity_prod
 #      + role husrevity created). See ~/iamhusrev-prod/postgres/.
-#   2. The env_file symlink (apps/api/.env.prod for prod, apps/api/.env.staging
-#      for staging — selected by ${HUSREVITY_ENV_FILE}) points at the matching
-#      central secrets file (~/iamhusrev-prod/secrets/husrevity.env or
-#      husrevity-staging.env), with HUSREVITY_DB_HOST=postgres and the matching
-#      HUSREVITY_DB_PASSWORD from ~/iamhusrev-prod/secrets/postgres.env.
+#   2. The env_file symlink (apps/api/.env.prod, selected by
+#      ${HUSREVITY_ENV_FILE}) points at the central secrets file
+#      (~/iamhusrev-prod/secrets/husrevity.env), with HUSREVITY_DB_HOST=postgres
+#      and the matching HUSREVITY_DB_PASSWORD from
+#      ~/iamhusrev-prod/secrets/postgres.env.
 #   3. Repo root .env points at the same file (compose ${VAR} interpolation).
 #   4. Cloudflare Tunnel "husrevity" has ingress for api.iamhusrev.com (→ :4090)
 #      and app.iamhusrev.com (→ :3090).
@@ -38,9 +38,8 @@ services:
     container_name: ${STACK_NAME:-husrevity-prod}-api
     restart: unless-stopped
     env_file:
-      # Selectable per environment: prod → apps/api/.env.prod,
-      # staging → apps/api/.env.staging. Each is a symlink the deploy workflow
-      # recreates, pointing at the matching central secrets file.
+      # apps/api/.env.prod is a symlink the deploy workflow recreates,
+      # pointing at the central secrets file.
       - ${HUSREVITY_ENV_FILE:-apps/api/.env.prod}
     # Loopback bind only — cloudflared on the host hits this port.
     # No LAN exposure, no public exposure.

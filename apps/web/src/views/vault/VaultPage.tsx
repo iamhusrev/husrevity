@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { Dropdown } from "@/components/dropdown/Dropdown";
+import { DropdownItem } from "@/components/dropdown/DropdownItem";
 import {
   useVaultEntities,
   useCreateVaultEntity,
@@ -18,6 +20,7 @@ import { vaultService } from "@/services/vault-service";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import VaultCsvImportModal from "./VaultCsvImportModal";
 import { VaultEntityResponse, VaultItemResponse } from "@/types/vault/vault";
 import {
   BiShow,
@@ -28,6 +31,8 @@ import {
   BiImport,
   BiPlus,
   BiCopy,
+  BiChevronDown,
+  BiFile,
 } from "react-icons/bi";
 
 const PRESET_COLORS = [
@@ -554,6 +559,8 @@ function ItemsPanel({ entity }: { entity: VaultEntityResponse }) {
   const [showItemModal, setShowItemModal] = useState(false);
   const [editingItem, setEditingItem] = useState<VaultItemResponse | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showCsvImportModal, setShowCsvImportModal] = useState(false);
+  const [importMenuOpen, setImportMenuOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
@@ -596,13 +603,38 @@ function ItemsPanel({ entity }: { entity: VaultEntityResponse }) {
           </span>
         )}
         <div className="ml-auto flex gap-2">
-          <button
-            type="button"
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <BiImport size={15} /> {t("vault.import")}
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setImportMenuOpen((v) => !v)}
+              className="dropdown-toggle flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <BiImport size={15} /> {t("vault.import")}
+              <BiChevronDown size={14} className="text-gray-400" />
+            </button>
+            <Dropdown
+              isOpen={importMenuOpen}
+              onClose={() => setImportMenuOpen(false)}
+              className="left-0 right-auto w-56 p-1.5"
+            >
+              <DropdownItem
+                onClick={() => setShowImportModal(true)}
+                onItemClick={() => setImportMenuOpen(false)}
+                baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                <BiImport size={15} className="shrink-0" />
+                {t("vault.import_modal.title")}
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => setShowCsvImportModal(true)}
+                onItemClick={() => setImportMenuOpen(false)}
+                baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              >
+                <BiFile size={15} className="shrink-0" />
+                {t("vault.importCsv.title")}
+              </DropdownItem>
+            </Dropdown>
+          </div>
           <button
             type="button"
             onClick={handleExport}
@@ -667,6 +699,11 @@ function ItemsPanel({ entity }: { entity: VaultEntityResponse }) {
       {showImportModal && (
         <ImportModal entityId={entity.id} onClose={() => setShowImportModal(false)} />
       )}
+      <VaultCsvImportModal
+        entityId={String(entity.id)}
+        isOpen={showCsvImportModal}
+        onClose={() => setShowCsvImportModal(false)}
+      />
     </div>
   );
 }
