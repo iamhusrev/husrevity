@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { BiRefresh, BiTrash } from "react-icons/bi";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -27,13 +27,8 @@ import {
   useUpdateEvent,
 } from "@/hooks/useCalendarEvents";
 import { EventResponse } from "@/types/calendar/calendar-event";
-import { useGmailAccounts } from "@/hooks/useGmail";
-import { gmailService } from "@/services/gmail-service";
-import type { GoogleCalendarEvent } from "@/types/gmail/gmail";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-
-const GOOGLE_ACCOUNT_COLORS = ["#4285F4", "#0F9D58", "#DB4437", "#AB47BC", "#00ACC1"];
 
 interface EditingEvent {
   id?: number;
@@ -290,35 +285,7 @@ export default function CalendarPage() {
 
   const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["calendar-events"] });
-    qc.invalidateQueries({ queryKey: ["gmail-calendar"] });
   };
-  const { data: gmailAccounts = [] } = useGmailAccounts();
-
-  const googleCalendars = useQueries({
-    queries: gmailAccounts.map((a) => ({
-      queryKey: ["gmail-calendar", a.id, range.from, range.to],
-      queryFn: () => gmailService.listCalendar(a.id, range),
-      enabled: !!range.from && !!range.to,
-      retry: false,
-    })),
-  });
-
-  const googleEvents: EventInput[] = googleCalendars.flatMap((q, i) => {
-    const color = GOOGLE_ACCOUNT_COLORS[i % GOOGLE_ACCOUNT_COLORS.length];
-    const list = (q.data?.data ?? []) as GoogleCalendarEvent[];
-    return list
-      .filter((ev) => ev.startAt)
-      .map((ev) => ({
-        id: `gcal:${ev.accountId}:${ev.id}`,
-        title: ev.title,
-        start: ev.startAt ?? undefined,
-        end: ev.endAt ?? undefined,
-        allDay: ev.allDay,
-        color,
-        editable: false,
-        extendedProps: { google: true, accountEmail: ev.accountEmail },
-      }));
-  });
 
   const handleDatesSet = (arg: DatesSetArg) => {
     setRange({
@@ -337,7 +304,6 @@ export default function CalendarPage() {
   };
 
   const handleEventClick = (arg: EventClickArg) => {
-    if (arg.event.extendedProps?.google) return; // read-only Google event
     const raw = arg.event.extendedProps?.raw as EventResponse | undefined;
     if (!raw) return;
     setEditing({
@@ -415,7 +381,7 @@ export default function CalendarPage() {
           height="100%"
           editable
           selectable
-          events={[...events.map(toFullCalendarEvent), ...googleEvents]}
+          events={events.map(toFullCalendarEvent)}
           datesSet={handleDatesSet}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
@@ -423,24 +389,6 @@ export default function CalendarPage() {
           eventResize={handleEventDrop as never}
         />
       </div>
-
-      {gmailAccounts.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium">{t("calendar.googleSource")}</span>
-          {gmailAccounts.map((a, i) => (
-            <span key={a.id} className="inline-flex items-center gap-1.5">
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{
-                  backgroundColor:
-                    GOOGLE_ACCOUNT_COLORS[i % GOOGLE_ACCOUNT_COLORS.length],
-                }}
-              />
-              {a.email}
-            </span>
-          ))}
-        </div>
-      )}
 
       {editing && <EventModal initial={editing} onClose={() => setEditing(null)} />}
     </div>

@@ -89,31 +89,9 @@ export const CALENDAR_ENDPOINTS = {
   EVENT_BY_ID: (id: number) => `/calendar/events/${id}`,
 };
 
-// ─── Gmail ────────────────────────────────────────────────────────────────────
-
-export const GMAIL_ENDPOINTS = {
-  ACCOUNTS: "/gmail/accounts",
-  ACCOUNT_BY_ID: (id: number) => `/gmail/accounts/${id}`,
-  MESSAGES: (id: number) => `/gmail/accounts/${id}/messages`,
-  MESSAGE_DETAIL: (id: number, mid: string) => `/gmail/accounts/${id}/messages/${mid}`,
-  MESSAGE_READ: (id: number, mid: string) => `/gmail/accounts/${id}/messages/${mid}/read`,
-  MESSAGE_UNREAD: (id: number, mid: string) => `/gmail/accounts/${id}/messages/${mid}/unread`,
-  MESSAGE_STAR: (id: number, mid: string) => `/gmail/accounts/${id}/messages/${mid}/star`,
-  MESSAGE_UNSTAR: (id: number, mid: string) => `/gmail/accounts/${id}/messages/${mid}/unstar`,
-  SEND: (id: number) => `/gmail/accounts/${id}/send`,
-  SYNC: (id: number) => `/gmail/accounts/${id}/sync`,
-  CALENDAR: (id: number) => `/gmail/accounts/${id}/calendar`,
-  CONTACTS: (id: number) => `/gmail/accounts/${id}/contacts`,
-  DRIVE: (id: number) => `/gmail/accounts/${id}/drive`,
-  AUTHORIZE_URL: "/gmail/oauth/authorize-url",
-};
-
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 export const AI_ENDPOINTS = {
-  CONVERSATIONS: "/ai/conversations",
-  CONVERSATION_BY_ID: (id: number) => `/ai/conversations/${id}`,
-  MESSAGES: (id: number) => `/ai/conversations/${id}/messages`,
   SUGGESTIONS: "/ai/suggestions",
 };
 

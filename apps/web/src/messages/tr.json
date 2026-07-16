@@ -140,8 +140,6 @@
     "projects": "Projeler",
     "plans": "Planlar",
     "calendar": "Takvim",
-    "gmail": "Posta",
-    "ai": "AI",
     "vault": "Vault",
     "evkat": "Evkat",
     "finance": "Finans",
@@ -150,7 +148,14 @@
     "settings": "Ayarlar",
     "profile": "Profil",
     "readings": "Okumalar",
-    "sport": "Spor"
+    "sport": "Spor",
+    "section": {
+      "planning": "Planlama",
+      "work": "Çalışma",
+      "life": "Yaşam",
+      "system": "Sistem"
+    },
+    "more": "Diğer"
   },
   "admin": {
     "kicker": "Yönetim",
@@ -513,15 +518,6 @@
       "later": "Şimdi değil"
     }
   },
-  "ai": {
-    "title": "AI Asistan",
-    "newChat": "Yeni sohbet",
-    "empty": "Henüz sohbet yok.",
-    "startHint": "Projelerin, planların ve notların hakkında her şeyi sor.",
-    "thinking": "Düşünüyor…",
-    "placeholder": "Asistana yaz…",
-    "send": "Gönder"
-  },
   "sidebarPanel": {
     "ctaTitle": "Bugün ne yapsam?",
     "ctaBody": "Husrevity senin için 3 görev önerdi."
@@ -571,7 +567,6 @@
       "activeTasks": "Aktif Görev",
       "thisWeek": "Bu Hafta",
       "vault": "Vault",
-      "gmail": "Posta",
       "pinnedHint_one": "{{count}} sabitli",
       "pinnedHint_other": "{{count}} sabitli",
       "dueHint": "bugün veya gecikmiş",
@@ -579,7 +574,6 @@
       "totalHint_other": "{{count}} toplam",
       "events": "etkinlik",
       "vaultHint": "kayıt",
-      "gmailHint": "hesap",
       "routineSegments": "Vakitler",
       "readings": "Okumalar"
     },
@@ -945,7 +939,6 @@
   },
   "calendar": {
     "title": "Takvim",
-    "googleSource": "Google takvimleri:",
     "refresh": "Yenile",
     "newEvent": "Yeni Olay",
     "editEvent": "Olayı Düzenle",
@@ -1039,46 +1032,6 @@
     "noEntities": "Henüz entity yok.",
     "startNew": "Başlamak için bir entity oluşturun.",
     "selectEntity": "Bir entity seçin."
-  },
-  "gmail": {
-    "title": "Posta",
-    "newMessage": "Yeni Mesaj",
-    "addAccount": "Hesap Ekle",
-    "addGoogle": "Gmail Ekle",
-    "addOutlook": "Outlook Ekle",
-    "compose": "Yaz",
-    "sync": "Sync",
-    "send": "Gönder",
-    "to": "Kime",
-    "cc": "Cc",
-    "bcc": "Bcc",
-    "subject": "Konu",
-    "body": "Mesaj…",
-    "sendAsHtml": "HTML olarak gönder",
-    "star": "Yıldızla",
-    "noBody": "(İçerik yok)",
-    "fromLabel": "Kimden:",
-    "toLabel": "Kime:",
-    "dateLabel": "Tarih:",
-    "noAccounts": "Henüz hesap yok.",
-    "selectAccount": "Bir hesap seç.",
-    "noMessages": "Mesaj yok.",
-    "selectMessage": "Bir mesaj seç.",
-    "noSubject": "(Konusuz)",
-    "loadMore": "Daha fazla",
-    "sentTitle": "Gönderildi",
-    "sentMessage": "Mesaj gönderildi.",
-    "syncedTitle": "Senkronize edildi",
-    "syncedMessage": "Hesap senkronize edildi.",
-    "connectedTitle": "Bağlandı",
-    "connectedMessage": "Google hesabı bağlandı.",
-    "contacts": "Kişiler",
-    "contactsTitle": "Kişiler",
-    "noContacts": "Kişi yok.",
-    "drive": "Drive",
-    "driveTitle": "Google Drive",
-    "noFiles": "Dosya yok.",
-    "googleReconnect": "Takvim, Kişiler ve Drive için bu hesabı yeniden bağla."
   },
   "users": {
     "title": "Kullanıcılar",

@@ -140,8 +140,6 @@
     "projects": "Projects",
     "plans": "Plans",
     "calendar": "Calendar",
-    "gmail": "Mail",
-    "ai": "AI",
     "vault": "Vault",
     "evkat": "Evkat",
     "finance": "Finance",
@@ -150,7 +148,14 @@
     "settings": "Settings",
     "profile": "Profile",
     "readings": "Readings",
-    "sport": "Sport"
+    "sport": "Sport",
+    "section": {
+      "planning": "Planning",
+      "work": "Work",
+      "life": "Life",
+      "system": "System"
+    },
+    "more": "More"
   },
   "admin": {
     "kicker": "Admin",
@@ -513,15 +518,6 @@
       "later": "Not now"
     }
   },
-  "ai": {
-    "title": "AI Assistant",
-    "newChat": "New chat",
-    "empty": "No conversations yet.",
-    "startHint": "Ask anything about your projects, plans and notes.",
-    "thinking": "Thinking…",
-    "placeholder": "Message the assistant…",
-    "send": "Send"
-  },
   "sidebarPanel": {
     "ctaTitle": "What should I do today?",
     "ctaBody": "Husrevity suggested 3 tasks for you."
@@ -571,7 +567,6 @@
       "activeTasks": "Active Tasks",
       "thisWeek": "This Week",
       "vault": "Vault",
-      "gmail": "Mail",
       "pinnedHint_one": "{{count}} pinned",
       "pinnedHint_other": "{{count}} pinned",
       "dueHint": "today or overdue",
@@ -579,7 +574,6 @@
       "totalHint_other": "{{count}} total",
       "events": "events",
       "vaultHint": "items",
-      "gmailHint": "accounts",
       "routineSegments": "Routine",
       "readings": "Readings"
     },
@@ -945,7 +939,6 @@
   },
   "calendar": {
     "title": "Calendar",
-    "googleSource": "Google calendars:",
     "refresh": "Refresh",
     "newEvent": "New Event",
     "editEvent": "Edit Event",
@@ -1039,46 +1032,6 @@
     "noEntities": "No entities yet.",
     "startNew": "Create an entity to get started.",
     "selectEntity": "Select an entity."
-  },
-  "gmail": {
-    "title": "Mail",
-    "newMessage": "New Message",
-    "addAccount": "Add Account",
-    "addGoogle": "Add Gmail",
-    "addOutlook": "Add Outlook",
-    "compose": "Compose",
-    "sync": "Sync",
-    "send": "Send",
-    "to": "To",
-    "cc": "Cc",
-    "bcc": "Bcc",
-    "subject": "Subject",
-    "body": "Message…",
-    "sendAsHtml": "Send as HTML",
-    "star": "Star",
-    "noBody": "(No content)",
-    "fromLabel": "From:",
-    "toLabel": "To:",
-    "dateLabel": "Date:",
-    "noAccounts": "No accounts yet.",
-    "selectAccount": "Select an account.",
-    "noMessages": "No messages.",
-    "selectMessage": "Select a message.",
-    "noSubject": "(No subject)",
-    "loadMore": "Load more",
-    "sentTitle": "Sent",
-    "sentMessage": "Message sent.",
-    "syncedTitle": "Synced",
-    "syncedMessage": "Account synced.",
-    "connectedTitle": "Connected",
-    "connectedMessage": "Google account connected.",
-    "contacts": "Contacts",
-    "contactsTitle": "Contacts",
-    "noContacts": "No contacts.",
-    "drive": "Drive",
-    "driveTitle": "Google Drive",
-    "noFiles": "No files.",
-    "googleReconnect": "Reconnect this account to enable Calendar, Contacts & Drive."
   },
   "users": {
     "title": "Users",

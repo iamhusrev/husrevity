@@ -10,7 +10,7 @@ const TAG_LENGTH = 16;
  * Port of com.husrevity.common.CryptoUtil. AES-256-GCM with a 32-byte key
  * supplied as base64 in HUSREVITY_CRYPTO_KEY. Output format: base64(IV || ciphertext || tag).
  *
- * Used by the Vault module (Phase 2) and Gmail OAuth token storage (Phase 2).
+ * Used by the Vault module (Phase 2).
  * Lives in apps/api/src/crypto/ as foundation infrastructure available now.
  */
 @Injectable()

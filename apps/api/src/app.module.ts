@@ -17,7 +17,6 @@ import { PlanModule } from './plan/plan.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { VaultModule } from './vault/vault.module';
-import { GmailModule } from './gmail/gmail.module';
 import { AiModule } from './ai/ai.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { NotificationModule } from './notification/notification.module';
@@ -46,7 +45,6 @@ import { HealthController } from './common/health.controller';
     CalendarModule,
     ReminderModule,
     VaultModule,
-    GmailModule,
     AiModule,
     NotificationModule,
     TimeBlockModule,

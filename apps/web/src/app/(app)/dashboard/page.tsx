@@ -16,7 +16,6 @@ import { useReminderLists } from "@/hooks/useReminders";
 import { useProjects } from "@/hooks/useProjects";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useVaultEntities } from "@/hooks/useVault";
-import { useGmailAccounts } from "@/hooks/useGmail";
 import { useRoutineSegments } from "@/hooks/useRoutine";
 import { useReadingTracks } from "@/hooks/useReading";
 import { reminderService } from "@/services/reminder-service";
@@ -30,7 +29,6 @@ import {
   BiTask,
   BiCalendar,
   BiLockAlt,
-  BiEnvelope,
   BiPin,
   BiBookOpen,
 } from "react-icons/bi";
@@ -87,7 +85,6 @@ export default function DashboardPage() {
   const { data: projects = [] } = useProjects();
   const { data: events = [] } = useCalendarEvents(weekRange);
   const { data: vaultEntries = [] } = useVaultEntities();
-  const { data: gmailAccounts = [] } = useGmailAccounts();
   const { data: routineSegments = [] } = useRoutineSegments();
   const { data: readingTracks = [] } = useReadingTracks();
 
@@ -299,14 +296,6 @@ export default function DashboardPage() {
           hint={t("dashboard.stat.vaultHint")}
           href="/vault"
           tone="ink"
-        />
-        <StatCard
-          icon={<BiEnvelope size={22} />}
-          label={t("dashboard.stat.gmail")}
-          value={gmailAccounts.length}
-          hint={t("dashboard.stat.gmailHint")}
-          href="/gmail"
-          tone="red"
         />
         <StatCard
           icon={<HiOutlineClock size={22} />}

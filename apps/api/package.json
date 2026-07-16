@@ -33,7 +33,6 @@
     "class-validator": "^0.14.1",
     "csv-parse": "^7.0.1",
     "dotenv": "^16.4.7",
-    "googleapis": "^144.0.0",
     "helmet": "^8.0.0",
     "multer": "^2.2.0",
     "passport": "^0.7.0",

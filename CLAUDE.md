@@ -94,7 +94,7 @@ Each feature module is self-contained: `<feature>.module.ts`, controller, servic
 - `common/` — `BaseEntity`, `ApiException`, `ResponseInterceptor`, `GlobalExceptionFilter`, `RolesGuard`, `AuditSubscriber`, `RequestContext`, `@Public()`, `@CurrentUser()`, `@Roles()`, `HealthController`.
 - `auth/` — register/login/refresh/logout, JWT issuance, `RefreshToken` entity, `JwtStrategy`, `JwtAuthGuard`.
 - `user/` — `User` + `Role`, `/me` endpoint.
-- `note/`, `list/`, `project/`, `task/`, `plan/`, `calendar/`, `reminder/`, `vault/`, `gmail/` — domain modules (full CRUD, all gated by JWT + ownerId).
+- `note/`, `list/`, `project/`, `task/`, `plan/`, `calendar/`, `reminder/`, `vault/` — domain modules (full CRUD, all gated by JWT + ownerId). `ai/` serves only the "today's suggestions" endpoint (Gemini). The former `gmail/` module and AI chat were removed (migration `DropGmailAndAiChat`).
 - `crypto/` — AES-GCM `CryptoService` (used by Vault).
 - `config/typeorm.config.ts` — entity globs `**/*.entity.{ts,js}`, migration glob `db/migrations/*.{ts,js}`. `synchronize: false` always.
 - `db/` — `data-source.ts`, `migrate.ts` CLI wrapper, `migrations/` (`Baseline`, `SeedAdmin`, `Phase2`, `RemoveDefaultAdmin` — prod-only, no-op in dev).
@@ -103,7 +103,8 @@ Each feature module is self-contained: `<feature>.module.ts`, controller, servic
 
 Next.js 15 App Router + React 19 + Tailwind 4 + TanStack Query. Forked from `../husrevity-web` and **synced to the NestJS contract** (it no longer tracks upstream `husrevity-web` / Spring). `NEXT_PUBLIC_API_URL=http://localhost:4090/api` in dev.
 
-- Route groups: `(landing)` (public), `(auth)` (login), `(app)` (protected — layout redirects unauthenticated users). Domain pages: `dashboard`, `notes`, `lists`, `projects`, `plans`, `calendar`, `reminders`, `gmail`, `vault`, `settings`.
+- Route groups: `(landing)` (public), `(auth)` (login), `(app)` (protected — layout redirects unauthenticated users). Domain pages: `dashboard`, `notes`, `lists`, `projects`, `plans`, `calendar`, `reminders`, `vault`, `settings`.
+- Navigation: `layout/AppSidebar.tsx` renders grouped sections (`getNavSections`) on `xl+`; below `xl` (1280px) the sidebar is hidden and `layout/MobileBottomNav.tsx` provides a fixed 5-slot bottom bar (Reminders · Notes · Dashboard center · Calendar · "More" sheet).
 - Provider stack (root `layout.tsx`): `I18nProvider` → `ReactQueryProvider` → `AuthProvider` → `ThemeProvider` → `SidebarProvider`.
 - Auth: `AuthProvider` stores JWT in `localStorage`; `services/api-client.ts` is the axios instance that injects the Bearer token and auto-refreshes on 401/403 (skipping `/auth/*` to avoid loops). `auth-events.ts` is the pub/sub bridge for forced logout.
 - Data fetching: feature hooks in `src/hooks/` (e.g. `useNotes`, `useLists`, `useProjects`) wrap TanStack Query and call services in `src/services/`. Each hook file exports the full CRUD set (`useX`, `useCreateX`, `useUpdateX`, `useDeleteX`). Follow this pattern for new domains.
@@ -116,7 +117,7 @@ Next.js 15 App Router + React 19 + Tailwind 4 + TanStack Query. Forked from `../
 ## Environment files
 
 - Root `.env.example` — only shared DB vars (rarely needed; per-app `.env`s are the source of truth).
-- `apps/api/.env` (gitignored, copy from `.env.example`) — Postgres, JWT secret/TTLs, AES-GCM key, CORS origins, optional Google OAuth for Gmail.
+- `apps/api/.env` (gitignored, copy from `.env.example`) — Postgres, JWT secret/TTLs, AES-GCM key, CORS origins, optional Gemini key for AI suggestions.
 - `apps/web/.env.local` (gitignored, copy from `.env.example`) — just `NEXT_PUBLIC_API_URL`.
 
 JWT defaults: 15-min access tokens, 30-day opaque refresh tokens (SHA-256 hashed at rest).

@@ -41,6 +41,8 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#f6f3ec" },
     { media: "(prefers-color-scheme: dark)", color: "#2b2823" },
   ],
+  // Needed for env(safe-area-inset-bottom) in MobileBottomNav on notched iPhones.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

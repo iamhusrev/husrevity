@@ -15,7 +15,6 @@ import {
   BiFolder,
   BiTargetLock,
   BiCalendar,
-  BiEnvelope,
   BiWallet,
   BiShield,
   BiBookOpen,
@@ -34,229 +33,244 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
+type NavSection = {
+  label: string | null;
+  items: NavItem[];
+};
+
 type TFunc = (key: string) => string;
 
-const getNavItems = (t: TFunc, isAdmin: boolean): NavItem[] => [
+const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
   {
-    icon: <CiGrid41 size={"1.5rem"} />,
-    name: t("nav.dashboard"),
-    path: "/dashboard",
+    label: null,
+    items: [
+      {
+        icon: <CiGrid41 size={"1.5rem"} />,
+        name: t("nav.dashboard"),
+        path: "/dashboard",
+      },
+    ],
   },
   {
-    icon: <BiBell size={"1.5rem"} />,
-    name: t("nav.reminders"),
-    path: "/reminders",
+    label: t("nav.section.planning"),
+    items: [
+      {
+        icon: <BiBell size={"1.5rem"} />,
+        name: t("nav.reminders"),
+        path: "/reminders",
+      },
+      {
+        icon: <BiCalendar size={"1.5rem"} />,
+        name: t("nav.calendar"),
+        path: "/calendar",
+      },
+      {
+        icon: <BiTargetLock size={"1.5rem"} />,
+        name: t("nav.plans"),
+        path: "/plans",
+      },
+      {
+        icon: <HiOutlineClock size={"1.5rem"} />,
+        name: t("nav.evkat"),
+        path: "/evkat",
+      },
+    ],
   },
   {
-    icon: <BiNote size={"1.5rem"} />,
-    name: t("nav.notes"),
-    path: "/notes",
+    label: t("nav.section.work"),
+    items: [
+      {
+        icon: <BiNote size={"1.5rem"} />,
+        name: t("nav.notes"),
+        path: "/notes",
+      },
+      {
+        icon: <BiListUl size={"1.5rem"} />,
+        name: t("nav.lists"),
+        path: "/lists",
+      },
+      {
+        icon: <BiFolder size={"1.5rem"} />,
+        name: t("nav.projects"),
+        path: "/projects",
+      },
+      {
+        icon: <BiBookOpen size={"1.5rem"} />,
+        name: t("nav.readings"),
+        path: "/readings",
+      },
+    ],
   },
   {
-    icon: <BiFolder size={"1.5rem"} />,
-    name: t("nav.projects"),
-    path: "/projects",
+    label: t("nav.section.life"),
+    items: [
+      {
+        icon: <BiDumbbell size={"1.5rem"} />,
+        name: t("nav.sport"),
+        path: "/sport",
+      },
+      {
+        icon: <BiWallet size={"1.5rem"} />,
+        name: t("nav.finance"),
+        path: "/finance",
+      },
+    ],
   },
   {
-    icon: <HiOutlineClock size={"1.5rem"} />,
-    name: t("nav.evkat"),
-    path: "/evkat",
-  },
-  {
-    icon: <BiListUl size={"1.5rem"} />,
-    name: t("nav.lists"),
-    path: "/lists",
-  },
-  {
-    icon: <BiBookOpen size={"1.5rem"} />,
-    name: t("nav.readings"),
-    path: "/readings",
-  },
-  {
-    icon: <BiDumbbell size={"1.5rem"} />,
-    name: t("nav.sport"),
-    path: "/sport",
-  },
-  {
-    icon: <BiTargetLock size={"1.5rem"} />,
-    name: t("nav.plans"),
-    path: "/plans",
-  },
-  {
-    icon: <BiCalendar size={"1.5rem"} />,
-    name: t("nav.calendar"),
-    path: "/calendar",
-  },
-  {
-    icon: <BiWallet size={"1.5rem"} />,
-    name: t("nav.finance"),
-    path: "/finance",
-  },
-  {
-    icon: <BiEnvelope size={"1.5rem"} />,
-    name: t("nav.gmail"),
-    path: "/gmail",
-  },
-  {
-    icon: <HiSparkles size={"1.5rem"} />,
-    name: t("nav.ai"),
-    path: "/ai",
-  },
-  {
-    icon: <BiLockAlt size={"1.5rem"} />,
-    name: t("nav.vault"),
-    path: "/vault",
-  },
-  ...(isAdmin
-    ? [
-        {
-          icon: <BiShield size={"1.5rem"} />,
-          name: t("nav.admin"),
-          subItems: [{ name: t("nav.adminUsers"), path: "/admin/users" }],
-        } as NavItem,
-      ]
-    : []),
-  {
-    icon: <CiSettings size={"1.5rem"} />,
-    name: t("nav.settings"),
-    subItems: [{ name: t("nav.profile"), path: "/settings/profile" }],
+    label: t("nav.section.system"),
+    items: [
+      {
+        icon: <BiLockAlt size={"1.5rem"} />,
+        name: t("nav.vault"),
+        path: "/vault",
+      },
+      ...(isAdmin
+        ? [
+            {
+              icon: <BiShield size={"1.5rem"} />,
+              name: t("nav.admin"),
+              subItems: [{ name: t("nav.adminUsers"), path: "/admin/users" }],
+            } as NavItem,
+          ]
+        : []),
+      {
+        icon: <CiSettings size={"1.5rem"} />,
+        name: t("nav.settings"),
+        subItems: [{ name: t("nav.profile"), path: "/settings/profile" }],
+      },
+    ],
   },
 ];
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isExpanded, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main";
-    index: number;
-  } | null>(null);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const showText = isExpanded || isHovered;
 
   useEffect(() => {
     let submenuMatched = false;
-    getNavItems(t, isAdmin).forEach((nav, index) => {
-      nav.subItems?.forEach((subItem) => {
-        if (isActive(subItem.path)) {
-          setOpenSubmenu({ type: "main", index });
-          submenuMatched = true;
-        }
+    getNavSections(t, isAdmin).forEach((section, sectionIndex) => {
+      section.items.forEach((nav, itemIndex) => {
+        nav.subItems?.forEach((subItem) => {
+          if (isActive(subItem.path)) {
+            setOpenSubmenu(`${sectionIndex}-${itemIndex}`);
+            submenuMatched = true;
+          }
+        });
       });
     });
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [pathname, isActive, t]);
+  }, [pathname, isActive, t, isAdmin]);
 
   useEffect(() => {
-    if (openSubmenu !== null) {
-      const key = `main-${openSubmenu.index}`;
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prev) => ({
-          ...prev,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
-      }
+    if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
+      setSubMenuHeight((prev) => ({
+        ...prev,
+        [openSubmenu]: subMenuRefs.current[openSubmenu]?.scrollHeight || 0,
+      }));
     }
   }, [openSubmenu]);
 
-  const handleSubmenuToggle = (index: number) => {
-    setOpenSubmenu((prev) => (prev && prev.index === index ? null : { type: "main", index }));
+  const handleSubmenuToggle = (key: string) => {
+    setOpenSubmenu((prev) => (prev === key ? null : key));
   };
 
-  const renderMenuItems = (navItems: NavItem[]) => (
+  const renderMenuItems = (navItems: NavItem[], sectionIndex: number) => (
     <ul className="flex flex-col gap-1">
-      {navItems.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index)}
-              className={`menu-item group cursor-pointer ${
-                openSubmenu?.index === index ? "menu-item-active" : "menu-item-inactive"
-              } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
-            >
-              <span
-                className={`${
-                  openSubmenu?.index === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <FaChevronDown
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu?.index === index ? "rotate-180 text-brand-500" : ""
-                  }`}
-                />
-              )}
-            </button>
-          ) : (
-            nav.path && (
-              <Link
-                href={nav.path}
-                className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                }`}
+      {navItems.map((nav, itemIndex) => {
+        const key = `${sectionIndex}-${itemIndex}`;
+        return (
+          <li key={nav.name}>
+            {nav.subItems ? (
+              <button
+                onClick={() => handleSubmenuToggle(key)}
+                className={`menu-item group cursor-pointer ${
+                  openSubmenu === key ? "menu-item-active" : "menu-item-inactive"
+                } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
               >
                 <span
                   className={`${
-                    isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    openSubmenu === key ? "menu-item-icon-active" : "menu-item-icon-inactive"
                   }`}
                 >
                   {nav.icon}
                 </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
+                {showText && <span className="menu-item-text">{nav.name}</span>}
+                {showText && (
+                  <FaChevronDown
+                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                      openSubmenu === key ? "rotate-180 text-brand-500" : ""
+                    }`}
+                  />
                 )}
-              </Link>
-            )
-          )}
-          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[`main-${index}`] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu?.index === index ? `${subMenuHeight[`main-${index}`]}px` : "0px",
-              }}
-            >
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      href={subItem.path}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path)
-                          ? "menu-dropdown-item-active"
-                          : "menu-dropdown-item-inactive"
-                      }`}
-                    >
-                      {subItem.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
+              </button>
+            ) : (
+              nav.path && (
+                <Link
+                  href={nav.path}
+                  className={`menu-item group ${
+                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  }`}
+                >
+                  <span
+                    className={`${
+                      isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    }`}
+                  >
+                    {nav.icon}
+                  </span>
+                  {showText && <span className="menu-item-text">{nav.name}</span>}
+                </Link>
+              )
+            )}
+            {nav.subItems && showText && (
+              <div
+                ref={(el) => {
+                  subMenuRefs.current[key] = el;
+                }}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height: openSubmenu === key ? `${subMenuHeight[key]}px` : "0px",
+                }}
+              >
+                <ul className="mt-2 space-y-1 ml-9">
+                  {nav.subItems.map((subItem) => (
+                    <li key={subItem.name}>
+                      <Link
+                        href={subItem.path}
+                        className={`menu-dropdown-item ${
+                          isActive(subItem.path)
+                            ? "menu-dropdown-item-active"
+                            : "menu-dropdown-item-inactive"
+                        }`}
+                      >
+                        {subItem.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 
   return (
     <aside
       className={`fixed flex flex-col xl:mt-0 top-0 px-5 left-0 bg-husrev-cream/85 dark:bg-husrev-ink/70 backdrop-blur-sm text-husrev-ink dark:text-husrev-cream h-full transition-all duration-300 ease-in-out z-50 border-r border-husrev-sand/70 dark:border-white/5 ${
-        isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"
-      } ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} xl:translate-x-0`}
+        isExpanded || isHovered ? "w-[290px]" : "w-[90px]"
+      } -translate-x-full xl:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -266,19 +280,36 @@ const AppSidebar: React.FC = () => {
         }`}
       >
         <Link href={HOME_PAGE}>
-          <AppLogo collapsed={!(isExpanded || isHovered || isMobileOpen)} />
+          <AppLogo collapsed={!showText} />
         </Link>
       </div>
 
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>{renderMenuItems(getNavItems(t, isAdmin))}</div>
+          <div className="flex flex-col">
+            {getNavSections(t, isAdmin).map((section, sectionIndex) => (
+              <div key={section.label ?? "top"}>
+                {section.label &&
+                  (showText ? (
+                    <div className="px-3 pt-4 pb-1 text-[10px] font-mono uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                      {section.label}
+                    </div>
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="my-2 text-center text-xs leading-none tracking-widest text-gray-300 dark:text-gray-600 select-none"
+                    >
+                      ···
+                    </div>
+                  ))}
+                {renderMenuItems(section.items, sectionIndex)}
+              </div>
+            ))}
           </div>
         </nav>
 
         <div className="mt-auto pb-4">
-          {isExpanded || isHovered || isMobileOpen ? (
+          {showText ? (
             <button
               type="button"
               onClick={() => setShowSuggestions(true)}
