@@ -68,4 +68,9 @@ export class TaskController {
   remove(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.tasks.delete(u.userId, id);
   }
+
+  @Patch('tasks/:id/restore')
+  restore(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<TaskResponseDto> {
+    return this.tasks.restore(u.userId, id);
+  }
 }

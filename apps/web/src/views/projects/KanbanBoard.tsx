@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
-import { useDeleteTask, useReorderTasks, useUpdateTask } from "@/hooks/useProjects";
-import { alertStore } from "@/stores/alert-store";
+import { useDeleteTask, useReorderTasks, useRestoreTask, useUpdateTask } from "@/hooks/useProjects";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
 import { BiTrash } from "react-icons/bi";
@@ -196,9 +196,11 @@ export default function KanbanBoard({
   onSelect: (task: TaskResponse) => void;
 }) {
   const showAlert = alertStore((s) => s.show);
+  const { t } = useTranslation();
   const updateTask = useUpdateTask();
   const reorderTasks = useReorderTasks();
   const deleteTask = useDeleteTask();
+  const restoreTask = useRestoreTask();
 
   const groupBy = (list: TaskResponse[]): Record<TaskStatus, TaskResponse[]> => {
     const out: Record<TaskStatus, TaskResponse[]> = {
@@ -284,8 +286,13 @@ export default function KanbanBoard({
   );
 
   const handleDelete = async (id: number) => {
+    const task = STATUSES.flatMap((s) => groups[s]).find((tk) => tk.id === id);
     try {
       await deleteTask.mutateAsync({ id, code });
+      showUndoToast({
+        message: t("projects.undo.taskDeleted", { title: task?.title ?? "" }),
+        onUndo: () => restoreTask.mutateAsync({ id, code }),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });

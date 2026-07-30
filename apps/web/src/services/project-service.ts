@@ -39,6 +39,11 @@ export const projectService = {
     return res.data;
   },
 
+  async restoreProject(code: string): Promise<ApiResponse<ProjectResponse>> {
+    const res = await apiClient.patch(PROJECT_ENDPOINTS.RESTORE(code));
+    return res.data;
+  },
+
   async listTasks(code: string): Promise<ApiResponse<TaskResponse[]>> {
     const res = await apiClient.get(PROJECT_ENDPOINTS.TASKS(code));
     return res.data;
@@ -66,6 +71,11 @@ export const projectService = {
 
   async deleteTask(id: number): Promise<ApiResponse<void>> {
     const res = await apiClient.delete(PROJECT_ENDPOINTS.TASK_BY_ID(id));
+    return res.data;
+  },
+
+  async restoreTask(id: number): Promise<ApiResponse<TaskResponse>> {
+    const res = await apiClient.patch(PROJECT_ENDPOINTS.TASK_RESTORE(id));
     return res.data;
   },
 };

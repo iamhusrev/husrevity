@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common';
@@ -55,5 +56,13 @@ export class ProjectController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@CurrentUser() u: AuthenticatedUser, @Param('code') code: string): Promise<void> {
     return this.projects.delete(u.userId, code);
+  }
+
+  @Patch(':code/restore')
+  restore(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('code') code: string,
+  ): Promise<ProjectResponseDto> {
+    return this.projects.restore(u.userId, code);
   }
 }

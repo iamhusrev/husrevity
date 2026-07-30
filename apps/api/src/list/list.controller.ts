@@ -63,6 +63,11 @@ export class ListController {
     return this.lists.delete(u.userId, id);
   }
 
+  @Patch('lists/:id/restore')
+  restore(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<ListResponseDto> {
+    return this.lists.restore(u.userId, id);
+  }
+
   @Patch('lists/reorder')
   @HttpCode(HttpStatus.NO_CONTENT)
   reorderLists(
@@ -168,5 +173,13 @@ export class ListController {
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteItem(@CurrentUser() u: AuthenticatedUser, @Param('id') itemId: string): Promise<void> {
     return this.lists.deleteItem(u.userId, itemId);
+  }
+
+  @Patch('list-items/:id/restore')
+  restoreItem(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') itemId: string,
+  ): Promise<ItemResponseDto> {
+    return this.lists.restoreItem(u.userId, itemId);
   }
 }

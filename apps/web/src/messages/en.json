@@ -37,7 +37,8 @@
     "sync": "Sync",
     "deleted": "Deleted",
     "saved": "Saved",
-    "open": "Open"
+    "open": "Open",
+    "undo": "Undo"
   },
   "datepicker": {
     "label": "Pick a date",
@@ -650,6 +651,8 @@
     "introEm": "Calmly",
     "introAfter": "begin — the rest follows.",
     "newPlan": "New plan",
+    "export": "Export",
+    "exportAria": "Export plan items",
     "modal": {
       "kicker": "Fresh start",
       "title": "New",
@@ -688,7 +691,11 @@
     "newItemPlaceholder": "Add a new step…",
     "noItems": "No steps in this plan yet.",
     "fallbackTitle": "Plan",
-    "deleteAria": "Delete plan"
+    "deleteAria": "Delete plan",
+    "undo": {
+      "planDeleted": "Plan \"{{title}}\" deleted.",
+      "itemDeleted": "Step \"{{title}}\" deleted."
+    }
   },
   "projects": {
     "title": "Projects",
@@ -712,6 +719,7 @@
     "introEm": "card",
     "introAfter": ", move it, finish it.",
     "newProject": "New project",
+    "export": "Export",
     "openBoard": "Open board",
     "modal": {
       "kicker": "New file",
@@ -741,6 +749,10 @@
       "PAUSED": "Paused",
       "DONE": "Done",
       "CANCELLED": "Cancelled"
+    },
+    "undo": {
+      "projectDeleted": "Project \"{{name}}\" deleted.",
+      "taskDeleted": "Task \"{{title}}\" deleted."
     }
   },
   "kanban": {
@@ -749,6 +761,7 @@
       "list": "List"
     },
     "newTask": "New task",
+    "export": "Export",
     "dropHere": "drop here",
     "back": "Back to projects",
     "noTasks": "No tasks in this project yet.",
@@ -844,6 +857,24 @@
       "deleteMessage": "The section will be removed; its items move to 'General'.",
       "saveAria": "Save",
       "cancelAria": "Cancel"
+    },
+    "undo": {
+      "listDeleted": "List \"{{name}}\" deleted.",
+      "itemDeleted": "Item \"{{text}}\" deleted."
+    },
+    "export": {
+      "aria": "Export list",
+      "txt": "Export as .txt",
+      "pdf": "Export as .pdf",
+      "statusLabel": "Status",
+      "createdLabel": "Created",
+      "summaryHint": "Open the list to export its full items.",
+      "sectionColumn": "Section",
+      "itemColumn": "Item",
+      "doneColumn": "Done",
+      "dueColumn": "Due",
+      "doneYes": "Yes",
+      "doneNo": "No"
     }
   },
   "reminders": {
@@ -869,6 +900,7 @@
     },
     "deleteAria": "Delete",
     "renameListAria": "Rename list",
+    "exportAria": "Export list as Excel",
     "addDue": "Add date",
     "flagAria": "Toggle flag",
     "priorityAria": "Cycle priority",
@@ -899,6 +931,10 @@
       "priorityField": "Priority",
       "dueField": "Date",
       "flagField": "Flag"
+    },
+    "undo": {
+      "deleted": "Reminder \"{{title}}\" deleted.",
+      "listDeleted": "List \"{{name}}\" deleted."
     }
   },
   "notes": {
@@ -935,6 +971,14 @@
       "archived": "Archive",
       "tags": "Tags",
       "color": "Color"
+    },
+    "export": {
+      "aria": "Export note",
+      "txt": "Export as .txt",
+      "pdf": "Export as .pdf",
+      "tagsLabel": "Tags",
+      "createdLabel": "Created",
+      "updatedLabel": "Updated"
     }
   },
   "calendar": {
@@ -950,7 +994,12 @@
       "end": "End",
       "allDay": "All day",
       "color": "Color"
-    }
+    },
+    "undo": {
+      "eventDeleted": "Event \"{{title}}\" deleted."
+    },
+    "export": "Export",
+    "exportEmpty": "No events in the visible range to export."
   },
   "vault": {
     "title": "Vault",

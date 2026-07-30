@@ -37,6 +37,11 @@ export const listService = {
     return res.data;
   },
 
+  async restoreList(id: number): Promise<ApiResponse<TodoListResponse>> {
+    const res = await apiClient.patch(LIST_ENDPOINTS.RESTORE(id));
+    return res.data;
+  },
+
   async reorderLists(items: ReorderItem[]): Promise<ApiResponse<void>> {
     const res = await apiClient.patch(LIST_ENDPOINTS.REORDER, { items });
     return res.data;
@@ -70,6 +75,11 @@ export const listService = {
 
   async deleteItem(id: number): Promise<ApiResponse<void>> {
     const res = await apiClient.delete(LIST_ENDPOINTS.ITEM_BY_ID(id));
+    return res.data;
+  },
+
+  async restoreItem(id: number): Promise<ApiResponse<TodoListItemResponse>> {
+    const res = await apiClient.patch(LIST_ENDPOINTS.ITEM_RESTORE(id));
     return res.data;
   },
 

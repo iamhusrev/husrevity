@@ -74,6 +74,15 @@ export class CalendarService {
     await this.events.softRemove(e);
   }
 
+  async restore(ownerId: string, id: string): Promise<EventResponseDto> {
+    const e = await this.events.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!e || !e.deletedAt) throw ApiException.notFound('Event not found');
+    await this.events.restore({ id, ownerId });
+    const restored = await this.requireOwned(ownerId, id);
+    await this.syncNotification(restored);
+    return EventResponseDto.from(restored);
+  }
+
   /**
    * Calendar events use the existing `reminderMinutes` column (matching the
    * Spring → Nest port; the new lead-time pattern on reminder/task/list_item

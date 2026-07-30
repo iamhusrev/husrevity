@@ -29,6 +29,11 @@ export const planService = {
     return res.data;
   },
 
+  async restorePlan(id: number): Promise<ApiResponse<PlanResponse>> {
+    const res = await apiClient.patch(PLAN_ENDPOINTS.RESTORE(id));
+    return res.data;
+  },
+
   async listItems(planId: number): Promise<ApiResponse<PlanItemResponse[]>> {
     const res = await apiClient.get(PLAN_ENDPOINTS.ITEMS(planId));
     return res.data;
@@ -46,6 +51,11 @@ export const planService = {
 
   async deleteItem(id: number): Promise<ApiResponse<void>> {
     const res = await apiClient.delete(PLAN_ENDPOINTS.ITEM_BY_ID(id));
+    return res.data;
+  },
+
+  async restoreItem(id: number): Promise<ApiResponse<PlanItemResponse>> {
+    const res = await apiClient.patch(PLAN_ENDPOINTS.ITEM_RESTORE(id));
     return res.data;
   },
 };

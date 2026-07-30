@@ -53,6 +53,14 @@ export function useDeletePlan() {
   });
 }
 
+export function useRestorePlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => planService.restorePlan(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: PLAN_KEYS.all }),
+  });
+}
+
 export function usePlanItems(planId: number) {
   return useQuery({
     queryKey: PLAN_KEYS.items(planId),
@@ -88,6 +96,16 @@ export function useDeletePlanItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id }: { id: number; planId: number }) => planService.deleteItem(id),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: PLAN_KEYS.items(vars.planId) });
+    },
+  });
+}
+
+export function useRestorePlanItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number; planId: number }) => planService.restoreItem(id),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: PLAN_KEYS.items(vars.planId) });
     },

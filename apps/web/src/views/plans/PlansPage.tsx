@@ -6,13 +6,14 @@ import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DetailModal from "@/components/modal/DetailModal";
 import PlanDetailPage from "@/views/plans/PlanDetailPage";
-import { useCreatePlan, useDeletePlan, usePlans } from "@/hooks/usePlans";
+import { useCreatePlan, useDeletePlan, usePlans, useRestorePlan } from "@/hooks/usePlans";
 import { PlanResponse } from "@/types/plan/plan";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { formatMonthShort } from "@/utils/i18n-date";
+import { formatDate, formatMonthShort } from "@/utils/i18n-date";
+import { exportAsXlsx } from "@/utils/export";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
-import { BiPlus, BiTrash, BiTargetLock, BiCalendarEvent } from "react-icons/bi";
+import { BiPlus, BiTrash, BiTargetLock, BiCalendarEvent, BiDownload } from "react-icons/bi";
 
 const STATUS_TONE: Record<string, { bg: string; dot: string }> = {
   ACTIVE: {
@@ -258,18 +259,33 @@ export default function PlansPage() {
   const router = useRouter();
   const { data: plans = [], isLoading } = usePlans();
   const remove = useDeletePlan();
+  const restorePlan = useRestorePlan();
   const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
   const [openId, setOpenId] = useState<number | null>(null);
   const openPlan = plans.find((p) => Number(p.id) === openId);
 
   const handleDelete = async (id: number) => {
+    const plan = plans.find((p) => p.id === id);
     try {
       await remove.mutateAsync(id);
+      showUndoToast({
+        message: t("plans.undo.planDeleted", { title: plan?.title ?? "" }),
+        onUndo: () => restorePlan.mutateAsync(id),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
     }
+  };
+
+  const handleExportAll = () => {
+    const rows = plans.map((p) => ({
+      Title: p.title,
+      Status: p.status ? t(`plans.status.${p.status}`) : "",
+      "Target Date": p.targetDate ? formatDate(p.targetDate) : "",
+    }));
+    exportAsXlsx("plans.xlsx", rows, "Plans");
   };
 
   const sortedPlans = useMemo(() => {
@@ -305,9 +321,19 @@ export default function PlansPage() {
           </span>{" "}
           {t("plans.introAfter")}
         </p>
-        <button onClick={() => setShowModal(true)} className="husrev-btn">
-          <BiPlus size={16} /> {t("plans.newPlan")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportAll}
+            disabled={plans.length === 0}
+            className="husrev-btn-ghost disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <BiDownload size={16} /> {t("plans.export")}
+          </button>
+          <button onClick={() => setShowModal(true)} className="husrev-btn">
+            <BiPlus size={16} /> {t("plans.newPlan")}
+          </button>
+        </div>
       </div>
 
       {isLoading ? (

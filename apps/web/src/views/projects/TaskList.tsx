@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useTranslation } from "react-i18next";
 import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
-import { useDeleteTask, useReorderTasks } from "@/hooks/useProjects";
-import { alertStore } from "@/stores/alert-store";
+import { useDeleteTask, useReorderTasks, useRestoreTask } from "@/hooks/useProjects";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { BiMenu, BiTrash } from "react-icons/bi";
 
@@ -120,6 +120,7 @@ export default function TaskList({
   const { t } = useTranslation();
   const reorderTasks = useReorderTasks();
   const deleteTask = useDeleteTask();
+  const restoreTask = useRestoreTask();
 
   const sorted = [...tasks].sort((a, b) => a.position - b.position);
   const [ordered, setOrdered] = useState<TaskResponse[]>(sorted);
@@ -161,8 +162,13 @@ export default function TaskList({
   }, [reorderTasks, code, showAlert]);
 
   const handleDelete = async (id: number) => {
+    const task = ordered.find((t) => t.id === id);
     try {
       await deleteTask.mutateAsync({ id, code });
+      showUndoToast({
+        message: t("projects.undo.taskDeleted", { title: task?.title ?? "" }),
+        onUndo: () => restoreTask.mutateAsync({ id, code }),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });

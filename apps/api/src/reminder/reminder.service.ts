@@ -75,6 +75,17 @@ export class ReminderService {
     await this.lists.softRemove(l);
   }
 
+  async restoreList(ownerId: string, id: string): Promise<ReminderListResponseDto> {
+    const l = await this.lists.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!l || !l.deletedAt) throw ApiException.notFound('Reminder list not found');
+    await this.lists.restore({ id, ownerId });
+    const restored = await this.requireList(ownerId, id);
+    const count = await this.reminders.count({
+      where: { listId: restored.id, completedAt: IsNull() },
+    });
+    return ReminderListResponseDto.from(restored, count);
+  }
+
   async reorderLists(ownerId: string, items: ReorderItemDto[]): Promise<void> {
     if (!items.length) return;
     await this.dataSource.transaction(async (em) => {
@@ -168,6 +179,15 @@ export class ReminderService {
     const r = await this.requireReminder(ownerId, id);
     await this.notifications.cancelForSource(ownerId, 'reminder', r.id);
     await this.reminders.softRemove(r);
+  }
+
+  async restoreReminder(ownerId: string, id: string): Promise<ReminderResponseDto> {
+    const r = await this.reminders.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!r || !r.deletedAt) throw ApiException.notFound('Reminder not found');
+    await this.reminders.restore({ id, ownerId });
+    const restored = await this.requireReminder(ownerId, id);
+    await this.syncNotification(restored);
+    return ReminderResponseDto.from(restored);
   }
 
   async reorderReminders(ownerId: string, items: ReorderItemDto[]): Promise<void> {

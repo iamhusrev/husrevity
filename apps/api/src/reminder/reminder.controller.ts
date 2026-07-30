@@ -59,6 +59,14 @@ export class ReminderController {
     return this.reminders.deleteList(u.userId, id);
   }
 
+  @Patch('reminder-lists/:id/restore')
+  restoreList(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<ReminderListResponseDto> {
+    return this.reminders.restoreList(u.userId, id);
+  }
+
   @Patch('reminder-lists/reorder')
   @HttpCode(HttpStatus.NO_CONTENT)
   reorderLists(
@@ -119,6 +127,14 @@ export class ReminderController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.reminders.deleteReminder(u.userId, id);
+  }
+
+  @Patch('reminders/:id/restore')
+  restore(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<ReminderResponseDto> {
+    return this.reminders.restoreReminder(u.userId, id);
   }
 
   @Patch('reminders/reorder')

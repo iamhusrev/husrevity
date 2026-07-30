@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common';
@@ -59,6 +60,11 @@ export class PlanController {
     return this.plans.delete(u.userId, id);
   }
 
+  @Patch('plans/:id/restore')
+  restore(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<PlanResponseDto> {
+    return this.plans.restore(u.userId, id);
+  }
+
   @Get('plans/:id/items')
   listItems(
     @CurrentUser() u: AuthenticatedUser,
@@ -90,5 +96,13 @@ export class PlanController {
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteItem(@CurrentUser() u: AuthenticatedUser, @Param('id') itemId: string): Promise<void> {
     return this.plans.deleteItem(u.userId, itemId);
+  }
+
+  @Patch('plan-items/:id/restore')
+  restoreItem(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') itemId: string,
+  ): Promise<PlanItemResponseDto> {
+    return this.plans.restoreItem(u.userId, itemId);
   }
 }

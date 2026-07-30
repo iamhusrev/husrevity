@@ -35,4 +35,9 @@ export const calendarService = {
     const res = await apiClient.delete(CALENDAR_ENDPOINTS.EVENT_BY_ID(id));
     return res.data;
   },
+
+  async restoreEvent(id: number): Promise<ApiResponse<EventResponse>> {
+    const res = await apiClient.patch(CALENDAR_ENDPOINTS.EVENT_RESTORE(id));
+    return res.data;
+  },
 };

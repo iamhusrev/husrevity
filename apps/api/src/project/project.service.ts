@@ -22,8 +22,18 @@ export class ProjectService {
   }
 
   async create(ownerId: string, req: ProjectRequestDto): Promise<ProjectResponseDto> {
-    const exists = await this.projects.findOne({ where: { ownerId, code: req.code } });
-    if (exists) throw ApiException.conflict(`Project code "${req.code}" already exists`);
+    const exists = await this.projects.findOne({
+      where: { ownerId, code: req.code },
+      withDeleted: true,
+    });
+    if (exists) {
+      if (exists.deletedAt) {
+        throw ApiException.conflict(
+          `Project code "${req.code}" belongs to a previously deleted project — restore it instead of creating a new one`,
+        );
+      }
+      throw ApiException.conflict(`Project code "${req.code}" already exists`);
+    }
     const p = this.projects.create({
       ownerId,
       code: req.code,
@@ -55,6 +65,22 @@ export class ProjectService {
   async delete(ownerId: string, code: string): Promise<void> {
     const p = await this.requireByCode(ownerId, code);
     await this.projects.softRemove(p);
+  }
+
+  async restore(ownerId: string, code: string): Promise<ProjectResponseDto> {
+    const p = await this.projects.findOne({ where: { ownerId, code }, withDeleted: true });
+    if (!p || !p.deletedAt) throw ApiException.notFound(`Project "${code}" not found`);
+    try {
+      await this.projects.restore({ id: p.id, ownerId });
+    } catch (e) {
+      if ((e as { code?: string }).code === '23505') {
+        throw ApiException.conflict(
+          'A project with this code already exists — cannot restore',
+        );
+      }
+      throw e;
+    }
+    return ProjectResponseDto.from(await this.requireByCode(ownerId, code));
   }
 
   async requireByCode(ownerId: string, code: string): Promise<Project> {

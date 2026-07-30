@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BiTrash } from "react-icons/bi";
 import DetailModal from "@/components/modal/DetailModal";
-import { useDeleteTask, useUpdateTask } from "@/hooks/useProjects";
+import { useDeleteTask, useRestoreTask, useUpdateTask } from "@/hooks/useProjects";
 import { TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
@@ -24,6 +24,7 @@ export default function TaskDetailModal({
   const showAlert = alertStore((s) => s.show);
   const update = useUpdateTask();
   const remove = useDeleteTask();
+  const restore = useRestoreTask();
 
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? "");
@@ -56,6 +57,10 @@ export default function TaskDetailModal({
   const handleDelete = async () => {
     try {
       await remove.mutateAsync({ id: task.id, code });
+      showUndoToast({
+        message: t("projects.undo.taskDeleted", { title: task.title }),
+        onUndo: () => restore.mutateAsync({ id: task.id, code }),
+      });
       onClose();
     } catch (err) {
       const { title: ti, message } = parseAxiosError(err);

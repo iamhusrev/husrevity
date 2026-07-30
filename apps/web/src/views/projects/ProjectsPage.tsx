@@ -8,12 +8,24 @@ import {
   useCreateProject,
   useDeleteProject,
   useProjects,
+  useRestoreProject,
   useUpdateProject,
 } from "@/hooks/useProjects";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
+import { exportAsXlsx } from "@/utils/export";
+import { formatDate } from "@/utils/i18n-date";
 import { ProjectResponse } from "@/types/project/project";
-import { BiPlus, BiTrash, BiFolder, BiRightArrowAlt, BiPin, BiSolidPin, BiArchive } from "react-icons/bi";
+import {
+  BiPlus,
+  BiTrash,
+  BiFolder,
+  BiRightArrowAlt,
+  BiPin,
+  BiSolidPin,
+  BiArchive,
+  BiDownload,
+} from "react-icons/bi";
 
 function NewProjectModal({ onClose }: { onClose: () => void }) {
   const showAlert = alertStore((s) => s.show);
@@ -128,12 +140,18 @@ export default function ProjectsPage() {
   const router = useRouter();
   const { data: projects = [], isLoading } = useProjects();
   const remove = useDeleteProject();
+  const restoreProject = useRestoreProject();
   const updateProject = useUpdateProject();
   const [showModal, setShowModal] = useState(false);
 
   const handleDelete = async (code: string) => {
+    const project = projects.find((p) => p.code === code);
     try {
       await remove.mutateAsync(code);
+      showUndoToast({
+        message: t("projects.undo.projectDeleted", { name: project?.name ?? code }),
+        onUndo: () => restoreProject.mutateAsync(code),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -150,6 +168,19 @@ export default function ProjectsPage() {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
     }
+  };
+
+  const handleExportAll = () => {
+    const rows = projects.map((p) => ({
+      Code: p.code,
+      Name: p.name,
+      Status: p.status ? t(`projects.statuses.${p.status}`) : "",
+      "Start Date": p.startDate ? formatDate(p.startDate) : "",
+      "End Date": p.endDate ? formatDate(p.endDate) : "",
+      Pinned: p.pinned ? t("common.yes") : t("common.no"),
+      Archived: p.archived ? t("common.yes") : t("common.no"),
+    }));
+    exportAsXlsx("projects.xlsx", rows, "Projects");
   };
 
   const handleToggleArchive = async (project: ProjectResponse) => {
@@ -180,9 +211,19 @@ export default function ProjectsPage() {
           </span>{" "}
           {t("projects.introAfter")}
         </p>
-        <button onClick={() => setShowModal(true)} className="husrev-btn">
-          <BiPlus size={16} /> {t("projects.newProject")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportAll}
+            disabled={projects.length === 0}
+            className="husrev-btn-ghost disabled:opacity-50 disabled:pointer-events-none"
+          >
+            <BiDownload size={16} /> {t("projects.export")}
+          </button>
+          <button onClick={() => setShowModal(true)} className="husrev-btn">
+            <BiPlus size={16} /> {t("projects.newProject")}
+          </button>
+        </div>
       </div>
 
       {isLoading ? (

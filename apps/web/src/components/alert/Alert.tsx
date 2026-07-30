@@ -11,6 +11,7 @@ interface AlertProps {
   showLink?: boolean;
   linkHref?: string;
   linkText?: string;
+  action?: { label: string; onClick: () => void };
   onClose?: () => void;
 }
 
@@ -89,6 +90,7 @@ const Alert: React.FC<AlertProps> = ({
   showLink = false,
   linkHref = "#",
   linkText = "Learn more",
+  action,
   onClose,
 }) => {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -168,6 +170,16 @@ const Alert: React.FC<AlertProps> = ({
             >
               {linkText}
             </Link>
+          )}
+
+          {action && (
+            <button
+              type="button"
+              onClick={action.onClick}
+              className="inline-block mt-3 text-sm font-medium text-gray-700 underline dark:text-gray-300"
+            >
+              {action.label}
+            </button>
           )}
         </div>
       </div>

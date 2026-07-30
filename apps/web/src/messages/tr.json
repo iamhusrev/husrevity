@@ -37,7 +37,8 @@
     "sync": "Sync",
     "deleted": "Silindi",
     "saved": "Kaydedildi",
-    "open": "Aç"
+    "open": "Aç",
+    "undo": "Geri Al"
   },
   "datepicker": {
     "label": "Tarih seç",
@@ -650,6 +651,8 @@
     "introEm": "Sakince",
     "introAfter": "başla, gerisi gelir.",
     "newPlan": "Yeni plan",
+    "export": "Dışa aktar",
+    "exportAria": "Plan adımlarını dışa aktar",
     "modal": {
       "kicker": "Yeni başlangıç",
       "title": "Yeni",
@@ -688,7 +691,11 @@
     "newItemPlaceholder": "Yeni adım ekle…",
     "noItems": "Bu planda henüz adım yok.",
     "fallbackTitle": "Plan",
-    "deleteAria": "Plan sil"
+    "deleteAria": "Plan sil",
+    "undo": {
+      "planDeleted": "\"{{title}}\" planı silindi.",
+      "itemDeleted": "\"{{title}}\" adımı silindi."
+    }
   },
   "projects": {
     "title": "Projeler",
@@ -712,6 +719,7 @@
     "introEm": "kart",
     "introAfter": "koy, taşı, bitir.",
     "newProject": "Yeni proje",
+    "export": "Dışa aktar",
     "openBoard": "Panoyu aç",
     "modal": {
       "kicker": "Yeni dosya",
@@ -741,6 +749,10 @@
       "PAUSED": "Duraklatıldı",
       "DONE": "Tamamlandı",
       "CANCELLED": "İptal Edildi"
+    },
+    "undo": {
+      "projectDeleted": "\"{{name}}\" projesi silindi.",
+      "taskDeleted": "\"{{title}}\" görevi silindi."
     }
   },
   "kanban": {
@@ -749,6 +761,7 @@
       "list": "Liste"
     },
     "newTask": "Yeni görev",
+    "export": "Dışa aktar",
     "dropHere": "buraya bırak",
     "back": "Projelere dön",
     "noTasks": "Bu projede henüz görev yok.",
@@ -844,6 +857,24 @@
       "deleteMessage": "Bölüm silinecek; içindeki öğeler 'Genel'e taşınır.",
       "saveAria": "Kaydet",
       "cancelAria": "İptal"
+    },
+    "undo": {
+      "listDeleted": "\"{{name}}\" listesi silindi.",
+      "itemDeleted": "\"{{text}}\" öğesi silindi."
+    },
+    "export": {
+      "aria": "Listeyi dışa aktar",
+      "txt": ".txt olarak dışa aktar",
+      "pdf": ".pdf olarak dışa aktar",
+      "statusLabel": "Durum",
+      "createdLabel": "Oluşturma",
+      "summaryHint": "Tüm öğeleri dışa aktarmak için listeyi aç.",
+      "sectionColumn": "Bölüm",
+      "itemColumn": "Öğe",
+      "doneColumn": "Tamamlandı",
+      "dueColumn": "Son tarih",
+      "doneYes": "Evet",
+      "doneNo": "Hayır"
     }
   },
   "reminders": {
@@ -869,6 +900,7 @@
     },
     "deleteAria": "Sil",
     "renameListAria": "Listeyi yeniden adlandır",
+    "exportAria": "Listeyi Excel olarak dışa aktar",
     "addDue": "Tarih ekle",
     "flagAria": "Bayrağı değiştir",
     "priorityAria": "Önceliği değiştir",
@@ -899,6 +931,10 @@
       "priorityField": "Öncelik",
       "dueField": "Tarih",
       "flagField": "Bayrak"
+    },
+    "undo": {
+      "deleted": "\"{{title}}\" anımsatıcısı silindi.",
+      "listDeleted": "\"{{name}}\" listesi silindi."
     }
   },
   "notes": {
@@ -935,6 +971,14 @@
       "archived": "Arşivle",
       "tags": "Etiketler",
       "color": "Renk"
+    },
+    "export": {
+      "aria": "Notu dışa aktar",
+      "txt": ".txt olarak dışa aktar",
+      "pdf": ".pdf olarak dışa aktar",
+      "tagsLabel": "Etiketler",
+      "createdLabel": "Oluşturma",
+      "updatedLabel": "Güncelleme"
     }
   },
   "calendar": {
@@ -950,7 +994,12 @@
       "end": "Bitiş",
       "allDay": "Tüm gün",
       "color": "Renk"
-    }
+    },
+    "undo": {
+      "eventDeleted": "\"{{title}}\" etkinliği silindi."
+    },
+    "export": "Dışa Aktar",
+    "exportEmpty": "Görünen aralıkta dışa aktarılacak etkinlik yok."
   },
   "vault": {
     "title": "Vault",

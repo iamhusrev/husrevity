@@ -9,12 +9,14 @@ import {
   useDeletePlanItem,
   usePlan,
   usePlanItems,
+  useRestorePlanItem,
   useUpdatePlanItem,
 } from "@/hooks/usePlans";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
-import { BiPlus, BiTrash, BiArrowBack } from "react-icons/bi";
+import { exportAsXlsx } from "@/utils/export";
+import { BiPlus, BiTrash, BiArrowBack, BiDownload } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 import { PlanItemResponse } from "@/types/plan/plan";
 
@@ -23,6 +25,7 @@ function PlanItemRow({ item, planId }: { item: PlanItemResponse; planId: number 
   const { t } = useTranslation();
   const update = useUpdatePlanItem();
   const remove = useDeletePlanItem();
+  const restore = useRestorePlanItem();
 
   const handleToggle = async () => {
     try {
@@ -45,6 +48,10 @@ function PlanItemRow({ item, planId }: { item: PlanItemResponse; planId: number 
   const handleDelete = async () => {
     try {
       await remove.mutateAsync({ id: item.id, planId });
+      showUndoToast({
+        message: t("plans.undo.itemDeleted", { title: item.title }),
+        onUndo: () => restore.mutateAsync({ id: item.id, planId }),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -111,6 +118,16 @@ export default function PlanDetailPage({
 
   const sorted = [...items].sort((a, b) => a.orderIndex - b.orderIndex);
 
+  const handleExportItems = () => {
+    const rows = sorted.map((item) => ({
+      Title: item.title,
+      Done: item.done ? t("common.yes") : t("common.no"),
+      "Target Date": item.targetDate ? formatDate(item.targetDate) : "",
+      Order: item.orderIndex,
+    }));
+    exportAsXlsx(`plan-${id}-items.xlsx`, rows, "Plan Items");
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = title.trim();
@@ -143,7 +160,18 @@ export default function PlanDetailPage({
           >
             <BiArrowBack size={18} />
           </button>
-          <PageBreadcrumb pageTitle={plan?.title ?? t("plans.fallbackTitle")} />
+          <div className="flex-1">
+            <PageBreadcrumb pageTitle={plan?.title ?? t("plans.fallbackTitle")} />
+          </div>
+          <button
+            type="button"
+            onClick={handleExportItems}
+            disabled={sorted.length === 0}
+            className="shrink-0 rounded-full p-2 text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:hover:bg-gray-800"
+            aria-label={t("plans.exportAria")}
+          >
+            <BiDownload size={18} />
+          </button>
         </div>
       )}
 

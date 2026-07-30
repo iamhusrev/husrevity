@@ -73,6 +73,19 @@ export class ListService {
     await this.lists.softRemove(l);
   }
 
+  async restore(ownerId: string, id: string): Promise<ListResponseDto> {
+    const l = await this.lists.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!l || !l.deletedAt) throw ApiException.notFound('List not found');
+    await this.lists.restore({ id, ownerId });
+    const restored = await this.requireList(ownerId, id);
+    // Mirror delete()'s cancellation: re-sync every (still-live) item's notification.
+    const items = await this.items.find({ where: { listId: restored.id } });
+    for (const i of items) {
+      await this.syncNotification(ownerId, i);
+    }
+    return ListResponseDto.from(restored);
+  }
+
   async reorderLists(ownerId: string, items: ReorderItemDto[]): Promise<void> {
     if (!items.length) return;
     await this.dataSource.transaction(async (em) => {
@@ -143,6 +156,14 @@ export class ListService {
     const item = await this.requireItem(ownerId, itemId);
     await this.notifications.cancelForSource(ownerId, 'list_item', item.id);
     await this.items.softRemove(item);
+  }
+
+  async restoreItem(ownerId: string, itemId: string): Promise<ItemResponseDto> {
+    await this.requireDeletedItem(ownerId, itemId);
+    await this.items.restore({ id: itemId });
+    const restored = await this.requireItem(ownerId, itemId);
+    await this.syncNotification(ownerId, restored);
+    return ItemResponseDto.from(restored);
   }
 
   async reorderItems(ownerId: string, listId: string, items: ReorderItemDto[]): Promise<void> {
@@ -271,6 +292,17 @@ export class ListService {
       .where('i.id = :itemId', { itemId })
       .getOne();
     if (!item) throw ApiException.notFound('List item not found');
+    return item;
+  }
+
+  private async requireDeletedItem(ownerId: string, itemId: string): Promise<ListItem> {
+    const item = await this.items
+      .createQueryBuilder('i')
+      .innerJoin(TodoList, 'l', 'l.id = i.list_id AND l.owner_id = :ownerId', { ownerId })
+      .where('i.id = :itemId', { itemId })
+      .withDeleted()
+      .getOne();
+    if (!item || !item.deletedAt) throw ApiException.notFound('List item not found');
     return item;
   }
 }

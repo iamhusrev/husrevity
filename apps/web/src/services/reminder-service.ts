@@ -33,6 +33,11 @@ export const reminderService = {
     return res.data;
   },
 
+  async restoreList(id: number): Promise<ApiResponse<ReminderListResponse>> {
+    const res = await apiClient.patch(REMINDER_ENDPOINTS.LIST_RESTORE(id));
+    return res.data;
+  },
+
   async reorderLists(items: ReorderItem[]): Promise<ApiResponse<void>> {
     const res = await apiClient.patch(REMINDER_ENDPOINTS.REORDER_LISTS, { items });
     return res.data;
@@ -55,6 +60,11 @@ export const reminderService = {
 
   async remove(id: number): Promise<ApiResponse<void>> {
     const res = await apiClient.delete(REMINDER_ENDPOINTS.BY_ID(id));
+    return res.data;
+  },
+
+  async restore(id: number): Promise<ApiResponse<ReminderResponse>> {
+    const res = await apiClient.patch(REMINDER_ENDPOINTS.RESTORE(id));
     return res.data;
   },
 

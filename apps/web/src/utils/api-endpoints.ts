@@ -29,9 +29,11 @@ export const REMINDER_ENDPOINTS = {
   LISTS: "/reminder-lists",
   LIST_BY_ID: (id: number) => `/reminder-lists/${id}`,
   LIST_REMINDERS: (id: number) => `/reminder-lists/${id}/reminders`,
+  LIST_RESTORE: (id: number) => `/reminder-lists/${id}/restore`,
   REORDER_LISTS: "/reminder-lists/reorder",
   REMINDERS: "/reminders",
   BY_ID: (id: number) => `/reminders/${id}`,
+  RESTORE: (id: number) => `/reminders/${id}/restore`,
   TOGGLE: (id: number) => `/reminders/${id}/toggle`,
   REORDER: "/reminders/reorder",
 };
@@ -53,10 +55,12 @@ export const VAULT_ENDPOINTS = {
 export const LIST_ENDPOINTS = {
   ALL: "/lists",
   BY_ID: (id: number) => `/lists/${id}`,
+  RESTORE: (id: number) => `/lists/${id}/restore`,
   REORDER: "/lists/reorder",
   ITEMS: (id: number) => `/lists/${id}/items`,
   ITEMS_REORDER: (id: number) => `/lists/${id}/items/reorder`,
   ITEM_BY_ID: (id: number) => `/list-items/${id}`,
+  ITEM_RESTORE: (id: number) => `/list-items/${id}/restore`,
   ITEM_TOGGLE: (id: number) => `/list-items/${id}/toggle`,
   SECTIONS: (id: number) => `/lists/${id}/sections`,
   SECTIONS_REORDER: (id: number) => `/lists/${id}/sections/reorder`,
@@ -68,9 +72,11 @@ export const LIST_ENDPOINTS = {
 export const PROJECT_ENDPOINTS = {
   ALL: "/projects",
   BY_CODE: (code: string) => `/projects/${code}`,
+  RESTORE: (code: string) => `/projects/${code}/restore`,
   TASKS: (code: string) => `/projects/${code}/tasks`,
   TASKS_REORDER: (code: string) => `/projects/${code}/tasks/reorder`,
   TASK_BY_ID: (id: number) => `/tasks/${id}`,
+  TASK_RESTORE: (id: number) => `/tasks/${id}/restore`,
 };
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -78,8 +84,10 @@ export const PROJECT_ENDPOINTS = {
 export const PLAN_ENDPOINTS = {
   ALL: "/plans",
   BY_ID: (id: number) => `/plans/${id}`,
+  RESTORE: (id: number) => `/plans/${id}/restore`,
   ITEMS: (id: number) => `/plans/${id}/items`,
   ITEM_BY_ID: (id: number) => `/plan-items/${id}`,
+  ITEM_RESTORE: (id: number) => `/plan-items/${id}/restore`,
 };
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
@@ -87,6 +95,7 @@ export const PLAN_ENDPOINTS = {
 export const CALENDAR_ENDPOINTS = {
   EVENTS: "/calendar/events",
   EVENT_BY_ID: (id: number) => `/calendar/events/${id}`,
+  EVENT_RESTORE: (id: number) => `/calendar/events/${id}/restore`,
 };
 
 // ─── AI ───────────────────────────────────────────────────────────────────────

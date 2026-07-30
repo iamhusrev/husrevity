@@ -10,6 +10,8 @@ import Button from "@/components/button/Button";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 import { Modal } from "@/components/modal";
 import DetailModal from "@/components/modal/DetailModal";
+import { Dropdown } from "@/components/dropdown/Dropdown";
+import { DropdownItem } from "@/components/dropdown/DropdownItem";
 import NoteEditorPage from "@/views/notes/NoteEditorPage";
 import {
   useCreateNote,
@@ -23,7 +25,18 @@ import {
 } from "@/hooks/useNotes";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPin, BiSolidPin, BiTrash, BiMenu, BiPurchaseTag, BiArchive } from "react-icons/bi";
+import { exportAsPdf, exportAsTxt } from "@/utils/export";
+import { slugify } from "@/utils/utils";
+import { formatDateTime } from "@/utils/i18n-date";
+import {
+  BiPin,
+  BiSolidPin,
+  BiTrash,
+  BiMenu,
+  BiPurchaseTag,
+  BiArchive,
+  BiDownload,
+} from "react-icons/bi";
 import { NoteRequest } from "@/types/note/note";
 
 /** Build a complete NoteRequest from a note — update() nulls omitted fields. */
@@ -45,6 +58,68 @@ const DRAG_TYPE = "NOTE_CARD";
 interface DragItem {
   index: number;
   id: number;
+}
+
+/** Builds the "Tags / Created / Updated" footer shared by both export formats. */
+function noteExportMetaLines(note: NoteResponse, t: ReturnType<typeof useTranslation>["t"]): string {
+  const tags = note.tags.length > 0 ? note.tags.map((tag) => tag.name).join(", ") : "—";
+  const created = note.createdAt ? formatDateTime(note.createdAt) : "—";
+  const updated = note.updatedAt ? formatDateTime(note.updatedAt) : "—";
+  return [
+    `${t("notes.export.tagsLabel")}: ${tags}`,
+    `${t("notes.export.createdLabel")}: ${created}`,
+    `${t("notes.export.updatedLabel")}: ${updated}`,
+  ].join("\n");
+}
+
+/** Per-note export trigger — icon button + Dropdown with .txt/.pdf choices. */
+function NoteExportMenu({ note }: { note: NoteResponse }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  const filename = (ext: "txt" | "pdf") => `notes-${slugify(note.title)}.${ext}`;
+
+  const handleExportTxt = () => {
+    const content = `${note.title}\n\n${note.bodyMarkdown ?? ""}\n\n---\n${noteExportMetaLines(note, t)}\n`;
+    exportAsTxt(filename("txt"), content);
+    setOpen(false);
+  };
+
+  const handleExportPdf = () => {
+    const text = `${noteExportMetaLines(note, t)}\n\n${note.bodyMarkdown ?? ""}`;
+    exportAsPdf(filename("pdf"), { title: note.title, text });
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="dropdown-toggle rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+        aria-label={t("notes.export.aria")}
+      >
+        <BiDownload size={16} />
+      </button>
+      <Dropdown isOpen={open} onClose={() => setOpen(false)} className="w-48 p-1.5">
+        <DropdownItem
+          onClick={handleExportTxt}
+          baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
+          {t("notes.export.txt")}
+        </DropdownItem>
+        <DropdownItem
+          onClick={handleExportPdf}
+          baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
+          {t("notes.export.pdf")}
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  );
 }
 
 function DraggableNoteCard({
@@ -103,6 +178,7 @@ function DraggableNoteCard({
         <BiMenu size={14} />
       </span>
       <div className="flex justify-end gap-1 mb-2">
+        <NoteExportMenu note={note} />
         <button
           type="button"
           onClick={(e) => {
@@ -179,6 +255,7 @@ function PinnedCard({
       className="group relative rounded-2xl ring-2 ring-husrev-amber/60 bg-husrev-cream/40 shadow-card-warm p-5 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-husrev-amber/40"
     >
       <div className="flex justify-end gap-1 mb-2">
+        <NoteExportMenu note={note} />
         <button
           type="button"
           onClick={(e) => {

@@ -12,17 +12,21 @@ import {
   useCreateReminderList,
   useUpdateReminderList,
   useDeleteReminderList,
+  useRestoreReminderList,
   useReminders,
   useCreateReminder,
   useToggleReminder,
   useUpdateReminder,
   useDeleteReminder,
+  useRestoreReminder,
   useReorderReminders,
   useReorderReminderLists,
 } from "@/hooks/useReminders";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDateTime } from "@/utils/i18n-date";
+import { exportAsXlsx } from "@/utils/export";
+import { slugify } from "@/utils/utils";
 import {
   ReminderListResponse,
   ReminderResponse,
@@ -37,6 +41,7 @@ import {
   BiEditAlt,
   BiCheck,
   BiX,
+  BiExport,
 } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
@@ -189,6 +194,7 @@ function ReminderRow({
   const toggleReminder = useToggleReminder();
   const updateReminder = useUpdateReminder();
   const deleteReminder = useDeleteReminder();
+  const restoreReminder = useRestoreReminder();
   const [dueOpen, setDueOpen] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -239,6 +245,10 @@ function ReminderRow({
   const handleDelete = async () => {
     try {
       await deleteReminder.mutateAsync({ id: reminder.id, listId });
+      showUndoToast({
+        message: t("reminders.undo.deleted", { title: reminder.title }),
+        onUndo: () => restoreReminder.mutateAsync({ id: reminder.id, listId }),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -404,6 +414,7 @@ function ReminderEditModal({
   const { t } = useTranslation();
   const updateReminder = useUpdateReminder();
   const deleteReminder = useDeleteReminder();
+  const restoreReminder = useRestoreReminder();
 
   const [title, setTitle] = useState(reminder.title);
   const [notes, setNotes] = useState(reminder.notes ?? "");
@@ -436,6 +447,10 @@ function ReminderEditModal({
   const handleDelete = async () => {
     try {
       await deleteReminder.mutateAsync({ id: reminder.id, listId });
+      showUndoToast({
+        message: t("reminders.undo.deleted", { title: reminder.title }),
+        onUndo: () => restoreReminder.mutateAsync({ id: reminder.id, listId }),
+      });
       onClose();
     } catch (err) {
       const { title: errTitle, message } = parseAxiosError(err);
@@ -629,6 +644,27 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
     reorderReminders.mutate({ items, listId: list.id });
   }, [reorderReminders, list.id]);
 
+  const handleExport = () => {
+    const rows = ordered.map((r) => ({
+      Title: r.title,
+      Notes: r.notes ?? "",
+      "Due Date": r.dueAt
+        ? formatDateTime(r.dueAt, {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+      Priority: t(`reminders.priority.${r.priority}`),
+      Flagged: r.flag ? t("common.yes") : t("common.no"),
+      Completed: r.completedAt ? t("common.yes") : t("common.no"),
+      List: list.name,
+    }));
+    exportAsXlsx(`reminders-${slugify(list.name)}.xlsx`, rows, "Reminders");
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const title = newTitle.trim();
@@ -651,6 +687,16 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
         <span className="ml-auto rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
           {list.itemCount}
         </span>
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={ordered.length === 0}
+          title={t("reminders.exportAria")}
+          aria-label={t("reminders.exportAria")}
+          className="shrink-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-brand-500 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-gray-800"
+        >
+          <BiExport size={16} />
+        </button>
       </div>
 
       <form onSubmit={handleAdd} className="mb-4 flex gap-2">
@@ -1003,6 +1049,7 @@ export default function RemindersPage({
   const { t } = useTranslation();
   const { data: lists = [], isLoading } = useReminderLists();
   const deleteList = useDeleteReminderList();
+  const restoreList = useRestoreReminderList();
   const reorderLists = useReorderReminderLists();
   const renameList = useUpdateReminderList();
 
@@ -1053,11 +1100,16 @@ export default function RemindersPage({
   const selectedList = lists.find((l) => l.id === selectedListId) ?? null;
 
   const handleDeleteList = async (id: number) => {
+    const list = lists.find((l) => l.id === id);
     try {
       await deleteList.mutateAsync(id);
       if (selectedListId === id) {
         setSelectedListId(lists.find((l) => l.id !== id)?.id ?? null);
       }
+      showUndoToast({
+        message: t("reminders.undo.listDeleted", { name: list?.name ?? "" }),
+        onUndo: () => restoreList.mutateAsync(id),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });

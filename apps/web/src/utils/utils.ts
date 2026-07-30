@@ -9,3 +9,21 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(...inputs));
 }
+
+/**
+ * Converts an arbitrary string into a lowercase, hyphen-separated slug
+ * suitable for filenames (e.g. for exported file names).
+ * @example
+ * slugify("Grocery List!") → "grocery-list"
+ */
+export function slugify(value: string): string {
+  return (
+    value
+      .normalize("NFKD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "untitled"
+  );
+}

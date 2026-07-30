@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import { Dropdown } from "@/components/dropdown/Dropdown";
+import { DropdownItem } from "@/components/dropdown/DropdownItem";
 import {
   useCreateListSection,
   useCreateTodoListItem,
@@ -14,6 +16,7 @@ import {
   useDeleteTodoListItem,
   useListSections,
   useReorderTodoListItems,
+  useRestoreTodoListItem,
   useToggleTodoListItem,
   useTodoList,
   useTodoListItems,
@@ -21,9 +24,11 @@ import {
   useUpdateTodoList,
 } from "@/hooks/useLists";
 import { ListSectionResponse, TodoListItemResponse } from "@/types/list/list";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDateTime } from "@/utils/i18n-date";
+import { exportAsPdf, exportAsTxt } from "@/utils/export";
+import { slugify } from "@/utils/utils";
 import {
   BiPlus,
   BiTrash,
@@ -32,6 +37,7 @@ import {
   BiEditAlt,
   BiCheck,
   BiX,
+  BiDownload,
 } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
@@ -64,6 +70,7 @@ function ItemRow({
   const { t } = useTranslation();
   const toggle = useToggleTodoListItem();
   const remove = useDeleteTodoListItem();
+  const restore = useRestoreTodoListItem();
   const ref = useRef<HTMLDivElement>(null);
   const sectionKey = sectionKeyOf(item);
 
@@ -101,6 +108,10 @@ function ItemRow({
   const handleDelete = async () => {
     try {
       await remove.mutateAsync({ id: item.id, listId });
+      showUndoToast({
+        message: t("lists.undo.itemDeleted", { text: item.text }),
+        onUndo: () => restore.mutateAsync({ id: item.id, listId }),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -366,6 +377,7 @@ export default function ListDetailPage({
 
   const [sectionDraft, setSectionDraft] = useState("");
   const [editingListName, setEditingListName] = useState<string | null>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
   const sorted = useMemo(
     () => [...items].sort((a, b) => a.position - b.position),
@@ -475,6 +487,58 @@ export default function ListDetailPage({
 
   const ungrouped = itemsBySection.get(UNGROUPED) ?? [];
 
+  // Sections in display order, mirroring how the page itself renders them
+  // (ungrouped bucket first, then real sections by position).
+  const orderedSectionGroups: { name: string; items: TodoListItemResponse[] }[] = [
+    { name: t("lists.sections.ungrouped"), items: ungrouped },
+    ...sortedSections.map((section) => ({
+      name: section.name,
+      items: itemsBySection.get(String(section.id)) ?? [],
+    })),
+  ];
+
+  const exportFilename = (ext: "txt" | "pdf") =>
+    `lists-${slugify(list?.name ?? t("lists.title"))}.${ext}`;
+
+  const handleExportListTxt = () => {
+    const lines: string[] = [list?.name ?? t("lists.title"), ""];
+    for (const group of orderedSectionGroups) {
+      if (group.items.length === 0) continue;
+      lines.push(group.name);
+      for (const item of group.items) {
+        lines.push(`${item.done ? "[x]" : "[ ]"} ${item.text}`);
+      }
+      lines.push("");
+    }
+    exportAsTxt(exportFilename("txt"), lines.join("\n").trimEnd() + "\n");
+    setExportMenuOpen(false);
+  };
+
+  const handleExportListPdf = () => {
+    const rows: (string | number)[][] = [];
+    for (const group of orderedSectionGroups) {
+      for (const item of group.items) {
+        rows.push([
+          group.name,
+          item.text,
+          item.done ? t("lists.export.doneYes") : t("lists.export.doneNo"),
+          item.dueAt ? formatDateTime(item.dueAt) : "—",
+        ]);
+      }
+    }
+    exportAsPdf(exportFilename("pdf"), {
+      title: list?.name ?? t("lists.title"),
+      columns: [
+        t("lists.export.sectionColumn"),
+        t("lists.export.itemColumn"),
+        t("lists.export.doneColumn"),
+        t("lists.export.dueColumn"),
+      ],
+      rows,
+    });
+    setExportMenuOpen(false);
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="space-y-6">
@@ -531,6 +595,36 @@ export default function ListDetailPage({
                   >
                     <BiEditAlt size={16} />
                   </button>
+                )}
+                {list && (
+                  <div className="relative shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setExportMenuOpen((v) => !v)}
+                      className="dropdown-toggle rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-white"
+                      aria-label={t("lists.export.aria")}
+                    >
+                      <BiDownload size={16} />
+                    </button>
+                    <Dropdown
+                      isOpen={exportMenuOpen}
+                      onClose={() => setExportMenuOpen(false)}
+                      className="w-48 p-1.5"
+                    >
+                      <DropdownItem
+                        onClick={handleExportListTxt}
+                        baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        {t("lists.export.txt")}
+                      </DropdownItem>
+                      <DropdownItem
+                        onClick={handleExportListPdf}
+                        baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        {t("lists.export.pdf")}
+                      </DropdownItem>
+                    </Dropdown>
+                  </div>
                 )}
               </>
             )}

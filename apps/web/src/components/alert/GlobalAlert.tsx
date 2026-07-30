@@ -1,10 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import { alertStore } from "@/stores/alert-store";
+import { parseAxiosError } from "@/utils/handleError";
 import Alert from "./Alert";
 
 export default function GlobalAlert() {
-  const { open, title, message, type, position, width, close } = alertStore();
+  const { open, title, message, type, position, width, action, duration, seq, close } =
+    alertStore();
+
+  useEffect(() => {
+    if (!open || !duration) return;
+    const t = setTimeout(close, duration);
+    return () => clearTimeout(t);
+    // `seq` bumps on every show(), so a new toast always restarts this timer
+    // even when open/duration are unchanged (e.g. two undo-toasts in a row).
+  }, [open, duration, seq, close]);
 
   if (!open) return null;
 
@@ -33,7 +44,29 @@ export default function GlobalAlert() {
         ${positionClasses[position]}
       `}
     >
-      <Alert variant={type} title={title} message={message} showLink={false} onClose={close} />
+      <Alert
+        variant={type}
+        title={title}
+        message={message}
+        showLink={false}
+        action={
+          action
+            ? {
+                label: action.label,
+                onClick: () => {
+                  close();
+                  Promise.resolve(action.onClick()).catch((err) => {
+                    const { title: errTitle, message } = parseAxiosError(err);
+                    alertStore
+                      .getState()
+                      .show({ title: errTitle, message, type: "error", position: "top-center" });
+                  });
+                },
+              }
+            : undefined
+        }
+        onClose={close}
+      />
     </div>
   );
 }

@@ -14,7 +14,9 @@ import FormFieldTextarea from "@/components/form/FormFieldTextarea";
 import { useCreateTask, useProject, useProjectTasks, useUpdateProject } from "@/hooks/useProjects";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPlus, BiArrowBack, BiEditAlt } from "react-icons/bi";
+import { exportAsXlsx } from "@/utils/export";
+import { formatDate } from "@/utils/i18n-date";
+import { BiPlus, BiArrowBack, BiEditAlt, BiDownload } from "react-icons/bi";
 import KanbanBoard from "./KanbanBoard";
 import TaskList from "./TaskList";
 import TaskDetailModal from "./TaskDetailModal";
@@ -46,8 +48,8 @@ function NewTaskModal({ code, onClose }: { code: string; onClose: () => void }) 
       });
       onClose();
     } catch (err) {
-      const { title: t, message } = parseAxiosError(err);
-      showAlert({ title: t, message, type: "error", position: "top-center" });
+      const { title: errTitle, message } = parseAxiosError(err);
+      showAlert({ title: errTitle, message, type: "error", position: "top-center" });
     }
   };
 
@@ -331,6 +333,17 @@ export default function ProjectDetailPage({
   const { data: project } = useProject(code);
   const { data: tasks = [], isLoading } = useProjectTasks(code);
 
+  const handleExportTasks = () => {
+    const rows = tasks.map((task) => ({
+      Title: task.title,
+      Status: t(`kanban.status.${task.status}`),
+      Priority: t(`kanban.priority.${task.priority}`),
+      "Due Date": task.dueAt ? formatDate(task.dueAt) : "",
+      Description: task.description ?? "",
+    }));
+    exportAsXlsx(`project-${code}-tasks.xlsx`, rows, "Tasks");
+  };
+
   useEffect(() => {
     if (embedded) return; // in a modal — don't rewrite the browser URL
     const params = new URLSearchParams(searchParams.toString());
@@ -392,9 +405,19 @@ export default function ProjectDetailPage({
               {t("kanban.view.list")}
             </button>
           </div>
-          <button onClick={() => setShowModal(true)} className="husrev-btn">
-            <BiPlus size={16} /> {t("kanban.newTask")}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportTasks}
+              disabled={tasks.length === 0}
+              className="husrev-btn-ghost disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <BiDownload size={16} /> {t("kanban.export")}
+            </button>
+            <button onClick={() => setShowModal(true)} className="husrev-btn">
+              <BiPlus size={16} /> {t("kanban.newTask")}
+            </button>
+          </div>
         </div>
 
         {isLoading ? (

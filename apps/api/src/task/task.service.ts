@@ -79,6 +79,15 @@ export class TaskService {
     await this.tasks.softRemove(t);
   }
 
+  async restore(ownerId: string, id: string): Promise<TaskResponseDto> {
+    const t = await this.tasks.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!t || !t.deletedAt) throw ApiException.notFound('Task not found');
+    await this.tasks.restore({ id, ownerId });
+    const restored = await this.requireOwned(ownerId, id);
+    await this.syncNotification(restored);
+    return TaskResponseDto.from(restored);
+  }
+
   async reorderForProject(
     ownerId: string,
     projectCode: string,

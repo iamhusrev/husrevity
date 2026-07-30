@@ -24,11 +24,14 @@ import {
   useCalendarEvents,
   useCreateEvent,
   useDeleteEvent,
+  useRestoreEvent,
   useUpdateEvent,
 } from "@/hooks/useCalendarEvents";
 import { EventResponse } from "@/types/calendar/calendar-event";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
+import { exportAsXlsx } from "@/utils/export";
+import { formatDateTime } from "@/utils/i18n-date";
 
 interface EditingEvent {
   id?: number;
@@ -52,6 +55,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
   const create = useCreateEvent();
   const update = useUpdateEvent();
   const remove = useDeleteEvent();
+  const restore = useRestoreEvent();
 
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description ?? "");
@@ -94,9 +98,14 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
   };
 
   const handleDelete = async () => {
-    if (!initial.id) return;
+    const id = initial.id;
+    if (!id) return;
     try {
-      await remove.mutateAsync(initial.id);
+      await remove.mutateAsync(id);
+      showUndoToast({
+        message: t("calendar.undo.eventDeleted", { title: initial.title }),
+        onUndo: () => restore.mutateAsync(id),
+      });
       onClose();
     } catch (err) {
       const { title, message } = parseAxiosError(err);
@@ -287,6 +296,46 @@ export default function CalendarPage() {
     qc.invalidateQueries({ queryKey: ["calendar-events"] });
   };
 
+  // `events` already reflects the currently visible range — `range` is kept
+  // in sync with FullCalendar's active view via `handleDatesSet` below, and
+  // `useCalendarEvents` re-fetches whenever `range` changes.
+  const handleExportXlsx = () => {
+    if (events.length === 0) {
+      showAlert({
+        title: t("calendar.export"),
+        message: t("calendar.exportEmpty"),
+        type: "info",
+        position: "top-center",
+      });
+      return;
+    }
+
+    const rows = events.map((e) => ({
+      Title: e.title,
+      Start: formatDateTime(e.startAt, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      End: formatDateTime(e.endAt, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      "All Day": e.allDay ? t("common.yes") : t("common.no"),
+      Location: e.location ?? "",
+      Description: e.description ?? "",
+    }));
+
+    const fromDate = range.from?.slice(0, 10) ?? "range";
+    const toDate = range.to?.slice(0, 10) ?? "range";
+    exportAsXlsx(`calendar-events-${fromDate}-${toDate}.xlsx`, rows, "Events");
+  };
+
   const handleDatesSet = (arg: DatesSetArg) => {
     setRange({
       from: arg.start.toISOString(),
@@ -367,14 +416,20 @@ export default function CalendarPage() {
               ? {
                   left: "prev,next",
                   center: "title",
-                  right: "listWeek,dayGridMonth",
+                  right: "listWeek,dayGridMonth exportXlsx",
                 }
               : {
                   left: "prev,next today",
                   center: "title",
-                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+                  right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek exportXlsx",
                 }
           }
+          customButtons={{
+            exportXlsx: {
+              text: t("calendar.export"),
+              click: handleExportXlsx,
+            },
+          }}
           locales={FC_LOCALES}
           locale={(i18n.language ?? "en").split("-")[0] === "tr" ? "tr" : "en-gb"}
           firstDay={1}

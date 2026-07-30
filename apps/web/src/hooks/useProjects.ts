@@ -55,6 +55,14 @@ export function useDeleteProject() {
   });
 }
 
+export function useRestoreProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (code: string) => projectService.restoreProject(code),
+    onSuccess: () => qc.invalidateQueries({ queryKey: PROJECT_KEYS.all }),
+  });
+}
+
 export function useProjectTasks(code: string) {
   return useQuery({
     queryKey: PROJECT_KEYS.tasks(code),
@@ -113,6 +121,18 @@ export function useDeleteTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id }: { id: number; code?: string }) => projectService.deleteTask(id),
+    onSuccess: (_, vars) => {
+      if (vars.code) {
+        qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.code) });
+      }
+    },
+  });
+}
+
+export function useRestoreTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number; code?: string }) => projectService.restoreTask(id),
     onSuccess: (_, vars) => {
       if (vars.code) {
         qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.code) });

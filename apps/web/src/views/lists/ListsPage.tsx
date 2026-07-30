@@ -7,23 +7,93 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DetailModal from "@/components/modal/DetailModal";
+import { Dropdown } from "@/components/dropdown/Dropdown";
+import { DropdownItem } from "@/components/dropdown/DropdownItem";
 import ListDetailPage from "@/views/lists/ListDetailPage";
 import {
   useCreateTodoList,
   useDeleteTodoList,
   useReorderTodoLists,
+  useRestoreTodoList,
   useTodoLists,
 } from "@/hooks/useLists";
 import { TodoListResponse } from "@/types/list/list";
-import { alertStore } from "@/stores/alert-store";
+import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
-import { BiPlus, BiTrash, BiListUl, BiMenu } from "react-icons/bi";
+import { exportAsPdf, exportAsTxt } from "@/utils/export";
+import { slugify } from "@/utils/utils";
+import { formatDateTime } from "@/utils/i18n-date";
+import { BiPlus, BiTrash, BiListUl, BiMenu, BiDownload } from "react-icons/bi";
 
 const DRAG_TYPE = "TODO_LIST_CARD";
 
 interface DragItem {
   index: number;
   id: number;
+}
+
+/**
+ * Per-list export trigger. `useTodoLists()` only returns list metadata (no
+ * items), so this exports the title/status/created-date summary only — open
+ * the list to export the full items + sections (see `ListDetailPage`).
+ */
+function ListExportMenu({ list }: { list: TodoListResponse }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  const filename = (ext: "txt" | "pdf") => `lists-${slugify(list.name)}.${ext}`;
+  const statusLine = `${t("lists.export.statusLabel")}: ${
+    list.archived ? t("lists.archived") : t("lists.openList")
+  }`;
+  const createdLine = list.createdAt
+    ? `${t("lists.export.createdLabel")}: ${formatDateTime(list.createdAt)}`
+    : null;
+
+  const handleExportTxt = () => {
+    const lines = [list.name, "", statusLine];
+    if (createdLine) lines.push(createdLine);
+    lines.push("", t("lists.export.summaryHint"));
+    exportAsTxt(filename("txt"), lines.join("\n"));
+    setOpen(false);
+  };
+
+  const handleExportPdf = () => {
+    const textLines = [statusLine];
+    if (createdLine) textLines.push(createdLine);
+    textLines.push("", t("lists.export.summaryHint"));
+    exportAsPdf(filename("pdf"), { title: list.name, text: textLines.join("\n") });
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="dropdown-toggle rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+        aria-label={t("lists.export.aria")}
+      >
+        <BiDownload size={16} />
+      </button>
+      <Dropdown isOpen={open} onClose={() => setOpen(false)} className="w-48 p-1.5">
+        <DropdownItem
+          onClick={handleExportTxt}
+          baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
+          {t("lists.export.txt")}
+        </DropdownItem>
+        <DropdownItem
+          onClick={handleExportPdf}
+          baseClassName="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
+          {t("lists.export.pdf")}
+        </DropdownItem>
+      </Dropdown>
+    </div>
+  );
 }
 
 const PRESET_COLORS = [
@@ -124,14 +194,17 @@ function ListCard({
         </div>
       </button>
 
-      <button
-        type="button"
-        onClick={() => onDelete(list.id)}
-        className="absolute right-3 top-3 rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("lists.deleteAria")}
-      >
-        <BiTrash size={16} />
-      </button>
+      <div className="absolute right-3 top-3 flex items-center gap-0.5 opacity-0 transition group-hover:opacity-100">
+        <ListExportMenu list={list} />
+        <button
+          type="button"
+          onClick={() => onDelete(list.id)}
+          className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("lists.deleteAria")}
+        >
+          <BiTrash size={16} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -255,6 +328,7 @@ export default function ListsPage() {
   const { data: lists = [], isLoading } = useTodoLists();
   const reorder = useReorderTodoLists();
   const remove = useDeleteTodoList();
+  const restore = useRestoreTodoList();
 
   const [showModal, setShowModal] = useState(false);
   const [openId, setOpenId] = useState<number | null>(null);
@@ -291,8 +365,13 @@ export default function ListsPage() {
   }, [reorder]);
 
   const handleDelete = async (id: number) => {
+    const list = lists.find((l) => l.id === id);
     try {
       await remove.mutateAsync(id);
+      showUndoToast({
+        message: t("lists.undo.listDeleted", { name: list?.name ?? "" }),
+        onUndo: () => restore.mutateAsync(id),
+      });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });

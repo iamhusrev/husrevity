@@ -41,6 +41,14 @@ export function useDeleteReminderList() {
   });
 }
 
+export function useRestoreReminderList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => reminderService.restoreList(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists }),
+  });
+}
+
 export function useReorderReminderLists() {
   const qc = useQueryClient();
   return useMutation({
@@ -86,6 +94,17 @@ export function useDeleteReminder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, listId }: { id: number; listId: number }) => reminderService.remove(id),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: KEYS.reminders(vars.listId) });
+      qc.invalidateQueries({ queryKey: KEYS.lists });
+    },
+  });
+}
+
+export function useRestoreReminder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, listId }: { id: number; listId: number }) => reminderService.restore(id),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: KEYS.reminders(vars.listId) });
       qc.invalidateQueries({ queryKey: KEYS.lists });

@@ -54,3 +54,11 @@ export function useDeleteEvent() {
     onSuccess: () => qc.invalidateQueries({ queryKey: EVENT_KEYS.all }),
   });
 }
+
+export function useRestoreEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => calendarService.restoreEvent(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: EVENT_KEYS.all }),
+  });
+}

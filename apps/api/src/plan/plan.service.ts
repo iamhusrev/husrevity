@@ -55,6 +55,13 @@ export class PlanService {
     await this.plans.softRemove(p);
   }
 
+  async restore(ownerId: string, id: string): Promise<PlanResponseDto> {
+    const p = await this.plans.findOne({ where: { id, ownerId }, withDeleted: true });
+    if (!p || !p.deletedAt) throw ApiException.notFound('Plan not found');
+    await this.plans.restore({ id, ownerId });
+    return PlanResponseDto.from(await this.requirePlan(ownerId, id));
+  }
+
   async listItems(ownerId: string, planId: string): Promise<PlanItemResponseDto[]> {
     await this.requirePlan(ownerId, planId);
     const rows = await this.items.find({
@@ -98,6 +105,13 @@ export class PlanService {
     await this.items.softRemove(i);
   }
 
+  async restoreItem(ownerId: string, itemId: string): Promise<PlanItemResponseDto> {
+    await this.requireDeletedItem(ownerId, itemId);
+    await this.items.restore({ id: itemId });
+    const restored = await this.requireItem(ownerId, itemId);
+    return PlanItemResponseDto.from(restored);
+  }
+
   private async requirePlan(ownerId: string, id: string): Promise<Plan> {
     const p = await this.plans.findOne({ where: { id, ownerId } });
     if (!p) throw ApiException.notFound('Plan not found');
@@ -111,6 +125,17 @@ export class PlanService {
       .where('i.id = :itemId', { itemId })
       .getOne();
     if (!i) throw ApiException.notFound('Plan item not found');
+    return i;
+  }
+
+  private async requireDeletedItem(ownerId: string, itemId: string): Promise<PlanItem> {
+    const i = await this.items
+      .createQueryBuilder('i')
+      .innerJoin(Plan, 'p', 'p.id = i.plan_id AND p.owner_id = :ownerId', { ownerId })
+      .where('i.id = :itemId', { itemId })
+      .withDeleted()
+      .getOne();
+    if (!i || !i.deletedAt) throw ApiException.notFound('Plan item not found');
     return i;
   }
 }

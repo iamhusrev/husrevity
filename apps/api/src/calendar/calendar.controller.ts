@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -57,5 +58,13 @@ export class CalendarController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.events.delete(u.userId, id);
+  }
+
+  @Patch(':id/restore')
+  restore(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<EventResponseDto> {
+    return this.events.restore(u.userId, id);
   }
 }

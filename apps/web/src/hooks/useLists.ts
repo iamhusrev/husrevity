@@ -59,6 +59,14 @@ export function useDeleteTodoList() {
   });
 }
 
+export function useRestoreTodoList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => listService.restoreList(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: LIST_KEYS.all }),
+  });
+}
+
 export function useReorderTodoLists() {
   const qc = useQueryClient();
   return useMutation({
@@ -112,6 +120,16 @@ export function useDeleteTodoListItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id }: { id: number; listId: number }) => listService.deleteItem(id),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: LIST_KEYS.items(vars.listId) });
+    },
+  });
+}
+
+export function useRestoreTodoListItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: number; listId: number }) => listService.restoreItem(id),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: LIST_KEYS.items(vars.listId) });
     },
