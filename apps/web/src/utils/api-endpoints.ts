@@ -69,14 +69,29 @@ export const LIST_ENDPOINTS = {
 
 // ─── Projects & Tasks ─────────────────────────────────────────────────────────
 
+export type ProjectFilter = "all" | "mine" | "shared";
+
 export const PROJECT_ENDPOINTS = {
   ALL: "/projects",
-  BY_CODE: (code: string) => `/projects/${code}`,
-  RESTORE: (code: string) => `/projects/${code}/restore`,
-  TASKS: (code: string) => `/projects/${code}/tasks`,
-  TASKS_REORDER: (code: string) => `/projects/${code}/tasks/reorder`,
+  LIST: (filter?: ProjectFilter) =>
+    filter && filter !== "all" ? `/projects?filter=${filter}` : "/projects",
+  BY_ID: (id: number) => `/projects/${id}`,
+  RESTORE: (id: number) => `/projects/${id}/restore`,
+  TASKS: (id: number) => `/projects/${id}/tasks`,
+  TASKS_REORDER: (id: number) => `/projects/${id}/tasks/reorder`,
   TASK_BY_ID: (id: number) => `/tasks/${id}`,
   TASK_RESTORE: (id: number) => `/tasks/${id}/restore`,
+  MEMBERS: (id: number) => `/projects/${id}/members`,
+  MEMBER_BY_ID: (id: number, memberId: number) => `/projects/${id}/members/${memberId}`,
+  LEAVE: (id: number) => `/projects/${id}/members/me`,
+  INVITES: (id: number) => `/projects/${id}/invites`,
+  INVITE_BY_ID: (id: number, inviteId: number) => `/projects/${id}/invites/${inviteId}`,
+};
+
+export const PROJECT_INVITE_PUBLIC_ENDPOINTS = {
+  LOOKUP: (token: string) => `/project-invites/${token}`,
+  ACCEPT: (token: string) => `/project-invites/${token}/accept`,
+  REGISTER: (token: string) => `/project-invites/${token}/register`,
 };
 
 // ─── Plans ────────────────────────────────────────────────────────────────────

@@ -104,10 +104,10 @@ export default function DashboardPage() {
   // Parallel: tasks for every project
   const taskQueries = useQueries({
     queries: projects.map((p) => ({
-      queryKey: ["project-tasks", p.code] as const,
-      queryFn: () => projectService.listTasks(p.code),
+      queryKey: ["project-tasks", p.id] as const,
+      queryFn: () => projectService.listTasks(p.id),
       select: (d: { data: TaskResponse[] }) => d.data,
-      enabled: !!p.code,
+      enabled: p.id > 0,
     })),
   });
   const allTasks: TaskResponse[] = taskQueries.flatMap(

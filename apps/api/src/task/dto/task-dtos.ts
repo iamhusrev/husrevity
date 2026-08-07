@@ -38,6 +38,9 @@ export class TaskRequestDto {
   @IsOptional()
   @IsInt()
   notifyMinutesBefore?: number | null;
+
+  @IsOptional()
+  assigneeId?: string | null;
 }
 
 export class TaskResponseDto {
@@ -50,10 +53,12 @@ export class TaskResponseDto {
   dueAt!: Date | null;
   position!: number;
   notifyMinutesBefore!: number | null;
+  assigneeId!: string | null;
+  assigneeName!: string | null;
   createdAt!: Date;
   updatedAt!: Date;
 
-  static from(t: Task): TaskResponseDto {
+  static from(t: Task, assigneeName?: string | null): TaskResponseDto {
     return {
       id: t.id,
       projectId: t.projectId,
@@ -64,6 +69,8 @@ export class TaskResponseDto {
       dueAt: t.dueAt,
       position: t.position,
       notifyMinutesBefore: t.notifyMinutesBefore,
+      assigneeId: t.assigneeId,
+      assigneeName: assigneeName ?? null,
       createdAt: t.createdAt,
       updatedAt: t.updatedAt,
     };

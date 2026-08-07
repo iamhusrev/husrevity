@@ -107,7 +107,7 @@ export class AiSuggestionService {
       this.notes.list(ownerId, undefined, undefined, false),
       this.reminders.listReminderLists(ownerId),
       this.plans.list(ownerId),
-      this.projects.list(ownerId),
+      this.projects.listOwned(ownerId),
     ]);
 
     // Reminders: all open across every list.
@@ -124,7 +124,7 @@ export class AiSuggestionService {
       await Promise.all(
         projectRows
           .filter((p) => p.status !== 'ARCHIVED' && p.status !== 'CANCELLED')
-          .map((p) => this.tasks.listForProject(ownerId, p.code).catch(() => [])),
+          .map((p) => this.tasks.listForProject(ownerId, p.id).catch(() => [])),
       )
     ).flat();
 

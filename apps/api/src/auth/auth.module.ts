@@ -5,9 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { ProjectInviteRegisterController } from './project-invite-register.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { RefreshToken } from './refresh-token.entity';
 import { UserModule } from '../user/user.module';
+import { ProjectModule } from '../project/project.module';
 
 @Module({
   imports: [
@@ -21,8 +23,11 @@ import { UserModule } from '../user/user.module';
         secret: config.get<string>('HUSREVITY_JWT_SECRET'),
       }),
     }),
+    // One-directional: AuthModule -> ProjectModule, never the reverse — see
+    // project-invite-register.controller.ts for the full rationale.
+    ProjectModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, ProjectInviteRegisterController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })

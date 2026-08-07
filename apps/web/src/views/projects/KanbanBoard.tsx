@@ -9,6 +9,7 @@ import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
 import { BiTrash } from "react-icons/bi";
+import MemberAvatar from "./MemberAvatar";
 
 const DRAG_TYPE = "PROJECT_TASK";
 
@@ -41,6 +42,7 @@ function TaskCard({
   onDelete,
   onDropEnd,
   onSelect,
+  canEdit,
 }: {
   task: TaskResponse;
   index: number;
@@ -48,6 +50,7 @@ function TaskCard({
   onDelete: (id: number) => void;
   onDropEnd: (didDrop: boolean) => void;
   onSelect: (task: TaskResponse) => void;
+  canEdit: boolean;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -55,6 +58,7 @@ function TaskCard({
   const [{ isDragging }, dragRef] = useDrag<DragItem, unknown, { isDragging: boolean }>({
     type: DRAG_TYPE,
     item: { id: task.id, fromStatus: task.status, fromIndex: index },
+    canDrag: canEdit,
     collect: (m) => ({ isDragging: m.isDragging() }),
     end: (_item, monitor) => onDropEnd(monitor.didDrop()),
   });
@@ -86,31 +90,38 @@ function TaskCard({
         <span className="text-sm font-medium leading-snug text-husrev-ink dark:text-husrev-cream">
           {task.title}
         </span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(task.id);
-          }}
-          className="shrink-0 rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
-        >
-          <BiTrash size={12} />
-        </button>
+        {canEdit && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(task.id);
+            }}
+            className="shrink-0 rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
+          >
+            <BiTrash size={12} />
+          </button>
+        )}
       </div>
       {task.description && (
         <p className="mb-2 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">
           {task.description}
         </p>
       )}
-      <div className="flex items-center gap-1.5">
-        <span
-          className={`rounded-md px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider ${PRIORITY_COLOR[task.priority]}`}
-        >
-          {t(`kanban.priority.${task.priority}`)}
-        </span>
-        {task.dueAt && (
-          <span className="font-mono text-[10px] text-gray-400">
-            {formatDate(task.dueAt, { day: "2-digit", month: "short" })}
+      <div className="flex items-center justify-between gap-1.5">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`rounded-md px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider ${PRIORITY_COLOR[task.priority]}`}
+          >
+            {t(`kanban.priority.${task.priority}`)}
           </span>
+          {task.dueAt && (
+            <span className="font-mono text-[10px] text-gray-400">
+              {formatDate(task.dueAt, { day: "2-digit", month: "short" })}
+            </span>
+          )}
+        </div>
+        {task.assigneeId && task.assigneeName && (
+          <MemberAvatar name={task.assigneeName} size="sm" />
         )}
       </div>
     </div>
@@ -125,6 +136,7 @@ function KanbanColumn({
   onDelete,
   onDropEnd,
   onSelect,
+  canEdit,
 }: {
   status: TaskStatus;
   tasks: TaskResponse[];
@@ -133,12 +145,14 @@ function KanbanColumn({
   onDelete: (id: number) => void;
   onDropEnd: (didDrop: boolean) => void;
   onSelect: (task: TaskResponse) => void;
+  canEdit: boolean;
 }) {
   const { t } = useTranslation();
   const [{ isOver }, dropRef] = useDrop<DragItem, unknown, { isOver: boolean }>({
     accept: DRAG_TYPE,
     collect: (m) => ({ isOver: m.isOver({ shallow: true }) }),
     drop(item, monitor) {
+      if (!canEdit) return;
       if (monitor.didDrop()) return;
       onDropOnColumn(item, status);
     },
@@ -174,6 +188,7 @@ function KanbanColumn({
             onDelete={onDelete}
             onDropEnd={onDropEnd}
             onSelect={onSelect}
+            canEdit={canEdit}
           />
         ))}
         {tasks.length === 0 && (
@@ -187,13 +202,15 @@ function KanbanColumn({
 }
 
 export default function KanbanBoard({
-  code,
+  projectId,
   tasks,
   onSelect,
+  canEdit,
 }: {
-  code: string;
+  projectId: number;
   tasks: TaskResponse[];
   onSelect: (task: TaskResponse) => void;
+  canEdit: boolean;
 }) {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
@@ -237,13 +254,14 @@ export default function KanbanBoard({
 
   const onDropOnColumn = useCallback(
     (item: DragItem, status: TaskStatus) => {
+      if (!canEdit) return;
       if (item.fromStatus === status) return;
       const moved = groups[item.fromStatus][item.fromIndex];
       if (!moved) return;
       updateTask.mutate(
         {
           id: moved.id,
-          code,
+          projectId,
           body: {
             title: moved.title,
             description: moved.description,
@@ -260,11 +278,12 @@ export default function KanbanBoard({
         },
       );
     },
-    [groups, updateTask, code, showAlert],
+    [groups, updateTask, projectId, showAlert, canEdit],
   );
 
   const onDropEnd = useCallback(
     (didDrop: boolean) => {
+      if (!canEdit) return;
       if (!didDrop || !reorderedColumn.current) {
         reorderedColumn.current = null;
         return;
@@ -273,7 +292,7 @@ export default function KanbanBoard({
       const items = all.map((t, i) => ({ id: t.id, position: i }));
       reorderedColumn.current = null;
       reorderTasks.mutate(
-        { code, items },
+        { projectId, items },
         {
           onError: (err) => {
             const { title, message } = parseAxiosError(err);
@@ -282,16 +301,16 @@ export default function KanbanBoard({
         },
       );
     },
-    [groups, reorderTasks, code, showAlert],
+    [groups, reorderTasks, projectId, showAlert, canEdit],
   );
 
   const handleDelete = async (id: number) => {
     const task = STATUSES.flatMap((s) => groups[s]).find((tk) => tk.id === id);
     try {
-      await deleteTask.mutateAsync({ id, code });
+      await deleteTask.mutateAsync({ id, projectId });
       showUndoToast({
         message: t("projects.undo.taskDeleted", { title: task?.title ?? "" }),
-        onUndo: () => restoreTask.mutateAsync({ id, code }),
+        onUndo: () => restoreTask.mutateAsync({ id, projectId }),
       });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
@@ -311,6 +330,7 @@ export default function KanbanBoard({
           onDelete={handleDelete}
           onDropEnd={onDropEnd}
           onSelect={onSelect}
+          canEdit={canEdit}
         />
       ))}
     </div>

@@ -8,6 +8,7 @@
     "notFound": "Kayıt bulunamadı",
     "submit": "Gönder",
     "cancel": "İptal",
+    "close": "Kapat",
     "select": "Seçiniz",
     "back": "Geri",
     "edit": "Düzenle",
@@ -220,6 +221,29 @@
     "creating": "Hesap oluşturuluyor…",
     "invalid": "Davet bulunamadı veya süresi doldu.",
     "errorHint": "Davet edenle iletişime geç ve yeni bir link iste."
+  },
+  "projectInvite": {
+    "kicker": "Proje daveti",
+    "titlePrefix": "Projeye",
+    "titleFlourish": "katıl",
+    "invalid": "Davet bulunamadı veya süresi doldu.",
+    "errorHint": "Davet edenle iletişime geç ve yeni bir link iste.",
+    "project": "Proje",
+    "invitedBy": "{{by}} tarafından {{role}} olarak davet edildin · son geçerlilik: {{date}}",
+    "invitedAs": "Davet edilen e-posta: {{email}}",
+    "password": "Şifre",
+    "confirmPassword": "Şifre tekrar",
+    "passwordPlaceholder": "En az 8 karakter",
+    "passwordTooShort": "Şifre en az 8 karakter olmalı.",
+    "passwordMismatch": "Şifreler aynı değil.",
+    "creating": "Hesap oluşturuluyor…",
+    "submitRegister": "Hesap oluştur ve katıl",
+    "accepting": "Katılıyorsun…",
+    "submitAccept": "Daveti kabul et",
+    "wrongAccount": "Bu davet {{email}} adresine gönderildi, o hesapla giriş yap.",
+    "logoutAndSwitch": "Çıkış yap ve başka hesapla dene",
+    "loginHint": "{{email}} adresiyle zaten bir hesabın var. Devam etmek için o hesapla giriş yap.",
+    "goToLogin": "Giriş yap"
   },
   "finance": {
     "title": "Finans",
@@ -753,6 +777,50 @@
     "undo": {
       "projectDeleted": "\"{{name}}\" projesi silindi.",
       "taskDeleted": "\"{{title}}\" görevi silindi."
+    },
+    "shared": "Paylaşılan",
+    "memberCount": "{{count}} kişi",
+    "ownedBy": "sahip: {{name}}",
+    "filter": {
+      "all": "Tümü",
+      "mine": "Benim",
+      "shared": "Paylaşılan"
+    },
+    "roles": {
+      "OWNER": "Sahip",
+      "EDITOR": "Düzenleyici",
+      "VIEWER": "Görüntüleyici"
+    },
+    "members": {
+      "title": "Üyeler",
+      "count": "{{count}} kişi",
+      "listTitle": "Üye listesi",
+      "add": "Üye ekle",
+      "you": "sen",
+      "empty": "Henüz üye yok.",
+      "remove": "Üyeyi çıkar",
+      "removeTitle": "Üyeyi çıkar",
+      "removeMessage": "{{name}} bu projeden çıkarılacak ve erişimini kaybedecek.",
+      "leave": "Projeden ayrıl",
+      "leaveTitle": "Projeden ayrıl",
+      "leaveMessage": "Bu projeden ayrılacaksın ve erişimini kaybedeceksin. Emin misin?",
+      "pendingTitle": "Bekleyen davetler",
+      "noPending": "Bekleyen davet yok.",
+      "revoke": "Daveti iptal et",
+      "expiresAt": "Son geçerlilik: {{date}}",
+      "addKicker": "Üye ekle",
+      "addTitle": "Projeye üye ekle",
+      "email": "E-posta",
+      "role": "Rol",
+      "addHint": "Kullanıcının zaten bir hesabı varsa doğrudan projeye eklenir; yoksa 7 gün geçerli bir davet linki oluşturulur.",
+      "adding": "Ekleniyor…",
+      "addSubmit": "Üye ekle",
+      "addedDirect": "{{name}} projeye eklendi.",
+      "deliveredOk": "Davet e-postası başarıyla gönderildi.",
+      "deliveredOff": "Sunucuda mail ayarlı değil — linki aşağıdan kopyalayıp kullanıcıya elden ulaştırabilirsin.",
+      "inviteUrl": "Davet linki",
+      "copy": "Kopyala",
+      "copied": "Kopyalandı"
     }
   },
   "kanban": {
@@ -788,7 +856,9 @@
       "columnField": "Sütun",
       "priorityField": "Öncelik",
       "submit": "Görevi ekle",
-      "submitting": "Ekleniyor…"
+      "submitting": "Ekleniyor…",
+      "assigneeField": "Atanan kişi",
+      "unassigned": "Atanmamış"
     },
     "detail": {
       "dueField": "Bitiş tarihi",

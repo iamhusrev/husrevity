@@ -16,6 +16,8 @@ import { parseAxiosError } from "@/utils/handleError";
 import { exportAsXlsx } from "@/utils/export";
 import { formatDate } from "@/utils/i18n-date";
 import { ProjectResponse } from "@/types/project/project";
+import { ProjectFilter } from "@/utils/api-endpoints";
+import RoleBadge from "./RoleBadge";
 import {
   BiPlus,
   BiTrash,
@@ -25,6 +27,7 @@ import {
   BiSolidPin,
   BiArchive,
   BiDownload,
+  BiGroup,
 } from "react-icons/bi";
 
 function NewProjectModal({ onClose }: { onClose: () => void }) {
@@ -138,19 +141,20 @@ export default function ProjectsPage() {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: projects = [], isLoading } = useProjects();
+  const [filter, setFilter] = useState<ProjectFilter>("all");
+  const { data: projects = [], isLoading } = useProjects(filter);
   const remove = useDeleteProject();
   const restoreProject = useRestoreProject();
   const updateProject = useUpdateProject();
   const [showModal, setShowModal] = useState(false);
 
-  const handleDelete = async (code: string) => {
-    const project = projects.find((p) => p.code === code);
+  const handleDelete = async (id: number) => {
+    const project = projects.find((p) => p.id === id);
     try {
-      await remove.mutateAsync(code);
+      await remove.mutateAsync(id);
       showUndoToast({
-        message: t("projects.undo.projectDeleted", { name: project?.name ?? code }),
-        onUndo: () => restoreProject.mutateAsync(code),
+        message: t("projects.undo.projectDeleted", { name: project?.name ?? id }),
+        onUndo: () => restoreProject.mutateAsync(id),
       });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
@@ -161,7 +165,7 @@ export default function ProjectsPage() {
   const handleTogglePin = async (project: ProjectResponse) => {
     try {
       await updateProject.mutateAsync({
-        code: project.code,
+        id: project.id,
         body: { pinned: !project.pinned },
       });
     } catch (err) {
@@ -186,7 +190,7 @@ export default function ProjectsPage() {
   const handleToggleArchive = async (project: ProjectResponse) => {
     try {
       await updateProject.mutateAsync({
-        code: project.code,
+        id: project.id,
         body: { archived: !project.archived },
       });
     } catch (err) {
@@ -226,6 +230,22 @@ export default function ProjectsPage() {
         </div>
       </div>
 
+      <div className="inline-flex rounded-xl ring-1 ring-husrev-sand/90 bg-white/60 p-1 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+        {(["all", "mine", "shared"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
+              filter === f
+                ? "bg-husrev-ember text-husrev-cream shadow-sm"
+                : "text-husrev-shadow hover:bg-husrev-cream dark:text-husrev-cream dark:hover:bg-white/5"
+            }`}
+          >
+            {t(`projects.filter.${f}`, f === "all" ? "Tümü" : f === "mine" ? "Benim" : "Paylaşılan")}
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[0, 1, 2].map((i) => (
@@ -257,53 +277,59 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 husrev-stagger">
           {projects.map((p) => (
             <article
-              key={p.code}
+              key={p.id}
               className="group relative overflow-hidden rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm husrev-lift dark:bg-husrev-shadow dark:ring-white/[0.06]"
             >
               <span className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-husrev-amber/8 blur-2xl transition-opacity duration-500 group-hover:bg-husrev-amber/20" />
               <span className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-husrev-amber via-husrev-ember to-husrev-amber/0 opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
 
               <div className="flex justify-end gap-1 p-3 pb-0">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTogglePin(p);
-                  }}
-                  className="rounded-full p-2 text-gray-400 transition hover:bg-husrev-amber/10 hover:text-husrev-amber"
-                  aria-label={t("projects.pinAria")}
-                >
-                  {p.pinned ? <BiSolidPin size={16} /> : <BiPin size={16} />}
-                </button>
+                {p.role !== "VIEWER" && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTogglePin(p);
+                    }}
+                    className="rounded-full p-2 text-gray-400 transition hover:bg-husrev-amber/10 hover:text-husrev-amber"
+                    aria-label={t("projects.pinAria")}
+                  >
+                    {p.pinned ? <BiSolidPin size={16} /> : <BiPin size={16} />}
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleArchive(p);
-                  }}
-                  className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-                  aria-label={t("projects.archiveAria")}
-                >
-                  <BiArchive size={16} />
-                </button>
+                {p.role === "OWNER" && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleArchive(p);
+                    }}
+                    className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                    aria-label={t("projects.archiveAria")}
+                  >
+                    <BiArchive size={16} />
+                  </button>
+                )}
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(p.code);
-                  }}
-                  className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-                  aria-label={t("projects.deleteAria")}
-                >
-                  <BiTrash size={16} />
-                </button>
+                {p.role === "OWNER" && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(p.id);
+                    }}
+                    className="rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                    aria-label={t("projects.deleteAria")}
+                  >
+                    <BiTrash size={16} />
+                  </button>
+                )}
               </div>
 
               <button
                 type="button"
-                onClick={() => router.push(`/projects/${p.code}`)}
+                onClick={() => router.push(`/projects/${p.id}`)}
                 className="block w-full cursor-pointer p-5 pl-6 pt-2 text-left"
               >
                 <div className="flex items-center gap-2">
@@ -321,6 +347,26 @@ export default function ProjectsPage() {
                   <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-gray-500 dark:text-gray-400">
                     {p.description}
                   </p>
+                )}
+
+                {(p.role !== "OWNER" || p.memberCount > 1) && (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                    <span className="inline-flex items-center rounded-md bg-husrev-moss/10 px-1.5 py-0.5 text-[11px] font-mono uppercase tracking-[0.12em] text-husrev-moss dark:bg-husrev-moss/20">
+                      {t("projects.shared", "Paylaşılan")}
+                    </span>
+                    <RoleBadge role={p.role} />
+                    {p.memberCount > 1 && (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-husrev-sand/60 px-1.5 py-0.5 text-[11px] text-husrev-shadow dark:bg-white/5 dark:text-husrev-cream">
+                        <BiGroup size={11} />
+                        {t("projects.memberCount", "{{count}} kişi", { count: p.memberCount })}
+                      </span>
+                    )}
+                    {p.role !== "OWNER" && p.ownerName && (
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                        {t("projects.ownedBy", "sahip: {{name}}", { name: p.ownerName })}
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 <div className="mt-4 flex items-center justify-between">

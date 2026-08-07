@@ -38,6 +38,7 @@ function TaskRow({
   onDrop,
   onDelete,
   onSelect,
+  canEdit,
 }: {
   task: TaskResponse;
   index: number;
@@ -45,12 +46,14 @@ function TaskRow({
   onDrop: () => void;
   onDelete: (id: number) => void;
   onSelect: (task: TaskResponse) => void;
+  canEdit: boolean;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [{ isDragging }, dragRef] = useDrag<DragItem, unknown, { isDragging: boolean }>({
     type: DRAG_TYPE,
     item: { index, id: task.id },
+    canDrag: canEdit,
     collect: (m) => ({ isDragging: m.isDragging() }),
     end: (_item, monitor) => {
       if (monitor.didDrop()) onDrop();
@@ -59,6 +62,7 @@ function TaskRow({
   const [, dropRef] = useDrop<DragItem>({
     accept: DRAG_TYPE,
     hover(item) {
+      if (!canEdit) return;
       if (item.index === index) return;
       onMove(item.index, index);
       item.index = index;
@@ -74,12 +78,14 @@ function TaskRow({
       style={{ opacity: isDragging ? 0.4 : 1 }}
       className="group flex cursor-pointer items-center gap-3 rounded-xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm px-3 py-2 transition hover:shadow-md dark:bg-husrev-shadow dark:ring-white/[0.06]"
     >
-      <span
-        onClick={(e) => e.stopPropagation()}
-        className="cursor-grab text-gray-300 active:cursor-grabbing"
-      >
-        <BiMenu size={14} />
-      </span>
+      {canEdit && (
+        <span
+          onClick={(e) => e.stopPropagation()}
+          className="cursor-grab text-gray-300 active:cursor-grabbing"
+        >
+          <BiMenu size={14} />
+        </span>
+      )}
       <span className="flex-1 text-sm font-medium text-gray-800 dark:text-white/90 truncate">
         {task.title}
       </span>
@@ -93,28 +99,32 @@ function TaskRow({
       >
         {t(`kanban.priority.${task.priority}`)}
       </span>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(task.id);
-        }}
-        className="rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-        aria-label={t("common.delete")}
-      >
-        <BiTrash size={14} />
-      </button>
+      {canEdit && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(task.id);
+          }}
+          className="rounded-full p-1 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("common.delete")}
+        >
+          <BiTrash size={14} />
+        </button>
+      )}
     </div>
   );
 }
 
 export default function TaskList({
-  code,
+  projectId,
   tasks,
   onSelect,
+  canEdit,
 }: {
-  code: string;
+  projectId: number;
   tasks: TaskResponse[];
   onSelect: (task: TaskResponse) => void;
+  canEdit: boolean;
 }) {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
@@ -136,22 +146,27 @@ export default function TaskList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]);
 
-  const onMove = useCallback((drag: number, hover: number) => {
-    dragging.current = true;
-    setOrdered((prev) => {
-      const next = [...prev];
-      const [it] = next.splice(drag, 1);
-      next.splice(hover, 0, it);
-      orderedRef.current = next;
-      return next;
-    });
-  }, []);
+  const onMove = useCallback(
+    (drag: number, hover: number) => {
+      if (!canEdit) return;
+      dragging.current = true;
+      setOrdered((prev) => {
+        const next = [...prev];
+        const [it] = next.splice(drag, 1);
+        next.splice(hover, 0, it);
+        orderedRef.current = next;
+        return next;
+      });
+    },
+    [canEdit],
+  );
 
   const onDrop = useCallback(() => {
+    if (!canEdit) return;
     dragging.current = false;
     const items = orderedRef.current.map((t, i) => ({ id: t.id, position: i }));
     reorderTasks.mutate(
-      { code, items },
+      { projectId, items },
       {
         onError: (err) => {
           const { title, message } = parseAxiosError(err);
@@ -159,15 +174,15 @@ export default function TaskList({
         },
       },
     );
-  }, [reorderTasks, code, showAlert]);
+  }, [reorderTasks, projectId, showAlert, canEdit]);
 
   const handleDelete = async (id: number) => {
     const task = ordered.find((t) => t.id === id);
     try {
-      await deleteTask.mutateAsync({ id, code });
+      await deleteTask.mutateAsync({ id, projectId });
       showUndoToast({
         message: t("projects.undo.taskDeleted", { title: task?.title ?? "" }),
-        onUndo: () => restoreTask.mutateAsync({ id, code }),
+        onUndo: () => restoreTask.mutateAsync({ id, projectId }),
       });
     } catch (err) {
       const { title, message } = parseAxiosError(err);
@@ -194,6 +209,7 @@ export default function TaskList({
           onDrop={onDrop}
           onDelete={handleDelete}
           onSelect={onSelect}
+          canEdit={canEdit}
         />
       ))}
     </div>

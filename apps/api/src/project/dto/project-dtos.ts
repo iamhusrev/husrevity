@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Project } from '../project.entity';
+import { ProjectRole } from '../project-member.entity';
 
 export class ProjectRequestDto {
   @IsNotEmpty()
@@ -80,8 +81,19 @@ export class ProjectResponseDto {
   @ApiProperty() archived!: boolean;
   createdAt!: Date;
   updatedAt!: Date;
+  ownerId!: string;
+  ownerName!: string | null;
+  @ApiProperty() role!: ProjectRole;
+  @ApiProperty() shared!: boolean;
+  @ApiProperty() memberCount!: number;
 
-  static from(p: Project): ProjectResponseDto {
+  static from(
+    p: Project,
+    ctx?: { role?: ProjectRole; memberCount?: number; ownerName?: string | null },
+  ): ProjectResponseDto {
+    const role = ctx?.role ?? 'OWNER';
+    const memberCount = ctx?.memberCount ?? 1;
+    const ownerName = ctx?.ownerName ?? null;
     return {
       id: p.id,
       code: p.code,
@@ -94,6 +106,11 @@ export class ProjectResponseDto {
       archived: p.archived,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
+      ownerId: p.ownerId,
+      ownerName,
+      role,
+      shared: memberCount > 1,
+      memberCount,
     };
   }
 }

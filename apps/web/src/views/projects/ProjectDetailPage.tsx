@@ -20,11 +20,13 @@ import { BiPlus, BiArrowBack, BiEditAlt, BiDownload } from "react-icons/bi";
 import KanbanBoard from "./KanbanBoard";
 import TaskList from "./TaskList";
 import TaskDetailModal from "./TaskDetailModal";
+import MembersPanel from "./MembersPanel";
+import AssigneePicker from "./AssigneePicker";
 import { ProjectResponse, TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
 
 type ViewMode = "kanban" | "list";
 
-function NewTaskModal({ code, onClose }: { code: string; onClose: () => void }) {
+function NewTaskModal({ projectId, onClose }: { projectId: number; onClose: () => void }) {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
   const create = useCreateTask();
@@ -32,18 +34,20 @@ function NewTaskModal({ code, onClose }: { code: string; onClose: () => void }) 
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<TaskStatus>("TODO");
   const [priority, setPriority] = useState<TaskPriority>("MEDIUM");
+  const [assigneeId, setAssigneeId] = useState<number | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     try {
       await create.mutateAsync({
-        code,
+        projectId,
         body: {
           title: title.trim(),
           description: description || null,
           status,
           priority,
+          assigneeId,
         },
       });
       onClose();
@@ -132,6 +136,12 @@ function NewTaskModal({ code, onClose }: { code: string; onClose: () => void }) 
               </select>
             </div>
           </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("kanban.modal.assigneeField", "Atanan kişi")}
+            </label>
+            <AssigneePicker projectId={projectId} value={assigneeId} onChange={setAssigneeId} />
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="husrev-btn-ghost">
               {t("common.cancel")}
@@ -187,7 +197,7 @@ function EditProjectModal({
   const submit = handleSubmit(async (data) => {
     try {
       await updateProject.mutateAsync({
-        code: project.code,
+        id: project.id,
         body: {
           name: data.name.trim(),
           description: data.description?.trim() || null,
@@ -314,10 +324,10 @@ function EditProjectModal({
 }
 
 export default function ProjectDetailPage({
-  code,
+  projectId,
   embedded,
 }: {
-  code: string;
+  projectId: number;
   embedded?: boolean;
   onClose?: () => void;
 }) {
@@ -330,8 +340,10 @@ export default function ProjectDetailPage({
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
 
-  const { data: project } = useProject(code);
-  const { data: tasks = [], isLoading } = useProjectTasks(code);
+  const { data: project } = useProject(projectId);
+  const { data: tasks = [], isLoading } = useProjectTasks(projectId);
+  const isOwner = project?.role === "OWNER";
+  const canEdit = project?.role === "OWNER" || project?.role === "EDITOR";
 
   const handleExportTasks = () => {
     const rows = tasks.map((task) => ({
@@ -341,18 +353,19 @@ export default function ProjectDetailPage({
       "Due Date": task.dueAt ? formatDate(task.dueAt) : "",
       Description: task.description ?? "",
     }));
-    exportAsXlsx(`project-${code}-tasks.xlsx`, rows, "Tasks");
+    exportAsXlsx(`project-${project?.code ?? projectId}-tasks.xlsx`, rows, "Tasks");
   };
 
   useEffect(() => {
     if (embedded) return; // in a modal — don't rewrite the browser URL
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", view);
-    router.replace(`/projects/${code}?${params.toString()}`, { scroll: false });
+    router.replace(`/projects/${projectId}?${params.toString()}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, code]);
+  }, [view, projectId]);
 
-  if (!code) return <p className="p-6 text-gray-500">{t("projects.invalid")}</p>;
+  if (!projectId || Number.isNaN(projectId))
+    return <p className="p-6 text-gray-500">{t("projects.invalid")}</p>;
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -367,9 +380,12 @@ export default function ProjectDetailPage({
               <BiArrowBack size={18} />
             </button>
             <div className="flex-1">
-              <PageBreadcrumb pageTitle={project?.name ?? code} kicker={code} />
+              <PageBreadcrumb
+                pageTitle={project?.name ?? String(projectId)}
+                kicker={project?.code ?? String(projectId)}
+              />
             </div>
-            {project && (
+            {project && canEdit && (
               <button
                 type="button"
                 onClick={() => setShowEditModal(true)}
@@ -381,6 +397,8 @@ export default function ProjectDetailPage({
             )}
           </div>
         )}
+
+        {project && <MembersPanel projectId={projectId} isOwner={isOwner} />}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex rounded-xl ring-1 ring-husrev-sand/90 bg-white/60 p-1 dark:bg-husrev-shadow dark:ring-white/[0.06]">
@@ -414,28 +432,41 @@ export default function ProjectDetailPage({
             >
               <BiDownload size={16} /> {t("kanban.export")}
             </button>
-            <button onClick={() => setShowModal(true)} className="husrev-btn">
-              <BiPlus size={16} /> {t("kanban.newTask")}
-            </button>
+            {canEdit && (
+              <button onClick={() => setShowModal(true)} className="husrev-btn">
+                <BiPlus size={16} /> {t("kanban.newTask")}
+              </button>
+            )}
           </div>
         </div>
 
         {isLoading ? (
           <p className="text-gray-500">{t("common.loading")}</p>
         ) : view === "kanban" ? (
-          <KanbanBoard code={code} tasks={tasks} onSelect={setSelectedTask} />
+          <KanbanBoard
+            projectId={projectId}
+            tasks={tasks}
+            onSelect={setSelectedTask}
+            canEdit={canEdit}
+          />
         ) : (
-          <TaskList code={code} tasks={tasks} onSelect={setSelectedTask} />
+          <TaskList
+            projectId={projectId}
+            tasks={tasks}
+            onSelect={setSelectedTask}
+            canEdit={canEdit}
+          />
         )}
 
-        {showModal && <NewTaskModal code={code} onClose={() => setShowModal(false)} />}
+        {showModal && <NewTaskModal projectId={projectId} onClose={() => setShowModal(false)} />}
         {showEditModal && project && (
           <EditProjectModal project={project} onClose={() => setShowEditModal(false)} />
         )}
         {selectedTask && (
           <TaskDetailModal
             task={selectedTask}
-            code={code}
+            projectId={projectId}
+            canEdit={canEdit}
             onClose={() => setSelectedTask(null)}
           />
         )}

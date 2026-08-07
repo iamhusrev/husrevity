@@ -8,6 +8,7 @@
     "notFound": "Not found",
     "submit": "Submit",
     "cancel": "Cancel",
+    "close": "Close",
     "select": "Select",
     "back": "Back",
     "edit": "Edit",
@@ -220,6 +221,29 @@
     "creating": "Creating account…",
     "invalid": "Invite not found or expired.",
     "errorHint": "Contact the inviter and ask for a fresh link."
+  },
+  "projectInvite": {
+    "kicker": "Project invite",
+    "titlePrefix": "Join the",
+    "titleFlourish": "project",
+    "invalid": "Invite not found or expired.",
+    "errorHint": "Contact whoever invited you and ask for a new link.",
+    "project": "Project",
+    "invitedBy": "Invited by {{by}} as {{role}} · expires {{date}}",
+    "invitedAs": "Invited email: {{email}}",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordPlaceholder": "At least 8 characters",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords don't match.",
+    "creating": "Creating account…",
+    "submitRegister": "Create account and join",
+    "accepting": "Joining…",
+    "submitAccept": "Accept invite",
+    "wrongAccount": "This invite was sent to {{email}} — sign in with that account.",
+    "logoutAndSwitch": "Log out and try a different account",
+    "loginHint": "You already have an account with {{email}}. Sign in with that account to continue.",
+    "goToLogin": "Sign in"
   },
   "finance": {
     "title": "Finance",
@@ -753,6 +777,50 @@
     "undo": {
       "projectDeleted": "Project \"{{name}}\" deleted.",
       "taskDeleted": "Task \"{{title}}\" deleted."
+    },
+    "shared": "Shared",
+    "memberCount": "{{count}} members",
+    "ownedBy": "owner: {{name}}",
+    "filter": {
+      "all": "All",
+      "mine": "Mine",
+      "shared": "Shared"
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "EDITOR": "Editor",
+      "VIEWER": "Viewer"
+    },
+    "members": {
+      "title": "Members",
+      "count": "{{count}} members",
+      "listTitle": "Member list",
+      "add": "Add member",
+      "you": "you",
+      "empty": "No members yet.",
+      "remove": "Remove member",
+      "removeTitle": "Remove member",
+      "removeMessage": "{{name}} will be removed from this project and lose access.",
+      "leave": "Leave project",
+      "leaveTitle": "Leave project",
+      "leaveMessage": "You'll leave this project and lose access. Are you sure?",
+      "pendingTitle": "Pending invites",
+      "noPending": "No pending invites.",
+      "revoke": "Revoke invite",
+      "expiresAt": "Expires: {{date}}",
+      "addKicker": "Add member",
+      "addTitle": "Add a project member",
+      "email": "Email",
+      "role": "Role",
+      "addHint": "If the user already has an account they're added directly; otherwise a 7-day invite link is created.",
+      "adding": "Adding…",
+      "addSubmit": "Add member",
+      "addedDirect": "{{name}} was added to the project.",
+      "deliveredOk": "Invite email sent successfully.",
+      "deliveredOff": "SMTP isn't configured on the server — copy the link below and share it with the user directly.",
+      "inviteUrl": "Invite link",
+      "copy": "Copy",
+      "copied": "Copied"
     }
   },
   "kanban": {
@@ -788,7 +856,9 @@
       "columnField": "Column",
       "priorityField": "Priority",
       "submit": "Add task",
-      "submitting": "Adding…"
+      "submitting": "Adding…",
+      "assigneeField": "Assignee",
+      "unassigned": "Unassigned"
     },
     "detail": {
       "dueField": "Due date",
