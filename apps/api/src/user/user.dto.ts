@@ -54,3 +54,25 @@ export class UserDto {
     };
   }
 }
+
+/**
+ * Deliberately narrow projection of `User` for the general "list registered
+ * users" directory (see `UsersController`) — id/email/name only, never
+ * `role`/`enabled`/`emailNotificationsEnabled`/`passwordHash`, since that
+ * endpoint is reachable by any authenticated user, not just admins.
+ */
+export class UserSummaryDto {
+  id!: string;
+  email!: string;
+  firstName!: string | null;
+  lastName!: string | null;
+
+  static from(u: User): UserSummaryDto {
+    return {
+      id: u.id,
+      email: u.email,
+      firstName: u.firstName,
+      lastName: u.lastName,
+    };
+  }
+}

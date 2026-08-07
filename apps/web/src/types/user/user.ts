@@ -14,6 +14,14 @@ export interface UserResponse {
   role: string;
 }
 
+/** Lightweight profile for pickers/directories — not the full `UserResponse`. */
+export interface UserSummary {
+  id: number;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
 export interface UpdateProfileRequest {
   firstName?: string;
   lastName?: string;

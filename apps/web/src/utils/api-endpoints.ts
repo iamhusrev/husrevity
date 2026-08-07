@@ -162,6 +162,12 @@ export const READING_ENDPOINTS = {
     `/reading-tracks/${id}/logs/${date}`,
 };
 
+// ─── Users (directory) ──────────────────────────────────────────────────────
+
+export const USER_DIRECTORY_ENDPOINTS = {
+  LIST: "/users",
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
 export const ADMIN_ENDPOINTS = {

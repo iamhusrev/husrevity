@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HiOutlineMail, HiOutlineCheck } from "react-icons/hi";
-import { useAddProjectMember } from "@/hooks/useProjects";
+import { useAddProjectMember, useProjectMembers, useSystemUsers } from "@/hooks/useProjects";
 import { AddProjectMemberResponse, ProjectRole } from "@/types/project/project";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 
 type AddableRole = Exclude<ProjectRole, "OWNER">;
+type AddMode = "pick" | "email";
 
 export default function AddMemberModal({
   projectId,
@@ -21,17 +22,39 @@ export default function AddMemberModal({
   const showAlert = alertStore((s) => s.show);
   const addMember = useAddProjectMember();
 
+  const [mode, setMode] = useState<AddMode>("pick");
+  // Kept as string, not Number()'d: ids are bigint-as-string over the wire
+  // (UserSummary.id says `number` in the TS types, but the runtime value from
+  // the API is always a string — see the codebase-wide note on this). Coercing
+  // to a real JS number here would make `u.id === selectedUserId` never match.
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [filterText, setFilterText] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AddableRole>("EDITOR");
   const [result, setResult] = useState<AddProjectMemberResponse | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const { data: allUsers = [], isLoading: usersLoading } = useSystemUsers();
+  const { data: existingMembers = [] } = useProjectMembers(projectId);
+  const existingMemberUserIds = new Set(existingMembers.map((m) => m.userId));
+  const availableUsers = allUsers.filter((u) => !existingMemberUserIds.has(u.id));
+  const filteredUsers = filterText.trim()
+    ? availableUsers.filter((u) => {
+        const q = filterText.trim().toLowerCase();
+        const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
+        return u.email.toLowerCase().includes(q) || name.includes(q);
+      })
+    : availableUsers;
+  const selectedUser = availableUsers.find((u) => String(u.id) === selectedUserId);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const targetEmail = mode === "pick" ? selectedUser?.email : email.trim();
+    if (!targetEmail) return;
     try {
       const res = await addMember.mutateAsync({
         id: projectId,
-        body: { email: email.trim(), role },
+        body: { email: targetEmail, role },
       });
       setResult(res.data);
     } catch (err) {
@@ -80,17 +103,56 @@ export default function AddMemberModal({
         ) : (
           <>
             <div className="space-y-4">
-              <Field label={t("projects.members.email", "E-posta")}>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="husrev-input"
-                  autoFocus
-                  placeholder="kullanici@ornek.com"
-                />
-              </Field>
+              {mode === "pick" ? (
+                <Field label={t("projects.members.pickUser", "Kullanıcı seç")}>
+                  <input
+                    type="text"
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    placeholder={t(
+                      "projects.members.searchPlaceholder",
+                      "İsim veya e-posta ile ara…",
+                    )}
+                    className="husrev-input mb-2"
+                    autoFocus
+                  />
+                  <select
+                    required
+                    value={selectedUserId ?? ""}
+                    onChange={(e) => setSelectedUserId(e.target.value || null)}
+                    disabled={usersLoading}
+                    size={Math.min(Math.max(filteredUsers.length, 1), 6)}
+                    className="husrev-input"
+                  >
+                    {usersLoading ? (
+                      <option>{t("common.loading", "Yükleniyor…")}</option>
+                    ) : filteredUsers.length === 0 ? (
+                      <option disabled>
+                        {t("projects.members.noUsersFound", "Kullanıcı bulunamadı.")}
+                      </option>
+                    ) : (
+                      filteredUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {[u.firstName, u.lastName].filter(Boolean).join(" ") || u.email}
+                          {u.firstName || u.lastName ? ` (${u.email})` : ""}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </Field>
+              ) : (
+                <Field label={t("projects.members.email", "E-posta")}>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="husrev-input"
+                    autoFocus
+                    placeholder="kullanici@ornek.com"
+                  />
+                </Field>
+              )}
               <Field label={t("projects.members.role", "Rol")}>
                 <div className="grid grid-cols-2 gap-1 rounded-full bg-husrev-sand/50 p-1 dark:bg-white/[0.06]">
                   <button
@@ -119,11 +181,22 @@ export default function AddMemberModal({
               </Field>
               <p className="text-[12px] text-gray-500 dark:text-gray-400">
                 <HiOutlineMail className="inline-block h-3.5 w-3.5 mr-1" />
-                {t(
-                  "projects.members.addHint",
-                  "Kullanıcının zaten bir hesabı varsa doğrudan projeye eklenir; yoksa 7 gün geçerli bir davet linki oluşturulur.",
-                )}
+                {mode === "pick"
+                  ? t("projects.members.pickHint", "Listede kayıtlı kullanıcılar görünür.")
+                  : t(
+                      "projects.members.addHint",
+                      "Kullanıcının zaten bir hesabı varsa doğrudan projeye eklenir; yoksa 7 gün geçerli bir davet linki oluşturulur.",
+                    )}
               </p>
+              <button
+                type="button"
+                onClick={() => setMode(mode === "pick" ? "email" : "pick")}
+                className="text-[12px] font-medium text-husrev-ember underline-offset-2 hover:underline dark:text-husrev-amber"
+              >
+                {mode === "pick"
+                  ? t("projects.members.switchToEmail", "Kayıtlı değil mi? E-posta ile davet et")
+                  : t("projects.members.switchToPick", "Listeden seç")}
+              </button>
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
@@ -135,7 +208,13 @@ export default function AddMemberModal({
               >
                 {t("common.cancel", "İptal")}
               </button>
-              <button type="submit" disabled={!email.trim() || addMember.isPending} className="husrev-btn">
+              <button
+                type="submit"
+                disabled={
+                  (mode === "pick" ? !selectedUserId : !email.trim()) || addMember.isPending
+                }
+                className="husrev-btn"
+              >
                 {addMember.isPending
                   ? t("projects.members.adding", "Ekleniyor…")
                   : t("projects.members.addSubmit", "Üye ekle")}

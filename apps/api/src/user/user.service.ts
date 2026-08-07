@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { ApiException } from '../common/api.exception';
@@ -52,5 +52,18 @@ export class UserService {
     const u = await this.requireById(id);
     if (dto.email !== undefined) u.emailNotificationsEnabled = dto.email;
     return this.users.save(u);
+  }
+
+  /**
+   * Lightweight directory for picking a collaborator (e.g. adding a project
+   * member) — deliberately excludes disabled users and the caller themselves.
+   * Capped since this is a small personal-use app, not a paginated directory.
+   */
+  listSelectable(excludeUserId: string): Promise<User[]> {
+    return this.users.find({
+      where: { enabled: true, id: Not(excludeUserId) },
+      order: { firstName: 'ASC', lastName: 'ASC', email: 'ASC' },
+      take: 200,
+    });
   }
 }

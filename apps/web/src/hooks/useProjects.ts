@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { projectService } from "@/services/project-service";
+import { userDirectoryService } from "@/services/user-directory-service";
 import {
   AddProjectMemberRequest,
   ProjectRequest,
@@ -242,4 +243,13 @@ export function useRevokeProjectInvite() {
 
 export function useProjectRole(id: number): ProjectRole | undefined {
   return useProject(id).data?.role;
+}
+
+export function useSystemUsers() {
+  return useQuery({
+    queryKey: ["users", "directory"] as const,
+    queryFn: () => userDirectoryService.listUsers(),
+    select: (d) => d.data,
+    staleTime: 5 * 60 * 1000, // this list changes rarely; avoid refetching on every modal open
+  });
 }
