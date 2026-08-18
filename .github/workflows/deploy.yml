@@ -18,7 +18,7 @@ concurrency:
 jobs:
   deploy:
     name: Build + restart prod stack
-    runs-on: [self-hosted, macOS, iamhusrev-prod]
+    runs-on: [self-hosted, linux, iamhusrev-prod]
     timeout-minutes: 20
     env:
       STACK_NAME: husrevity-prod
@@ -32,12 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup runner PATH (Homebrew / Colima)
-        run: |
-          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
-          /opt/homebrew/bin/docker --version
-          /opt/homebrew/bin/docker context show   # expected: colima
 
       - name: Point env symlinks at prod secrets
         run: |

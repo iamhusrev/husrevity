@@ -23,17 +23,15 @@ concurrency:
 jobs:
   build-and-test:
     name: Build + lint + test
-    runs-on: [self-hosted, macOS, iamhusrev-prod]
+    runs-on: [self-hosted, linux, iamhusrev-prod]
     timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup runner PATH
-        run: |
-          echo "/usr/local/bin" >> "$GITHUB_PATH"
-          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+      - name: Setup runner PATH (bun)
+        run: echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
 
       - name: Sanity check (bun + node)
         run: |
