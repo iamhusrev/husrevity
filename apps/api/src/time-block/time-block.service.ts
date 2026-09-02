@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { TimeBlock } from './time-block.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
@@ -107,6 +107,15 @@ export class TimeBlockService {
     const b = await this.requireOwned(ownerId, id);
     await this.notifications.cancelForSource(ownerId, 'time_block', b.id);
     await this.blocks.softRemove(b);
+  }
+
+  async resyncNotifications(ownerId: string): Promise<number> {
+    const rows = await this.blocks.find({
+      where: { ownerId, completedAt: IsNull() },
+    });
+    const future = rows.filter((b) => b.startAt.getTime() > Date.now());
+    for (const b of future) await this.syncNotification(b);
+    return future.length;
   }
 
   private async syncNotification(b: TimeBlock): Promise<void> {

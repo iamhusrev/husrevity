@@ -21,6 +21,7 @@ export interface ReminderResponse {
   title: string;
   notes?: string | null;
   dueAt?: string | null;
+  notifyMinutesBefore?: number | null;
   completedAt?: string | null;
   priority: ReminderPriority;
   flag: boolean;
@@ -32,6 +33,7 @@ export interface ReminderRequest {
   title: string;
   notes?: string | null;
   dueAt?: string | null;
+  notifyMinutesBefore?: number | null;
   priority?: ReminderPriority;
   flag?: boolean;
 }

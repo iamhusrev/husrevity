@@ -130,6 +130,7 @@
     "calendar": "Calendar",
     "vault": "Vault",
     "evkat": "Evkat",
+    "learning": "Learning",
     "admin": "Admin",
     "adminUsers": "Users",
     "settings": "Settings",
@@ -272,6 +273,24 @@
       "editTitle": "Edit block"
     }
   },
+  "learning": {
+    "title": "Learning",
+    "kicker": "Learning tracker",
+    "flourish": "curiosity",
+    "intro": "Track what you are learning, one item at a time.",
+    "error": "Topics could not be loaded.",
+    "newTopic": "New topic",
+    "empty": { "kicker": "Your learning list is empty", "body": "Create a topic and begin collecting the things you want to master." },
+    "field": { "title": "Title", "description": "Description", "itemText": "Item", "url": "Resource link", "notes": "Notes", "estimatedMinutes": "Estimated minutes", "reviewAt": "Review at" },
+    "placeholders": { "title": "Kubernetes", "description": "What do you want to learn?", "itemText": "Add an item…" },
+    "modal": { "newKicker": "New topic", "editKicker": "Edit", "createTitle": "Create topic", "editTitle": "Edit topic", "itemCreateTitle": "New learning item", "itemEditTitle": "Edit learning item" },
+    "toggle": { "complete": "Mark complete", "incomplete": "Mark incomplete" },
+    "confirmDeleteTitle": "Delete learning topic",
+    "confirmDeleteTopic": "Are you sure you want to delete this topic and all its items?",
+    "confirmDeleteItem": "Are you sure you want to delete this item?",
+    "addItem": "Add item…",
+    "progress": "{{done}}/{{total}}"
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all read",
@@ -294,6 +313,17 @@
       "enable": "Enable notifications",
       "enabling": "Enabling…",
       "later": "Not now"
+    },
+    "leadTime": {
+      "off": "Off",
+      "option_0": "At the due time",
+      "option_5": "5 minutes before",
+      "option_10": "10 minutes before",
+      "option_15": "15 minutes before",
+      "option_30": "30 minutes before",
+      "option_60": "1 hour before",
+      "option_120": "2 hours before",
+      "option_1440": "1 day before"
     }
   },
   "sidebarPanel": {
@@ -683,6 +713,7 @@
       "start": "Start",
       "end": "End",
       "allDay": "All day",
+      "reminder": "Reminder",
       "color": "Color"
     },
     "undo": {
@@ -838,7 +869,48 @@
       "emailLabel": "Also send notifications by email",
       "emailDescription": "When a notification fires, also delivers a copy to {{email}} alongside the push. Silently disabled if SMTP isn't configured on the server.",
       "emailEnabledHint": "Notification emails will now be sent.",
-      "emailDisabledHint": "Notification emails are off."
+      "emailDisabledHint": "Notification emails are off.",
+      "push": {
+        "label": "Browser push notifications",
+        "description": "Receive notifications on this device even when Husrevity is not open.",
+        "enableCta": "Enable push",
+        "disableCta": "Disable push",
+        "denied": "Notification permission is blocked in your browser settings.",
+        "unsupported": "This browser does not support push notifications."
+      },
+      "diagnostics": {
+        "title": "Notification diagnostics",
+        "vapid": "Server VAPID",
+        "vapidConfigured": "Configured",
+        "vapidUnconfigured": "Not configured",
+        "mail": "SMTP",
+        "mailConfigured": "Configured",
+        "mailUnconfigured": "Not configured",
+        "device": "This device",
+        "deviceRegistered": "Registered",
+        "deviceUnregistered": "Not registered",
+        "pending": "Pending notifications",
+        "dispatched24h": "Sent in the last 24 hours",
+        "testCta": "Send test notification",
+        "testSending": "Sending test…",
+        "resyncCta": "Rebuild notifications",
+        "resyncSending": "Rebuilding…",
+        "resyncResult": "Notifications scheduled for {{count}} records.",
+        "testResult": "Push: {{push}}. Email: {{email}}.",
+        "resultPushSucceeded": "sent to at least one device",
+        "resultPushFailed": "delivery failed",
+        "resultPushSkipped": "not sent",
+        "resultPushVapidMissing": "not sent (VAPID is not configured)",
+        "resultPushNoDevice": "not sent (no registered device)",
+        "resultMailSucceeded": "sent",
+        "resultMailFailed": "delivery failed",
+        "resultMailSkipped": "not sent",
+        "resultMailSmtpMissing": "not sent (SMTP is not configured)",
+        "resultMailOptOut": "not sent (email notifications are disabled)"
+      },
+      "ios": {
+        "hint": "To receive notifications on iPhone, first install the app using Share → Add to Home Screen, then open this page from there."
+      }
     }
   },
   "status": {

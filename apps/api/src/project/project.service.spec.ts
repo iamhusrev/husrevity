@@ -227,7 +227,6 @@ describe('ProjectService', () => {
 
       expect(projects.findOne).toHaveBeenCalledWith({
         where: { ownerId, code: req.code },
-        withDeleted: true,
       });
       expect(dataSource.transaction).toHaveBeenCalledTimes(1);
       expect(em.getRepository).toHaveBeenCalledWith(Project);
@@ -258,18 +257,24 @@ describe('ProjectService', () => {
       expect(members.save).not.toHaveBeenCalled();
     });
 
-    it('throws conflict (not a raw save) when the code belongs to a soft-deleted project', async () => {
-      projects.findOne.mockResolvedValueOnce({
-        id: '1',
-        ownerId,
-        code: req.code,
-        deletedAt: new Date(),
-      } as unknown as Project);
+    it('allows creation when the code only belongs to a soft-deleted project', async () => {
+      // `uq_project_owner_code_live` (migration 1715000018000) scopes
+      // uniqueness to live rows only, so TypeORM's default (soft-delete
+      // excluding) findOne never resolves a deleted row here in real usage
+      // — reflected by mocking it to resolve `null`, same as the live-row
+      // creation test above.
+      projects.findOne.mockResolvedValueOnce(null);
+      const savedProject = { id: '2', ownerId, ...req } as unknown as Project;
+      projects.create.mockReturnValue(savedProject);
+      projects.save.mockResolvedValue(savedProject);
+      const savedMember = { id: 'm2', projectId: '2', userId: ownerId, role: 'OWNER' };
+      members.create.mockReturnValue(savedMember);
+      members.save.mockResolvedValue(savedMember);
 
-      await expect(service.create(ownerId, req)).rejects.toMatchObject({ status: 409 });
-      expect(dataSource.transaction).not.toHaveBeenCalled();
-      expect(projects.save).not.toHaveBeenCalled();
-      expect(members.save).not.toHaveBeenCalled();
+      const result = await service.create(ownerId, req);
+
+      expect(dataSource.transaction).toHaveBeenCalledTimes(1);
+      expect(result.code).toBe('ACME');
     });
   });
 

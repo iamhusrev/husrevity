@@ -17,6 +17,7 @@ const KINDS: NotificationKind[] = [
   'task',
   'calendar_event',
   'time_block',
+  'learning',
 ];
 
 export class NotificationResponseDto {
@@ -113,6 +114,24 @@ export class VapidPublicKeyResponseDto {
 
 export class UnreadCountResponseDto {
   @ApiProperty() unread!: number;
+}
+
+export class NotificationDiagnosticsDto {
+  @ApiProperty() vapidConfigured!: boolean;
+  @ApiProperty() mailConfigured!: boolean;
+  @ApiProperty() emailOptIn!: boolean;
+  @ApiProperty() subscriptionCount!: number;
+  @ApiProperty() pendingCount!: number;
+  @ApiProperty() dispatchedLast24h!: number;
+  @ApiProperty() serverTime!: string;
+}
+
+export class TestNotificationResultDto {
+  @ApiProperty() pushAttempted!: boolean;
+  @ApiProperty() pushSucceeded!: boolean;
+  @ApiProperty() emailAttempted!: boolean;
+  @ApiProperty() emailSucceeded!: boolean;
+  @ApiPropertyOptional() reason?: string;
 }
 
 export { KINDS as NOTIFICATION_KINDS };

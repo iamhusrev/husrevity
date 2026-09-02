@@ -213,6 +213,18 @@ export class TaskService {
     });
   }
 
+  async resyncNotifications(ownerId: string): Promise<number> {
+    const rows = await this.tasks.find({ where: { ownerId } });
+    const future = rows.filter(
+      (t) =>
+        !TASK_DONE_STATUSES.has(t.status) &&
+        t.dueAt &&
+        t.dueAt.getTime() > Date.now(),
+    );
+    for (const t of future) await this.syncNotification(t);
+    return future.length;
+  }
+
   /** Throws 400 unless `assigneeId` is null/undefined or a live member of `projectId`. */
   private async validateAssignee(
     projectId: string,

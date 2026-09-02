@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import NotificationDiagnosticsPanel from "@/components/notifications/NotificationDiagnosticsPanel";
 import { useAuth } from "@/providers/AuthProvider";
 import { AuthService } from "@/services/auth-service";
 import { alertStore } from "@/stores/alert-store";
@@ -201,6 +202,7 @@ export default function ProfilePage() {
       />
 
       <NotificationPreferences />
+      <NotificationDiagnosticsPanel />
     </div>
   );
 }

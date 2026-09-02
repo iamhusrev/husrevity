@@ -130,6 +130,7 @@
     "calendar": "Takvim",
     "vault": "Vault",
     "evkat": "Evkat",
+    "learning": "Öğrenme",
     "admin": "Yönetim",
     "adminUsers": "Kullanıcılar",
     "settings": "Ayarlar",
@@ -272,6 +273,24 @@
       "editTitle": "Bloğu düzenle"
     }
   },
+  "learning": {
+    "title": "Öğrenme",
+    "kicker": "Öğrenme takipçisi",
+    "flourish": "merak",
+    "intro": "Öğrendiğin şeyleri, her seferinde bir maddeyle takip et.",
+    "error": "Konular yüklenemedi.",
+    "newTopic": "Yeni konu",
+    "empty": { "kicker": "Öğrenme listen boş", "body": "Bir konu oluşturarak ustalaşmak istediğin şeyleri toplamaya başla." },
+    "field": { "title": "Başlık", "description": "Açıklama", "itemText": "Madde", "url": "Kaynak bağlantısı", "notes": "Notlar", "estimatedMinutes": "Tahmini dakika", "reviewAt": "Tekrar zamanı" },
+    "placeholders": { "title": "Kubernetes", "description": "Ne öğrenmek istiyorsun?", "itemText": "Madde ekle…" },
+    "modal": { "newKicker": "Yeni konu", "editKicker": "Düzenle", "createTitle": "Konu oluştur", "editTitle": "Konuyu düzenle", "itemCreateTitle": "Yeni öğrenme maddesi", "itemEditTitle": "Öğrenme maddesini düzenle" },
+    "toggle": { "complete": "Tamamlandı olarak işaretle", "incomplete": "Tamamlanmadı olarak işaretle" },
+    "confirmDeleteTitle": "Öğrenme konusunu sil",
+    "confirmDeleteTopic": "Bu konuyu ve tüm maddelerini silmek istediğine emin misin?",
+    "confirmDeleteItem": "Bu maddeyi silmek istediğine emin misin?",
+    "addItem": "Madde ekle…",
+    "progress": "{{done}}/{{total}}"
+  },
   "notifications": {
     "title": "Bildirimler",
     "markAllRead": "Tümünü okundu",
@@ -294,6 +313,17 @@
       "enable": "Bildirimleri aç",
       "enabling": "Açılıyor…",
       "later": "Şimdi değil"
+    },
+    "leadTime": {
+      "off": "Kapalı",
+      "option_0": "Zamanında",
+      "option_5": "5 dakika önce",
+      "option_10": "10 dakika önce",
+      "option_15": "15 dakika önce",
+      "option_30": "30 dakika önce",
+      "option_60": "1 saat önce",
+      "option_120": "2 saat önce",
+      "option_1440": "1 gün önce"
     }
   },
   "sidebarPanel": {
@@ -683,6 +713,7 @@
       "start": "Başlangıç",
       "end": "Bitiş",
       "allDay": "Tüm gün",
+      "reminder": "Hatırlatma",
       "color": "Renk"
     },
     "undo": {
@@ -838,7 +869,48 @@
       "emailLabel": "Bildirimleri e-posta ile de al",
       "emailDescription": "Bildirim zamanı geldiğinde anlık push'a ek olarak {{email}} adresine bir e-posta gönderir. Sunucuda SMTP ayarlanmamışsa sessizce devre dışı kalır.",
       "emailEnabledHint": "Artık bildirim e-postaları da gönderilecek.",
-      "emailDisabledHint": "Bildirim e-postaları kapatıldı."
+      "emailDisabledHint": "Bildirim e-postaları kapatıldı.",
+      "push": {
+        "label": "Tarayıcı push bildirimleri",
+        "description": "Husrevity açık değilken bile bu cihazda bildirim al.",
+        "enableCta": "Push bildirimlerini aç",
+        "disableCta": "Push bildirimlerini kapat",
+        "denied": "Bildirim izni tarayıcı ayarlarında engellenmiş.",
+        "unsupported": "Bu tarayıcı push bildirimlerini desteklemiyor."
+      },
+      "diagnostics": {
+        "title": "Bildirim tanılaması",
+        "vapid": "Sunucuda VAPID",
+        "vapidConfigured": "Yapılandırıldı",
+        "vapidUnconfigured": "Yapılandırılmadı",
+        "mail": "SMTP",
+        "mailConfigured": "Yapılandırıldı",
+        "mailUnconfigured": "Yapılandırılmadı",
+        "device": "Bu cihaz",
+        "deviceRegistered": "Kayıtlı",
+        "deviceUnregistered": "Kayıtlı değil",
+        "pending": "Bekleyen bildirim",
+        "dispatched24h": "Son 24 saatte gönderilen",
+        "testCta": "Test bildirimi gönder",
+        "testSending": "Test gönderiliyor…",
+        "resyncCta": "Bildirimleri yeniden kur",
+        "resyncSending": "Yeniden kuruluyor…",
+        "resyncResult": "{{count}} kayıt için bildirim planlandı.",
+        "testResult": "Push: {{push}}. E-posta: {{email}}.",
+        "resultPushSucceeded": "en az bir cihaza gönderildi",
+        "resultPushFailed": "gönderim başarısız oldu",
+        "resultPushSkipped": "gönderilmedi",
+        "resultPushVapidMissing": "gönderilmedi (VAPID yapılandırılmamış)",
+        "resultPushNoDevice": "gönderilmedi (kayıtlı cihaz yok)",
+        "resultMailSucceeded": "gönderildi",
+        "resultMailFailed": "gönderim başarısız oldu",
+        "resultMailSkipped": "gönderilmedi",
+        "resultMailSmtpMissing": "gönderilmedi (SMTP yapılandırılmamış)",
+        "resultMailOptOut": "gönderilmedi (e-posta bildirimleri kapalı)"
+      },
+      "ios": {
+        "hint": "iPhone'da bildirim alabilmek için önce Paylaş → Ana Ekrana Ekle ile uygulamayı kur, sonra bu sayfayı oradan aç."
+      }
     }
   },
   "status": {

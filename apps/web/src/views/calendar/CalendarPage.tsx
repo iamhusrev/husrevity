@@ -14,6 +14,7 @@ import enGbLocale from "@fullcalendar/core/locales/en-gb";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
+import LeadTimeSelect from "@/components/notifications/LeadTimeSelect";
 
 // Stable references — recreating these arrays on every render makes
 // FullCalendar see new prop identities, fire `datesSet` after each
@@ -42,6 +43,7 @@ interface EditingEvent {
   allDay: boolean;
   location?: string | null;
   colorHex?: string | null;
+  reminderMinutes?: number | null;
 }
 
 // Backend requires endAt. When the user leaves it blank, default to start + 1h.
@@ -64,6 +66,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
   const [allDay, setAllDay] = useState(initial.allDay);
   const [location, setLocation] = useState(initial.location ?? "");
   const [colorHex, setColorHex] = useState(initial.colorHex ?? "#007AFF");
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(initial.reminderMinutes ?? 0);
 
   const isEdit = !!initial.id;
 
@@ -78,6 +81,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
       allDay,
       location: location || null,
       colorHex,
+      reminderMinutes,
     };
     try {
       if (isEdit && initial.id) {
@@ -189,6 +193,10 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
             />
             {t("calendar.field.allDay")}
           </label>
+
+          <CalField label={t("calendar.field.reminder")}>
+            <LeadTimeSelect value={reminderMinutes} onChange={setReminderMinutes} />
+          </CalField>
 
           <CalField label={t("calendar.field.location")}>
             <input
@@ -364,6 +372,7 @@ export default function CalendarPage() {
       allDay: raw.allDay,
       location: raw.location,
       colorHex: raw.colorHex,
+      reminderMinutes: raw.reminderMinutes,
     });
   };
 

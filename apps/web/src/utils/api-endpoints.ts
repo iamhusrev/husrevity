@@ -100,6 +100,9 @@ export const NOTIFICATION_ENDPOINTS = {
   MARK_ALL_READ: "/notifications/read-all",
   VAPID_PUBLIC_KEY: "/notifications/vapid-public-key",
   PUSH_SUBSCRIPTIONS: "/notifications/push-subscriptions",
+  DIAGNOSTICS: "/notifications/diagnostics",
+  TEST: "/notifications/test",
+  RESYNC: "/notifications/resync",
 };
 
 // ─── Evkat (time blocks — legacy per-date planner) ────────────────────────────
@@ -120,6 +123,18 @@ export const ROUTINE_ENDPOINTS = {
   SEGMENT_ACTIVITIES_REORDER: (id: string) =>
     `/routine/segments/${id}/activities/reorder`,
   ACTIVITY_BY_ID: (id: string) => `/routine/activities/${id}`,
+};
+
+// ─── Learning tracker ───────────────────────────────────────────────────────
+
+export const LEARNING_ENDPOINTS = {
+  TOPICS: "/learning/topics",
+  TOPIC_BY_ID: (id: string) => `/learning/topics/${id}`,
+  TOPICS_REORDER: "/learning/topics/reorder",
+  TOPIC_ITEMS: (id: string) => `/learning/topics/${id}/items`,
+  TOPIC_ITEMS_REORDER: (id: string) => `/learning/topics/${id}/items/reorder`,
+  ITEM_BY_ID: (id: string) => `/learning/items/${id}`,
+  ITEM_TOGGLE: (id: string) => `/learning/items/${id}/toggle`,
 };
 
 // ─── Users (directory) ──────────────────────────────────────────────────────

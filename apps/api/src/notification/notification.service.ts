@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThanOrEqual, Repository } from 'typeorm';
+import { Between, IsNull, LessThan, Repository } from 'typeorm';
 import { ApiException } from '../common/api.exception';
 import { Notification, NotificationKind } from './notification.entity';
 import { PushSubscription } from './push-subscription.entity';
@@ -191,6 +191,40 @@ export class NotificationService {
     if (sub) await this.subscriptions.softRemove(sub);
   }
 
+  async subscriptionCount(ownerId: string): Promise<number> {
+    return this.subscriptions.count({ where: { ownerId } });
+  }
+
+  async pendingCount(ownerId: string): Promise<number> {
+    return this.notifications.count({
+      where: { ownerId, dispatchedAt: IsNull() },
+    });
+  }
+
+  async dispatchedCountSince(ownerId: string, since: Date): Promise<number> {
+    return this.notifications
+      .createQueryBuilder('n')
+      .where('n.owner_id = :ownerId', { ownerId })
+      .andWhere('n.dispatched_at >= :since', { since })
+      .getCount();
+  }
+
+  async enqueueTest(ownerId: string): Promise<Notification> {
+    return this.notifications.save(
+      this.notifications.create({
+        ownerId,
+        kind: 'reminder',
+        sourceId: '0',
+        scheduledAt: new Date(),
+        title: 'Test bildirimi',
+        body: 'Bildirim sistemi çalışıyor 🎉',
+        deepLink: '/settings/profile',
+        dispatchedAt: null,
+        readAt: null,
+      }),
+    );
+  }
+
   // ─── Dispatcher hooks ───────────────────────────────────────────────────────
 
   /**
@@ -198,9 +232,23 @@ export class NotificationService {
    * dispatcher service) is responsible for delivering each one via web-push.
    */
   async claimPending(now: Date, limit = 50): Promise<Notification[]> {
+    const floor = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const stale = await this.notifications.find({
+      where: { scheduledAt: LessThan(floor), dispatchedAt: IsNull() },
+      take: 500,
+    });
+    if (stale.length > 0) {
+      await this.notifications.update(
+        stale.map((notification) => notification.id),
+        { dispatchedAt: now },
+      );
+      this.logger.warn(
+        `Marked ${stale.length} stale (>2h overdue) notification(s) dispatched without sending`,
+      );
+    }
     return this.notifications.find({
       where: {
-        scheduledAt: LessThanOrEqual(now),
+        scheduledAt: Between(floor, now),
         dispatchedAt: IsNull(),
       },
       order: { scheduledAt: 'ASC' },

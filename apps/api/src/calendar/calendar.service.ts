@@ -83,6 +83,13 @@ export class CalendarService {
     return EventResponseDto.from(restored);
   }
 
+  async resyncNotifications(ownerId: string): Promise<number> {
+    const rows = await this.events.find({ where: { ownerId } });
+    const future = rows.filter((e) => e.startAt.getTime() > Date.now());
+    for (const e of future) await this.syncNotification(e);
+    return future.length;
+  }
+
   /**
    * Calendar events use the existing `reminderMinutes` column (matching the
    * Spring → Nest port; the new lead-time pattern on reminder/task/list_item

@@ -1,8 +1,11 @@
 import apiClient from "./api-client";
 import { ApiResponse } from "@/types/common/api-response";
 import {
+  NotificationDiagnostics,
   NotificationResponse,
   PushSubscriptionPayload,
+  ResyncResult,
+  TestNotificationResult,
   UnreadCountResponse,
   VapidKeyResponse,
 } from "@/types/notification/notification";
@@ -49,6 +52,21 @@ export const notificationService = {
       NOTIFICATION_ENDPOINTS.PUSH_SUBSCRIPTIONS,
       { data: { endpoint } },
     );
+    return res.data;
+  },
+
+  async getDiagnostics(): Promise<ApiResponse<NotificationDiagnostics>> {
+    const res = await apiClient.get(NOTIFICATION_ENDPOINTS.DIAGNOSTICS);
+    return res.data;
+  },
+
+  async sendTest(): Promise<ApiResponse<TestNotificationResult>> {
+    const res = await apiClient.post(NOTIFICATION_ENDPOINTS.TEST);
+    return res.data;
+  },
+
+  async resync(): Promise<ApiResponse<ResyncResult>> {
+    const res = await apiClient.post(NOTIFICATION_ENDPOINTS.RESYNC);
     return res.data;
   },
 };

@@ -1,9 +1,17 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../common/base.entity';
 
+/**
+ * `email` uniqueness is enforced only on live rows via the partial index
+ * `uq_app_user_email_live` (see migration
+ * 1715000018000-PartialUniqueOnSoftDelete.ts) — `synchronize` is always
+ * off, so `unique: true` here would be documentation only, and it would
+ * misleadingly imply a soft-deleted user's email still blocks
+ * re-registration (it doesn't).
+ */
 @Entity('app_user')
 export class User extends BaseEntity {
-  @Column({ type: 'varchar', length: 160, unique: true })
+  @Column({ type: 'varchar', length: 160 })
   email!: string;
 
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })

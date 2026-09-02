@@ -6,6 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
+import LeadTimeSelect from "@/components/notifications/LeadTimeSelect";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import {
   useReminderLists,
@@ -112,6 +113,7 @@ function isThisMonth(d: Date, now: Date): boolean {
 
 type ReminderPatch = Partial<{
   dueAt: string | null;
+  notifyMinutesBefore: number | null;
   priority: ReminderPriority;
   flag: boolean;
 }>;
@@ -122,6 +124,7 @@ function toReminderRequest(r: ReminderResponse, patch: ReminderPatch) {
     title: r.title,
     notes: r.notes,
     dueAt: r.dueAt,
+    notifyMinutesBefore: r.notifyMinutesBefore,
     priority: r.priority,
     flag: r.flag,
     ...patch,
@@ -329,7 +332,7 @@ function ReminderRow({
                     key={p}
                     type="button"
                     onClick={() => {
-                      commit({ dueAt: presetDueAt(p) });
+                      commit({ dueAt: presetDueAt(p), notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0 });
                       setDueOpen(false);
                     }}
                     className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 transition hover:bg-brand-50 hover:text-brand-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
@@ -342,7 +345,7 @@ function ReminderRow({
               <div className="mt-3" onPointerDown={(e) => e.stopPropagation()}>
                 <DateTimePicker
                   value={reminder.dueAt}
-                  onChange={(iso) => commit({ dueAt: iso })}
+                  onChange={(iso) => commit({ dueAt: iso, notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0 })}
                 />
               </div>
             </div>
@@ -420,6 +423,7 @@ function ReminderEditModal({
   const [notes, setNotes] = useState(reminder.notes ?? "");
   const [priority, setPriority] = useState<ReminderPriority>(reminder.priority);
   const [dueAt, setDueAt] = useState<string | null>(reminder.dueAt ?? null);
+  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(reminder.notifyMinutesBefore ?? 0);
   const [flag, setFlag] = useState(reminder.flag);
 
   const submit = async (e: React.FormEvent) => {
@@ -433,6 +437,7 @@ function ReminderEditModal({
           title: title.trim(),
           notes: notes.trim() || null,
           dueAt: dueAt,
+          notifyMinutesBefore,
           priority,
           flag,
         },
@@ -540,6 +545,13 @@ function ReminderEditModal({
               <DateTimePicker value={dueAt} onChange={setDueAt} />
             </label>
           </div>
+
+          <label className="block space-y-1.5">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("calendar.field.reminder")}
+            </span>
+            <LeadTimeSelect value={notifyMinutesBefore} onChange={setNotifyMinutesBefore} />
+          </label>
 
           <button
             type="button"

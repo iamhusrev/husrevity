@@ -72,8 +72,8 @@ export class MailerService implements OnModuleInit {
     to: string,
     n: Notification,
     webBaseUrl: string,
-  ): Promise<void> {
-    if (!this.transporter) return;
+  ): Promise<boolean> {
+    if (!this.transporter) return false;
     const url = `${webBaseUrl.replace(/\/+$/, '')}${n.deepLink ?? '/dashboard'}`;
     const subject = `🔔 ${n.title}`;
     const text = renderText(n, url);
@@ -87,10 +87,12 @@ export class MailerService implements OnModuleInit {
         text,
         html,
       });
+      return true;
     } catch (e) {
       this.logger.warn(
         `sendMail failed for notification ${n.id}: ${(e as Error).message}`,
       );
+      return false;
     }
   }
 

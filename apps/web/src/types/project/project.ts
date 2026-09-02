@@ -51,6 +51,7 @@ export interface TaskResponse {
   status: TaskStatus;
   priority: TaskPriority;
   dueAt?: string | null;
+  notifyMinutesBefore?: number | null;
   position: number;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -64,6 +65,7 @@ export interface TaskRequest {
   status?: TaskStatus;
   priority?: TaskPriority;
   dueAt?: string | null;
+  notifyMinutesBefore?: number | null;
   projectId?: number | null;
   assigneeId?: number | null;
 }

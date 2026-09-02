@@ -9,5 +9,6 @@ import { NotificationModule } from '../notification/notification.module';
   imports: [TypeOrmModule.forFeature([CalendarEvent]), NotificationModule],
   providers: [CalendarService],
   controllers: [CalendarController],
+  exports: [CalendarService],
 })
 export class CalendarModule {}

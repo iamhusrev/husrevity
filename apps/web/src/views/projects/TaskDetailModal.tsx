@@ -10,6 +10,7 @@ import { alertStore, showUndoToast } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
+import LeadTimeSelect from "@/components/notifications/LeadTimeSelect";
 import AssigneePicker from "./AssigneePicker";
 
 export default function TaskDetailModal({
@@ -34,6 +35,7 @@ export default function TaskDetailModal({
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
   const [dueAt, setDueAt] = useState<string | null>(task.dueAt ?? null);
+  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(task.notifyMinutesBefore ?? 0);
   const [assigneeId, setAssigneeId] = useState<number | null>(task.assigneeId ?? null);
 
   const submit = async (e: React.FormEvent) => {
@@ -49,6 +51,7 @@ export default function TaskDetailModal({
           status,
           priority,
           dueAt: dueAt,
+          notifyMinutesBefore,
           assigneeId,
         },
       });
@@ -160,6 +163,17 @@ export default function TaskDetailModal({
             {t("kanban.detail.dueField", "Bitiş tarihi")}
           </label>
           <DateTimePicker value={dueAt} onChange={setDueAt} mode="date" disabled={!canEdit} />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("calendar.field.reminder")}
+          </label>
+          <LeadTimeSelect
+            value={notifyMinutesBefore}
+            onChange={setNotifyMinutesBefore}
+            disabled={!canEdit}
+          />
         </div>
 
         {task.createdAt && (

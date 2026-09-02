@@ -31,3 +31,29 @@ export interface VapidKeyResponse {
 export interface UnreadCountResponse {
   unread: number;
 }
+
+export interface NotificationDiagnostics {
+  vapidConfigured: boolean;
+  mailConfigured: boolean;
+  emailOptIn: boolean;
+  subscriptionCount: number;
+  pendingCount: number;
+  dispatchedLast24h: number;
+  serverTime: string;
+}
+
+export interface TestNotificationResult {
+  pushAttempted: boolean;
+  pushSucceeded: boolean;
+  emailAttempted: boolean;
+  emailSucceeded: boolean;
+  reason?: string;
+}
+
+export interface ResyncResult {
+  reminders: number;
+  tasks: number;
+  calendarEvents: number;
+  timeBlocks: number;
+  total: number;
+}

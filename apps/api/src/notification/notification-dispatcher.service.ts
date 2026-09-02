@@ -7,6 +7,15 @@ import { Notification } from './notification.entity';
 import { PushSubscription } from './push-subscription.entity';
 import { MailerService } from './mailer.service';
 import { UserService } from '../user/user.service';
+import type { User } from '../user/user.entity';
+
+export interface DispatchResult {
+  pushAttempted: boolean;
+  pushSucceeded: boolean;
+  emailAttempted: boolean;
+  emailSucceeded: boolean;
+  reason?: string;
+}
 
 /**
  * Per-minute cron that finds notifications whose `scheduled_at <= now()` and
@@ -65,7 +74,10 @@ export class NotificationDispatcherService implements OnModuleInit {
   async tick(): Promise<void> {
     const now = new Date();
     const pending = await this.notifications.claimPending(now, 100);
-    if (pending.length === 0) return;
+    if (pending.length === 0) {
+      this.logger.debug('No pending notifications to dispatch');
+      return;
+    }
     this.logger.debug(`Dispatching ${pending.length} notification(s)`);
 
     // Mark all dispatched first to make this idempotent under overlap — even
@@ -95,24 +107,72 @@ export class NotificationDispatcherService implements OnModuleInit {
       // Look up the user once per owner — used by the email leg + skipped
       // if they've opted out / SMTP isn't configured.
       const user = await this.users.findById(ownerId).catch(() => null);
-      const emailEnabled =
-        Boolean(user?.emailNotificationsEnabled) &&
-        this.mailer.isConfigured() &&
-        Boolean(user?.email);
-
       for (const n of items) {
-        if (subs.length > 0) await this.sendPush(n, subs);
-        if (emailEnabled && user) {
-          await this.mailer.sendNotificationEmail(user.email, n, this.webBaseUrl);
-        }
+        await this.deliver(n, subs, user);
       }
     }
+    this.logger.debug(`Dispatched ${pending.length} notification(s)`);
+  }
+
+  async dispatchOne(n: Notification): Promise<DispatchResult> {
+    const subs = this.vapidReady
+      ? await this.notifications.listSubscriptions(n.ownerId)
+      : [];
+    const user = await this.users.findById(n.ownerId).catch(() => null);
+    return this.deliver(n, subs, user);
+  }
+
+  private async deliver(
+    n: Notification,
+    subs: PushSubscription[],
+    user: User | null,
+  ): Promise<DispatchResult> {
+    const result: DispatchResult = {
+      pushAttempted: false,
+      pushSucceeded: false,
+      emailAttempted: false,
+      emailSucceeded: false,
+    };
+
+    if (subs.length > 0) {
+      result.pushAttempted = true;
+      result.pushSucceeded = await this.sendPush(n, subs);
+    }
+
+    const emailEnabled =
+      Boolean(user?.emailNotificationsEnabled) &&
+      this.mailer.isConfigured() &&
+      Boolean(user?.email);
+    if (emailEnabled && user?.email) {
+      result.emailAttempted = true;
+      result.emailSucceeded = await this.sendEmail(n, user.email);
+    }
+
+    if (!result.pushAttempted && !result.emailAttempted) {
+      result.reason = this.noDeliveryReason(user, subs);
+    }
+    return result;
+  }
+
+  private noDeliveryReason(
+    user: User | null,
+    subs: PushSubscription[],
+  ): string {
+    if (!this.vapidReady) return 'vapid-not-configured';
+    if (subs.length === 0) return 'no-subscriptions';
+    if (!this.mailer.isConfigured()) return 'mail-not-configured';
+    if (!user?.emailNotificationsEnabled) return 'email-opt-out';
+    return 'email-not-configured';
+  }
+
+  private sendEmail(n: Notification, email: string): Promise<boolean> {
+    return this.mailer.sendNotificationEmail(email, n, this.webBaseUrl);
   }
 
   private async sendPush(
     n: Notification,
     subs: PushSubscription[],
-  ): Promise<void> {
+  ): Promise<boolean> {
     const payload = JSON.stringify({
       id: n.id,
       title: n.title,
@@ -120,6 +180,7 @@ export class NotificationDispatcherService implements OnModuleInit {
       deepLink: n.deepLink ?? '/dashboard',
       kind: n.kind,
     });
+    let succeeded = false;
     for (const sub of subs) {
       try {
         await webpush.sendNotification(
@@ -130,6 +191,7 @@ export class NotificationDispatcherService implements OnModuleInit {
           payload,
           { TTL: 600 },
         );
+        succeeded = true;
       } catch (err) {
         const status = (err as { statusCode?: number }).statusCode;
         if (status === 404 || status === 410) {
@@ -147,5 +209,6 @@ export class NotificationDispatcherService implements OnModuleInit {
         }
       }
     }
+    return succeeded;
   }
 }

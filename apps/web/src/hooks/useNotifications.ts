@@ -6,6 +6,7 @@ const NOTIFICATION_KEYS = {
   list: (unread?: boolean) =>
     ["notifications", "list", unread ?? null] as const,
   unreadCount: ["notifications", "unread-count"] as const,
+  diagnostics: ["notifications", "diagnostics"] as const,
 };
 
 /**
@@ -47,5 +48,32 @@ export function useMarkAllNotificationsRead() {
   return useMutation({
     mutationFn: () => notificationService.markAllRead(),
     onSuccess: () => qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.all }),
+  });
+}
+
+export function useNotificationDiagnostics() {
+  return useQuery({
+    queryKey: NOTIFICATION_KEYS.diagnostics,
+    queryFn: () => notificationService.getDiagnostics(),
+    select: (d) => d.data,
+    staleTime: 30_000,
+  });
+}
+
+export function useSendTestNotification() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => notificationService.sendTest(),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
+  });
+}
+
+export function useResyncNotifications() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => notificationService.resync(),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
   });
 }

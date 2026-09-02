@@ -74,16 +74,12 @@ export class ProjectService {
   }
 
   async create(ownerId: string, req: ProjectRequestDto): Promise<ProjectResponseDto> {
-    const exists = await this.projects.findOne({
-      where: { ownerId, code: req.code },
-      withDeleted: true,
-    });
+    // `uq_project_owner_code_live` (migration 1715000018000) scopes
+    // uniqueness to live rows only, so a plain (soft-delete-excluding) find
+    // is the right pre-check — a soft-deleted project's code is free to
+    // reuse and no longer collides here.
+    const exists = await this.projects.findOne({ where: { ownerId, code: req.code } });
     if (exists) {
-      if (exists.deletedAt) {
-        throw ApiException.conflict(
-          `Project code "${req.code}" belongs to a previously deleted project — restore it instead of creating a new one`,
-        );
-      }
       throw ApiException.conflict(`Project code "${req.code}" already exists`);
     }
 

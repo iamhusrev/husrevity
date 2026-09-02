@@ -204,6 +204,15 @@ export class ReminderService {
     });
   }
 
+  async resyncNotifications(ownerId: string): Promise<number> {
+    const rows = await this.reminders.find({
+      where: { ownerId, completedAt: IsNull() },
+    });
+    const future = rows.filter((r) => r.dueAt && r.dueAt.getTime() > Date.now());
+    for (const r of future) await this.syncNotification(r);
+    return future.length;
+  }
+
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
   /**

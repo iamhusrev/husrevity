@@ -16,6 +16,7 @@ import {
   BiDumbbell,
   BiLockAlt,
   BiShield,
+  BiBookOpen,
 } from "react-icons/bi";
 import { HiOutlineClock } from "react-icons/hi2";
 import { useAuth } from "@/providers/AuthProvider";
@@ -25,6 +26,7 @@ type MoreItem = { key: string; path: string; icon: IconType };
 const MORE_ITEMS: MoreItem[] = [
   { key: "nav.projects", path: "/projects", icon: BiFolder },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
+  { key: "nav.learning", path: "/learning", icon: BiBookOpen },
   { key: "nav.sport", path: "/sport", icon: BiDumbbell },
   { key: "nav.vault", path: "/vault", icon: BiLockAlt },
 ];

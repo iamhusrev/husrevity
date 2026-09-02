@@ -18,10 +18,12 @@ import { VaultModule } from './vault/vault.module';
 import { AiModule } from './ai/ai.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { NotificationModule } from './notification/notification.module';
+import { NotificationResyncModule } from './notification/notification-resync.module';
 import { TimeBlockModule } from './time-block/time-block.module';
 import { RoutineModule } from './routine/routine.module';
 import { AdminModule } from './admin/admin.module';
 import { SportModule } from './sport/sport.module';
+import { LearningModule } from './learning/learning.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -41,10 +43,12 @@ import { HealthController } from './common/health.controller';
     VaultModule,
     AiModule,
     NotificationModule,
+    NotificationResyncModule,
     TimeBlockModule,
     RoutineModule,
     AdminModule,
     SportModule,
+    LearningModule,
   ],
   controllers: [HealthController],
   providers: [

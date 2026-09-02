@@ -15,6 +15,7 @@ import {
   BiCalendar,
   BiShield,
   BiDumbbell,
+  BiBookOpen,
 } from "react-icons/bi";
 import { useAuth } from "@/providers/AuthProvider";
 import { HiSparkles, HiOutlineClock } from "react-icons/hi2";
@@ -84,6 +85,11 @@ const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
         icon: <HiOutlineClock size={"1.5rem"} />,
         name: t("nav.evkat"),
         path: "/evkat",
+      },
+      {
+        icon: <BiBookOpen size={"1.5rem"} />,
+        name: t("nav.learning"),
+        path: "/learning",
       },
       {
         icon: <BiDumbbell size={"1.5rem"} />,
