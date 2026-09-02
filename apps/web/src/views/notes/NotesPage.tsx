@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTranslation } from "react-i18next";
-import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { PageHeader } from "@/components/ui";
 import Button from "@/components/button/Button";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 import { Modal } from "@/components/modal";
@@ -551,17 +551,19 @@ export default function NotesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-          <PageBreadcrumb pageTitle={t("notes.title")} />
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setShowTags(true)}>
+      <PageHeader
+        pageTitle={t("notes.title")}
+        actions={
+          <>
+            <Button size="sm" variant="ghost" onClick={() => setShowTags(true)}>
               <BiPurchaseTag size={14} /> {t("notes.manageTags")}
             </Button>
             <Button size="sm" onClick={() => setEditingId("new")}>
               + {t("notes.newNote")}
             </Button>
-          </div>
-        </div>
+          </>
+        }
+      />
 
         <div className="flex flex-wrap items-center gap-3">
           <input

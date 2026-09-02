@@ -50,8 +50,6 @@ function sourceHref(ref: SuggestionSourceRef): string {
   switch (ref.type) {
     case "note":
       return `/notes/${ref.id}`;
-    case "plan":
-      return `/plans/${ref.id}`;
     case "reminder":
       return `/reminders`;
     case "task":

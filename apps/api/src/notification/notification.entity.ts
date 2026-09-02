@@ -3,17 +3,14 @@ import { BaseEntity } from '../common/base.entity';
 
 /**
  * Source domain that emitted this notification. Kept as a string union so
- * adding a new source (e.g. plan items, project milestones) is a non-breaking
- * additive change.
+ * adding a new source alongside reminders, tasks, calendar events, and time
+ * blocks is a non-breaking additive change.
  */
 export type NotificationKind =
   | 'reminder'
   | 'task'
-  | 'list_item'
   | 'calendar_event'
-  | 'time_block'
-  | 'debt'
-  | 'finance_installment';
+  | 'time_block';
 
 /**
  * Unified notification queue + read log.

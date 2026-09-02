@@ -4,7 +4,6 @@ export type SuggestionSourceType =
   | "reminder"
   | "task"
   | "note"
-  | "plan"
   | "project";
 
 export interface SuggestionSourceRef {

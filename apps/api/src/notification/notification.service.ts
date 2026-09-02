@@ -14,7 +14,7 @@ import {
 
 /**
  * Central hub for the notification system. Every domain module (Reminder,
- * Task, ListItem, CalendarEvent, TimeBlock) calls `enqueue` / `cancelForSource`
+ * Task, CalendarEvent, TimeBlock) calls `enqueue` / `cancelForSource`
  * from its create/update/delete service paths. The dispatcher (separate
  * service) is the only consumer that *sends* — everything else is just
  * scheduling rows here.

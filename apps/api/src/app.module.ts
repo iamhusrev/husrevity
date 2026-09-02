@@ -10,10 +10,8 @@ import { RolesGuard } from './common/roles.guard';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { NoteModule } from './note/note.module';
-import { ListModule } from './list/list.module';
 import { ProjectModule } from './project/project.module';
 import { TaskModule } from './task/task.module';
-import { PlanModule } from './plan/plan.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { VaultModule } from './vault/vault.module';
@@ -22,8 +20,6 @@ import { CryptoModule } from './crypto/crypto.module';
 import { NotificationModule } from './notification/notification.module';
 import { TimeBlockModule } from './time-block/time-block.module';
 import { RoutineModule } from './routine/routine.module';
-import { ReadingModule } from './reading/reading.module';
-import { FinanceModule } from './finance/finance.module';
 import { AdminModule } from './admin/admin.module';
 import { SportModule } from './sport/sport.module';
 import { HealthController } from './common/health.controller';
@@ -38,10 +34,8 @@ import { HealthController } from './common/health.controller';
     AuthModule,
     UserModule,
     NoteModule,
-    ListModule,
     ProjectModule,
     TaskModule,
-    PlanModule,
     CalendarModule,
     ReminderModule,
     VaultModule,
@@ -49,8 +43,6 @@ import { HealthController } from './common/health.controller';
     NotificationModule,
     TimeBlockModule,
     RoutineModule,
-    ReadingModule,
-    FinanceModule,
     AdminModule,
     SportModule,
   ],

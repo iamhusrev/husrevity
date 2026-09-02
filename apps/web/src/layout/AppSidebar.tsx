@@ -11,13 +11,9 @@ import {
   BiNote,
   BiBell,
   BiLockAlt,
-  BiListUl,
   BiFolder,
-  BiTargetLock,
   BiCalendar,
-  BiWallet,
   BiShield,
-  BiBookOpen,
   BiDumbbell,
 } from "react-icons/bi";
 import { useAuth } from "@/providers/AuthProvider";
@@ -52,7 +48,7 @@ const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
     ],
   },
   {
-    label: t("nav.section.planning"),
+    label: t("nav.section.core"),
     items: [
       {
         icon: <BiBell size={"1.5rem"} />,
@@ -60,34 +56,9 @@ const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
         path: "/reminders",
       },
       {
-        icon: <BiCalendar size={"1.5rem"} />,
-        name: t("nav.calendar"),
-        path: "/calendar",
-      },
-      {
-        icon: <BiTargetLock size={"1.5rem"} />,
-        name: t("nav.plans"),
-        path: "/plans",
-      },
-      {
-        icon: <HiOutlineClock size={"1.5rem"} />,
-        name: t("nav.evkat"),
-        path: "/evkat",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.work"),
-    items: [
-      {
         icon: <BiNote size={"1.5rem"} />,
         name: t("nav.notes"),
         path: "/notes",
-      },
-      {
-        icon: <BiListUl size={"1.5rem"} />,
-        name: t("nav.lists"),
-        path: "/lists",
       },
       {
         icon: <BiFolder size={"1.5rem"} />,
@@ -95,35 +66,35 @@ const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
         path: "/projects",
       },
       {
-        icon: <BiBookOpen size={"1.5rem"} />,
-        name: t("nav.readings"),
-        path: "/readings",
+        icon: <BiLockAlt size={"1.5rem"} />,
+        name: t("nav.vault"),
+        path: "/vault",
       },
     ],
   },
   {
-    label: t("nav.section.life"),
+    label: t("nav.section.daily"),
     items: [
+      {
+        icon: <BiCalendar size={"1.5rem"} />,
+        name: t("nav.calendar"),
+        path: "/calendar",
+      },
+      {
+        icon: <HiOutlineClock size={"1.5rem"} />,
+        name: t("nav.evkat"),
+        path: "/evkat",
+      },
       {
         icon: <BiDumbbell size={"1.5rem"} />,
         name: t("nav.sport"),
         path: "/sport",
-      },
-      {
-        icon: <BiWallet size={"1.5rem"} />,
-        name: t("nav.finance"),
-        path: "/finance",
       },
     ],
   },
   {
     label: t("nav.section.system"),
     items: [
-      {
-        icon: <BiLockAlt size={"1.5rem"} />,
-        name: t("nav.vault"),
-        path: "/vault",
-      },
       ...(isAdmin
         ? [
             {

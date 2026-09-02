@@ -15,7 +15,7 @@ export class AiSuggestionController {
   constructor(private readonly svc: AiSuggestionService) {}
 
   /**
-   * Dashboard "what should I do?" — pulls notes/reminders/plans/projects/tasks
+   * Dashboard "what should I do?" — pulls notes/reminders/projects/tasks
    * for the current user, RAG-lite into Gemini, returns 1 or 3 suggestions.
    *
    * Tighter throttle than the global default because each call is one LLM call.

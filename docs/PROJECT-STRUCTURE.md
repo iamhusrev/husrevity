@@ -6,7 +6,7 @@
 
 ## 1. What this repo is
 
-`husrevity` is a personal productivity monorepo. The API began as a TypeScript port of a sibling Spring Boot project (`../husrevity-api`) and has since become the **source of truth**; the Spring repo is historical context only. Phase 1 (auth, user, note, list, common, crypto) and Phase 2 (project, task, plan, calendar, reminder, vault, gmail) are fully shipped. The most recent additions are a central push-notification system and the Evkat (time-blocking) domain.
+`husrevity` is a personal productivity monorepo. The API began as a TypeScript port of a sibling Spring Boot project (`../husrevity-api`) and has since become the **source of truth**; the Spring repo is historical context only. Phase 1 (auth, user, note, common, crypto) and Phase 2 (project, task, calendar, reminder, vault, gmail) are fully shipped. The most recent additions are a central push-notification system and the Evkat (time-blocking) domain.
 
 Two apps share a Bun workspace: `apps/api` is a NestJS 10 backend with TypeORM, Postgres, JWT auth, global response envelope, soft-delete + audit base entity, per-minute notification cron, and `@nestjs/throttler`. `apps/web` is a Next.js 15 App Router frontend with React 19, Tailwind 4, and TanStack Query, wired exclusively to the NestJS contract. The web is always subordinate to the API — when the two disagree, fix the web.
 
@@ -262,28 +262,6 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 
 ---
 
-### `list/` — todo lists with items
-
-**Path**: `apps/api/src/list/`  
-**Purpose**: Named todo lists (archived flag, position) containing checklist items with optional due dates and lead-time notifications.  
-**Persisted state**: `todo_list` (name, color, icon, archived, position), `list_item` (text, done, due_at, position, notify_minutes_before).  
-**HTTP surface**:
-
-| Verb | Path |
-|---|---|
-| `GET/POST` | `/api/lists` |
-| `PUT/DELETE` | `/api/lists/:id` |
-| `PATCH` | `/api/lists/reorder` |
-| `GET/POST` | `/api/lists/:id/items` |
-| `PUT/DELETE` | `/api/lists/:id/items/:itemId` |
-| `POST` | `/api/lists/:id/items/:itemId/toggle` |
-| `PATCH` | `/api/lists/:id/items/reorder` |
-
-**Cross-module deps**: imports `NotificationModule` (to sync notifications on item mutations).  
-**Notable invariants**: `notify_minutes_before` added to `list_item` in migration `1715000009000`. `syncNotification()` is called after every create/update/toggle/delete of a list item (same pattern as Reminder).
-
----
-
 ### `project/` — projects
 
 **Path**: `apps/api/src/project/`  
@@ -316,25 +294,6 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 
 **Cross-module deps**: imports `ProjectModule` (validates project ownership), `NotificationModule`; exports `TaskService` (consumed by `AiModule`).  
 **Notable invariants**: `notify_minutes_before` added in migration `1715000009000`. `syncNotification()` called on every mutation.
-
----
-
-### `plan/` — plans with items
-
-**Path**: `apps/api/src/plan/`  
-**Purpose**: Goal-oriented plans containing ordered items (milestones/steps) with status tracking.  
-**Persisted state**: `plan` (title, description, target_date DATE, status), `plan_item` (plan_id FK, text, done, position, target_date DATE).  
-**HTTP surface**:
-
-| Verb | Path |
-|---|---|
-| `GET/POST` | `/api/plans` |
-| `GET/PUT/DELETE` | `/api/plans/:id` |
-| `POST/PUT/DELETE` | `/api/plans/:id/items`, `/api/plans/:id/items/:itemId` |
-| `PATCH` | `/api/plans/:id/items/reorder` |
-
-**Cross-module deps**: exports `PlanService` (consumed by `AiModule`).  
-**Notable invariants**: `target_date` fields are date-only; no notifications in V1. RRULE-based recurring fan-out is deferred (Faz 5).
 
 ---
 
@@ -432,7 +391,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 **Path**: `apps/api/src/notification/`  
 **Purpose**: Unified notification queue (scheduled-at table) + web-push delivery + in-app bell feed.  
 **Persisted state**:
-- `notification` (owner_id, kind VARCHAR(32), source_id, scheduled_at, dispatched_at, read_at, title, body, deep_link) — `kind` ∈ `'reminder' | 'task' | 'list_item' | 'calendar_event' | 'time_block'`.
+- `notification` (owner_id, kind VARCHAR(32), source_id, scheduled_at, dispatched_at, read_at, title, body, deep_link) — `kind` ∈ `'reminder' | 'task' | 'calendar_event' | 'time_block'`.
 - `push_subscription` (owner_id, endpoint TEXT, p256dh TEXT, auth TEXT, user_agent, last_used_at).
 
 **HTTP surface**:
@@ -447,7 +406,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 | `POST` | `/api/notifications/push-subscriptions` | Register device (throttled 10/60s) |
 | `DELETE` | `/api/notifications/push-subscriptions` | Unregister device |
 
-**Cross-module deps**: imported by `reminder`, `list`, `task`, `calendar`, `time-block`; exports `NotificationService`.  
+**Cross-module deps**: imported by `reminder`, `task`, `calendar`, `time-block`; exports `NotificationService`.  
 **Notable invariants**:
 - `enqueue()` is idempotent: the partial-unique index `uq_notification_source_live` on `(owner_id, kind, source_id, scheduled_at) WHERE deleted_at IS NULL` turns a duplicate enqueue into an UPDATE of the existing row (refreshes title/body copy if the domain entity was edited).
 - `cancelForSource()` soft-deletes all undispatched rows for a source — call before re-enqueue on update.
@@ -491,7 +450,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 ### `ai/` — AI chat and suggestions via Gemini
 
 **Path**: `apps/api/src/ai/`  
-**Purpose**: Persistent chat conversations with a Gemini LLM, injecting the user's current projects, plans, and notes as context. A secondary suggestion controller provides one-shot AI hints.  
+**Purpose**: Persistent chat conversations with a Gemini LLM, injecting the user's current projects and notes as context. A secondary suggestion controller provides one-shot AI hints.  
 **Persisted state**: `ai_conversation` (owner_id, title), `ai_message` (owner_id, conversation_id, role VARCHAR(16), content TEXT).  
 **HTTP surface**:
 
@@ -503,8 +462,8 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 | `POST` | `/api/ai/conversations/:id/messages` |
 | `POST` | `/api/ai/suggestions` |
 
-**Cross-module deps**: imports `ProjectModule`, `PlanModule`, `NoteModule`, `ReminderModule`, `TaskModule` (to read context for the system prompt).  
-**Notable invariants**: `AiChatService` fetches up to 20 recent projects/plans/notes as context and the last 20 messages as history. Gemini is called via plain `fetch` to `https://generativelanguage.googleapis.com/v1beta/models/…`. `GOOGLE_GEMINI_API_KEY` env var required; feature degrades gracefully if absent (throws 500 on first use).
+**Cross-module deps**: imports `ProjectModule`, `NoteModule`, `ReminderModule`, `TaskModule` (to read context for the system prompt).  
+**Notable invariants**: `AiChatService` fetches up to 20 recent projects/notes as context and the last 20 messages as history. Gemini is called via plain `fetch` to `https://generativelanguage.googleapis.com/v1beta/models/…`. `GOOGLE_GEMINI_API_KEY` env var required; feature degrades gracefully if absent (throws 500 on first use).
 
 ---
 
@@ -520,7 +479,7 @@ Modules are explicit — no component scanning. All are listed in `apps/api/src/
 
 The `(app)` layout (`apps/web/src/app/(app)/layout.tsx`) is a client component that calls `useAuth()` and redirects on `!isAuthenticated`. It also mounts `<NotificationPermissionPrompt />` so the prompt appears once per session on any app page.
 
-Domain routes under `(app)`: `dashboard`, `notes`, `notes/[id]`, `notes/new`, `lists`, `lists/[id]`, `projects`, `projects/[code]`, `plans`, `plans/[id]`, `calendar`, `reminders`, `reminders/[listId]`, `vault`, `gmail`, `ai`, `evkat`, `settings`, `settings/profile`.
+Domain routes under `(app)`: `dashboard`, `notes`, `notes/[id]`, `notes/new`, `projects`, `projects/[code]`, `calendar`, `reminders`, `reminders/[listId]`, `vault`, `gmail`, `ai`, `evkat`, `settings`, `settings/profile`.
 
 ### Provider stack (root `layout.tsx`)
 
@@ -630,14 +589,14 @@ Files in `apps/api/src/db/migrations/`, applied in timestamp order by `bun run m
 |---|---|
 | `1715000000000-Baseline.ts` | Phase 1 schema: `role`, `app_user`, `app_user_role`, `refresh_token`, `note_tag`, `note`, `note_tag_assignment`, `todo_list`, `list_item` + all indexes. |
 | `1715000001000-SeedAdmin.ts` | Inserts `admin@admin.com / admin` (bcrypt). Idempotent — no-op if the row exists. |
-| `1715000002000-Phase2.ts` | Phase 2 schema: `project`, `task`, `plan`, `plan_item`, `calendar_event`, `reminder_list`, `reminder`, `vault_entity`, `vault_item`, `gmail_account`, `gmail_message`. |
+| `1715000002000-Phase2.ts` | Phase 2 schema: `project`, `task`, `calendar_event`, `reminder_list`, `reminder`, `vault_entity`, `vault_item`, `gmail_account`, `gmail_message`. |
 | `1715000003000-RemoveDefaultAdmin.ts` | Prod-only: replaces the seeded admin with one from env vars (`HUSREVITY_INITIAL_ADMIN_EMAIL` + `HUSREVITY_INITIAL_ADMIN_PASSWORD_HASH`), then deletes `admin@admin.com`. Throws if default exists and env vars missing in `NODE_ENV=production`. No-op in dev. |
 | `1715000004000-DropRoles.ts` | Drops `app_user_role` and `role` tables. All users are equal; isolation is by `owner_id` only. |
 | `1715000005000-AddNoteColor.ts` | Adds `color_hex VARCHAR(16)` to `note` (Google-Keep-style background colour). |
 | `1715000006000-AiTables.ts` | Creates `ai_conversation` and `ai_message` with owner + conversation indexes. |
 | `1715000007000-AccountProvider.ts` | Adds `provider VARCHAR(16) DEFAULT 'google'` to `gmail_account`; widens uniqueness constraint to include provider. |
 | `1715000008000-GmailAccountUniquePartial.ts` | Replaces the plain `UNIQUE` constraint on `(owner_id, email, provider)` with a partial unique index `WHERE deleted_at IS NULL` so soft-deleted accounts can be reconnected. |
-| `1715000009000-NotificationsAndTimeBlock.ts` | Creates `push_subscription`, `notification` (with idempotent partial-unique index on `(owner_id, kind, source_id, scheduled_at)`), and `time_block`. Adds `notify_minutes_before` to `reminder`, `task`, and `list_item`. |
+| `1715000009000-NotificationsAndTimeBlock.ts` | Creates `push_subscription`, `notification` (with idempotent partial-unique index on `(owner_id, kind, source_id, scheduled_at)`), and `time_block`. Adds `notify_minutes_before` to `reminder` and `task`. |
 
 Migration invariants:
 - `synchronize: false` always — never let TypeORM auto-sync.
@@ -684,7 +643,7 @@ Default login (dev): `admin@admin.com / admin`.
 
 - **Calendar RRULE fan-out deferred**: `calendar_event.recurrence_rule` is stored but a single recurring event generates at most one `notification` row (the next occurrence). Per-occurrence fan-out is planned for Faz 5.
 
-- **Plan/PlanItem and Project date fields**: `plan.target_date`, `plan_item.target_date`, `project.start_date`/`end_date` are date-only columns. They do not trigger notifications in V1.
+- **Project date fields**: `project.start_date`/`end_date` are date-only columns. They do not trigger notifications in V1.
 
 - **No mailer**: there is no email-sending integration. All notifications are in-app bell + optional web-push.
 
@@ -700,9 +659,9 @@ Default login (dev): `admin@admin.com / admin`.
 | **RequestContext** | An `AsyncLocalStorage<{ userId, email }>` entered by `JwtAuthGuard` on every authenticated request. `AuditSubscriber` reads it to populate `createdById`/`updatedById`; services call `getCurrentUserId()` when they need the caller's ID outside of a DI chain. |
 | **AuditSubscriber** | A TypeORM `EntitySubscriberInterface` that fires `beforeInsert` and `beforeUpdate` for every `BaseEntity` subclass, setting `createdById`/`updatedById` from `RequestContext`. Registered in `typeorm.config.ts`. |
 | **Vault** | The encrypted secrets store. `vault_entity` groups `vault_item` rows whose `value_enc` is AES-256-GCM ciphertext. |
-| **syncNotification()** | Private method on `ReminderService`, `TaskService`, `ListService`, `CalendarService`, and `TimeBlockService`. Called after every create/update/toggle: cancels any prior undispatched notification for the source entity and re-enqueues at `dueAt - notifyMinutesBefore`. Pattern is identical across all five modules. |
+| **syncNotification()** | Private method on `ReminderService`, `TaskService`, `CalendarService`, and `TimeBlockService`. Called after every create/update/toggle: cancels any prior undispatched notification for the source entity and re-enqueues at `dueAt - notifyMinutesBefore`. Pattern is identical across all four modules. |
 | **Partial unique index** | Postgres `WHERE deleted_at IS NULL` unique index. Used by `notification` (`uq_notification_source_live`), `push_subscription` (`uq_push_subscription_endpoint_live`), and `gmail_account` (`uq_gmail_account_owner_email_provider`) to allow soft-deleted rows to be "resurrected" without colliding on the uniqueness constraint. |
-| **Phase 1 / Phase 2** | The two development phases during which Spring Boot modules were ported to NestJS. Phase 1: auth, user, note, list, common, crypto. Phase 2: project, task, plan, calendar, reminder, vault, gmail. Both are fully shipped as of commit `0f549d1`. |
+| **Phase 1 / Phase 2** | The two development phases during which Spring Boot modules were ported to NestJS. Phase 1: auth, user, note, common, crypto. Phase 2: project, task, calendar, reminder, vault, gmail. Both are fully shipped as of commit `0f549d1`. |
 
 ---
 

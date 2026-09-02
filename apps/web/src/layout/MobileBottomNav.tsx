@@ -13,11 +13,7 @@ import {
   BiCalendar,
   BiDotsHorizontalRounded,
   BiFolder,
-  BiListUl,
-  BiBookOpen,
   BiDumbbell,
-  BiTargetLock,
-  BiWallet,
   BiLockAlt,
   BiShield,
 } from "react-icons/bi";
@@ -29,11 +25,7 @@ type MoreItem = { key: string; path: string; icon: IconType };
 const MORE_ITEMS: MoreItem[] = [
   { key: "nav.projects", path: "/projects", icon: BiFolder },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
-  { key: "nav.lists", path: "/lists", icon: BiListUl },
-  { key: "nav.readings", path: "/readings", icon: BiBookOpen },
   { key: "nav.sport", path: "/sport", icon: BiDumbbell },
-  { key: "nav.plans", path: "/plans", icon: BiTargetLock },
-  { key: "nav.finance", path: "/finance", icon: BiWallet },
   { key: "nav.vault", path: "/vault", icon: BiLockAlt },
 ];
 

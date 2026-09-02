@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { PageHeader } from "@/components/ui";
 import { Dropdown } from "@/components/dropdown/Dropdown";
 import { DropdownItem } from "@/components/dropdown/DropdownItem";
 import {
@@ -748,16 +748,18 @@ export default function VaultPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageBreadcrumb pageTitle={t("vault.title")} />
-        <button
-          type="button"
-          onClick={() => setShowEntityModal(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-brand-500 px-3 py-2 text-sm text-white hover:bg-brand-600"
-        >
-          <BiPlus size={16} /> {t("vault.newEntity")}
-        </button>
-      </div>
+      <PageHeader
+        pageTitle={t("vault.title")}
+        actions={
+          <button
+            type="button"
+            onClick={() => setShowEntityModal(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-brand-500 px-3 py-2 text-sm text-white hover:bg-brand-600"
+          >
+            <BiPlus size={16} /> {t("vault.newEntity")}
+          </button>
+        }
+      />
 
       <div
         className="flex gap-0 rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06] overflow-hidden"

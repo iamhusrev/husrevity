@@ -15,11 +15,8 @@ import { Notification, NotificationKind } from '../notification.entity';
 const KINDS: NotificationKind[] = [
   'reminder',
   'task',
-  'list_item',
   'calendar_event',
   'time_block',
-  'debt',
-  'finance_installment',
 ];
 
 export class NotificationResponseDto {

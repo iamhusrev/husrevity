@@ -27,9 +27,7 @@ Next.js 15 (App Router) + React 19 + TypeScript 5 + Tailwind CSS 4 üzerine kuru
 | **Dashboard**     | KPI kartları, bugünün ajandası, yaklaşan/geciken anımsatıcılar, görev durum dağılımı, son notlar  |
 | **Notlar**        | Markdown gövde, etiketler, sabitleme (pin), sürükle-bırak sıralama, modal düzenleme               |
 | **Anımsatıcılar** | Liste bazlı anımsatıcılar, öncelik + zaman damgası, geciken/bugün/bu hafta gruplaması             |
-| **Listeler**      | Görev listeleri (todo) — basit, hızlı yakala, tamamlandığında italik üstü çizgili görünüm         |
 | **Projeler**      | Kanban + List görünümü, durum/öncelik etiketleri, sürükle-bırak görev taşıma, alt görev sayaçları |
-| **Planlar**       | Milestone tabanlı uzun vadeli planlar, serif italic ay etiketleri                                 |
 | **Takvim**        | FullCalendar (day / week / month / list), bugünün hücresi amber vurguluk, mono gün başlıkları     |
 | **Gmail**         | Bağlı Gmail hesapları, thread listesi, sand-ring satır hover                                      |
 | **Vault**         | AES-256-GCM at-rest şifreli kimlik bilgisi yöneticisi (.env import/export), kopyalama maskeleme   |
@@ -127,9 +125,7 @@ src/
 │   │   ├── dashboard/
 │   │   ├── notes/
 │   │   ├── reminders/
-│   │   ├── lists/
 │   │   ├── projects/[code]/
-│   │   ├── plans/[id]/
 │   │   ├── calendar/
 │   │   ├── gmail/
 │   │   ├── vault/
@@ -147,9 +143,9 @@ src/
 │   └── modal/                   # Modal + DeleteConfirmModal
 │
 ├── views/                       # sayfa-seviyesi bileşik component'ler
-│   ├── notes/, vault/, lists/, projects/, plans/, calendar/, gmail/, reminders/, settings/, auth/
+│   ├── notes/, vault/, projects/, calendar/, gmail/, reminders/, settings/, auth/
 │
-├── hooks/                       # useNotes, useVault, useLists, useProjects, usePlans,
+├── hooks/                       # useNotes, useVault, useProjects,
 │                                # useCalendarEvents, useGmail, useReminders, useModal, useGoBack
 │
 ├── services/                    # api-client.ts, http-service.ts, ve domain servisleri
@@ -159,7 +155,7 @@ src/
 ├── icons/                       # ~64 inline SVG icon component
 ├── messages/                    # i18n JSON: tr.json, en.json
 ├── utils/                       # api-endpoints, constants-url, handleError, ...
-└── types/                       # TS arayüzleri (note, vault, list, project, plan, ...)
+└── types/                       # TS arayüzleri (note, vault, project, ...)
 ```
 
 ---

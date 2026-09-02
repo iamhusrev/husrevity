@@ -50,23 +50,6 @@ export const VAULT_ENDPOINTS = {
   IMPORT_CSV: (entityId: string | number) => `/vault/import-csv?entityId=${entityId}`,
 };
 
-// ─── Lists (todo) ─────────────────────────────────────────────────────────────
-
-export const LIST_ENDPOINTS = {
-  ALL: "/lists",
-  BY_ID: (id: number) => `/lists/${id}`,
-  RESTORE: (id: number) => `/lists/${id}/restore`,
-  REORDER: "/lists/reorder",
-  ITEMS: (id: number) => `/lists/${id}/items`,
-  ITEMS_REORDER: (id: number) => `/lists/${id}/items/reorder`,
-  ITEM_BY_ID: (id: number) => `/list-items/${id}`,
-  ITEM_RESTORE: (id: number) => `/list-items/${id}/restore`,
-  ITEM_TOGGLE: (id: number) => `/list-items/${id}/toggle`,
-  SECTIONS: (id: number) => `/lists/${id}/sections`,
-  SECTIONS_REORDER: (id: number) => `/lists/${id}/sections/reorder`,
-  SECTION_BY_ID: (id: number) => `/list-sections/${id}`,
-};
-
 // ─── Projects & Tasks ─────────────────────────────────────────────────────────
 
 export type ProjectFilter = "all" | "mine" | "shared";
@@ -92,17 +75,6 @@ export const PROJECT_INVITE_PUBLIC_ENDPOINTS = {
   LOOKUP: (token: string) => `/project-invites/${token}`,
   ACCEPT: (token: string) => `/project-invites/${token}/accept`,
   REGISTER: (token: string) => `/project-invites/${token}/register`,
-};
-
-// ─── Plans ────────────────────────────────────────────────────────────────────
-
-export const PLAN_ENDPOINTS = {
-  ALL: "/plans",
-  BY_ID: (id: number) => `/plans/${id}`,
-  RESTORE: (id: number) => `/plans/${id}/restore`,
-  ITEMS: (id: number) => `/plans/${id}/items`,
-  ITEM_BY_ID: (id: number) => `/plan-items/${id}`,
-  ITEM_RESTORE: (id: number) => `/plan-items/${id}/restore`,
 };
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
@@ -150,18 +122,6 @@ export const ROUTINE_ENDPOINTS = {
   ACTIVITY_BY_ID: (id: string) => `/routine/activities/${id}`,
 };
 
-// ─── Okumalar (reading / habit tracker) ───────────────────────────────────────
-
-export const READING_ENDPOINTS = {
-  TRACKS: "/reading-tracks",
-  TRACK_BY_ID: (id: string) => `/reading-tracks/${id}`,
-  TRACKS_REORDER: "/reading-tracks/reorder",
-  LOGS: (from: string, to: string) =>
-    `/reading-tracks/logs?from=${from}&to=${to}`,
-  LOG_FOR_DATE: (id: string, date: string) =>
-    `/reading-tracks/${id}/logs/${date}`,
-};
-
 // ─── Users (directory) ──────────────────────────────────────────────────────
 
 export const USER_DIRECTORY_ENDPOINTS = {
@@ -204,28 +164,4 @@ export const SPORT_ENDPOINTS = {
     const qs = params.toString();
     return qs ? `/sport/stats?${qs}` : "/sport/stats";
   },
-};
-
-// ─── Finance ──────────────────────────────────────────────────────────────────
-
-export const FINANCE_ENDPOINTS = {
-  ACCOUNTS: "/finance/accounts",
-  ACCOUNT_BY_ID: (id: string) => `/finance/accounts/${id}`,
-  CATEGORIES: "/finance/categories",
-  CATEGORY_BY_ID: (id: string) => `/finance/categories/${id}`,
-  TRANSACTIONS: "/finance/transactions",
-  TRANSACTION_BY_ID: (id: string) => `/finance/transactions/${id}`,
-  TRANSFERS: "/finance/transfers",
-  DEBTS: "/finance/debts",
-  DEBT_BY_ID: (id: string) => `/finance/debts/${id}`,
-  DEBT_SETTLE: (id: string) => `/finance/debts/${id}/settle`,
-  DEBT_PAY: (id: string) => `/finance/debts/${id}/pay`,
-  DEBT_PAYMENTS: (id: string) => `/finance/debts/${id}/payments`,
-  ASSETS: "/finance/assets",
-  ASSET_BY_ID: (id: string) => `/finance/assets/${id}`,
-  LOANS: "/finance/loans",
-  LOAN_BY_ID: (id: string) => `/finance/loans/${id}`,
-  LOAN_INSTALLMENT_PAY: (loanId: string, installmentId: string) =>
-    `/finance/loans/${loanId}/installments/${installmentId}/pay`,
-  SUMMARY: "/finance/summary",
 };

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { PageHeader } from "@/components/ui";
 import {
   useCreateProject,
   useDeleteProject,
@@ -201,34 +201,34 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <PageBreadcrumb
+      <PageHeader
         pageTitle={t("projects.title")}
         kicker={t("projects.kicker")}
         flourish={t("projects.flourish")}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={handleExportAll}
+              disabled={projects.length === 0}
+              className="husrev-btn-ghost disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <BiDownload size={16} /> {t("projects.export")}
+            </button>
+            <button onClick={() => setShowModal(true)} className="husrev-btn">
+              <BiPlus size={16} /> {t("projects.newProject")}
+            </button>
+          </>
+        }
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-xl text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-          {t("projects.introBefore")}{" "}
-          <span className="font-instrument-serif italic text-husrev-ember dark:text-husrev-amber">
-            {t("projects.introEm")}
-          </span>{" "}
-          {t("projects.introAfter")}
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleExportAll}
-            disabled={projects.length === 0}
-            className="husrev-btn-ghost disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <BiDownload size={16} /> {t("projects.export")}
-          </button>
-          <button onClick={() => setShowModal(true)} className="husrev-btn">
-            <BiPlus size={16} /> {t("projects.newProject")}
-          </button>
-        </div>
-      </div>
+      <p className="max-w-xl text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+        {t("projects.introBefore")}{" "}
+        <span className="font-instrument-serif italic text-husrev-ember dark:text-husrev-amber">
+          {t("projects.introEm")}
+        </span>{" "}
+        {t("projects.introAfter")}
+      </p>
 
       <div className="inline-flex rounded-xl ring-1 ring-husrev-sand/90 bg-white/60 p-1 dark:bg-husrev-shadow dark:ring-white/[0.06]">
         {(["all", "mine", "shared"] as const).map((f) => (

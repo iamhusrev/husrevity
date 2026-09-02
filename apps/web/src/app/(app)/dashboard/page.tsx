@@ -8,8 +8,6 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import StatCard from "@/components/dashboard/StatCard";
 import TodaySuggestionsCard from "@/components/dashboard/TodaySuggestionsCard";
 import RoutineNowCard from "@/components/dashboard/RoutineNowCard";
-import TodayReadingsCard from "@/components/dashboard/TodayReadingsCard";
-import ListsOverviewCard from "@/components/dashboard/ListsOverviewCard";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNotes } from "@/hooks/useNotes";
 import { useReminderLists } from "@/hooks/useReminders";
@@ -17,7 +15,6 @@ import { useProjects } from "@/hooks/useProjects";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { useVaultEntities } from "@/hooks/useVault";
 import { useRoutineSegments } from "@/hooks/useRoutine";
-import { useReadingTracks } from "@/hooks/useReading";
 import { reminderService } from "@/services/reminder-service";
 import { projectService } from "@/services/project-service";
 import { ReminderResponse } from "@/types/reminder/reminder";
@@ -30,7 +27,6 @@ import {
   BiCalendar,
   BiLockAlt,
   BiPin,
-  BiBookOpen,
 } from "react-icons/bi";
 import { HiOutlineClock } from "react-icons/hi2";
 
@@ -86,7 +82,6 @@ export default function DashboardPage() {
   const { data: events = [] } = useCalendarEvents(weekRange);
   const { data: vaultEntries = [] } = useVaultEntities();
   const { data: routineSegments = [] } = useRoutineSegments();
-  const { data: readingTracks = [] } = useReadingTracks();
 
   // Parallel: reminders for every list
   const reminderQueries = useQueries({
@@ -193,7 +188,7 @@ export default function DashboardPage() {
   const dayLabel = formatWeekdayDayMonth(now);
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <PageBreadcrumb
         pageTitle={t("nav.dashboard")}
         kicker={t("dashboard.kicker")}
@@ -247,14 +242,8 @@ export default function DashboardPage() {
       {/* Today's AI suggestion — the dashboard's actionable focal widget */}
       <TodaySuggestionsCard />
 
-      {/* Daily ritual — what to do right now (routine) + today's readings */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <RoutineNowCard />
-        <TodayReadingsCard />
-      </div>
-
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4 husrev-stagger">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6 husrev-stagger">
         <StatCard
           icon={<BiNote size={22} />}
           label={t("dashboard.stat.notes")}
@@ -289,6 +278,7 @@ export default function DashboardPage() {
           href="/calendar"
           tone="amber"
         />
+        {/* Vault is stat-only by design — never preview vault contents on the dashboard */}
         <StatCard
           icon={<BiLockAlt size={22} />}
           label={t("dashboard.stat.vault")}
@@ -304,20 +294,11 @@ export default function DashboardPage() {
           href="/evkat"
           tone="moss"
         />
-        <StatCard
-          icon={<BiBookOpen size={22} />}
-          label={t("dashboard.stat.readings")}
-          value={readingTracks.length}
-          href="/readings"
-          tone="amber"
-        />
       </div>
 
-      {/* Lists overview — per-list completion progress */}
-      <ListsOverviewCard />
-
-      {/* Today's events + Due reminders */}
+      {/* Row A: RoutineNowCard | Today's Agenda */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <RoutineNowCard />
         <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-5 dark:bg-husrev-shadow dark:ring-white/[0.06]">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
@@ -354,7 +335,10 @@ export default function DashboardPage() {
             </ul>
           )}
         </section>
+      </div>
 
+      {/* Row B: Upcoming Reminders | Recent Notes */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-5 dark:bg-husrev-shadow dark:ring-white/[0.06]">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
@@ -373,7 +357,7 @@ export default function DashboardPage() {
               {groupedReminders.overdue.length > 0 && (
                 <ReminderGroup
                   title={t("dashboard.reminderGroup.overdue")}
-                  tone="red"
+                  tone="ember"
                   items={groupedReminders.overdue}
                   moreLabel={(n) => t("dashboard.reminderGroup.more", { count: n })}
                 />
@@ -389,7 +373,7 @@ export default function DashboardPage() {
               {groupedReminders.week.length > 0 && (
                 <ReminderGroup
                   title={t("dashboard.reminderGroup.thisWeek")}
-                  tone="gray"
+                  tone="ink"
                   items={groupedReminders.week}
                   moreLabel={(n) => t("dashboard.reminderGroup.more", { count: n })}
                 />
@@ -397,47 +381,7 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
-      </div>
-
-      {/* Tasks by status + Recent notes */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-5 dark:bg-husrev-shadow dark:ring-white/[0.06]">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
-              {t("dashboard.tasksTitle")}
-            </h3>
-            <Link href="/projects" className="text-xs text-brand-500 hover:underline">
-              {t("dashboard.projectsLink")} →
-            </Link>
-          </div>
-          {totalTasks === 0 ? (
-            <p className="py-6 text-center text-sm text-gray-400">{t("dashboard.noTasks")}</p>
-          ) : (
-            <div className="space-y-3">
-              {(Object.keys(TASK_STATUS_TONES) as TaskStatus[]).map((s) => {
-                const count = tasksByStatus[s];
-                const pct = totalTasks > 0 ? (count / totalTasks) * 100 : 0;
-                return (
-                  <div key={s}>
-                    <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="font-medium text-gray-600 dark:text-gray-400">
-                        {t(`dashboard.taskStatus.${s}`)}
-                      </span>
-                      <span className="text-gray-500">{count}</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-                      <div
-                        className={`h-full transition-all ${TASK_STATUS_TONES[s]}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
+        
         <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-5 dark:bg-husrev-shadow dark:ring-white/[0.06]">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
@@ -477,6 +421,44 @@ export default function DashboardPage() {
           )}
         </section>
       </div>
+
+      {/* Row C: Tasks by status */}
+      <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-5 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
+            {t("dashboard.tasksTitle")}
+          </h3>
+          <Link href="/projects" className="text-xs text-brand-500 hover:underline">
+            {t("dashboard.projectsLink")} →
+          </Link>
+        </div>
+        {totalTasks === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-400">{t("dashboard.noTasks")}</p>
+        ) : (
+          <div className="space-y-3">
+            {(Object.keys(TASK_STATUS_TONES) as TaskStatus[]).map((s) => {
+              const count = tasksByStatus[s];
+              const pct = totalTasks > 0 ? (count / totalTasks) * 100 : 0;
+              return (
+                <div key={s}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      {t(`dashboard.taskStatus.${s}`)}
+                    </span>
+                    <span className="text-gray-500">{count}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div
+                      className={`h-full transition-all ${TASK_STATUS_TONES[s]}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
@@ -488,15 +470,15 @@ function ReminderGroup({
   moreLabel,
 }: {
   title: string;
-  tone: "red" | "amber" | "gray";
+  tone: "ember" | "amber" | "ink";
   items: ReminderResponse[];
   moreLabel: (count: number) => string;
 }) {
   const dotClass =
-    tone === "red" ? "bg-red-500" : tone === "amber" ? "bg-husrev-amber" : "bg-gray-400";
+    tone === "ember" ? "bg-husrev-ember" : tone === "amber" ? "bg-husrev-amber" : "bg-husrev-ink";
   const titleClass =
-    tone === "red"
-      ? "text-red-600 dark:text-red-400"
+    tone === "ember"
+      ? "text-husrev-ember dark:text-husrev-amber"
       : tone === "amber"
         ? "text-husrev-ember dark:text-husrev-amber"
         : "text-gray-500 dark:text-gray-400";

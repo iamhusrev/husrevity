@@ -11,7 +11,7 @@ Bun-workspace monorepo with two apps:
 
 `packages/` is reserved for cross-app TS types (`shared-types/`) but is currently empty.
 
-> Phase 1 (auth, user, note, list, common, crypto) and Phase 2 (project, task, plan, calendar, reminder, vault, gmail) are **both shipped** as of commit `0f549d1`. All Spring modules now have NestJS counterparts.
+> Phase 1 (auth, user, note, common, crypto) and Phase 2 (project, task, calendar, reminder, vault, gmail) are **both shipped** as of commit `0f549d1`. All Spring modules now have NestJS counterparts.
 
 ## Commands (run from repo root)
 
@@ -94,7 +94,7 @@ Each feature module is self-contained: `<feature>.module.ts`, controller, servic
 - `common/` — `BaseEntity`, `ApiException`, `ResponseInterceptor`, `GlobalExceptionFilter`, `RolesGuard`, `AuditSubscriber`, `RequestContext`, `@Public()`, `@CurrentUser()`, `@Roles()`, `HealthController`.
 - `auth/` — register/login/refresh/logout, JWT issuance, `RefreshToken` entity, `JwtStrategy`, `JwtAuthGuard`.
 - `user/` — `User` + `Role`, `/me` endpoint.
-- `note/`, `list/`, `task/`, `plan/`, `calendar/`, `reminder/`, `vault/` — domain modules (full CRUD, all gated by JWT + ownerId). `ai/` serves only the "today's suggestions" endpoint (Gemini) and, for privacy, only ever sees the caller's own projects/tasks via `ProjectService.listOwned()` — never shared ones. The former `gmail/` module and AI chat were removed (migration `DropGmailAndAiChat`).
+- `note/`, `task/`, `calendar/`, `reminder/`, `vault/` — domain modules (full CRUD, all gated by JWT + ownerId). `ai/` serves only the "today's suggestions" endpoint (Gemini) and, for privacy, only ever sees the caller's own projects/tasks via `ProjectService.listOwned()` — never shared ones. The former `gmail/` module and AI chat were removed (migration `DropGmailAndAiChat`).
 - `project/` — multi-user project collaboration: `ProjectService`/`ProjectController` (id-based CRUD + `?filter=all|mine|shared`), `ProjectAccessService` (the single OWNER/EDITOR/VIEWER access gate, used by both `project` and `task`), `ProjectMemberService`/`ProjectMemberController` (`/projects/:projectId/members[/:memberId|/me]`), `ProjectInviteService` + two controllers split across modules to keep the dependency graph one-directional (`ProjectInviteController` here for public lookup/authenticated-accept; `auth/project-invite-register.controller.ts` for the brand-new-account register flow, since only `AuthModule` may depend on `ProjectModule`, never the reverse). Migration `AddProjectCollaboration` added `project_member`, `project_invite`, and `task.assignee_id`.
 - `crypto/` — AES-GCM `CryptoService` (used by Vault).
 - `config/typeorm.config.ts` — entity globs `**/*.entity.{ts,js}`, migration glob `db/migrations/*.{ts,js}`. `synchronize: false` always.
@@ -104,11 +104,11 @@ Each feature module is self-contained: `<feature>.module.ts`, controller, servic
 
 Next.js 15 App Router + React 19 + Tailwind 4 + TanStack Query. Forked from `../husrevity-web` and **synced to the NestJS contract** (it no longer tracks upstream `husrevity-web` / Spring). `NEXT_PUBLIC_API_URL=http://localhost:4090/api` in dev.
 
-- Route groups: `(landing)` (public), `(auth)` (login, plus the public `invite/[token]` and `project-invite/[token]` acceptance pages), `(app)` (protected — layout redirects unauthenticated users). Domain pages: `dashboard`, `notes`, `lists`, `projects`, `plans`, `calendar`, `reminders`, `vault`, `settings`. `projects/[projectId]` is id-based (not `[code]` — see the API conventions note on project collaboration); `ProjectDetailPage` derives `role`/`canEdit`/`isOwner` from `ProjectResponse.role` and renders `MembersPanel` for sharing.
+- Route groups: `(landing)` (public), `(auth)` (login, plus the public `invite/[token]` and `project-invite/[token]` acceptance pages), `(app)` (protected — layout redirects unauthenticated users). Domain pages: `dashboard`, `notes`, `projects`, `calendar`, `reminders`, `vault`, `settings`. `projects/[projectId]` is id-based (not `[code]` — see the API conventions note on project collaboration); `ProjectDetailPage` derives `role`/`canEdit`/`isOwner` from `ProjectResponse.role` and renders `MembersPanel` for sharing.
 - Navigation: `layout/AppSidebar.tsx` renders grouped sections (`getNavSections`) on `xl+`; below `xl` (1280px) the sidebar is hidden and `layout/MobileBottomNav.tsx` provides a fixed 5-slot bottom bar (Reminders · Notes · Dashboard center · Calendar · "More" sheet).
 - Provider stack (root `layout.tsx`): `I18nProvider` → `ReactQueryProvider` → `AuthProvider` → `ThemeProvider` → `SidebarProvider`.
 - Auth: `AuthProvider` stores JWT in `localStorage`; `services/api-client.ts` is the axios instance that injects the Bearer token and auto-refreshes on 401/403 (skipping `/auth/*` to avoid loops). `auth-events.ts` is the pub/sub bridge for forced logout.
-- Data fetching: feature hooks in `src/hooks/` (e.g. `useNotes`, `useLists`, `useProjects`) wrap TanStack Query and call services in `src/services/`. Each hook file exports the full CRUD set (`useX`, `useCreateX`, `useUpdateX`, `useDeleteX`). Follow this pattern for new domains.
+- Data fetching: feature hooks in `src/hooks/` (e.g. `useNotes`, `useProjects`) wrap TanStack Query and call services in `src/services/`. Each hook file exports the full CRUD set (`useX`, `useCreateX`, `useUpdateX`, `useDeleteX`). Follow this pattern for new domains.
 - Backend response shape it expects: `{ success, message, code, data }` — same envelope the API emits.
 - Path alias: `@/` → `src/`. SVGs are React components via `@svgr/webpack` (`next.config.ts`).
 - i18n: `react-i18next` + `i18next-http-backend` + browser language detector; `<html lang>` is set dynamically.

@@ -6,7 +6,7 @@ describe('parseSuggestions', () => {
     validIds: new Set<string>([
       'note:n1',
       'reminder:r1',
-      'plan:p1',
+      'project:p1',
       'project:pr1',
       'task:t1',
     ]),
@@ -91,6 +91,17 @@ describe('parseSuggestions', () => {
         makeRow({ sourceRef: { type: 'gibberish', id: 'n1' } }),
       ]);
       const out = parseSuggestions(raw, 3, ctx);
+      expect(out[0].sourceRef).toBeNull();
+    });
+
+    it('drops a sourceRef with the removed plan type', () => {
+      const legacyCtx: ParseContext = {
+        validIds: new Set([...ctx.validIds, 'plan:p1']),
+      };
+      const raw = JSON.stringify([
+        makeRow({ sourceRef: { type: 'plan', id: 'p1' } }),
+      ]);
+      const out = parseSuggestions(raw, 3, legacyCtx);
       expect(out[0].sourceRef).toBeNull();
     });
   });

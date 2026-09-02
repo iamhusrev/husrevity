@@ -19,7 +19,6 @@ const SOURCE_TYPES = [
   'reminder',
   'task',
   'note',
-  'plan',
   'project',
 ] as const;
 

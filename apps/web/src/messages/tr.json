@@ -122,39 +122,22 @@
       "message": "İşleminiz tamamlandı."
     }
   },
-  "sidebar": {
-    "dashboard": "Panel",
-    "projects": "Projeler",
-    "tasks": "Görevler",
-    "allTasks": "Tüm Görevler",
-    "myTasks": "Görevlerim",
-    "archive": "Arşiv",
-    "users": "Kullanıcılar",
-    "settings": "Ayarlar",
-    "profile": "Profil",
-    "organization": "Organizasyon"
-  },
   "nav": {
     "dashboard": "Dashboard",
     "notes": "Notlar",
     "reminders": "Anımsatıcılar",
-    "lists": "Listeler",
     "projects": "Projeler",
-    "plans": "Planlar",
     "calendar": "Takvim",
     "vault": "Vault",
     "evkat": "Evkat",
-    "finance": "Finans",
     "admin": "Yönetim",
     "adminUsers": "Kullanıcılar",
     "settings": "Ayarlar",
     "profile": "Profil",
-    "readings": "Okumalar",
     "sport": "Spor",
     "section": {
-      "planning": "Planlama",
-      "work": "Çalışma",
-      "life": "Yaşam",
+      "core": "Temel",
+      "daily": "Günlük",
       "system": "Sistem"
     },
     "more": "Diğer"
@@ -245,233 +228,6 @@
     "loginHint": "{{email}} adresiyle zaten bir hesabın var. Devam etmek için o hesapla giriş yap.",
     "goToLogin": "Giriş yap"
   },
-  "finance": {
-    "title": "Finans",
-    "kicker": "Para defteri",
-    "flourish": "ekonomim",
-    "tab": {
-      "overview": "Özet",
-      "monthly": "Aylık",
-      "transactions": "İşlemler",
-      "accounts": "Hesaplar",
-      "debts": "Borçlar",
-      "assets": "Varlıklar",
-      "loans": "Krediler"
-    },
-    "stat": {
-      "totalBalance": "Toplam servet",
-      "monthIncome": "Bu ay gelir",
-      "monthExpense": "Bu ay gider",
-      "monthNet": "Net",
-      "totalAssets": "Toplam varlık",
-      "totalLiabilities": "Toplam borç",
-      "netWorth": "Net değer"
-    },
-    "month": {
-      "kicker": "Aylık defter",
-      "prev": "Önceki ay",
-      "next": "Sonraki ay",
-      "today": "Bu ay",
-      "movements": "Bu ayki hareketler",
-      "transfersSummary": "Transferler",
-      "empty": {
-        "title": "Bu ay hareket yok",
-        "body": "Seçtiğin ayda gelir, gider veya transfer kaydı bulunmuyor.",
-        "byCategory": "Bu ay kategorili işlem yok."
-      }
-    },
-    "netLabel": "Net",
-    "newTransaction": "Yeni işlem",
-    "newTransfer": "Transfer",
-    "newAccount": "Hesap ekle",
-    "newDebt": "Borç ekle",
-    "viewAll": "Tümü",
-    "transfer": {
-      "kicker": "Hesaplar arası",
-      "title": "Transfer",
-      "from": "Kaynak",
-      "to": "Hedef",
-      "submit": "Aktar",
-      "sameAccount": "Kaynak ve hedef hesap aynı olamaz."
-    },
-    "untitled": "(Açıklama yok)",
-    "uncategorised": "(Kategorisiz)",
-    "kind": {
-      "income": "Gelir",
-      "expense": "Gider",
-      "transfer": "Transfer"
-    },
-    "field": {
-      "name": "İsim",
-      "type": "Tip",
-      "amount": "Tutar (₺)",
-      "account": "Hesap",
-      "category": "Kategori",
-      "occurredAt": "Tarih",
-      "description": "Açıklama",
-      "notifyBefore": "Hatırlatma",
-      "notes": "Not",
-      "openingBalance": "Açılış bakiyesi (₺)"
-    },
-    "filter": {
-      "allAccounts": "Tüm hesaplar",
-      "allKinds": "Tüm türler"
-    },
-    "column": {
-      "date": "Tarih",
-      "account": "Hesap",
-      "description": "Açıklama",
-      "amount": "Tutar"
-    },
-    "section": {
-      "accounts": "Hesaplar",
-      "accountsAll": "Tüm hesaplar",
-      "recent": "Son işlemler",
-      "transactions": "İşlemler",
-      "upcoming": "Yaklaşan borçlar",
-      "debtsAll": "Borçlar & alacaklar",
-      "byCategory": "Kategoriye göre",
-      "assets": "Varlıklar",
-      "loans": "Krediler & taksitler",
-      "upcomingInstallments": "Yaklaşan taksitler"
-    },
-    "empty": {
-      "accounts": {
-        "title": "İlk hesabını ekle",
-        "body": "Banka, kart veya nakit cüzdan — gelirlerini ve giderlerini onlara bağlayacaksın."
-      },
-      "tx": {
-        "title": "Henüz işlem yok",
-        "body": "Bir gelir/gider girerek başla."
-      },
-      "debts": {
-        "title": "Sırada bekleyen borç yok",
-        "body": "Vadesi yaklaşan borçlar burada görünür."
-      },
-      "assets": {
-        "title": "Henüz varlık yok",
-        "body": "Gayrimenkul, araç, altın ya da yatırımlarını ekleyerek net değerini gör."
-      },
-      "loans": {
-        "title": "Kayıt yok",
-        "body": "Taksitli alışveriş ya da kredilerini ekle; tercihen faizsiz olanları."
-      },
-      "installments": {
-        "title": "Yaklaşan taksit yok",
-        "body": "Tercihen faizsiz bir taksit ekleyince burada görünür."
-      }
-    },
-    "modal": {
-      "newKicker": "Yeni",
-      "editKicker": "Düzenle",
-      "incomeTitle": "Gelir kaydı",
-      "expenseTitle": "Gider kaydı",
-      "invalidAmount": "Geçerli bir tutar gir.",
-      "noAccount": "Önce bir hesap ekle."
-    },
-    "account": {
-      "title": "Hesap",
-      "archived": "Arşivle (özet hesaplarda gösterilmez)",
-      "archivedTag": "Arşiv",
-      "openingShort": "Açılış"
-    },
-    "debt": {
-      "title": "Borç",
-      "iOwe": "Borçluyum",
-      "owedToMe": "Alacak",
-      "iOweTitle": "Borçlarım",
-      "owedToMeTitle": "Alacaklarım",
-      "counterparty": "Karşı taraf",
-      "interest": "Faiz (%)",
-      "dueAt": "Vade tarihi",
-      "settle": "Kapattım",
-      "reopen": "Tekrar aç",
-      "settledOn": "Kapatıldı: {{date}}",
-      "openStatus": "Açık borç",
-      "totalIOwe": "Kalan borcum",
-      "totalOwedToMe": "Kalan alacağım",
-      "settledTag": "Kapandı",
-      "showSettled": "Kapanmış olanları göster",
-      "noDueDate": "Vade yok",
-      "pay": {
-        "title": "Ödeme yap",
-        "collectTitle": "Tahsilat yap",
-        "remaining": "Kalan",
-        "paidSoFar": "Ödenen",
-        "submit": "Öde",
-        "invalidAmount": "Geçerli bir tutar gir.",
-        "exceeds": "Tutar kalan bakiyeyi aşıyor.",
-        "noAccount": "Bir hesap seç.",
-        "noAccountOption": "Hesap yok",
-        "expenseNote": "Bu ödeme seçili hesaptan gider olarak da kaydedilir.",
-        "incomeNote": "Bu tahsilat seçili hesaba gelir olarak da kaydedilir."
-      },
-      "payments": {
-        "title": "Ödemeler",
-        "empty": "Henüz ödeme yapılmadı."
-      }
-    },
-    "placeholders": {
-      "accountName": "Vakıfbank · Maaş",
-      "description": "İsteğe bağlı not",
-      "transferDescription": "Örn. Maaş transferi"
-    },
-    "assetsVsDebts": "Varlık / borç dengesi",
-    "newAsset": "Varlık ekle",
-    "newLoan": "Kredi ekle",
-    "asset": {
-      "title": "Varlık",
-      "name": "Ad",
-      "namePlaceholder": "Ev, araba, altın…",
-      "type": "Tür",
-      "value": "Değer (₺)",
-      "acquiredAt": "Edinim tarihi",
-      "confirmDeleteTitle": "Varlığı sil",
-      "confirmDelete": "Bu varlık kaydını silmek istediğine emin misin?"
-    },
-    "assetType": {
-      "cash": "Nakit",
-      "property": "Gayrimenkul",
-      "vehicle": "Araç",
-      "gold": "Altın",
-      "investment": "Yatırım",
-      "other": "Diğer"
-    },
-    "loan": {
-      "title": "Kredi / Taksit",
-      "name": "Ad",
-      "namePlaceholder": "Telefon taksiti",
-      "lender": "Kurum / mağaza",
-      "lenderPlaceholder": "Garanti BBVA",
-      "principal": "Toplam tutar (₺)",
-      "count": "Taksit sayısı",
-      "installment": "Aylık taksit (₺)",
-      "interestFree": "Faizsiz",
-      "interestRate": "Faiz oranı (%)",
-      "startDate": "İlk taksit tarihi",
-      "evenSplit": "Eşit böl",
-      "totalPlanned": "Toplam ödeme",
-      "lockedNote": "Ödeme yapıldıktan sonra taksit planı değiştirilemez. Planı değiştirmek için krediyi silip yeniden oluştur.",
-      "remaining": "Kalan",
-      "remainingTotal": "kalan",
-      "paidOf": "Ödenen",
-      "next": "Sıradaki",
-      "settled": "Bitti",
-      "zeroInterest": "%0",
-      "filterAll": "Tümü",
-      "filterFree": "Faizsiz",
-      "filterInterest": "Faizli",
-      "confirmDeleteTitle": "Krediyi sil",
-      "confirmDelete": "Bu krediyi ve tüm taksitlerini silmek istediğine emin misin?"
-    },
-    "notify": {
-      "off": "Kapalı",
-      "0": "Tam saatinde",
-      "1440": "1 gün önce",
-      "4320": "3 gün önce",
-      "10080": "1 hafta önce"
-    }
-  },
   "evkat": {
     "title": "Evkat",
     "kicker": "Günlük blok",
@@ -528,11 +284,8 @@
     "kind": {
       "reminder": "Anımsatıcı",
       "task": "Görev",
-      "list_item": "Liste",
       "calendar_event": "Takvim",
-      "time_block": "Evkat",
-      "debt": "Borç",
-      "finance_installment": "Taksit"
+      "time_block": "Evkat"
     },
     "permission": {
       "title": "Bildirim izni",
@@ -599,8 +352,7 @@
       "totalHint_other": "{{count}} toplam",
       "events": "etkinlik",
       "vaultHint": "kayıt",
-      "routineSegments": "Vakitler",
-      "readings": "Okumalar"
+      "routineSegments": "Vakitler"
     },
     "reminderGroup": {
       "overdue": "Gecikmiş",
@@ -618,7 +370,7 @@
     "today": {
       "kicker": "asistana sor",
       "title": "Bugün ne yapsam?",
-      "subtitle": "Notların, anımsatıcıların, planların, projelerin ve görevlerine bir göz at — küçük bir sonraki adım çıkar.",
+      "subtitle": "Notların, anımsatıcıların, projelerin ve görevlerine bir göz at — küçük bir sonraki adım çıkar.",
       "modeAria": "Öneri modu",
       "countAria": "Öneri sayısı",
       "modeTask": "Görev",
@@ -638,7 +390,6 @@
         "reminder": "Anımsatıcı",
         "task": "Görev",
         "note": "Not",
-        "plan": "Plan",
         "project": "Proje"
       }
     },
@@ -650,75 +401,6 @@
       "empty": "Günlük rutinini oluştur.",
       "error": "Vakitler yüklenemedi.",
       "noActivities": "Bu vakte bağlı iş yok."
-    },
-    "todayReadings": {
-      "title": "Bugünün okumaları",
-      "link": "Okumalar",
-      "empty": "Takip için okuma ekle.",
-      "error": "Okumalar yüklenemedi.",
-      "markRead": "Okundu işaretle",
-      "listened": "Dinlenildi"
-    },
-    "listsOverview": {
-      "title": "Listeler",
-      "link": "Listeler",
-      "empty": "Henüz liste yok.",
-      "error": "Listeler yüklenemedi.",
-      "progress": "{{done}}/{{total}}"
-    }
-  },
-  "plans": {
-    "title": "Planlar",
-    "kicker": "Niyetler ve hedefler",
-    "flourish": "defterleri",
-    "introBefore": "Her plan, ileride bir yere varmak için bugün attığın notlardan oluşur.",
-    "introEm": "Sakince",
-    "introAfter": "başla, gerisi gelir.",
-    "newPlan": "Yeni plan",
-    "export": "Dışa aktar",
-    "exportAria": "Plan adımlarını dışa aktar",
-    "modal": {
-      "kicker": "Yeni başlangıç",
-      "title": "Yeni",
-      "flourish": "plan",
-      "titleField": "Başlık",
-      "titlePlaceholder": "Bu defter ne anlatacak?",
-      "descriptionField": "Açıklama",
-      "descriptionPlaceholder": "Birkaç cümle yeterli — ayrıntı sonra gelir.",
-      "targetDate": "Hedef tarih",
-      "submit": "Defteri aç",
-      "submitting": "Oluşturuluyor…"
-    },
-    "status": {
-      "ACTIVE": "Aktif",
-      "COMPLETED": "Tamamlandı",
-      "PAUSED": "Beklemede",
-      "CANCELLED": "İptal"
-    },
-    "due": {
-      "overdue_one": "{{count}} gün gecikti",
-      "overdue_other": "{{count}} gün gecikti",
-      "today": "bugün",
-      "remaining_one": "{{count}} gün kaldı",
-      "remaining_other": "{{count}} gün kaldı"
-    },
-    "empty": {
-      "title": "Henüz",
-      "flourish": "defterin",
-      "suffix": "yok",
-      "bodyBefore": "Bir hedef yaz, küçük adımlara böl, takvim koy. Plan tutmak",
-      "bodyEm": "niyet",
-      "bodyAfter": "tutmaktır.",
-      "cta": "İlk planı oluştur"
-    },
-    "invalid": "Geçersiz plan.",
-    "newItemPlaceholder": "Yeni adım ekle…",
-    "noItems": "Bu planda henüz adım yok.",
-    "fallbackTitle": "Plan",
-    "deleteAria": "Plan sil",
-    "undo": {
-      "planDeleted": "\"{{title}}\" planı silindi.",
-      "itemDeleted": "\"{{title}}\" adımı silindi."
     }
   },
   "projects": {
@@ -884,74 +566,6 @@
     "createSuccess": "Görev başarıyla oluşturuldu",
     "updateSuccess": "Görev başarıyla güncellendi",
     "deleteSuccess": "Görev silindi"
-  },
-  "lists": {
-    "title": "Listeler",
-    "kicker": "Sıralanabilir koleksiyonlar",
-    "flourish": "rafları",
-    "introBefore": "Kartları",
-    "introEm": "sürükleyip",
-    "introAfter": "yeniden sırala — öncelik elinin altında.",
-    "newList": "Yeni liste",
-    "archived": "arşivlenmiş",
-    "openList": "Açık liste",
-    "modal": {
-      "kicker": "Yeni başlık",
-      "title": "Yeni",
-      "flourish": "liste",
-      "nameField": "Liste adı",
-      "namePlaceholder": "Bugün yapılacaklar, alışveriş…",
-      "colorField": "Renk",
-      "submit": "Listeyi aç",
-      "submitting": "Oluşturuluyor…"
-    },
-    "empty": {
-      "title": "Henüz",
-      "flourish": "listen",
-      "suffix": "yok",
-      "body": "İlk koleksiyonunu oluştur — bir renk seç, kartları sürükle, sıraya koy.",
-      "cta": "İlk listeyi oluştur"
-    },
-    "invalid": "Geçersiz liste.",
-    "newItemPlaceholder": "Yeni bir satır yaz, Enter ile ekle…",
-    "noItems": "Bu listede henüz öğe yok.",
-    "toggle": {
-      "complete": "Tamamlandı",
-      "incomplete": "Tamamlanmadı"
-    },
-    "deleteAria": "Sil",
-    "addAria": "Ekle",
-    "renameAria": "Listeyi yeniden adlandır",
-    "sections": {
-      "ungrouped": "Genel",
-      "add": "Bölüm ekle",
-      "namePlaceholder": "Bölüm adı…",
-      "addItemPlaceholder": "Bu bölüme ekle…",
-      "renameAria": "Bölümü yeniden adlandır",
-      "deleteAria": "Bölümü sil",
-      "deleteTitle": "Bölümü sil",
-      "deleteMessage": "Bölüm silinecek; içindeki öğeler 'Genel'e taşınır.",
-      "saveAria": "Kaydet",
-      "cancelAria": "İptal"
-    },
-    "undo": {
-      "listDeleted": "\"{{name}}\" listesi silindi.",
-      "itemDeleted": "\"{{text}}\" öğesi silindi."
-    },
-    "export": {
-      "aria": "Listeyi dışa aktar",
-      "txt": ".txt olarak dışa aktar",
-      "pdf": ".pdf olarak dışa aktar",
-      "statusLabel": "Durum",
-      "createdLabel": "Oluşturma",
-      "summaryHint": "Tüm öğeleri dışa aktarmak için listeyi aç.",
-      "sectionColumn": "Bölüm",
-      "itemColumn": "Öğe",
-      "doneColumn": "Tamamlandı",
-      "dueColumn": "Son tarih",
-      "doneYes": "Evet",
-      "doneNo": "Hayır"
-    }
   },
   "reminders": {
     "title": "Anımsatıcılar",
@@ -1334,55 +948,6 @@
       "message": "Mesaj",
       "send": "Gönder",
       "sending": "Gönderiliyor…"
-    }
-  },
-  "readings": {
-    "title": "Okumalar",
-    "kicker": "Günlük okuma",
-    "flourish": "takip",
-    "intro": "Her günkü okumalarını işaretle — sayfa aralığı, okundu ve dinlenildi.",
-    "newTrack": "Yeni okuma",
-    "prevWeek": "Önceki hafta",
-    "nextWeek": "Sonraki hafta",
-    "today": "Bugün",
-    "error": "Okumalar yüklenemedi.",
-    "trackCol": "Okuma",
-    "listenable": "Dinlenebilir",
-    "editCell": "Günü düzenle",
-    "read": "Okundu",
-    "listened": "Dinlenildi",
-    "pageRange": "Sayfa aralığı",
-    "pagePlaceholder": "örn. 1-10",
-    "clear": "Temizle",
-    "seeding": "Yükleniyor…",
-    "loadDefault": "Varsayılan okumaları yükle",
-    "confirmDeleteTitle": "Okumayı sil",
-    "confirmDelete": "Bu okumayı ve tüm günlük kayıtlarını silmek istediğine emin misin?",
-    "colorAuto": "Otomatik",
-    "empty": {
-      "kicker": "Henüz okuma yok",
-      "body": "Takip etmek istediğin okumaları ekle ya da hazır listeyle başla."
-    },
-    "modal": {
-      "editKicker": "Düzenle",
-      "newKicker": "Yeni okuma",
-      "editTitle": "Okumayı düzenle",
-      "createTitle": "Yeni okuma"
-    },
-    "field": {
-      "name": "Okuma adı",
-      "dailyTarget": "Günlük hedef",
-      "color": "Renk",
-      "tracksListened": "Dinlenildi takibi",
-      "cadence": "Sıklık"
-    },
-    "cadence": {
-      "daily": "Günlük",
-      "weekly": "Haftalık"
-    },
-    "placeholders": {
-      "name": "Kur'an",
-      "dailyTarget": "10 sayfa"
     }
   },
   "sport": {

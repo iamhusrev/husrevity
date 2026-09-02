@@ -40,8 +40,7 @@ the web app needs. (No default 3000/4000 in this project — owner policy.)
 - `src/app/(auth)/` — login page
 - `src/app/(app)/` — protected app pages; `(app)/layout.tsx` redirects
   unauthenticated users to `/login`. Domain pages: `dashboard`, `notes`,
-  `lists`, `projects`, `tasks`, `plans`, `calendar`, `reminders`,
-  `vault`, `finance`, `settings`, `admin`.
+  `projects`, `tasks`, `calendar`, `reminders`, `vault`, `settings`, `admin`.
 
 ### Provider Stack (root `layout.tsx`)
 
@@ -63,9 +62,9 @@ the web app needs. (No default 3000/4000 in this project — owner policy.)
 Per-domain hooks in `src/hooks/` wrap TanStack Query, each calling a
 matching service in `src/services/`. Each hook file exports the full CRUD set
 (`useX`, `useCreateX`, `useUpdateX`, `useDeleteX`). Existing examples:
-`useNotes`, `useLists`, `useProjects`, `usePlans`, `useCalendarEvents`,
-`useReminders`, `useVault`, `useAi` (suggestions only), `useFinance`, `useTimeBlocks`,
-`useNotifications`, `useAdmin`. Follow this pattern for new domains.
+`useNotes`, `useProjects`, `useCalendarEvents`, `useReminders`, `useVault`,
+`useAi` (suggestions only), `useTimeBlocks`, `useNotifications`, `useAdmin`.
+Follow this pattern for new domains.
 
 ### Backend Contract
 

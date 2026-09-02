@@ -43,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               - "fill-viewport" pages (Calendar / Vault / Reminders) use
                 `flex-1 min-h-0` on their root and fill the remaining space
                 after the prompt (when shown).
-              - "natural-flow" pages (Evkat hour-stack, Notes, Plans, …)
+              - "natural-flow" pages (Evkat hour-stack, Notes, Projects, …)
                 size to content; when total exceeds the viewport, the
                 wrapper grows beyond `min-h-full` and <main> scrolls.
             Putting `h-full` here instead — as before — pegged the wrapper
@@ -51,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             pushed children past the viewport without ever triggering
             <main>'s overflow-y-auto.
             The extra bottom padding below xl clears the fixed MobileBottomNav.
+            Note: The PageShell component now encodes this layout contract in code.
           */}
           <div className="mx-auto flex min-h-full w-full max-w-(--breakpoint-2xl) flex-col">
             <NotificationPermissionPrompt />
