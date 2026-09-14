@@ -40,9 +40,9 @@ jobs:
           # which deletes our gitignored symlinks — so we recreate them
           # every deploy. Same file feeds compose env_file (api) and
           # ${VAR} interpolation (root .env).
-          SECRETS="$HOME/iamhusrev-homelab/secrets/husrevity.env"
+          SECRETS="$HOME/iamhusrev/server/secrets/husrevity.env"
           if [[ ! -f "$SECRETS" ]]; then
-            echo "::error::$SECRETS missing on this host. Provision prod secrets first (see ~/iamhusrev-homelab/RUNBOOK.md §3)."
+            echo "::error::$SECRETS missing on this host. Provision prod secrets first (see ~/iamhusrev/server/docs/RUNBOOK.md §3)."
             exit 1
           fi
           ln -sfn "$SECRETS" "$HUSREVITY_ENV_FILE"   # apps/api/.env.prod
