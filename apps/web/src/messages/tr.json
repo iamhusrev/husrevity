@@ -703,7 +703,8 @@
       "tagsLabel": "Etiketler",
       "createdLabel": "Oluşturma",
       "updatedLabel": "Güncelleme"
-    }
+    },
+    "dictateFocusTooltip": "Dikte için odaklan"
   },
   "calendar": {
     "title": "Takvim",
@@ -1191,5 +1192,22 @@
       "weeklyTrend": "Haftalık trend",
       "empty": "Henüz veri yok."
     }
+  },
+  "dictate": {
+    "title": "Dikte ile madde ekle",
+    "placeholder": "Serbestçe konuş ya da dikte et — maddelere ayıracağız.",
+    "splitButton": "Maddelere ayır",
+    "review": {
+      "title": "Maddeleri gözden geçir",
+      "addLine": "+ Satır ekle",
+      "removeLine": "Kaldır"
+    },
+    "confirmButton": "Ekle ({{count}})",
+    "backButton": "Geri",
+    "error": {
+      "empty": "Önce bir şey söyle ya da yaz.",
+      "failed": "Metin ayrıştırılamadı. Tekrar dene."
+    },
+    "triggerTooltip": "Dikte ile hızlı ekle"
   }
 }

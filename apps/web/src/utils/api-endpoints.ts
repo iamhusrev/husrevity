@@ -89,6 +89,7 @@ export const CALENDAR_ENDPOINTS = {
 
 export const AI_ENDPOINTS = {
   SUGGESTIONS: "/ai/suggestions",
+  DICTATE_ITEMS: "/ai/dictate-items",
 };
 
 // ─── Notifications ────────────────────────────────────────────────────────────

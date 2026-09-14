@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { BiMicrophone } from "react-icons/bi";
 
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import Button from "@/components/button/Button";
@@ -76,6 +77,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
     register,
     watch,
     setValue,
+    setFocus,
     getValues,
     formState: { isDirty },
   } = useForm<FormValues>({
@@ -209,12 +211,23 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
       <form onSubmit={handleSubmit(handleSave)} className="space-y-5">
         <FormFieldText control={control} name="title" label={t("notes.field.title")} required />
 
-        <FormFieldTextarea
-          control={control}
-          name="bodyMarkdown"
-          label={t("notes.field.body")}
-          rows={14}
-        />
+        <div className="relative">
+          <FormFieldTextarea
+            control={control}
+            name="bodyMarkdown"
+            label={t("notes.field.body")}
+            rows={14}
+          />
+          <button
+            type="button"
+            onClick={() => setFocus("bodyMarkdown")}
+            title={t("notes.dictateFocusTooltip")}
+            aria-label={t("notes.dictateFocusTooltip")}
+            className="absolute right-0 top-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-brand-500 dark:hover:bg-gray-800"
+          >
+            <BiMicrophone size={16} />
+          </button>
+        </div>
 
         <div className="flex flex-wrap gap-6">
           <FormFieldCheckbox control={control} name="pinned" label={t("notes.field.pinned")} />

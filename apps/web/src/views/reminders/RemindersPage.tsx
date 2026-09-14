@@ -43,8 +43,10 @@ import {
   BiCheck,
   BiX,
   BiExport,
+  BiMicrophone,
 } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
+import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
 
 // ─── Priority helpers ─────────────────────────────────────────────────────────
 
@@ -624,6 +626,7 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
   const [newTitle, setNewTitle] = useState("");
   const [group, setGroup] = useState<SmartGroup>("all");
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showDictateModal, setShowDictateModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const visible = ordered
@@ -691,6 +694,17 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
     }
   };
 
+  const handleDictateConfirm = async (items: string[]) => {
+    for (const item of items) {
+      try {
+        await createReminder.mutateAsync({ listId: list.id, title: item, dueAt: presetDueAt("today") });
+      } catch (err) {
+        const { title: errTitle, message } = parseAxiosError(err);
+        showAlert({ title: errTitle, message, type: "error", position: "top-center" });
+      }
+    }
+  };
+
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
       <div className="mb-4 flex items-center gap-2">
@@ -709,7 +723,23 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
         >
           <BiExport size={16} />
         </button>
+        <button
+          type="button"
+          onClick={() => setShowDictateModal(true)}
+          title={t("dictate.triggerTooltip")}
+          aria-label={t("dictate.triggerTooltip")}
+          className="shrink-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-brand-500 dark:hover:bg-gray-800"
+        >
+          <BiMicrophone size={16} />
+        </button>
       </div>
+
+      <DictateQuickAddModal
+        isOpen={showDictateModal}
+        onClose={() => setShowDictateModal(false)}
+        title={t("dictate.title")}
+        onConfirm={handleDictateConfirm}
+      />
 
       <form onSubmit={handleAdd} className="mb-4 flex gap-2">
         <input

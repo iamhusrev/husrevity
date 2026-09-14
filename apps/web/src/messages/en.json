@@ -703,7 +703,8 @@
       "tagsLabel": "Tags",
       "createdLabel": "Created",
       "updatedLabel": "Updated"
-    }
+    },
+    "dictateFocusTooltip": "Focus to dictate"
   },
   "calendar": {
     "title": "Calendar",
@@ -1191,5 +1192,22 @@
       "weeklyTrend": "Weekly trend",
       "empty": "No data yet."
     }
+  },
+  "dictate": {
+    "title": "Dictate items",
+    "placeholder": "Speak or dictate freely — we will split it into separate items.",
+    "splitButton": "Split into items",
+    "review": {
+      "title": "Review items",
+      "addLine": "+ Add line",
+      "removeLine": "Remove"
+    },
+    "confirmButton": "Add ({{count}})",
+    "backButton": "Back",
+    "error": {
+      "empty": "Say or type something first.",
+      "failed": "Could not split the text. Try again."
+    },
+    "triggerTooltip": "Quick add by dictation"
   }
 }

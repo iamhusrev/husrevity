@@ -7,7 +7,9 @@
     "dev:local": "NEXT_PUBLIC_API_URL=http://localhost:4090/api next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3090",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.15",
@@ -47,12 +49,19 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@svgr/webpack": "^8.1.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.3",
+    "jsdom": "^30.0.1",
+    "msw": "^2.15.0",
     "postcss": "^8",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.0"
   }
 }

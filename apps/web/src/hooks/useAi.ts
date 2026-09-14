@@ -15,3 +15,14 @@ export function useAiSuggestions() {
     // `data` is the full ApiResponse envelope; consumers access `.data` for the array.
   });
 }
+
+/**
+ * Mutation hook for splitting voice-dictated text into structured item proposals.
+ * Manual trigger (call .mutate()), so we never auto-spend a Gemini call on render.
+ */
+export function useDictateItems() {
+  return useMutation({
+    mutationFn: (text: string) => aiService.splitDictatedText({ text }),
+  });
+}
+

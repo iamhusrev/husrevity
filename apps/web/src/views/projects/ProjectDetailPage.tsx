@@ -16,12 +16,13 @@ import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { exportAsXlsx } from "@/utils/export";
 import { formatDate } from "@/utils/i18n-date";
-import { BiPlus, BiArrowBack, BiEditAlt, BiDownload } from "react-icons/bi";
+import { BiPlus, BiArrowBack, BiEditAlt, BiDownload, BiMicrophone } from "react-icons/bi";
 import KanbanBoard from "./KanbanBoard";
 import TaskList from "./TaskList";
 import TaskDetailModal from "./TaskDetailModal";
 import MembersPanel from "./MembersPanel";
 import AssigneePicker from "./AssigneePicker";
+import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
 import { ProjectResponse, TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
 
 type ViewMode = "kanban" | "list";
@@ -334,14 +335,17 @@ export default function ProjectDetailPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
+  const showAlert = alertStore((s) => s.show);
   const initialView = (searchParams.get("view") as ViewMode | null) === "list" ? "list" : "kanban";
   const [view, setView] = useState<ViewMode>(initialView);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDictateModal, setShowDictateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
 
   const { data: project } = useProject(projectId);
   const { data: tasks = [], isLoading } = useProjectTasks(projectId);
+  const createTask = useCreateTask();
   const isOwner = project?.role === "OWNER";
   const canEdit = project?.role === "OWNER" || project?.role === "EDITOR";
 
@@ -354,6 +358,17 @@ export default function ProjectDetailPage({
       Description: task.description ?? "",
     }));
     exportAsXlsx(`project-${project?.code ?? projectId}-tasks.xlsx`, rows, "Tasks");
+  };
+
+  const handleDictateConfirm = async (items: string[]) => {
+    for (const item of items) {
+      try {
+        await createTask.mutateAsync({ projectId, body: { title: item } });
+      } catch (err) {
+        const { title, message } = parseAxiosError(err);
+        showAlert({ title, message, type: "error", position: "top-center" });
+      }
+    }
   };
 
   useEffect(() => {
@@ -433,12 +448,30 @@ export default function ProjectDetailPage({
               <BiDownload size={16} /> {t("kanban.export")}
             </button>
             {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowDictateModal(true)}
+                title={t("dictate.triggerTooltip")}
+                aria-label={t("dictate.triggerTooltip")}
+                className="husrev-btn-ghost"
+              >
+                <BiMicrophone size={16} />
+              </button>
+            )}
+            {canEdit && (
               <button onClick={() => setShowModal(true)} className="husrev-btn">
                 <BiPlus size={16} /> {t("kanban.newTask")}
               </button>
             )}
           </div>
         </div>
+
+        <DictateQuickAddModal
+          isOpen={showDictateModal}
+          onClose={() => setShowDictateModal(false)}
+          title={t("dictate.title")}
+          onConfirm={handleDictateConfirm}
+        />
 
         {isLoading ? (
           <p className="text-gray-500">{t("common.loading")}</p>
