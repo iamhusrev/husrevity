@@ -5,9 +5,15 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LearningItem } from '../learning-item.entity';
+import { LearningSubtopic } from '../learning-subtopic.entity';
 import { LearningTopic } from '../learning-topic.entity';
 
 export class TopicRequestDto {
+  @ApiProperty() @IsNotEmpty() @MaxLength(160) title!: string;
+  @ApiPropertyOptional() @IsOptional() description?: string | null;
+}
+
+export class SubtopicRequestDto {
   @ApiProperty() @IsNotEmpty() @MaxLength(160) title!: string;
   @ApiPropertyOptional() @IsOptional() description?: string | null;
 }
@@ -20,11 +26,13 @@ export class ItemRequestDto {
   @ApiPropertyOptional() @IsOptional() @IsDateString() reviewAt?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsInt() notifyMinutesBefore?: number | null;
   @ApiPropertyOptional() @IsOptional() @IsInt() position?: number;
+  @ApiPropertyOptional() @IsOptional() subtopicId?: string | null;
 }
 
 export class ItemResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() topicId!: string;
+  @ApiPropertyOptional() subtopicId!: string | null;
   @ApiProperty() text!: string;
   @ApiPropertyOptional() url!: string | null;
   @ApiPropertyOptional() notes!: string | null;
@@ -35,15 +43,16 @@ export class ItemResponseDto {
   @ApiProperty() position!: number;
 
   static from(i: LearningItem): ItemResponseDto {
-    return { id: i.id, topicId: i.topicId, text: i.text, url: i.url, notes: i.notes,
+    return { id: i.id, topicId: i.topicId, subtopicId: i.subtopicId, text: i.text, url: i.url, notes: i.notes,
       estimatedMinutes: i.estimatedMinutes, reviewAt: i.reviewAt?.toISOString() ?? null,
       notifyMinutesBefore: i.notifyMinutesBefore, completedAt: i.completedAt?.toISOString() ?? null,
       position: i.position };
   }
 }
 
-export class TopicResponseDto {
+export class SubtopicResponseDto {
   @ApiProperty() id!: string;
+  @ApiProperty() topicId!: string;
   @ApiProperty() title!: string;
   @ApiPropertyOptional() description!: string | null;
   @ApiProperty() position!: number;
@@ -53,10 +62,31 @@ export class TopicResponseDto {
   @ApiProperty() createdAt!: string;
   @ApiProperty() updatedAt!: string;
 
-  static from(t: LearningTopic, items: LearningItem[]): TopicResponseDto {
-    return { id: t.id, title: t.title, description: t.description, position: t.position,
+  static from(s: LearningSubtopic, items: LearningItem[]): SubtopicResponseDto {
+    return { id: s.id, topicId: s.topicId, title: s.title, description: s.description, position: s.position,
       items: items.map(ItemResponseDto.from), itemCount: items.length,
       completedCount: items.filter((i) => i.completedAt !== null).length,
+      createdAt: s.createdAt.toISOString(), updatedAt: s.updatedAt.toISOString() };
+  }
+}
+
+export class TopicResponseDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() title!: string;
+  @ApiPropertyOptional() description!: string | null;
+  @ApiProperty() position!: number;
+  @ApiProperty({ type: [ItemResponseDto] }) items!: ItemResponseDto[];
+  @ApiProperty({ type: [SubtopicResponseDto] }) subtopics!: SubtopicResponseDto[];
+  @ApiProperty() itemCount!: number;
+  @ApiProperty() completedCount!: number;
+  @ApiProperty() createdAt!: string;
+  @ApiProperty() updatedAt!: string;
+
+  static from(t: LearningTopic, directItems: LearningItem[], subtopics: SubtopicResponseDto[]): TopicResponseDto {
+    return { id: t.id, title: t.title, description: t.description, position: t.position,
+      items: directItems.map(ItemResponseDto.from), subtopics,
+      itemCount: directItems.length + subtopics.reduce((count, subtopic) => count + subtopic.itemCount, 0),
+      completedCount: directItems.filter((i) => i.completedAt !== null).length + subtopics.reduce((count, subtopic) => count + subtopic.completedCount, 0),
       createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString() };
   }
 }

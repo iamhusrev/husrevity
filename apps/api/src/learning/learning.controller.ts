@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedUser, CurrentUser } from '../common/current-user.decorator';
-import { ItemRequestDto, ItemResponseDto, LearningReorderRequestDto, TopicRequestDto, TopicResponseDto } from './dto/learning-dtos';
+import { ItemRequestDto, ItemResponseDto, LearningReorderRequestDto, SubtopicRequestDto, SubtopicResponseDto, TopicRequestDto, TopicResponseDto } from './dto/learning-dtos';
 import { LearningService } from './learning.service';
 
 @ApiTags('learning')
@@ -15,6 +15,10 @@ export class LearningController {
   @Patch('topics/reorder') @HttpCode(HttpStatus.NO_CONTENT) reorderTopics(@CurrentUser() u: AuthenticatedUser, @Body() body: LearningReorderRequestDto): Promise<void> { return this.learning.reorderTopics(u.userId, body.items); }
   @Put('topics/:id') updateTopic(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string, @Body() body: TopicRequestDto): Promise<TopicResponseDto> { return this.learning.updateTopic(u.userId, id, body); }
   @Delete('topics/:id') @HttpCode(HttpStatus.NO_CONTENT) deleteTopic(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> { return this.learning.deleteTopic(u.userId, id); }
+  @Post('topics/:id/subtopics') @HttpCode(HttpStatus.CREATED) createSubtopic(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string, @Body() body: SubtopicRequestDto): Promise<SubtopicResponseDto> { return this.learning.createSubtopic(u.userId, id, body); }
+  @Patch('topics/:id/subtopics/reorder') @HttpCode(HttpStatus.NO_CONTENT) reorderSubtopics(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string, @Body() body: LearningReorderRequestDto): Promise<void> { return this.learning.reorderSubtopics(u.userId, id, body.items); }
+  @Put('subtopics/:id') updateSubtopic(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string, @Body() body: SubtopicRequestDto): Promise<SubtopicResponseDto> { return this.learning.updateSubtopic(u.userId, id, body); }
+  @Delete('subtopics/:id') @HttpCode(HttpStatus.NO_CONTENT) deleteSubtopic(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> { return this.learning.deleteSubtopic(u.userId, id); }
   @Post('topics/:id/items') @HttpCode(HttpStatus.CREATED) createItem(@CurrentUser() u: AuthenticatedUser, @Param('id') topicId: string, @Body() body: ItemRequestDto): Promise<ItemResponseDto> { return this.learning.createItem(u.userId, topicId, body); }
   @Patch('topics/:id/items/reorder') @HttpCode(HttpStatus.NO_CONTENT) reorderItems(@CurrentUser() u: AuthenticatedUser, @Param('id') topicId: string, @Body() body: LearningReorderRequestDto): Promise<void> { return this.learning.reorderItems(u.userId, topicId, body.items); }
   @Put('items/:id') updateItem(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string, @Body() body: ItemRequestDto): Promise<ItemResponseDto> { return this.learning.updateItem(u.userId, id, body); }
