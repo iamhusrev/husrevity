@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { parseQuickAdd } from '@husrevity/parser';
 import { SlackApiService } from './slack-api.service';
 import { SlackLinkService } from './slack-link.service';
 import { ItemService } from '../item/item.service';
+import { ReminderService } from '../reminder/reminder.service';
+import { addFromChatMessage, chatQuickAddReply } from '../common/chat-quick-add';
 
 @Injectable()
 export class SlackMessageHandlerService {
@@ -12,6 +13,7 @@ export class SlackMessageHandlerService {
     private readonly slackApiService: SlackApiService,
     private readonly slackLinkService: SlackLinkService,
     private readonly itemService: ItemService,
+    private readonly reminderService: ReminderService,
   ) {}
 
   /**
@@ -90,7 +92,7 @@ export class SlackMessageHandlerService {
       await this.slackLinkService.confirmLink(code, slackUserId);
       await this.slackApiService.postMessage(
         channel,
-        '✅ Slack hesabınız Husrevity ile başarıyla bağlandı! Artık mesaj göndererek görev ekleyebilirsiniz.',
+        '✅ Slack hesabınız Husrevity ile başarıyla bağlandı! Artık mesaj göndererek anımsatıcı ekleyebilirsiniz.',
       );
     } catch (err) {
       const msg = (err as Error).message || 'Geçersiz veya süresi dolmuş kod.';
@@ -126,27 +128,21 @@ export class SlackMessageHandlerService {
     text: string,
   ): Promise<void> {
     try {
-      const draft = await parseQuickAdd(text);
-      const item = await this.itemService.create(ownerId, {
-        kind: 'task',
-        title: draft.title,
-        context: draft.context ?? null,
-        scheduledAt: draft.scheduledAt ?? null,
-        rrule: draft.rrule ?? null,
-        source: 'slack',
-      });
-
-      await this.slackApiService.postMessage(
-        channel,
-        `✅ Görev eklendi: "${item.title}"`,
+      const result = await addFromChatMessage(
+        this.reminderService,
+        this.itemService,
+        ownerId,
+        text,
+        'slack',
       );
+      await this.slackApiService.postMessage(channel, chatQuickAddReply(result));
     } catch (err) {
       this.logger.error(
-        `Failed to create item from Slack message: ${(err as Error).message}`,
+        `Failed to create reminder from Slack message: ${(err as Error).message}`,
       );
       await this.slackApiService.postMessage(
         channel,
-        `❌ Görev eklenirken bir hata oluştu: ${(err as Error).message}`,
+        `❌ Anımsatıcı eklenirken bir hata oluştu: ${(err as Error).message}`,
       );
     }
   }

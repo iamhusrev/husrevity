@@ -3,6 +3,7 @@ import { SlackMessageHandlerService } from './slack-message-handler.service';
 import { SlackApiService } from './slack-api.service';
 import { SlackLinkService } from './slack-link.service';
 import { ItemService } from '../item/item.service';
+import { ReminderService } from '../reminder/reminder.service';
 import { SlackLink } from './slack-link.entity';
 import { ApiException } from '../common/api.exception';
 
@@ -11,6 +12,7 @@ describe('SlackMessageHandlerService', () => {
   let slackApiService: jest.Mocked<SlackApiService>;
   let slackLinkService: jest.Mocked<SlackLinkService>;
   let itemService: jest.Mocked<ItemService>;
+  let reminderService: jest.Mocked<ReminderService>;
 
   beforeEach(async () => {
     const mockSlackApi = {
@@ -27,12 +29,17 @@ describe('SlackMessageHandlerService', () => {
       create: jest.fn(),
     };
 
+    const mockReminderService = {
+      createReminder: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SlackMessageHandlerService,
         { provide: SlackApiService, useValue: mockSlackApi },
         { provide: SlackLinkService, useValue: mockSlackLinkService },
         { provide: ItemService, useValue: mockItemService },
+        { provide: ReminderService, useValue: mockReminderService },
       ],
     }).compile();
 
@@ -42,6 +49,7 @@ describe('SlackMessageHandlerService', () => {
     slackApiService = module.get(SlackApiService);
     slackLinkService = module.get(SlackLinkService);
     itemService = module.get(ItemService);
+    reminderService = module.get(ReminderService);
   });
 
   it('should ignore invalid or non-DM events', async () => {
@@ -238,23 +246,16 @@ describe('SlackMessageHandlerService', () => {
       );
     });
 
-    it('should parse text and create item for linked user', async () => {
+    it('should create a reminder due at the parsed time for a linked user', async () => {
       slackLinkService.findBySlackUser.mockResolvedValueOnce({
         id: 'link-1',
         ownerId: 'user-42',
         slackUserId: 'U123',
         status: 'linked',
       } as SlackLink);
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'r-1', title: 'HGS kontrol' } as any);
 
-      itemService.create.mockResolvedValueOnce({
-        id: 'item-100',
-        title: 'HGS kontrol',
-        context: 'alican',
-        scheduledAt: '2026-09-29T06:00:00.000Z',
-        source: 'slack',
-      } as any);
-
-      const payload = {
+      await service.handleEvent({
         event: {
           type: 'message',
           channel_type: 'im',
@@ -262,26 +263,80 @@ describe('SlackMessageHandlerService', () => {
           user: 'U123',
           text: 'yarın 9da HGS kontrol #alican',
         },
-      };
+      });
 
-      await service.handleEvent(payload);
-
-      expect(itemService.create).toHaveBeenCalledWith(
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
         'user-42',
         expect.objectContaining({
-          kind: 'task',
           title: 'HGS kontrol',
-          context: 'alican',
-          source: 'slack',
+          dueAt: expect.any(String),
+          notifyMinutesBefore: 0,
         }),
       );
+      expect(itemService.create).not.toHaveBeenCalled();
       expect(slackApiService.postMessage).toHaveBeenCalledWith(
         'D123',
-        '✅ Görev eklendi: "HGS kontrol"',
+        expect.stringMatching(/^⏰ Anımsatıcı eklendi: "HGS kontrol" — /),
       );
     });
 
-    it('should handle item creation error gracefully', async () => {
+    it('should create a reminder without a notification when no time is given', async () => {
+      slackLinkService.findBySlackUser.mockResolvedValueOnce({
+        id: 'link-1',
+        ownerId: 'user-42',
+        slackUserId: 'U123',
+        status: 'linked',
+      } as SlackLink);
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'r-2', title: 'süt al' } as any);
+
+      await service.handleEvent({
+        event: {
+          type: 'message',
+          channel_type: 'im',
+          channel: 'D123',
+          user: 'U123',
+          text: 'süt al',
+        },
+      });
+
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
+        'user-42',
+        expect.objectContaining({ title: 'süt al', notifyMinutesBefore: null }),
+      );
+      expect(slackApiService.postMessage).toHaveBeenCalledWith('D123', '⏰ Anımsatıcı eklendi: "süt al"');
+    });
+
+    it('should store a recurring message as a recurring task instead of a reminder', async () => {
+      slackLinkService.findBySlackUser.mockResolvedValueOnce({
+        id: 'link-1',
+        ownerId: 'user-42',
+        slackUserId: 'U123',
+        status: 'linked',
+      } as SlackLink);
+      itemService.create.mockResolvedValueOnce({ id: 'i-1', title: 'vitamin' } as any);
+
+      await service.handleEvent({
+        event: {
+          type: 'message',
+          channel_type: 'im',
+          channel: 'D123',
+          user: 'U123',
+          text: 'her gün 9da vitamin',
+        },
+      });
+
+      expect(reminderService.createReminder).not.toHaveBeenCalled();
+      expect(itemService.create).toHaveBeenCalledWith(
+        'user-42',
+        expect.objectContaining({ kind: 'task', title: 'vitamin', rrule: expect.any(String), source: 'slack' }),
+      );
+      expect(slackApiService.postMessage).toHaveBeenCalledWith(
+        'D123',
+        expect.stringContaining('🔁 Tekrarlayan görev eklendi: "vitamin"'),
+      );
+    });
+
+    it('should handle reminder creation error gracefully', async () => {
       slackLinkService.findBySlackUser.mockResolvedValueOnce({
         id: 'link-1',
         ownerId: 'user-42',
@@ -289,7 +344,7 @@ describe('SlackMessageHandlerService', () => {
         status: 'linked',
       } as SlackLink);
 
-      itemService.create.mockRejectedValueOnce(new Error('Database error'));
+      reminderService.createReminder.mockRejectedValueOnce(new Error('Database error'));
 
       const payload = {
         event: {
@@ -306,7 +361,7 @@ describe('SlackMessageHandlerService', () => {
       expect(slackApiService.postMessage).toHaveBeenCalledWith(
         'D123',
         expect.stringContaining(
-          'Görev eklenirken bir hata oluştu: Database error',
+          'Anımsatıcı eklenirken bir hata oluştu: Database error',
         ),
       );
     });

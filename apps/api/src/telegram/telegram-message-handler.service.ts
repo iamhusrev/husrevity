@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { parseQuickAdd } from '@husrevity/parser';
 import { TelegramApiService, TelegramUpdate } from './telegram-api.service';
 import { TelegramLinkService } from './telegram-link.service';
 import { ItemService } from '../item/item.service';
+import { ReminderService } from '../reminder/reminder.service';
+import { addFromChatMessage, chatQuickAddReply } from '../common/chat-quick-add';
 
 @Injectable()
 export class TelegramMessageHandlerService {
@@ -12,6 +13,7 @@ export class TelegramMessageHandlerService {
     private readonly telegramApiService: TelegramApiService,
     private readonly telegramLinkService: TelegramLinkService,
     private readonly itemService: ItemService,
+    private readonly reminderService: ReminderService,
   ) {}
 
   /**
@@ -78,7 +80,7 @@ export class TelegramMessageHandlerService {
       await this.telegramLinkService.confirmLink(code, chatId);
       await this.telegramApiService.sendMessage(
         chatId,
-        '✅ Telegram hesabınız Husrevity ile başarıyla bağlandı! Artık mesaj göndererek görev ekleyebilirsiniz.',
+        '✅ Telegram hesabınız Husrevity ile başarıyla bağlandı! Artık mesaj göndererek anımsatıcı ekleyebilirsiniz.',
       );
     } catch (err) {
       const msg = (err as Error).message || 'Geçersiz veya süresi dolmuş kod.';
@@ -101,25 +103,19 @@ export class TelegramMessageHandlerService {
 
   private async handleQuickAdd(chatId: string, ownerId: string, text: string): Promise<void> {
     try {
-      const draft = await parseQuickAdd(text);
-      const item = await this.itemService.create(ownerId, {
-        kind: 'task',
-        title: draft.title,
-        context: draft.context ?? null,
-        scheduledAt: draft.scheduledAt ?? null,
-        rrule: draft.rrule ?? null,
-        source: 'telegram',
-      });
-
-      await this.telegramApiService.sendMessage(
-        chatId,
-        `✅ Görev eklendi: "${item.title}"`,
+      const result = await addFromChatMessage(
+        this.reminderService,
+        this.itemService,
+        ownerId,
+        text,
+        'telegram',
       );
+      await this.telegramApiService.sendMessage(chatId, chatQuickAddReply(result));
     } catch (err) {
-      this.logger.error(`Failed to create item from Telegram message: ${(err as Error).message}`);
+      this.logger.error(`Failed to create reminder from Telegram message: ${(err as Error).message}`);
       await this.telegramApiService.sendMessage(
         chatId,
-        `❌ Görev eklenirken bir hata oluştu: ${(err as Error).message}`,
+        `❌ Anımsatıcı eklenirken bir hata oluştu: ${(err as Error).message}`,
       );
     }
   }

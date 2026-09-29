@@ -3,6 +3,7 @@ import { TelegramMessageHandlerService } from './telegram-message-handler.servic
 import { TelegramApiService, TelegramUpdate } from './telegram-api.service';
 import { TelegramLinkService } from './telegram-link.service';
 import { ItemService } from '../item/item.service';
+import { ReminderService } from '../reminder/reminder.service';
 import { TelegramLink } from './telegram-link.entity';
 import { ApiException } from '../common/api.exception';
 
@@ -11,6 +12,7 @@ describe('TelegramMessageHandlerService', () => {
   let telegramApi: jest.Mocked<TelegramApiService>;
   let telegramLinkService: jest.Mocked<TelegramLinkService>;
   let itemService: jest.Mocked<ItemService>;
+  let reminderService: jest.Mocked<ReminderService>;
 
   beforeEach(async () => {
     const mockTelegramApi = {
@@ -27,12 +29,17 @@ describe('TelegramMessageHandlerService', () => {
       create: jest.fn(),
     };
 
+    const mockReminderService = {
+      createReminder: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TelegramMessageHandlerService,
         { provide: TelegramApiService, useValue: mockTelegramApi },
         { provide: TelegramLinkService, useValue: mockTelegramLinkService },
         { provide: ItemService, useValue: mockItemService },
+        { provide: ReminderService, useValue: mockReminderService },
       ],
     }).compile();
 
@@ -40,6 +47,7 @@ describe('TelegramMessageHandlerService', () => {
     telegramApi = module.get(TelegramApiService);
     telegramLinkService = module.get(TelegramLinkService);
     itemService = module.get(ItemService);
+    reminderService = module.get(ReminderService);
   });
 
   it('should ignore updates without message or text', async () => {
@@ -226,21 +234,14 @@ describe('TelegramMessageHandlerService', () => {
       );
     });
 
-    it('should parse text and create item for linked user', async () => {
+    it('should create a reminder due at the parsed time for a linked user', async () => {
       telegramLinkService.findByChatId.mockResolvedValueOnce({
         id: 'link-1',
         ownerId: 'user-42',
         chatId: '12345',
         status: 'linked',
       } as TelegramLink);
-
-      itemService.create.mockResolvedValueOnce({
-        id: 'item-100',
-        title: 'HGS kontrol',
-        context: 'alican',
-        scheduledAt: '2026-09-29T06:00:00.000Z',
-        source: 'telegram',
-      } as any);
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'r-1', title: 'HGS kontrol' } as any);
 
       const update: TelegramUpdate = {
         update_id: 1,
@@ -254,22 +255,82 @@ describe('TelegramMessageHandlerService', () => {
 
       await service.handleUpdate(update);
 
-      expect(itemService.create).toHaveBeenCalledWith(
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
         'user-42',
         expect.objectContaining({
-          kind: 'task',
           title: 'HGS kontrol',
-          context: 'alican',
-          source: 'telegram',
+          dueAt: expect.any(String),
+          notifyMinutesBefore: 0,
         }),
       );
+      expect(itemService.create).not.toHaveBeenCalled();
       expect(telegramApi.sendMessage).toHaveBeenCalledWith(
         '12345',
-        '✅ Görev eklendi: "HGS kontrol"',
+        expect.stringMatching(/^⏰ Anımsatıcı eklendi: "HGS kontrol" — /),
       );
     });
 
-    it('should handle item creation error gracefully', async () => {
+    it('should create a reminder without a notification when no time is given', async () => {
+      telegramLinkService.findByChatId.mockResolvedValueOnce({
+        id: 'link-1',
+        ownerId: 'user-42',
+        chatId: '12345',
+        status: 'linked',
+      } as TelegramLink);
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'r-2', title: 'süt al' } as any);
+
+      const update: TelegramUpdate = {
+        update_id: 1,
+        message: {
+          message_id: 1,
+          chat: { id: 12345, type: 'private' },
+          date: 1000,
+          text: 'süt al',
+        },
+      };
+
+      await service.handleUpdate(update);
+
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
+        'user-42',
+        expect.objectContaining({ title: 'süt al', notifyMinutesBefore: null }),
+      );
+      expect(telegramApi.sendMessage).toHaveBeenCalledWith('12345', '⏰ Anımsatıcı eklendi: "süt al"');
+    });
+
+    it('should store a recurring message as a recurring task instead of a reminder', async () => {
+      telegramLinkService.findByChatId.mockResolvedValueOnce({
+        id: 'link-1',
+        ownerId: 'user-42',
+        chatId: '12345',
+        status: 'linked',
+      } as TelegramLink);
+      itemService.create.mockResolvedValueOnce({ id: 'i-1', title: 'vitamin' } as any);
+
+      const update: TelegramUpdate = {
+        update_id: 1,
+        message: {
+          message_id: 1,
+          chat: { id: 12345, type: 'private' },
+          date: 1000,
+          text: 'her gün 9da vitamin',
+        },
+      };
+
+      await service.handleUpdate(update);
+
+      expect(reminderService.createReminder).not.toHaveBeenCalled();
+      expect(itemService.create).toHaveBeenCalledWith(
+        'user-42',
+        expect.objectContaining({ kind: 'task', title: 'vitamin', rrule: expect.any(String), source: 'telegram' }),
+      );
+      expect(telegramApi.sendMessage).toHaveBeenCalledWith(
+        '12345',
+        expect.stringContaining('🔁 Tekrarlayan görev eklendi: "vitamin"'),
+      );
+    });
+
+    it('should handle reminder creation error gracefully', async () => {
       telegramLinkService.findByChatId.mockResolvedValueOnce({
         id: 'link-1',
         ownerId: 'user-42',
@@ -277,7 +338,7 @@ describe('TelegramMessageHandlerService', () => {
         status: 'linked',
       } as TelegramLink);
 
-      itemService.create.mockRejectedValueOnce(new Error('Database error'));
+      reminderService.createReminder.mockRejectedValueOnce(new Error('Database error'));
 
       const update: TelegramUpdate = {
         update_id: 1,
@@ -293,7 +354,7 @@ describe('TelegramMessageHandlerService', () => {
 
       expect(telegramApi.sendMessage).toHaveBeenCalledWith(
         '12345',
-        expect.stringContaining('Görev eklenirken bir hata oluştu: Database error'),
+        expect.stringContaining('Anımsatıcı eklenirken bir hata oluştu: Database error'),
       );
     });
   });
