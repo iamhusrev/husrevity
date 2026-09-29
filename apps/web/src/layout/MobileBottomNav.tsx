@@ -9,7 +9,6 @@ import type { IconType } from "react-icons";
 import { CiGrid41, CiSettings } from "react-icons/ci";
 import {
   BiBell,
-  BiLink,
   BiNote,
   BiCalendar,
   BiDotsHorizontalRounded,
@@ -18,31 +17,23 @@ import {
   BiLockAlt,
   BiShield,
   BiBookOpen,
-  BiPlus,
+  BiLink,
 } from "react-icons/bi";
 import { HiOutlineClock } from "react-icons/hi2";
 import { useAuth } from "@/providers/AuthProvider";
-import QuickAddDialog from "@/components/quick-add/QuickAddDialog";
 
 type MoreItem = { key: string; path: string; icon: IconType };
 
-/**
- * Faz 2: everything that used to have its own primary tab slot now lives
- * in the "Diğer" sheet — their data is superseded by the unified Item
- * model and the Bugün screen, but the pages stay reachable while the old
- * tables are still live.
- */
 const MORE_ITEMS: MoreItem[] = [
-  { key: "nav.notes", path: "/notes", icon: BiNote },
-  { key: "nav.calendar", path: "/calendar", icon: BiCalendar },
+  { key: "nav.projects", path: "/projects", icon: BiFolder },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
   { key: "nav.learning", path: "/learning", icon: BiBookOpen },
   { key: "nav.sport", path: "/sport", icon: BiDumbbell },
   { key: "nav.vault", path: "/vault", icon: BiLockAlt },
 ];
 
-const ADMIN_ITEM: MoreItem = { key: "nav.admin", path: "/admin/users", icon: BiShield };
 const INTEGRATIONS_ITEM: MoreItem = { key: "nav.integrations", path: "/settings/integrations", icon: BiLink };
+const ADMIN_ITEM: MoreItem = { key: "nav.admin", path: "/admin/users", icon: BiShield };
 const SETTINGS_ITEM: MoreItem = { key: "nav.settings", path: "/settings/profile", icon: CiSettings };
 
 function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -116,19 +107,18 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 }
 
 const TABS: { key: string; path: string; icon: IconType }[] = [
-  { key: "nav.dashboard", path: "/dashboard", icon: CiGrid41 },
   { key: "nav.reminders", path: "/reminders", icon: BiBell },
+  { key: "nav.notes", path: "/notes", icon: BiNote },
 ];
 
 const TABS_RIGHT: { key: string; path: string; icon: IconType }[] = [
-  { key: "nav.projects", path: "/projects", icon: BiFolder },
+  { key: "nav.calendar", path: "/calendar", icon: BiCalendar },
 ];
 
 export default function MobileBottomNav() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   // Route changes (e.g. via a sheet link) must always dismiss the sheet.
   useEffect(() => {
@@ -157,14 +147,17 @@ export default function MobileBottomNav() {
           ))}
 
           <div className="relative flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShowQuickAdd(true)}
-              aria-label={t("quickAdd.title")}
-              className="-mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-husrev-ink text-husrev-amber shadow-lg ring-4 ring-husrev-cream transition dark:bg-husrev-cream dark:text-husrev-ember dark:ring-husrev-ink"
+            <Link
+              href="/dashboard"
+              aria-label={t("nav.dashboard")}
+              className={`-mt-6 flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-4 ring-husrev-cream transition dark:ring-husrev-ink ${
+                pathname === "/dashboard"
+                  ? "bg-husrev-ember text-husrev-cream"
+                  : "bg-husrev-ink text-husrev-amber dark:bg-husrev-cream dark:text-husrev-ember"
+              }`}
             >
-              <BiPlus size={26} />
-            </button>
+              <CiGrid41 size={26} />
+            </Link>
           </div>
 
           {TABS_RIGHT.map(({ key, path, icon: Icon }) => (
@@ -187,7 +180,6 @@ export default function MobileBottomNav() {
       </nav>
 
       <MoreSheet isOpen={showMore} onClose={() => setShowMore(false)} />
-      <QuickAddDialog open={showQuickAdd} onOpenChange={setShowQuickAdd} />
     </>
   );
 }
