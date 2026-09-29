@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon';
 import {
   WEEKDAY_CODES,
+  WEEKDAY_ALT_ONE_OFF,
+  WEEKDAY_SUFFIX,
   extractContext,
   extractPriority,
   extractProjectRef,
@@ -88,7 +90,9 @@ function parseRules(text: string): ParsedDraft {
     // Not \b(...)\b — "çar" starts with a non-ASCII letter, and JS's \b is
     // ASCII-word-boundary-only regardless of the /u flag, so \b silently
     // fails to match right before it. This lookaround is Unicode-correct.
-    const weekday = title.match(/(?<![\p{L}\p{N}_])(pzt|sal|çar|per|cum|cmt|paz)(?![\p{L}\p{N}_])/iu);
+    const weekday = title.match(
+      new RegExp(`(?<![\\p{L}\\p{N}_])(${WEEKDAY_ALT_ONE_OFF})${WEEKDAY_SUFFIX}(?![\\p{L}\\p{N}_])`, 'iu'),
+    );
     if (bugun) {
       target = now;
       title = stripToken(title, bugun);

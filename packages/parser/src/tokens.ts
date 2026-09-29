@@ -12,7 +12,38 @@ export const WEEKDAY_CODES: Record<string, number> = {
   cum: 5,
   cmt: 6,
   paz: 7,
+  pazartesi: 1,
+  salı: 2,
+  sali: 2,
+  çarşamba: 3,
+  carsamba: 3,
+  perşembe: 4,
+  persembe: 4,
+  cuma: 5,
+  cumartesi: 6,
+  pazar: 7,
 };
+
+const alternation = (names: string[]) =>
+  [...names].sort((a, b) => b.length - a.length).join('|'); // longest first: cumartesi before cuma
+
+const ALL_WEEKDAYS = Object.keys(WEEKDAY_CODES);
+
+/**
+ * Weekday words for "her <weekday>" (recurrence): every abbreviation and full
+ * name, including bare "pazar" — "her pazar" is unambiguous.
+ */
+export const WEEKDAY_ALT_RECURRING = alternation(ALL_WEEKDAYS);
+
+/**
+ * Weekday words for a one-off date. Bare "pazar" is excluded because it is
+ * just as often the word for "market" ("pazar alışverişi") — it only counts
+ * as Sunday when followed by "günü" ("pazar günü") or abbreviated ("paz").
+ */
+export const WEEKDAY_ALT_ONE_OFF = `${alternation(ALL_WEEKDAYS.filter((n) => n !== 'pazar'))}|pazar(?=\\s+(?:günü|gunu)(?![\\p{L}\\p{N}_]))`;
+
+/** Optional trailing " günü" that belongs to the weekday phrase ("cuma günü") and is removed with it. */
+export const WEEKDAY_SUFFIX = '(?:\\s+(?:günü|gunu))?';
 
 const RFC5545_WEEKDAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
@@ -79,7 +110,9 @@ export function extractRecurrence(text: string): ExtractResult<RecurrenceResult>
   if (daily) {
     return { rest: stripMatch(text, daily), value: { rrule: 'FREQ=DAILY' } };
   }
-  const weekly = text.match(/\bher (pzt|sal|çar|per|cum|cmt|paz)\b/i);
+  const weekly = text.match(
+    new RegExp(`(?<![\\p{L}\\p{N}_])her (${WEEKDAY_ALT_RECURRING})${WEEKDAY_SUFFIX}(?![\\p{L}\\p{N}_])`, 'iu'),
+  );
   if (weekly) {
     const code = WEEKDAY_CODES[weekly[1].toLowerCase()];
     return {

@@ -27,15 +27,33 @@ describe('TodayService', () => {
   });
 
   describe('dueToday', () => {
-    it('queries only open task-kind items for the given owner, ordered by dueAt', async () => {
+    it('queries open task-kind items for the owner by dueAt OR (non-recurring, non-block) scheduledAt', async () => {
       await service.dueToday(ownerId);
 
-      expect(items.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ ownerId, kind: 'task', status: 'open' }),
-          order: { dueAt: 'ASC' },
-        }),
-      );
+      const where = items.find.mock.calls[0][0].where as Array<Record<string, unknown>>;
+      expect(where).toHaveLength(2);
+      for (const branch of where) {
+        expect(branch).toMatchObject({ ownerId, kind: 'task', status: 'open' });
+      }
+      expect(where[0]).toHaveProperty('dueAt');
+      // scheduledAt-only tasks (what quick-add creates) must not drag in recurring / block-linked anchors
+      expect(where[1]).toHaveProperty('scheduledAt');
+      expect(where[1]).toHaveProperty('rrule');
+      expect(where[1]).toHaveProperty('blockId');
+    });
+
+    it('falls back to scheduledAt as the displayed time and sorts by the effective time', async () => {
+      const early = new Date('2026-01-05T06:00:00Z');
+      const late = new Date('2026-01-05T15:00:00Z');
+      items.find.mockResolvedValueOnce([
+        { id: '2', title: 'Akşam', dueAt: null, scheduledAt: late, status: 'open' } as Item,
+        { id: '1', title: 'Sabah', dueAt: early, scheduledAt: null, status: 'open' } as Item,
+      ]);
+
+      const result = await service.dueToday(ownerId);
+
+      expect(result.map((r) => r.itemId)).toEqual(['1', '2']);
+      expect(result[1].dueAt).toBe(late.toISOString());
     });
 
     it('maps rows to ItemSummaryDto shape', async () => {

@@ -16,7 +16,8 @@ COPY apps/mobile/package.json ./apps/mobile/package.json
 COPY packages/parser/package.json ./packages/parser/package.json
 COPY packages/api-client/package.json ./packages/api-client/package.json
 
-RUN bun install --frozen-lockfile --filter '@husrevity/api'
+# Registry downloads occasionally fail on the runner ("Fail extracting tarball"); retry a few times.
+RUN for i in 1 2 3; do bun install --frozen-lockfile --filter '@husrevity/api' && exit 0; echo "bun install failed (attempt $i), retrying"; sleep 5; done; exit 1
 
 # Source + build. @husrevity/parser is a workspace package published as
 # compiled CommonJS (dist/) — `.dockerignore` drops host dist folders, so it

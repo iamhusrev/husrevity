@@ -48,6 +48,53 @@ describe('parseQuickAdd', () => {
     });
   }
 
+  const fullNameCases: Array<[string, number]> = [
+    ['pazartesi', 1],
+    ['salı', 2],
+    ['çarşamba', 3],
+    ['perşembe', 4],
+    ['cuma', 5],
+    ['cumartesi', 6],
+  ];
+  for (const [name, num] of fullNameCases) {
+    it(`resolves the full weekday name "${name}" and strips it from the title`, async () => {
+      const d = await parseQuickAdd(`${name} diş hekimi`);
+      expect(d.title).toBe('diş hekimi');
+      expect(d.scheduledAt).toBe(isoAt(nearestWeekday(now(), num), 9));
+    });
+  }
+
+  it('resolves "cuma 18de spor #saglik" (full weekday + locative time + context)', async () => {
+    const d = await parseQuickAdd('cuma 18de spor #saglik');
+    expect(d.title).toBe('spor');
+    expect(d.context).toBe('saglik');
+    expect(d.scheduledAt).toBe(isoAt(nearestWeekday(now(), 5), 18));
+  });
+
+  it('strips a trailing "günü" together with the weekday ("cuma günü")', async () => {
+    const d = await parseQuickAdd('cuma günü toplantı');
+    expect(d.title).toBe('toplantı');
+  });
+
+  it('treats "pazar günü" as Sunday but leaves bare "pazar" (market) alone', async () => {
+    const sunday = await parseQuickAdd('pazar günü kahvaltı');
+    expect(sunday.title).toBe('kahvaltı');
+    expect(sunday.scheduledAt).toBe(isoAt(nearestWeekday(now(), 7), 9));
+
+    const market = await parseQuickAdd('pazar alışverişi yap');
+    expect(market).toEqual({ title: 'pazar alışverişi yap' });
+  });
+
+  it('parses recurrence with full names ("her cuma", "her pazar")', async () => {
+    const fri = await parseQuickAdd('her cuma 18:00 spor');
+    expect(fri.rrule).toBe('FREQ=WEEKLY;BYDAY=FR');
+    expect(fri.title).toBe('spor');
+
+    const sun = await parseQuickAdd('her pazar kahvaltı');
+    expect(sun.rrule).toBe('FREQ=WEEKLY;BYDAY=SU');
+    expect(sun.title).toBe('kahvaltı');
+  });
+
   it('parses a colon time and overrides the default hour', async () => {
     const d = await parseQuickAdd('bugün 14:30 doktor');
     expect(d.title).toBe('doktor');

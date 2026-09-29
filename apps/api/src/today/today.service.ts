@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { IsNull, LessThanOrEqual, Repository } from 'typeorm';
 import { DateTime } from 'luxon';
 import { Item } from '../item/item.entity';
 import { ItemRecurrenceService } from '../item/item-recurrence.service';
@@ -15,24 +15,32 @@ export class TodayService {
     private readonly recurrence: ItemRecurrenceService,
   ) {}
 
-  /** Open task-kind items due today (Europe/Istanbul) or overdue, owner-scoped. */
+  /**
+   * Open task-kind items due today (Europe/Istanbul) or overdue, owner-scoped.
+   * A task counts by `dueAt`, or — when it only has `scheduledAt`, which is
+   * what quick-add / the parser produces — by that. Recurring and
+   * block-linked tasks are left out of the `scheduledAt` branch: their
+   * scheduledAt is just an anchor (e.g. 2018-01-01), so they would otherwise
+   * look overdue forever.
+   */
   async dueToday(ownerId: string): Promise<ItemSummaryDto[]> {
     const endOfDay = DateTime.now().setZone(ISTANBUL).endOf('day').toUTC().toJSDate();
+    const base = { ownerId, kind: 'task' as const, status: 'open' as const };
     const rows = await this.items.find({
-      where: {
-        ownerId,
-        kind: 'task',
-        status: 'open',
-        dueAt: LessThanOrEqual(endOfDay),
-      },
-      order: { dueAt: 'ASC' },
+      where: [
+        { ...base, dueAt: LessThanOrEqual(endOfDay) },
+        { ...base, scheduledAt: LessThanOrEqual(endOfDay), rrule: IsNull(), blockId: IsNull() },
+      ],
     });
-    return rows.map((r) => ({
-      itemId: r.id,
-      title: r.title,
-      dueAt: r.dueAt ? r.dueAt.toISOString() : null,
-      status: r.status,
-    }));
+    const effectiveAt = (r: Item): Date | null => r.dueAt ?? r.scheduledAt ?? null;
+    return rows
+      .sort((a, b) => (effectiveAt(a)?.getTime() ?? 0) - (effectiveAt(b)?.getTime() ?? 0))
+      .map((r) => ({
+        itemId: r.id,
+        title: r.title,
+        dueAt: effectiveAt(r)?.toISOString() ?? null,
+        status: r.status,
+      }));
   }
 
   /**

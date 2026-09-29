@@ -1,3 +1,15 @@
+// pg-boss ships ESM-only, which jest cannot parse. The job queue is not what
+// this smoke test is about, and PgBossService degrades gracefully when
+// start() fails (logs a warning, stays not-ready), so a fake that refuses to
+// start keeps the rest of the real app boot honest.
+jest.mock('pg-boss', () => ({
+  PgBoss: jest.fn().mockImplementation(() => ({
+    on: jest.fn(),
+    start: jest.fn().mockRejectedValue(new Error('pg-boss disabled in e2e')),
+    stop: jest.fn(),
+  })),
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request = require('supertest');
@@ -9,10 +21,11 @@ import { GlobalExceptionFilter } from '../src/common/global-exception.filter';
  * E2E smoke test mirroring SmokeTest.java in the Spring project.
  * Boots the whole AppModule, hits register → login → /me, asserts envelope shape.
  *
- * Pre-requisites:
- *   - shared-infra postgres up on :5432 with husrevity_nest db
+ * Pre-requisites (verify.sh only runs this when :5432 is reachable):
+ *   - a local Postgres matching apps/api/.env (HUSREVITY_DB_*)
  *   - migrations applied: bun run migration:run
  *   - apps/api/.env exists with HUSREVITY_JWT_SECRET / HUSREVITY_CRYPTO_KEY filled
+ * It registers a throwaway smoke-<timestamp>@test.local user in that DB.
  */
 describe('SmokeTest (e2e)', () => {
   let app: INestApplication;
