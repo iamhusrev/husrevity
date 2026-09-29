@@ -24,6 +24,15 @@ import { RoutineModule } from './routine/routine.module';
 import { AdminModule } from './admin/admin.module';
 import { SportModule } from './sport/sport.module';
 import { LearningModule } from './learning/learning.module';
+import { ItemModule } from './item/item.module';
+import { TodayModule } from './today/today.module';
+import { SyncModule } from './sync/sync.module';
+import { DeviceModule } from './device/device.module';
+import { JobsModule } from './jobs/jobs.module';
+import { McpModule } from './mcp/mcp.module';
+import { IntegrationsModule } from './integrations/integrations.module';
+import { TelegramModule } from './telegram/telegram.module';
+import { SlackModule } from './slack/slack.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -49,6 +58,15 @@ import { HealthController } from './common/health.controller';
     AdminModule,
     SportModule,
     LearningModule,
+    ItemModule,
+    TodayModule,
+    SyncModule,
+    DeviceModule,
+    JobsModule,
+    McpModule,
+    IntegrationsModule,
+    TelegramModule,
+    SlackModule,
   ],
   controllers: [HealthController],
   providers: [

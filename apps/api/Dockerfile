@@ -9,10 +9,19 @@ WORKDIR /repo
 COPY package.json bun.lock tsconfig.base.json ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
+# Every workspace manifest must be present or `--frozen-lockfile` fails (the
+# lockfile covers the whole monorepo). --filter then installs only what the
+# API needs, so the mobile app's dependency tree stays out of this image.
+COPY apps/mobile/package.json ./apps/mobile/package.json
+COPY packages/parser/package.json ./packages/parser/package.json
+COPY packages/api-client/package.json ./packages/api-client/package.json
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --filter '@husrevity/api'
 
-# Source + build
+# Source + build. @husrevity/parser is a workspace package published as
+# compiled CommonJS (dist/) — `.dockerignore` drops host dist folders, so it
+# is built here (apps/api's `prebuild` also builds it).
+COPY packages/parser ./packages/parser
 COPY apps/api ./apps/api
 RUN cd apps/api && bun run build
 
@@ -31,6 +40,11 @@ ENV NODE_ENV=production
 COPY --from=builder /repo/node_modules ./node_modules
 COPY --from=builder /repo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /repo/apps/api/dist ./apps/api/dist
+# apps/api/node_modules/@husrevity/parser is a symlink to ../../../../packages/parser
+COPY --from=builder /repo/packages/parser/package.json ./packages/parser/package.json
+COPY --from=builder /repo/packages/parser/dist ./packages/parser/dist
+# parser's own deps (luxon) are symlinks into the hoisted /app/node_modules/.bun store
+COPY --from=builder /repo/packages/parser/node_modules ./packages/parser/node_modules
 COPY --from=builder /repo/apps/api/package.json ./apps/api/package.json
 COPY apps/api/scripts ./apps/api/scripts
 COPY apps/api/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

@@ -58,20 +58,26 @@ function sourceHref(ref: SuggestionSourceRef): string {
   }
 }
 
-export default function TodaySuggestionsCard() {
+export default function TodaySuggestionsCard({
+  activeBlockTitle,
+}: {
+  /** Title of the currently-active Evkat block (from useToday()), if any — nudges task-mode suggestions toward that context. */
+  activeBlockTitle?: string;
+} = {}) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<SuggestionMode>("task");
   const [count, setCount] = useState<Count>(3);
 
   const suggest = useAiSuggestions();
+  const suggestNow = () => suggest.mutate({ mode, count, activeBlockTitle });
 
-  // Auto-call on mount + whenever mode/count changes.
+  // Auto-call on mount + whenever mode/count/the active block changes.
   // Suggest is referentially stable enough for our purposes; we deliberately
-  // depend on mode/count only to avoid loop on every render.
+  // depend on mode/count/activeBlockTitle only to avoid loop on every render.
   useEffect(() => {
-    suggest.mutate({ mode, count });
+    suggestNow();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, count]);
+  }, [mode, count, activeBlockTitle]);
 
   const items: SuggestionItem[] = suggest.data?.data ?? [];
   const isLoading = suggest.isPending;
@@ -174,7 +180,7 @@ export default function TodaySuggestionsCard() {
           {/* Refresh */}
           <button
             type="button"
-            onClick={() => suggest.mutate({ mode, count })}
+            onClick={() => suggestNow()}
             disabled={isLoading}
             aria-label={t("dashboard.today.refreshAria")}
             className="inline-flex items-center justify-center rounded-full bg-white/70 p-2 text-gray-600 ring-1 ring-husrev-sand backdrop-blur transition-colors duration-200 hover:text-husrev-ember hover:ring-husrev-amber focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:text-husrev-amber"
@@ -204,7 +210,7 @@ export default function TodaySuggestionsCard() {
               </p>
               <button
                 type="button"
-                onClick={() => suggest.mutate({ mode, count })}
+                onClick={() => suggestNow()}
                 className="shrink-0 rounded-md px-2.5 py-1 text-xs font-medium text-husrev-ember underline-offset-2 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:text-husrev-amber"
               >
                 {t("dashboard.today.retry")}
@@ -230,7 +236,7 @@ export default function TodaySuggestionsCard() {
             <p>{t("dashboard.today.empty")}</p>
             <button
               type="button"
-              onClick={() => suggest.mutate({ mode, count })}
+              onClick={() => suggestNow()}
               className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-husrev-ember underline-offset-2 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:text-husrev-amber"
             >
               <BiRefresh size={12} aria-hidden /> {t("dashboard.today.retry")}
@@ -255,7 +261,9 @@ export default function TodaySuggestionsCard() {
                         className={`h-1.5 w-1.5 rounded-full ${badge.dot}`}
                         aria-hidden
                       />
-                      {t(`dashboard.today.kind.${s.kind}`)}
+                      {s.sourceRef
+                        ? t(`dashboard.today.source.${s.sourceRef.type}`)
+                        : t(`dashboard.today.kind.${s.kind}`)}
                     </span>
                     {s.sourceRef && (
                       <Link
@@ -263,7 +271,7 @@ export default function TodaySuggestionsCard() {
                         aria-label={t("dashboard.today.openSource")}
                         className="text-[10px] text-gray-400 underline-offset-2 transition-colors hover:text-husrev-ember hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:hover:text-husrev-amber"
                       >
-                        {t(`dashboard.today.source.${s.sourceRef.type}`)} ↗
+                        ↗
                       </Link>
                     )}
                   </div>

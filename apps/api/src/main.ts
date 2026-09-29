@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe, Logger, RequestMethod } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import type { Request, Response } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/response.interceptor';
@@ -17,7 +18,14 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const logger = new Logger('Bootstrap');
 
-  app.setGlobalPrefix('api');
+  // GcalWebhookController (`@Controller('hooks/gcal')`) is excluded from the
+  // global prefix so its real route is `POST /hooks/gcal` — the path Google
+  // is registered to call (GOOGLE_CALENDAR_WEBHOOK_URL must end in it).
+  // Without this exclude the route would be `/api/hooks/gcal` and every push
+  // notification would 404 (the 5-minute pg-boss poll would still cover it).
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: 'hooks/gcal', method: RequestMethod.POST }],
+  });
 
   // Behind Cloudflare Tunnel in prod — trust the first hop so the throttler
   // keys on the real client IP from X-Forwarded-For instead of the proxy's IP.
@@ -51,14 +59,25 @@ async function bootstrap() {
     .filter(Boolean);
   app.enableCors({ origin: corsOrigins, credentials: false });
 
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Husrevity API')
+    .setDescription('Personal productivity backend (NestJS port)')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+
+  // Raw OpenAPI JSON is public in every environment (mobile/CI client
+  // generation needs it in prod) — served directly via the HTTP adapter,
+  // deliberately bypassing Nest's guard pipeline since it's meant to be
+  // public. The interactive Swagger UI stays dev-only below.
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .get('/api/openapi.json', (_req: Request, res: Response) => res.json(swaggerDocument));
+
   if (!isProduction) {
-    const swagger = new DocumentBuilder()
-      .setTitle('Husrevity API')
-      .setDescription('Personal productivity backend (NestJS port)')
-      .setVersion('0.1.0')
-      .addBearerAuth()
-      .build();
-    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swagger));
+    SwaggerModule.setup('api/docs', app, swaggerDocument);
   }
 
   const port = Number(process.env.HUSREVITY_PORT ?? 4090);

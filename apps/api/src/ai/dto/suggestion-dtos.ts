@@ -1,4 +1,4 @@
-import { IsIn, IsOptional } from 'class-validator';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export type SuggestionMode = 'task' | 'hobby';
 export type SuggestionKind = 'task' | 'hobby' | 'mixed';
@@ -16,6 +16,12 @@ export class SuggestionsRequestDto {
   @IsOptional()
   @IsIn([1, 3])
   count?: 1 | 3;
+
+  /** Title of the currently-active Evkat block (from GET /today), if any — nudges task-mode suggestions toward that context. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  activeBlockTitle?: string;
 }
 
 export class SuggestionSourceRefDto {

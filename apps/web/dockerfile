@@ -8,8 +8,11 @@ WORKDIR /repo
 COPY package.json bun.lock tsconfig.base.json ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
+COPY apps/mobile/package.json ./apps/mobile/package.json
+COPY packages/parser/package.json ./packages/parser/package.json
+COPY packages/api-client/package.json ./packages/api-client/package.json
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --filter '@husrevity/web'
 
 COPY apps/web ./apps/web
 

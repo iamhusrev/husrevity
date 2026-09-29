@@ -73,17 +73,43 @@ export class AuthService {
   async refresh(req: RefreshRequestDto): Promise<AuthResponseDto> {
     const hash = this.sha256(req.refreshToken);
     const token = await this.refreshTokens.findOne({ where: { tokenHash: hash } });
-    if (!token || token.revoked || token.expiresAt.getTime() < Date.now()) {
+    if (!token) throw ApiException.unauthorized('Invalid or expired refresh token');
+
+    if (token.revoked) {
+      // Reuse of an already-rotated token — the classic stolen-refresh-token
+      // signal (either an attacker replaying a leaked token after the real
+      // owner already rotated past it, or vice versa). Revoke every live
+      // token in the family so a resulting compromised session can't
+      // continue on either side, and force re-login. The client-visible
+      // error is deliberately identical to a plain invalid/expired token —
+      // no oracle for an attacker to confirm detection fired.
+      await this.revokeFamily(token.familyId);
+      this.logger.warn(
+        `Refresh token reuse detected for user ${token.userId} (family ${token.familyId}) — entire family revoked`,
+      );
       throw ApiException.unauthorized('Invalid or expired refresh token');
     }
+    if (token.expiresAt.getTime() < Date.now()) {
+      throw ApiException.unauthorized('Invalid or expired refresh token');
+    }
+
     const user = await this.users.findOne({ where: { id: token.userId } });
     if (!user || !user.enabled) throw ApiException.unauthorized('User disabled');
 
     return this.dataSource.transaction(async (em) => {
       token.revoked = true;
       await em.save(token);
-      return this.issueTokensWithEm(em, user);
+      return this.issueTokensWithEm(em, user, token.familyId);
     });
+  }
+
+  private async revokeFamily(familyId: string): Promise<void> {
+    await this.refreshTokens
+      .createQueryBuilder()
+      .update(RefreshToken)
+      .set({ revoked: true })
+      .where('family_id = :familyId AND revoked = false', { familyId })
+      .execute();
   }
 
   async logout(userId: string): Promise<void> {
@@ -110,6 +136,7 @@ export class AuthService {
   private async issueTokensWithEm(
     em: import('typeorm').EntityManager,
     user: User,
+    familyId?: string,
   ): Promise<AuthResponseDto> {
     const accessTtlMin = Number(this.config.get('HUSREVITY_JWT_ACCESS_TTL_MIN') ?? 10080); // 7 days
     const refreshTtlDays = Number(this.config.get('HUSREVITY_JWT_REFRESH_TTL_DAYS') ?? 30); // 1 month
@@ -133,6 +160,9 @@ export class AuthService {
       userId: user.id,
       expiresAt,
       revoked: false,
+      // A fresh login/register starts a new family; a rotation (refresh())
+      // passes its predecessor's familyId to stay in the same lineage.
+      familyId: familyId ?? randomBytes(16).toString('hex'),
     });
     await em.save(rt);
 

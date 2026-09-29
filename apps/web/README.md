@@ -1,45 +1,45 @@
 # husrevity
 
-> Sakin, sıcak bir kişisel verimlilik panosu. Notlarım, anımsatıcılarım, görevlerim, takvimim, Gmail'im ve şifrelerim — hepsi tek bir yerde.
+> A calm, warm personal productivity dashboard. My notes, reminders, tasks, calendar, Gmail, and passwords — all in one place.
 
-Next.js 15 (App Router) + React 19 + TypeScript 5 + Tailwind CSS 4 üzerine kurulu, kendi Java Spring Boot API'mle konuşan bir admin dashboard. **Husrev** adını verdiğim sıcak tasarım dilini (cream, sand, ink, amber, ember, moss + Outfit / Instrument Serif / JetBrains Mono triology'si + warm card shadow + paper-grain doku) bütüne yansıtır.
+An admin dashboard built on Next.js 15 (App Router) + React 19 + TypeScript 5 + Tailwind CSS 4, communicating with my own Java Spring Boot API. Reflects the warm design language named **Husrev** (cream, sand, ink, amber, ember, moss + Outfit / Instrument Serif / JetBrains Mono trilogy + warm card shadow + paper-grain texture) throughout the system.
 
 ---
 
-## İçindekiler
+## Table of Contents
 
-- [Özellikler](#özellikler)
-- [Ekran görüntüleri](#ekran-görüntüleri)
-- [Tasarım dili](#tasarım-dili)
-- [Teknoloji yığını](#teknoloji-yığını)
-- [Hızlı başlangıç](#hızlı-başlangıç)
-- [Ortam değişkenleri](#ortam-değişkenleri)
-- [Proje yapısı](#proje-yapısı)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Design Language](#design-language)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
 - [Backend](#backend)
-- [Yol haritası](#yol-haritası)
+- [Roadmap](#roadmap)
 
 ---
 
-## Özellikler
+## Features
 
-| Modül             | Ne yapar                                                                                          |
+| Module            | What it does                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------- |
-| **Dashboard**     | KPI kartları, bugünün ajandası, yaklaşan/geciken anımsatıcılar, görev durum dağılımı, son notlar  |
-| **Notlar**        | Markdown gövde, etiketler, sabitleme (pin), sürükle-bırak sıralama, modal düzenleme               |
-| **Anımsatıcılar** | Liste bazlı anımsatıcılar, öncelik + zaman damgası, geciken/bugün/bu hafta gruplaması             |
-| **Projeler**      | Kanban + List görünümü, durum/öncelik etiketleri, sürükle-bırak görev taşıma, alt görev sayaçları |
-| **Takvim**        | FullCalendar (day / week / month / list), bugünün hücresi amber vurguluk, mono gün başlıkları     |
-| **Gmail**         | Bağlı Gmail hesapları, thread listesi, sand-ring satır hover                                      |
-| **Vault**         | AES-256-GCM at-rest şifreli kimlik bilgisi yöneticisi (.env import/export), kopyalama maskeleme   |
-| **Ayarlar**       | Profil, tema (warm-light / warm-dark), dil (TR/EN)                                                |
+| **Dashboard**     | KPI cards, today's agenda, upcoming/overdue reminders, task status distribution, recent notes    |
+| **Notes**         | Markdown body, tags, pinning, drag-and-drop ordering, modal editing                               |
+| **Reminders**     | List-based reminders, priority + timestamp, overdue/today/this week grouping                      |
+| **Projects**      | Kanban + List view, status/priority tags, drag-and-drop task moving, subtask counters            |
+| **Calendar**      | FullCalendar (day / week / month / list), today's cell highlighted amber, mono day headers        |
+| **Gmail**         | Connected Gmail accounts, thread list, sand-ring row hover                                        |
+| **Vault**         | AES-256-GCM at-rest encrypted credential manager (.env import/export), copy masking              |
+| **Settings**      | Profile, theme (warm-light / warm-dark), language (TR/EN)                                         |
 
-Tüm modüller TanStack Query v5 ile cachelenir; mutation'lar optimistic + invalidation ile çalışır. Form'lar React Hook Form + Zod resolver; doğrulama mesajları Türkçe.
+All modules are cached with TanStack Query v5; mutations work via optimistic updates + invalidation. Forms use React Hook Form + Zod resolver; validation messages in Turkish.
 
 ---
 
-## Ekran görüntüleri
+## Screenshots
 
-> Ekran görüntülerini `docs/screenshots/` klasörüne ekleyince burada otomatik gözükür.
+> Once screenshot images are added to the `docs/screenshots/` folder, they automatically appear here.
 
 | Light                                                    | Dark                                                   |
 | -------------------------------------------------------- | ------------------------------------------------------ |
@@ -49,45 +49,45 @@ Tüm modüller TanStack Query v5 ile cachelenir; mutation'lar optimistic + inval
 
 ---
 
-## Tasarım dili
+## Design Language
 
-**Husrev**, Anthropic tarzı admin tasarım sisteminin üzerine oturan sıcak / "kâğıt hissi" veren bir katman:
+**Husrev** is a layer sitting on top of an Anthropic-style admin design system, providing a warm / "paper feel":
 
-- **Renkler**: `cream #f6f3ec`, `sand #ebe5d6`, `ink #1a1814`, `shadow #2b2823`, `amber #c8732e`, `ember #a14d18`, `moss #5a6b3a`. Brand rampası (eski mavi) tamamen sıcak ember/amber'a remap edildi; primary CTA'lar artık `bg-brand-500` (ember) renginde.
-- **Tipografi**: gövde için **Outfit** (300–700), display vurgusu için **Instrument Serif** italik tek-iki kelimede ("İyi _akşamlar_", "henüz bir şey _yok_"), sayaç/breadcrumb/kısayollar için **JetBrains Mono**.
-- **Yüzeyler**: tüm kartlarda `shadow-card-warm` (içe doğru beyaz vurgu + dış sıcak gölge) + `ring-1 ring-husrev-sand/90`. Sayfa zemininde `.grain` paper-texture katmanı (light'ta multiply, dark'ta screen blend).
-- **Vurgu**: serif italic kelime altında `linear-gradient` ile %35 amber alt-çizgi, sidebar AI öneri kartı, mono ⌘K chip.
-- **Semantik renkler**: yıkıcı için `red`, başarı için `success` (yeşil), bilgi için `blue-light` (cyan) — bu üçü evrensel anlamları için aynen korundu.
+- **Colors**: `cream #f6f3ec`, `sand #ebe5d6`, `ink #1a1814`, `shadow #2b2823`, `amber #c8732e`, `ember #a14d18`, `moss #5a6b3a`. The brand ramp (former blue) is completely remapped to warm ember/amber; primary CTAs are now in `bg-brand-500` (ember).
+- **Typography**: **Outfit** (300–700) for body, **Instrument Serif** italic on key display words ("Good _evening_", "nothing _yet_"), **JetBrains Mono** for counters/breadcrumbs/shortcuts.
+- **Surfaces**: `shadow-card-warm` (inner white highlight + outer warm shadow) + `ring-1 ring-husrev-sand/90` on all cards. `.grain` paper-texture layer on page background (multiply blend in light, screen blend in dark).
+- **Accent**: 35% amber underline via `linear-gradient` under serif italic words, sidebar AI suggestion card, mono ⌘K chip.
+- **Semantic colors**: `red` for destructive, `success` (green) for success, `blue-light` (cyan) for info — these three are preserved as-is for their universal meaning.
 
-Tasarım handoff referansı: ileride paylaşılır.
+Design handoff reference: to be shared later.
 
 ---
 
-## Teknoloji yığını
+## Tech Stack
 
-| Katman          | Paket                                                        |
+| Layer           | Package                                                      |
 | --------------- | ------------------------------------------------------------ |
 | Framework       | Next.js 15 (App Router), React 19, TypeScript 5              |
-| Styling         | Tailwind CSS 4 (`@theme` token'ları, `@custom-variant dark`) |
+| Styling         | Tailwind CSS 4 (`@theme` tokens, `@custom-variant dark`)    |
 | Server state    | TanStack Query 5 (+ Devtools)                                |
-| Tablolar        | TanStack Table 8                                             |
-| Form'lar        | React Hook Form 7 + Zod 4                                    |
+| Tables          | TanStack Table 8                                             |
+| Forms           | React Hook Form 7 + Zod 4                                    |
 | HTTP            | Axios + JWT Bearer + auto-refresh interceptor                |
-| Yerel state     | Zustand (alert store)                                        |
+| Local state     | Zustand (alert store)                                        |
 | i18n            | i18next + react-i18next + http-backend (TR/EN)               |
-| UI yardımcıları | react-icons, react-dnd (HTML5 backend), simplebar-react      |
-| Takvim          | FullCalendar (daygrid + timegrid + list + interaction)       |
-| Grafikler       | ApexCharts                                                   |
-| Form girdileri  | flatpickr (date), react-dropzone (file)                      |
-| Haritalar       | react-leaflet, @react-jvectormap                             |
+| UI helpers      | react-icons, react-dnd (HTML5 backend), simplebar-react      |
+| Calendar        | FullCalendar (daygrid + timegrid + list + interaction)       |
+| Charts          | ApexCharts                                                   |
+| Form inputs     | flatpickr (date), react-dropzone (file)                      |
+| Maps            | react-leaflet, @react-jvectormap                             |
 
 ---
 
-## Hızlı başlangıç
+## Quick Start
 
 ```bash
 npm install
-cp .env.example .env.local       # NEXT_PUBLIC_API_URL'i kontrol et
+cp .env.example .env.local       # Check NEXT_PUBLIC_API_URL
 npm run dev                       # http://localhost:3090
 ```
 
@@ -98,11 +98,11 @@ npm run build
 npm run lint
 ```
 
-Docker imajı çıkarmak istersen `dockerfile` repo kökünde mevcut.
+If you want to build a Docker image, `dockerfile` is available at the repository root.
 
 ---
 
-## Ortam değişkenleri
+## Environment Variables
 
 `.env.local`:
 
@@ -110,17 +110,17 @@ Docker imajı çıkarmak istersen `dockerfile` repo kökünde mevcut.
 NEXT_PUBLIC_API_URL=http://localhost:8762/husrevity/dev
 ```
 
-Backend Spring Cloud Gateway'in arkasında çalışır; bu URL gateway'e işaret eder.
+Backend runs behind Spring Cloud Gateway; this URL points to the gateway.
 
 ---
 
-## Proje yapısı
+## Project Structure
 
 ```
 src/
 ├── app/
 │   ├── (auth)/                  # /login, /register
-│   ├── (app)/                   # auth-gated dashboard alanı
+│   ├── (app)/                   # auth-gated dashboard area
 │   │   ├── layout.tsx           # auth check + sidebar/header chrome
 │   │   ├── dashboard/
 │   │   ├── notes/
@@ -142,45 +142,45 @@ src/
 │   ├── header/                  # search, theme toggle, language, clock, notifications
 │   └── modal/                   # Modal + DeleteConfirmModal
 │
-├── views/                       # sayfa-seviyesi bileşik component'ler
+├── views/                       # page-level composite components
 │   ├── notes/, vault/, projects/, calendar/, gmail/, reminders/, settings/, auth/
 │
 ├── hooks/                       # useNotes, useVault, useProjects,
 │                                # useCalendarEvents, useGmail, useReminders, useModal, useGoBack
 │
-├── services/                    # api-client.ts, http-service.ts, ve domain servisleri
+├── services/                    # api-client.ts, http-service.ts, and domain services
 ├── providers/                   # Auth, Theme, Sidebar, ReactQuery, I18n
 ├── stores/                      # Zustand alert-store
 ├── layout/                      # AppSidebar, AppHeader, Backdrop
-├── icons/                       # ~64 inline SVG icon component
+├── icons/                       # ~64 inline SVG icon components
 ├── messages/                    # i18n JSON: tr.json, en.json
 ├── utils/                       # api-endpoints, constants-url, handleError, ...
-└── types/                       # TS arayüzleri (note, vault, project, ...)
+└── types/                       # TS interfaces (note, vault, project, ...)
 ```
 
 ---
 
 ## Backend
 
-Bu UI, kişisel **issue-tracker-microservices** Spring Boot projemle konuşur (multi-tenant, JWT auth). Tüm istekler:
+This UI communicates with my personal **issue-tracker-microservices** Spring Boot project (multi-tenant, JWT auth). All requests:
 
-- `Authorization: Bearer <jwt>` header'ı ile gider (`api-client.ts` interceptor).
-- 401 alınırsa otomatik refresh token ile yeniden denenir.
-- Cevap formatı: `ApiResponse<T> = { success, message, result, meta?, errors? }`.
+- Sent with `Authorization: Bearer <jwt>` header (`api-client.ts` interceptor).
+- If 401 is received, automatically retried with refresh token.
+- Response format: `ApiResponse<T> = { success, message, result, meta?, errors? }`.
 
-Backend'i lokal çalıştırmak için ayrı projedeki Docker Compose veya `mvn spring-boot:run` kullan.
+To run the backend locally, use Docker Compose or `mvn spring-boot:run` in the separate project.
 
 ---
 
-## Yol haritası
+## Roadmap
 
-- [ ] `/board` — Husrev tasarım handoff'undaki Kanban screen (dnd-kit + ghost rotate + amber drop indicator pulse)
-- [ ] Quick capture (⌘K) komut paleti
-- [ ] Görev detay drawer'ı (sağdan slide-in 480px)
+- [ ] `/board` — Kanban screen from Husrev design handoff (dnd-kit + ghost rotate + amber drop indicator pulse)
+- [ ] Quick capture (⌘K) command palette
+- [ ] Task detail drawer (slide-in from right 480px)
 - [ ] Vault — auto-clear clipboard + idle auto-mask (handoff §4.3)
-- [ ] Self-hosted fontlar (`next/font/local`) — Google Fonts dependency'sini kaldır
+- [ ] Self-hosted fonts (`next/font/local`) — remove Google Fonts dependency
 - [ ] Mobile bottom nav
 
 ---
 
-Kişisel proje — kendi günlük araç setim. PR / issue alırım ama public roadmap niyetim yok.
+Personal project — my daily toolkit. I accept PRs / issues, but have no intention of a public roadmap.

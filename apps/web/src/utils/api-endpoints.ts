@@ -184,3 +184,18 @@ export const SPORT_ENDPOINTS = {
     return qs ? `/sport/stats?${qs}` : "/sport/stats";
   },
 };
+
+// ─── Items (unified model) ─────────────────────────────────────────────────────
+
+export const ITEM_ENDPOINTS = {
+  ITEMS: "/items",
+  ITEM_BY_ID: (id: string) => `/items/${id}`,
+  ITEM_COMPLETE: (id: string) => `/items/${id}/complete`,
+  PARSE_QUICK_ADD: "/items/parse-quick-add",
+};
+
+// ─── Today ────────────────────────────────────────────────────────────────────
+
+export const TODAY_ENDPOINTS = {
+  TODAY: "/today",
+};

@@ -123,7 +123,7 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Today",
     "notes": "Notes",
     "reminders": "Reminders",
     "projects": "Projects",
@@ -435,6 +435,33 @@
       "empty": "Set up your daily routine.",
       "error": "Couldn't load your routine.",
       "noActivities": "No tasks for this segment."
+    }
+  },
+  "quickAdd": {
+    "kicker": "quick add",
+    "title": "Quick add",
+    "placeholder": "tomorrow 9am HGS check #alican",
+    "preview": "Preview",
+    "previewing": "Previewing…",
+    "confirm": "Add",
+    "adding": "Adding…",
+    "edit": "Edit"
+  },
+  "today": {
+    "now": "Right now",
+    "loading": "Loading…",
+    "nextUp": "Next up",
+    "currentBlock": {
+      "title": "Right now",
+      "empty": "No active block right now."
+    },
+    "timeline": {
+      "title": "Today's timeline",
+      "empty": "Nothing scheduled for today."
+    },
+    "dueToday": {
+      "title": "Overdue / due today",
+      "empty": "Nothing overdue or due today."
     }
   },
   "projects": {

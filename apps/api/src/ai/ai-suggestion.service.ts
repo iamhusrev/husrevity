@@ -65,10 +65,11 @@ export class AiSuggestionService {
 
     const mode = req.mode;
     const count = (req.count ?? 3) as 1 | 3;
+    const activeBlockTitle = req.activeBlockTitle;
 
     const context = await this.gatherContext(ownerId);
     const ctxHash = this.contextHash(context);
-    const key = `${ownerId}:${mode}:${count}:${ctxHash}`;
+    const key = `${ownerId}:${mode}:${count}:${activeBlockTitle ?? ''}:${ctxHash}`;
 
     const hit = this.cache.get(key);
     if (hit && hit.expiresAt > Date.now()) {
@@ -76,7 +77,7 @@ export class AiSuggestionService {
     }
 
     const system = this.buildSystem(mode, count);
-    const user = this.buildUserPrompt(context);
+    const user = this.buildUserPrompt(context, activeBlockTitle);
     const raw = await this.callGeminiJson(system, user);
     const parseCtx: ParseContext = { validIds: this.buildValidIds(context) };
     const parsed = parseSuggestions(raw, count, parseCtx);
@@ -242,18 +243,23 @@ export class AiSuggestionService {
       'Rules:',
       '- title ≤ 80 chars, imperative, single line.',
       '- description ≤ 220 chars, 1–2 sentences, second person.',
-      '- reasonShort ≤ 120 chars, explain WHY this surfaces NOW (e.g. "Due in 2 days", "Stalled 3 weeks", "You have an overdue reminder").',
+      '- reasonShort ≤ 120 chars, explain WHY this surfaces NOW in Turkish (e.g. "2 gün sonra son tarih", "3 haftadır ilerlemedi", "Gecikmiş bir anımsatıcın var").',
       '- If a task-mode suggestion derives from a real item in the context, set sourceRef to that item\'s exact id and type. Otherwise sourceRef = null.',
       '- Hobby-mode sourceRef is usually null.',
-      '- Respond in the same language as the user content (Turkish if the context titles are predominantly Turkish, otherwise English). Prefer Turkish on tie.',
+      '- Always respond in Turkish (Türkçe), regardless of the language of the context titles/notes.',
       '- Never invent ids that are not in the context.',
     ].join('\n');
   }
 
-  private buildUserPrompt(c: GatheredContext): string {
+  private buildUserPrompt(c: GatheredContext, activeBlockTitle?: string): string {
     const lines: string[] = [];
     lines.push('=== CONTEXT ===');
     lines.push(`now: ${new Date().toISOString()}`);
+    if (activeBlockTitle) {
+      lines.push(
+        `active Evkat block right now: "${activeBlockTitle}" — for task-mode, prefer something that fits this block's context when a good fit exists in the items below.`,
+      );
+    }
 
     lines.push(`\n[reminders ${c.reminders.length}]`);
     for (const r of c.reminders) {

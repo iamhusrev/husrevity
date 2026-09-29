@@ -6,7 +6,11 @@ import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
 import { NotificationDispatcherService } from './notification-dispatcher.service';
 import { MailerService } from './mailer.service';
+import { WebPushNotifier } from './web-push.notifier';
 import { UserModule } from '../user/user.module';
+import { TelegramCoreModule } from '../telegram/telegram-core.module';
+import { DeviceModule } from '../device/device.module';
+import { SlackCoreModule } from '../slack/slack-core.module';
 
 /**
  * Central notification hub. Exported `NotificationService` is imported by
@@ -22,8 +26,16 @@ import { UserModule } from '../user/user.module';
   imports: [
     TypeOrmModule.forFeature([Notification, PushSubscription]),
     UserModule,
+    // TelegramCoreModule, not the full TelegramModule — see
+    // telegram-core.module.ts's docblock for why: TelegramModule needs
+    // ItemModule (for quick-add), and ItemModule already imports
+    // NotificationModule (directly, and via ProjectModule), so importing
+    // the full TelegramModule here would close a real module cycle.
+    TelegramCoreModule,
+    DeviceModule,
+    SlackCoreModule,
   ],
-  providers: [NotificationService, NotificationDispatcherService, MailerService],
+  providers: [NotificationService, NotificationDispatcherService, MailerService, WebPushNotifier],
   controllers: [NotificationController],
   exports: [NotificationService, MailerService],
 })

@@ -22,4 +22,6 @@ export interface SuggestionItem {
 export interface SuggestionsRequest {
   mode: SuggestionMode;
   count?: 1 | 3;
+  /** Title of the currently-active Evkat block (from useToday()), if any. */
+  activeBlockTitle?: string;
 }

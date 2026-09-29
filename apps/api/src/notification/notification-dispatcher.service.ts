@@ -6,14 +6,31 @@ import { NotificationService } from './notification.service';
 import { Notification } from './notification.entity';
 import { PushSubscription } from './push-subscription.entity';
 import { MailerService } from './mailer.service';
+import { WebPushNotifier } from './web-push.notifier';
+import { NotifierPayload } from './notifier.interface';
 import { UserService } from '../user/user.service';
 import type { User } from '../user/user.entity';
+import { TelegramLinkService } from '../telegram/telegram-link.service';
+import { TelegramNotifier } from '../telegram/telegram.notifier';
+import type { TelegramLink } from '../telegram/telegram-link.entity';
+import { DeviceService } from '../device/device.service';
+import { ExpoPushNotifier } from '../device/expo-push.notifier';
+import { Device } from '../device/device.entity';
+import { SlackLinkService } from '../slack/slack-link.service';
+import { SlackNotifier } from '../slack/slack.notifier';
+import type { SlackLink } from '../slack/slack-link.entity';
 
 export interface DispatchResult {
   pushAttempted: boolean;
   pushSucceeded: boolean;
   emailAttempted: boolean;
   emailSucceeded: boolean;
+  telegramAttempted: boolean;
+  telegramSucceeded: boolean;
+  expoAttempted?: boolean;
+  expoSucceeded?: boolean;
+  slackAttempted?: boolean;
+  slackSucceeded?: boolean;
   reason?: string;
 }
 
@@ -27,6 +44,8 @@ export interface DispatchResult {
  *   2. Email — only if the user has emailNotificationsEnabled = true and
  *      SMTP (MAIL_* env) is configured. Failures are swallowed (log only)
  *      so a flaky SMTP doesn't poison the loop.
+ *   3. Telegram — only if the user has an active, linked telegram_link row.
+ *   4. Expo Push — to active mobile devices (iOS/Android push tokens).
  *
  * The `notification` row persists regardless of channel delivery — the bell
  * dropdown reads from the same table, so a user without any channel still
@@ -44,6 +63,13 @@ export class NotificationDispatcherService implements OnModuleInit {
     private readonly mailer: MailerService,
     private readonly users: UserService,
     private readonly config: ConfigService,
+    private readonly webPush: WebPushNotifier,
+    private readonly telegramLinkService: TelegramLinkService,
+    private readonly telegramNotifier: TelegramNotifier,
+    private readonly deviceService: DeviceService,
+    private readonly expoPushNotifier: ExpoPushNotifier,
+    private readonly slackLinkService: SlackLinkService,
+    private readonly slackNotifier: SlackNotifier,
   ) {}
 
   onModuleInit(): void {
@@ -107,8 +133,17 @@ export class NotificationDispatcherService implements OnModuleInit {
       // Look up the user once per owner — used by the email leg + skipped
       // if they've opted out / SMTP isn't configured.
       const user = await this.users.findById(ownerId).catch(() => null);
+      const telegramLink = await this.telegramLinkService
+        .findByOwner(ownerId)
+        .catch(() => null);
+      const mobileDevices = await this.deviceService
+        .findActiveForOwner(ownerId)
+        .catch(() => []);
+      const slackLink = await this.slackLinkService
+        .findByOwner(ownerId)
+        .catch(() => null);
       for (const n of items) {
-        await this.deliver(n, subs, user);
+        await this.deliver(n, subs, user, telegramLink, mobileDevices, slackLink);
       }
     }
     this.logger.debug(`Dispatched ${pending.length} notification(s)`);
@@ -119,19 +154,37 @@ export class NotificationDispatcherService implements OnModuleInit {
       ? await this.notifications.listSubscriptions(n.ownerId)
       : [];
     const user = await this.users.findById(n.ownerId).catch(() => null);
-    return this.deliver(n, subs, user);
+    const telegramLink = await this.telegramLinkService
+      .findByOwner(n.ownerId)
+      .catch(() => null);
+    const mobileDevices = await this.deviceService
+      .findActiveForOwner(n.ownerId)
+      .catch(() => []);
+    const slackLink = await this.slackLinkService
+      .findByOwner(n.ownerId)
+      .catch(() => null);
+    return this.deliver(n, subs, user, telegramLink, mobileDevices, slackLink);
   }
 
   private async deliver(
     n: Notification,
     subs: PushSubscription[],
     user: User | null,
+    telegramLink: TelegramLink | null,
+    mobileDevices: Device[] = [],
+    slackLink: SlackLink | null = null,
   ): Promise<DispatchResult> {
     const result: DispatchResult = {
       pushAttempted: false,
       pushSucceeded: false,
       emailAttempted: false,
       emailSucceeded: false,
+      telegramAttempted: false,
+      telegramSucceeded: false,
+      expoAttempted: false,
+      expoSucceeded: false,
+      slackAttempted: false,
+      slackSucceeded: false,
     };
 
     if (subs.length > 0) {
@@ -148,10 +201,108 @@ export class NotificationDispatcherService implements OnModuleInit {
       result.emailSucceeded = await this.sendEmail(n, user.email);
     }
 
-    if (!result.pushAttempted && !result.emailAttempted) {
+    if (
+      telegramLink &&
+      telegramLink.status === 'linked' &&
+      telegramLink.chatId
+    ) {
+      result.telegramAttempted = true;
+      result.telegramSucceeded = await this.sendTelegram(n, telegramLink);
+    }
+
+    if (mobileDevices.length > 0) {
+      result.expoAttempted = true;
+      result.expoSucceeded = await this.sendExpoPush(n, mobileDevices);
+    }
+
+    if (
+      slackLink &&
+      slackLink.status === 'linked' &&
+      slackLink.slackUserId
+    ) {
+      result.slackAttempted = true;
+      result.slackSucceeded = await this.sendSlack(n, slackLink);
+    }
+
+    if (
+      !result.pushAttempted &&
+      !result.emailAttempted &&
+      !result.telegramAttempted &&
+      !result.expoAttempted &&
+      !result.slackAttempted
+    ) {
       result.reason = this.noDeliveryReason(user, subs);
     }
     return result;
+  }
+
+  private async sendSlack(
+    n: Notification,
+    link: SlackLink,
+  ): Promise<boolean> {
+    const payload: NotifierPayload = {
+      id: n.id,
+      title: n.title,
+      body: n.body ?? '',
+      deepLink: n.deepLink ?? '/dashboard',
+      kind: n.kind,
+    };
+    try {
+      await this.slackNotifier.send(link, payload);
+      return true;
+    } catch (err) {
+      this.logger.warn(
+        `slack-notifier failed: ${(err as Error).message}`,
+      );
+      return false;
+    }
+  }
+
+  private async sendTelegram(
+    n: Notification,
+    link: TelegramLink,
+  ): Promise<boolean> {
+    const payload: NotifierPayload = {
+      id: n.id,
+      title: n.title,
+      body: n.body ?? '',
+      deepLink: n.deepLink ?? '/dashboard',
+      kind: n.kind,
+    };
+    try {
+      await this.telegramNotifier.send(link, payload);
+      return true;
+    } catch (err) {
+      this.logger.warn(
+        `telegram-notifier failed: ${(err as Error).message}`,
+      );
+      return false;
+    }
+  }
+
+  private async sendExpoPush(
+    n: Notification,
+    devices: Device[],
+  ): Promise<boolean> {
+    const payload: NotifierPayload = {
+      id: n.id,
+      title: n.title,
+      body: n.body ?? '',
+      deepLink: n.deepLink ?? '/today',
+      kind: n.kind,
+    };
+    let succeeded = false;
+    for (const dev of devices) {
+      try {
+        await this.expoPushNotifier.send(dev, payload);
+        succeeded = true;
+      } catch (err) {
+        this.logger.warn(
+          `expo-push failed for device ${dev.id}: ${(err as Error).message}`,
+        );
+      }
+    }
+    return succeeded;
   }
 
   private noDeliveryReason(
@@ -173,24 +324,17 @@ export class NotificationDispatcherService implements OnModuleInit {
     n: Notification,
     subs: PushSubscription[],
   ): Promise<boolean> {
-    const payload = JSON.stringify({
+    const payload: NotifierPayload = {
       id: n.id,
       title: n.title,
       body: n.body ?? '',
       deepLink: n.deepLink ?? '/dashboard',
       kind: n.kind,
-    });
+    };
     let succeeded = false;
     for (const sub of subs) {
       try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth },
-          },
-          payload,
-          { TTL: 600 },
-        );
+        await this.webPush.send(sub, payload);
         succeeded = true;
       } catch (err) {
         const status = (err as { statusCode?: number }).statusCode;

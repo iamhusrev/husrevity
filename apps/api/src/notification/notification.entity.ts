@@ -11,7 +11,8 @@ export type NotificationKind =
   | 'task'
   | 'calendar_event'
   | 'time_block'
-  | 'learning';
+  | 'learning'
+  | 'item';
 
 /**
  * Unified notification queue + read log.

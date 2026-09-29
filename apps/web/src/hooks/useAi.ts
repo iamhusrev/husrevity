@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { aiService } from "@/services/ai-service";
-import type { SuggestionMode } from "@/types/ai/suggestion";
+import type { SuggestionsRequest } from "@/types/ai/suggestion";
 
 /**
  * Mutation hook for the dashboard "Bugün ne yapsam?" widget. Manual trigger
@@ -10,8 +10,7 @@ import type { SuggestionMode } from "@/types/ai/suggestion";
  */
 export function useAiSuggestions() {
   return useMutation({
-    mutationFn: (input: { mode: SuggestionMode; count: 1 | 3 }) =>
-      aiService.getSuggestions(input),
+    mutationFn: (input: SuggestionsRequest) => aiService.getSuggestions(input),
     // `data` is the full ApiResponse envelope; consumers access `.data` for the array.
   });
 }

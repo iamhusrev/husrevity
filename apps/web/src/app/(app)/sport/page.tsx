@@ -1,13 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import { useSportLogs, useSportPrograms } from "@/hooks/useSport";
 import { SportLogResponse } from "@/types/sport/sport";
-import SportProfileCard from "@/views/sport/SportProfileCard";
-import SportProgramsList from "@/views/sport/SportProgramsList";
-import SportProgramDetail from "@/views/sport/SportProgramDetail";
 import SportStatsView from "@/views/sport/SportStatsView";
 import SportLogModal, { SessionOption } from "@/views/sport/SportLogModal";
 import {
@@ -19,7 +17,11 @@ import {
 } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
-type Tab = "profile" | "programs" | "logs" | "stats";
+// Faz 2: sadeleştirme — sadece "kayıt ekle" (Antrenman günlüğü) ve
+// İstatistikler burada kalır. Profil ve Programlar kendi alt rotalarına
+// taşındı (/sport/profile, /sport/programs) ve artık Diğer üzerinden
+// (ya da bu sayfanın üstündeki linklerden) ulaşılıyor.
+type Tab = "logs" | "stats";
 
 function toISO(d: Date): string {
   const y = d.getFullYear();
@@ -183,12 +185,9 @@ function LogsTab() {
 
 export default function SportPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("profile");
-  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("logs");
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "profile", label: t("sport.tabs.profile", "Profil") },
-    { id: "programs", label: t("sport.tabs.programs", "Programlar") },
     { id: "logs", label: t("sport.tabs.logs", "Antrenman günlüğü") },
     { id: "stats", label: t("sport.tabs.stats", "İstatistikler") },
   ];
@@ -201,12 +200,19 @@ export default function SportPage() {
         flourish={t("sport.flourish", "formunda kal")}
       />
 
-      <p className="max-w-xl text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-        {t(
-          "sport.intro",
-          "Spor profilini yönet, antrenman programları oluştur, seansları logla ve ilerlemeni takip et.",
-        )}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-xl text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          {t("sport.intro", "Antrenman kaydet, ilerlemeni takip et.")}
+        </p>
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <Link href="/sport/profile" className="hover:underline">
+            {t("sport.tabs.profile", "Profil")}
+          </Link>
+          <Link href="/sport/programs" className="hover:underline">
+            {t("sport.tabs.programs", "Programlar")}
+          </Link>
+        </div>
+      </div>
 
       <nav
         role="tablist"
@@ -217,10 +223,7 @@ export default function SportPage() {
             key={tb.id}
             role="tab"
             aria-selected={tab === tb.id}
-            onClick={() => {
-              setTab(tb.id);
-              if (tb.id !== "programs") setSelectedProgramId(null);
-            }}
+            onClick={() => setTab(tb.id)}
             className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
               tab === tb.id
                 ? "bg-husrev-ember text-husrev-cream"
@@ -231,18 +234,6 @@ export default function SportPage() {
           </button>
         ))}
       </nav>
-
-      {tab === "profile" && <SportProfileCard />}
-
-      {tab === "programs" &&
-        (selectedProgramId ? (
-          <SportProgramDetail
-            programId={selectedProgramId}
-            onBack={() => setSelectedProgramId(null)}
-          />
-        ) : (
-          <SportProgramsList onOpenDetail={setSelectedProgramId} />
-        ))}
 
       {tab === "logs" && <LogsTab />}
 

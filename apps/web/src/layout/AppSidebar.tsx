@@ -4,244 +4,44 @@ import TodaySuggestionsModal from "@/components/ai/TodaySuggestionsModal";
 import { HOME_PAGE } from "@/utils/constants-url";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CiGrid41, CiSettings } from "react-icons/ci";
-import {
-  BiNote,
-  BiBell,
-  BiLockAlt,
-  BiFolder,
-  BiCalendar,
-  BiShield,
-  BiDumbbell,
-  BiBookOpen,
-} from "react-icons/bi";
-import { useAuth } from "@/providers/AuthProvider";
-import { HiSparkles, HiOutlineClock } from "react-icons/hi2";
-import { FaChevronDown } from "react-icons/fa";
+import { CiGrid41 } from "react-icons/ci";
+import { BiNote, BiFolder, BiDotsHorizontalRounded } from "react-icons/bi";
+import { HiSparkles } from "react-icons/hi2";
 import { useSidebar } from "@/providers/SidebarContext";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
-  path?: string;
-  new?: boolean;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
-
-type NavSection = {
-  label: string | null;
-  items: NavItem[];
+  path: string;
 };
 
 type TFunc = (key: string) => string;
 
-const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
-  {
-    label: null,
-    items: [
-      {
-        icon: <CiGrid41 size={"1.5rem"} />,
-        name: t("nav.dashboard"),
-        path: "/dashboard",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.core"),
-    items: [
-      {
-        icon: <BiBell size={"1.5rem"} />,
-        name: t("nav.reminders"),
-        path: "/reminders",
-      },
-      {
-        icon: <BiNote size={"1.5rem"} />,
-        name: t("nav.notes"),
-        path: "/notes",
-      },
-      {
-        icon: <BiFolder size={"1.5rem"} />,
-        name: t("nav.projects"),
-        path: "/projects",
-      },
-      {
-        icon: <BiLockAlt size={"1.5rem"} />,
-        name: t("nav.vault"),
-        path: "/vault",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.daily"),
-    items: [
-      {
-        icon: <BiCalendar size={"1.5rem"} />,
-        name: t("nav.calendar"),
-        path: "/calendar",
-      },
-      {
-        icon: <HiOutlineClock size={"1.5rem"} />,
-        name: t("nav.evkat"),
-        path: "/evkat",
-      },
-      {
-        icon: <BiBookOpen size={"1.5rem"} />,
-        name: t("nav.learning"),
-        path: "/learning",
-      },
-      {
-        icon: <BiDumbbell size={"1.5rem"} />,
-        name: t("nav.sport"),
-        path: "/sport",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.system"),
-    items: [
-      ...(isAdmin
-        ? [
-            {
-              icon: <BiShield size={"1.5rem"} />,
-              name: t("nav.admin"),
-              subItems: [{ name: t("nav.adminUsers"), path: "/admin/users" }],
-            } as NavItem,
-          ]
-        : []),
-      {
-        icon: <CiSettings size={"1.5rem"} />,
-        name: t("nav.settings"),
-        subItems: [{ name: t("nav.profile"), path: "/settings/profile" }],
-      },
-    ],
-  },
+/**
+ * Faz 2: nav reduced to 4 top-level destinations — Bugün (/dashboard) ·
+ * Notlar · Projeler · Diğer. Everything that used to have its own primary
+ * nav entry (Reminders, Calendar, Evkat, Vault, Sport, Learning, Admin,
+ * Settings) now lives under "Diğer" (see DigerPage) — their data is
+ * superseded by the unified Item model and the Bugün screen, but the
+ * pages themselves stay reachable while the old tables are still live.
+ */
+const getNavSections = (t: TFunc): NavItem[] => [
+  { icon: <CiGrid41 size={"1.5rem"} />, name: t("nav.dashboard"), path: "/dashboard" },
+  { icon: <BiNote size={"1.5rem"} />, name: t("nav.notes"), path: "/notes" },
+  { icon: <BiFolder size={"1.5rem"} />, name: t("nav.projects"), path: "/projects" },
+  { icon: <BiDotsHorizontalRounded size={"1.5rem"} />, name: t("nav.more"), path: "/diger" },
 ];
+
 const AppSidebar: React.FC = () => {
   const { isExpanded, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
-
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const isActive = useCallback((path: string) => path === pathname, [pathname]);
   const showText = isExpanded || isHovered;
-
-  useEffect(() => {
-    let submenuMatched = false;
-    getNavSections(t, isAdmin).forEach((section, sectionIndex) => {
-      section.items.forEach((nav, itemIndex) => {
-        nav.subItems?.forEach((subItem) => {
-          if (isActive(subItem.path)) {
-            setOpenSubmenu(`${sectionIndex}-${itemIndex}`);
-            submenuMatched = true;
-          }
-        });
-      });
-    });
-    if (!submenuMatched) setOpenSubmenu(null);
-  }, [pathname, isActive, t, isAdmin]);
-
-  useEffect(() => {
-    if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
-      setSubMenuHeight((prev) => ({
-        ...prev,
-        [openSubmenu]: subMenuRefs.current[openSubmenu]?.scrollHeight || 0,
-      }));
-    }
-  }, [openSubmenu]);
-
-  const handleSubmenuToggle = (key: string) => {
-    setOpenSubmenu((prev) => (prev === key ? null : key));
-  };
-
-  const renderMenuItems = (navItems: NavItem[], sectionIndex: number) => (
-    <ul className="flex flex-col gap-1">
-      {navItems.map((nav, itemIndex) => {
-        const key = `${sectionIndex}-${itemIndex}`;
-        return (
-          <li key={nav.name}>
-            {nav.subItems ? (
-              <button
-                onClick={() => handleSubmenuToggle(key)}
-                className={`menu-item group cursor-pointer ${
-                  openSubmenu === key ? "menu-item-active" : "menu-item-inactive"
-                } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
-              >
-                <span
-                  className={`${
-                    openSubmenu === key ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                  }`}
-                >
-                  {nav.icon}
-                </span>
-                {showText && <span className="menu-item-text">{nav.name}</span>}
-                {showText && (
-                  <FaChevronDown
-                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                      openSubmenu === key ? "rotate-180 text-brand-500" : ""
-                    }`}
-                  />
-                )}
-              </button>
-            ) : (
-              nav.path && (
-                <Link
-                  href={nav.path}
-                  className={`menu-item group ${
-                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
-                >
-                  <span
-                    className={`${
-                      isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                    }`}
-                  >
-                    {nav.icon}
-                  </span>
-                  {showText && <span className="menu-item-text">{nav.name}</span>}
-                </Link>
-              )
-            )}
-            {nav.subItems && showText && (
-              <div
-                ref={(el) => {
-                  subMenuRefs.current[key] = el;
-                }}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height: openSubmenu === key ? `${subMenuHeight[key]}px` : "0px",
-                }}
-              >
-                <ul className="mt-2 space-y-1 ml-9">
-                  {nav.subItems.map((subItem) => (
-                    <li key={subItem.name}>
-                      <Link
-                        href={subItem.path}
-                        className={`menu-dropdown-item ${
-                          isActive(subItem.path)
-                            ? "menu-dropdown-item-active"
-                            : "menu-dropdown-item-inactive"
-                        }`}
-                      >
-                        {subItem.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
-  );
 
   return (
     <aside
@@ -263,26 +63,27 @@ const AppSidebar: React.FC = () => {
 
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col">
-            {getNavSections(t, isAdmin).map((section, sectionIndex) => (
-              <div key={section.label ?? "top"}>
-                {section.label &&
-                  (showText ? (
-                    <div className="px-3 pt-4 pb-1 text-[10px] font-mono uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-                      {section.label}
-                    </div>
-                  ) : (
-                    <div
-                      aria-hidden
-                      className="my-2 text-center text-xs leading-none tracking-widest text-gray-300 dark:text-gray-600 select-none"
-                    >
-                      ···
-                    </div>
-                  ))}
-                {renderMenuItems(section.items, sectionIndex)}
-              </div>
+          <ul className="flex flex-col gap-1">
+            {getNavSections(t).map((nav) => (
+              <li key={nav.path}>
+                <Link
+                  href={nav.path}
+                  className={`menu-item group ${
+                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  }`}
+                >
+                  <span
+                    className={`${
+                      isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                    }`}
+                  >
+                    {nav.icon}
+                  </span>
+                  {showText && <span className="menu-item-text">{nav.name}</span>}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </nav>
 
         <div className="mt-auto pb-4">

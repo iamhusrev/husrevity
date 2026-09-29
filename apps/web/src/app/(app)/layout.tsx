@@ -6,14 +6,16 @@ import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import MobileBottomNav from "@/layout/MobileBottomNav";
 import NotificationPermissionPrompt from "@/components/notifications/NotificationPermissionPrompt";
+import QuickAddDialog from "@/components/quick-add/QuickAddDialog";
 import { LOGIN_PAGE } from "@/utils/constants-url";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
   const { isExpanded, isHovered } = useSidebar();
   const router = useRouter();
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   // Redirect user only when auth status is known
   useEffect(() => {
@@ -21,6 +23,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.replace(LOGIN_PAGE);
     }
   }, [loading, isAuthenticated, router]);
+
+  // Global ⌘K / Ctrl+K opens quick-add from anywhere in the app.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowQuickAdd(true);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   // IMPORTANT: Prevent UI from rendering before redirect
   if (loading || !isAuthenticated) {
@@ -60,6 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </main>
       </div>
       <MobileBottomNav />
+      <QuickAddDialog open={showQuickAdd} onOpenChange={setShowQuickAdd} />
     </div>
   );
 }

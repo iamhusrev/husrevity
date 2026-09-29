@@ -123,7 +123,7 @@
     }
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Bugün",
     "notes": "Notlar",
     "reminders": "Anımsatıcılar",
     "projects": "Projeler",
@@ -435,6 +435,33 @@
       "empty": "Günlük rutinini oluştur.",
       "error": "Vakitler yüklenemedi.",
       "noActivities": "Bu vakte bağlı iş yok."
+    }
+  },
+  "quickAdd": {
+    "kicker": "hızlı ekle",
+    "title": "Hızlı ekleme",
+    "placeholder": "yarın 9da HGS kontrol #alican",
+    "preview": "Önizle",
+    "previewing": "Önizleniyor…",
+    "confirm": "Ekle",
+    "adding": "Ekleniyor…",
+    "edit": "Düzenle"
+  },
+  "today": {
+    "now": "Şu an",
+    "loading": "Yükleniyor…",
+    "nextUp": "Sırada",
+    "currentBlock": {
+      "title": "Şu an",
+      "empty": "Şu an aktif bir blok yok."
+    },
+    "timeline": {
+      "title": "Bugünün zaman çizelgesi",
+      "empty": "Bugün için planlanmış bir şey yok."
+    },
+    "dueToday": {
+      "title": "Gecikmiş / bugün teslim",
+      "empty": "Gecikmiş veya bugün teslim işin yok."
     }
   },
   "projects": {
