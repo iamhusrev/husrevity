@@ -42,6 +42,11 @@ export class GoogleCalendarConfig {
     return this.config.get<string>('GOOGLE_CALENDAR_WEBHOOK_URL') || undefined;
   }
 
+  /** Web app origin the OAuth callback sends the browser back to. */
+  get webUrl(): string {
+    return (this.config.get<string>('HUSREVITY_WEB_URL') || 'http://localhost:3090').replace(/\/+$/, '');
+  }
+
   isConfigured(): boolean {
     return !!(this.clientId && this.clientSecret && this.redirectUri);
   }

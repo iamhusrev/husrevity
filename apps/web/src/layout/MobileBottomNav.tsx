@@ -9,6 +9,7 @@ import type { IconType } from "react-icons";
 import { CiGrid41, CiSettings } from "react-icons/ci";
 import {
   BiBell,
+  BiLink,
   BiNote,
   BiCalendar,
   BiDotsHorizontalRounded,
@@ -32,7 +33,7 @@ type MoreItem = { key: string; path: string; icon: IconType };
  * tables are still live.
  */
 const MORE_ITEMS: MoreItem[] = [
-  { key: "nav.reminders", path: "/reminders", icon: BiBell },
+  { key: "nav.notes", path: "/notes", icon: BiNote },
   { key: "nav.calendar", path: "/calendar", icon: BiCalendar },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
   { key: "nav.learning", path: "/learning", icon: BiBookOpen },
@@ -41,6 +42,7 @@ const MORE_ITEMS: MoreItem[] = [
 ];
 
 const ADMIN_ITEM: MoreItem = { key: "nav.admin", path: "/admin/users", icon: BiShield };
+const INTEGRATIONS_ITEM: MoreItem = { key: "nav.integrations", path: "/settings/integrations", icon: BiLink };
 const SETTINGS_ITEM: MoreItem = { key: "nav.settings", path: "/settings/profile", icon: CiSettings };
 
 function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -49,7 +51,7 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
 
-  const items = [...MORE_ITEMS, ...(user?.role === "admin" ? [ADMIN_ITEM] : []), SETTINGS_ITEM];
+  const items = [...MORE_ITEMS, ...(user?.role === "admin" ? [ADMIN_ITEM] : []), INTEGRATIONS_ITEM, SETTINGS_ITEM];
 
   useEffect(() => {
     setMounted(true);
@@ -115,7 +117,7 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
 const TABS: { key: string; path: string; icon: IconType }[] = [
   { key: "nav.dashboard", path: "/dashboard", icon: CiGrid41 },
-  { key: "nav.notes", path: "/notes", icon: BiNote },
+  { key: "nav.reminders", path: "/reminders", icon: BiBell },
 ];
 
 const TABS_RIGHT: { key: string; path: string; icon: IconType }[] = [

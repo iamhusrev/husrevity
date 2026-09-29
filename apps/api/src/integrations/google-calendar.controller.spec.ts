@@ -37,6 +37,8 @@ describe('GoogleCalendarController', () => {
 
     mockGoogleCalendarConfig = {
       createOAuth2Client: jest.fn().mockReturnValue(mockOAuth2Client as any),
+      isConfigured: jest.fn().mockReturnValue(true),
+      webUrl: 'http://web.test',
     };
 
     mockIntegrationAccountService = {
@@ -91,37 +93,95 @@ describe('GoogleCalendarController', () => {
     });
   });
 
-  describe('callback', () => {
+  describe('connectUrl / status / disconnect', () => {
+    it('should return the consent URL as JSON', () => {
+      expect(controller.connectUrl(mockUser)).toEqual({
+        url: 'https://accounts.google.com/o/oauth2/v2/auth?mock=true',
+      });
+    });
+
+    it('should report connected state from the integration account', async () => {
+      (mockIntegrationAccountService as any).get = jest.fn().mockResolvedValue({
+        account: { connectedAt: new Date('2026-09-28T12:00:00Z') },
+      });
+      await expect(controller.status(mockUser)).resolves.toEqual({
+        configured: true,
+        connected: true,
+        connectedAt: '2026-09-28T12:00:00.000Z',
+      });
+    });
+
+    it('should report not connected when no account exists', async () => {
+      (mockIntegrationAccountService as any).get = jest.fn().mockResolvedValue(null);
+      await expect(controller.status(mockUser)).resolves.toEqual({
+        configured: true,
+        connected: false,
+        connectedAt: null,
+      });
+    });
+
+    it('should disconnect the caller google account', async () => {
+      (mockIntegrationAccountService as any).disconnect = jest.fn().mockResolvedValue(undefined);
+      await controller.disconnect(mockUser);
+      expect((mockIntegrationAccountService as any).disconnect).toHaveBeenCalledWith('user-123', 'google_calendar');
+    });
+  });
+
+  describe('callback (browser redirect)', () => {
+    const signState = (userId: string) =>
+      jwtService.sign({ purpose: 'gcal-oauth-state' }, { subject: userId, expiresIn: '10m' });
+
+    it('should redirect to the web app with google=connected on success', async () => {
+      const res = { redirect: jest.fn() } as unknown as Response;
+      await controller.callback(res, 'auth-code', signState('user-123'));
+      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=connected');
+    });
+
+    it('should redirect with google=error for a forged state and save nothing', async () => {
+      const res = { redirect: jest.fn() } as unknown as Response;
+      await controller.callback(res, 'auth-code', 'user-123');
+      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=error');
+      expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
+    });
+
+    it('should redirect with google=error when the user denies consent', async () => {
+      const res = { redirect: jest.fn() } as unknown as Response;
+      await controller.callback(res, '', undefined, 'access_denied');
+      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=error');
+    });
+  });
+
+  describe('handleCallback', () => {
     const signState = (userId: string) =>
       jwtService.sign({ purpose: 'gcal-oauth-state' }, { subject: userId, expiresIn: '10m' });
 
     it('should throw bad request if code is missing', async () => {
-      await expect(controller.callback('', signState('user-123'))).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('', signState('user-123'))).rejects.toThrow(ApiException);
     });
 
     it('should throw bad request if both state and user are missing', async () => {
-      await expect(controller.callback('auth-code')).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code')).rejects.toThrow(ApiException);
     });
 
     it('should reject a raw/unsigned state value (not just accept it as the ownerId)', async () => {
-      await expect(controller.callback('auth-code', 'user-123')).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', 'user-123')).rejects.toThrow(ApiException);
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should reject a state token signed for a different purpose', async () => {
       const forged = jwtService.sign({ purpose: 'not-gcal' }, { subject: 'victim-id', expiresIn: '10m' });
-      await expect(controller.callback('auth-code', forged)).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', forged)).rejects.toThrow(ApiException);
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should reject an expired state token', async () => {
       const expired = jwtService.sign({ purpose: 'gcal-oauth-state' }, { subject: 'user-123', expiresIn: '-1s' });
-      await expect(controller.callback('auth-code', expired)).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', expired)).rejects.toThrow(ApiException);
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should exchange code for tokens and save integration account using a verified state token', async () => {
-      const result = await controller.callback('auth-code', signState('user-123'));
+      const result = await controller.handleCallback('auth-code', signState('user-123'));
 
       expect(mockGoogleCalendarConfig.createOAuth2Client).toHaveBeenCalled();
       expect(mockOAuth2Client.getToken).toHaveBeenCalledWith('auth-code');
@@ -147,7 +207,7 @@ describe('GoogleCalendarController', () => {
     });
 
     it('should resolve user from CurrentUser if state is missing', async () => {
-      await controller.callback('auth-code', undefined, mockUser);
+      await controller.handleCallback('auth-code', undefined, mockUser);
 
       expect(mockIntegrationAccountService.save).toHaveBeenCalledWith(
         'user-123',
@@ -165,13 +225,13 @@ describe('GoogleCalendarController', () => {
         tokens: { access_token: undefined },
       });
 
-      await expect(controller.callback('auth-code', signState('user-123'))).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', signState('user-123'))).rejects.toThrow(ApiException);
     });
 
     it('should throw bad request if token exchange fails', async () => {
       (mockOAuth2Client.getToken as jest.Mock).mockRejectedValueOnce(new Error('Invalid grant'));
 
-      await expect(controller.callback('auth-code', signState('user-123'))).rejects.toThrow(
+      await expect(controller.handleCallback('auth-code', signState('user-123'))).rejects.toThrow(
         'Failed to exchange code for tokens: Invalid grant',
       );
     });

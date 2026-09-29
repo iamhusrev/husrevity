@@ -1,9 +1,9 @@
-import { Controller, Delete, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { SlackLinkService } from './slack-link.service';
 import { SlackConfig } from './slack.config';
-import { SlackLinkCodeResponseDto } from './dto/slack-dtos';
+import { SlackLinkCodeResponseDto, SlackLinkStatusResponseDto } from './dto/slack-dtos';
 
 /**
  * Endpoint for managing Slack bot account linking.
@@ -16,6 +16,23 @@ export class SlackController {
     private readonly slackLinkService: SlackLinkService,
     private readonly slackConfig: SlackConfig,
   ) {}
+
+  @Get('status')
+  @ApiOperation({ summary: 'Current link state of the caller' })
+  @ApiResponse({ status: 200, type: SlackLinkStatusResponseDto })
+  async status(@CurrentUser() u: AuthenticatedUser): Promise<SlackLinkStatusResponseDto> {
+    const link = await this.slackLinkService.findByOwner(u.userId);
+    const pending =
+      link?.status === 'pending' && !!link.linkCode && !!link.linkCodeExpiresAt && link.linkCodeExpiresAt > new Date();
+    return {
+      configured: this.slackConfig.isConfigured(),
+      linked: link?.status === 'linked',
+      botUsername: this.slackConfig.botUsername ?? null,
+      linkedAt: link?.linkedAt ? link.linkedAt.toISOString() : null,
+      pendingCode: pending ? link!.linkCode : null,
+      pendingCodeExpiresAt: pending ? link!.linkCodeExpiresAt!.toISOString() : null,
+    };
+  }
 
   @Post('link-code')
   @HttpCode(HttpStatus.OK)

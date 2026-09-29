@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import type { IconType } from "react-icons";
 import { CiSettings } from "react-icons/ci";
-import { BiBell, BiCalendar, BiDumbbell, BiLockAlt, BiShield, BiBookOpen } from "react-icons/bi";
+import { BiLink, BiNote, BiCalendar, BiDumbbell, BiLockAlt, BiShield, BiBookOpen } from "react-icons/bi";
 import { HiOutlineClock } from "react-icons/hi2";
 import { useAuth } from "@/providers/AuthProvider";
 
 type DigerItem = { key: string; path: string; icon: IconType };
 
 const ITEMS: DigerItem[] = [
-  { key: "nav.reminders", path: "/reminders", icon: BiBell },
+  { key: "nav.notes", path: "/notes", icon: BiNote },
   { key: "nav.calendar", path: "/calendar", icon: BiCalendar },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
   { key: "nav.learning", path: "/learning", icon: BiBookOpen },
@@ -20,6 +20,7 @@ const ITEMS: DigerItem[] = [
 ];
 
 const ADMIN_ITEM: DigerItem = { key: "nav.admin", path: "/admin/users", icon: BiShield };
+const INTEGRATIONS_ITEM: DigerItem = { key: "nav.integrations", path: "/settings/integrations", icon: BiLink };
 const SETTINGS_ITEM: DigerItem = { key: "nav.settings", path: "/settings/profile", icon: CiSettings };
 
 /**
@@ -32,7 +33,7 @@ const SETTINGS_ITEM: DigerItem = { key: "nav.settings", path: "/settings/profile
 export default function DigerPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const items = [...ITEMS, ...(user?.role === "admin" ? [ADMIN_ITEM] : []), SETTINGS_ITEM];
+  const items = [...ITEMS, ...(user?.role === "admin" ? [ADMIN_ITEM] : []), INTEGRATIONS_ITEM, SETTINGS_ITEM];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">

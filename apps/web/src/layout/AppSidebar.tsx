@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CiGrid41 } from "react-icons/ci";
-import { BiNote, BiFolder, BiDotsHorizontalRounded } from "react-icons/bi";
+import { BiBell, BiFolder, BiDotsHorizontalRounded } from "react-icons/bi";
 import { HiSparkles } from "react-icons/hi2";
 import { useSidebar } from "@/providers/SidebarContext";
 
@@ -29,7 +29,7 @@ type TFunc = (key: string) => string;
  */
 const getNavSections = (t: TFunc): NavItem[] => [
   { icon: <CiGrid41 size={"1.5rem"} />, name: t("nav.dashboard"), path: "/dashboard" },
-  { icon: <BiNote size={"1.5rem"} />, name: t("nav.notes"), path: "/notes" },
+  { icon: <BiBell size={"1.5rem"} />, name: t("nav.reminders"), path: "/reminders" },
   { icon: <BiFolder size={"1.5rem"} />, name: t("nav.projects"), path: "/projects" },
   { icon: <BiDotsHorizontalRounded size={"1.5rem"} />, name: t("nav.more"), path: "/diger" },
 ];

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Auth } from 'googleapis';
 import { JwtService } from '@nestjs/jwt';
@@ -18,6 +18,8 @@ interface OAuthStatePayload {
 
 @Controller('integrations/google-calendar')
 export class GoogleCalendarController {
+  private readonly logger = new Logger(GoogleCalendarController.name);
+
   constructor(
     private readonly googleCalendarConfig: GoogleCalendarConfig,
     private readonly integrationAccountService: IntegrationAccountService,
@@ -37,6 +39,36 @@ export class GoogleCalendarController {
    */
   @Get('connect')
   connect(@CurrentUser() user: AuthenticatedUser, @Res() res: Response) {
+    return res.redirect(this.buildConnectUrl(user));
+  }
+
+  /**
+   * Same consent URL as connect(), but returned as JSON: a browser navigation
+   * cannot carry the Bearer token, so the web app fetches this with its
+   * axios instance and then sets window.location itself.
+   */
+  @Get('connect-url')
+  connectUrl(@CurrentUser() user: AuthenticatedUser): { url: string } {
+    return { url: this.buildConnectUrl(user) };
+  }
+
+  @Get('status')
+  async status(@CurrentUser() user: AuthenticatedUser) {
+    const decrypted = await this.integrationAccountService.get(user.userId, 'google_calendar');
+    return {
+      configured: this.googleCalendarConfig.isConfigured(),
+      connected: !!decrypted,
+      connectedAt: decrypted ? decrypted.account.connectedAt.toISOString() : null,
+    };
+  }
+
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async disconnect(@CurrentUser() user: AuthenticatedUser): Promise<void> {
+    await this.integrationAccountService.disconnect(user.userId, 'google_calendar');
+  }
+
+  private buildConnectUrl(user: AuthenticatedUser): string {
     const client = this.googleCalendarConfig.createOAuth2Client();
     const state = this.jwtService.sign(
       { purpose: OAUTH_STATE_PURPOSE } satisfies Omit<OAuthStatePayload, 'sub'>,
@@ -49,7 +81,7 @@ export class GoogleCalendarController {
       state,
     });
 
-    return res.redirect(url);
+    return url;
   }
 
   /**
@@ -59,10 +91,26 @@ export class GoogleCalendarController {
   @Public()
   @Get('callback')
   async callback(
+    @Res() res: Response,
     @Query('code') code: string,
     @Query('state') state?: string,
-    @CurrentUser() user?: AuthenticatedUser,
+    @Query('error') oauthError?: string,
   ) {
+    const back = (result: 'connected' | 'error') =>
+      res.redirect(`${this.googleCalendarConfig.webUrl}/settings/integrations?google=${result}`);
+    if (oauthError) {
+      return back('error');
+    }
+    try {
+      await this.handleCallback(code, state);
+      return back('connected');
+    } catch (error) {
+      this.logger.warn(`Google OAuth callback failed: ${(error as Error).message}`);
+      return back('error');
+    }
+  }
+
+  async handleCallback(code: string, state?: string, user?: AuthenticatedUser) {
     if (!code) {
       throw ApiException.badRequest('Authorization code is required');
     }

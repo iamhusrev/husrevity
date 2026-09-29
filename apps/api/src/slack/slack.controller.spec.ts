@@ -96,3 +96,50 @@ describe('SlackController', () => {
     });
   });
 });
+
+describe('SlackController status', () => {
+  const user: AuthenticatedUser = { userId: 'user-123', email: 'u@example.com', role: 'user' };
+  const future = new Date(Date.now() + 5 * 60_000);
+  const past = new Date(Date.now() - 5 * 60_000);
+
+  async function build(link: unknown) {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [SlackController],
+      providers: [
+        { provide: SlackLinkService, useValue: { findByOwner: jest.fn().mockResolvedValue(link) } },
+        { provide: SlackConfig, useValue: { botUsername: 'bot', isConfigured: () => true } },
+      ],
+    }).compile();
+    return module.get<SlackController>(SlackController);
+  }
+
+  it('should expose an unexpired pending code', async () => {
+    const c = await build({ status: 'pending', linkCode: 'ABC123', linkCodeExpiresAt: future, linkedAt: null });
+    await expect(c.status(user)).resolves.toMatchObject({
+      linked: false,
+      pendingCode: 'ABC123',
+      pendingCodeExpiresAt: future.toISOString(),
+    });
+  });
+
+  it('should hide an expired pending code', async () => {
+    const c = await build({ status: 'pending', linkCode: 'ABC123', linkCodeExpiresAt: past, linkedAt: null });
+    await expect(c.status(user)).resolves.toMatchObject({ linked: false, pendingCode: null });
+  });
+
+  it('should report linked state and never leak a code', async () => {
+    const linkedAt = new Date('2026-09-29T10:00:00Z');
+    const c = await build({ status: 'linked', linkCode: null, linkCodeExpiresAt: null, linkedAt });
+    await expect(c.status(user)).resolves.toMatchObject({
+      configured: true,
+      linked: true,
+      linkedAt: linkedAt.toISOString(),
+      pendingCode: null,
+    });
+  });
+
+  it('should report unlinked when no row exists', async () => {
+    const c = await build(null);
+    await expect(c.status(user)).resolves.toMatchObject({ linked: false, pendingCode: null, linkedAt: null });
+  });
+});

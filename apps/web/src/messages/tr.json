@@ -141,7 +141,8 @@
       "daily": "Günlük",
       "system": "Sistem"
     },
-    "more": "Diğer"
+    "more": "Diğer",
+    "integrations": "Entegrasyonlar"
   },
   "admin": {
     "kicker": "Yönetim",
@@ -281,11 +282,42 @@
     "error": "Konular yüklenemedi.",
     "newTopic": "Yeni konu",
     "newSubtopic": "Yeni alt konu",
-    "empty": { "kicker": "Öğrenme listen boş", "body": "Bir konu oluşturarak ustalaşmak istediğin şeyleri toplamaya başla." },
-    "field": { "title": "Başlık", "description": "Açıklama", "itemText": "Madde", "url": "Kaynak bağlantısı", "notes": "Notlar", "estimatedMinutes": "Tahmini dakika", "reviewAt": "Tekrar zamanı", "subtopicSelect": "Alt konu", "subtopicNone": "Alt konu yok (doğrudan konu altında)" },
-    "placeholders": { "title": "Kubernetes", "description": "Ne öğrenmek istiyorsun?", "itemText": "Madde ekle…" },
-    "modal": { "newKicker": "Yeni konu", "editKicker": "Düzenle", "createTitle": "Konu oluştur", "editTitle": "Konuyu düzenle", "subtopicNewKicker": "Yeni alt konu", "subtopicEditKicker": "Düzenle", "subtopicCreateTitle": "Alt konu oluştur", "subtopicEditTitle": "Alt konuyu düzenle", "itemCreateTitle": "Yeni öğrenme maddesi", "itemEditTitle": "Öğrenme maddesini düzenle" },
-    "toggle": { "complete": "Tamamlandı olarak işaretle", "incomplete": "Tamamlanmadı olarak işaretle" },
+    "empty": {
+      "kicker": "Öğrenme listen boş",
+      "body": "Bir konu oluşturarak ustalaşmak istediğin şeyleri toplamaya başla."
+    },
+    "field": {
+      "title": "Başlık",
+      "description": "Açıklama",
+      "itemText": "Madde",
+      "url": "Kaynak bağlantısı",
+      "notes": "Notlar",
+      "estimatedMinutes": "Tahmini dakika",
+      "reviewAt": "Tekrar zamanı",
+      "subtopicSelect": "Alt konu",
+      "subtopicNone": "Alt konu yok (doğrudan konu altında)"
+    },
+    "placeholders": {
+      "title": "Kubernetes",
+      "description": "Ne öğrenmek istiyorsun?",
+      "itemText": "Madde ekle…"
+    },
+    "modal": {
+      "newKicker": "Yeni konu",
+      "editKicker": "Düzenle",
+      "createTitle": "Konu oluştur",
+      "editTitle": "Konuyu düzenle",
+      "subtopicNewKicker": "Yeni alt konu",
+      "subtopicEditKicker": "Düzenle",
+      "subtopicCreateTitle": "Alt konu oluştur",
+      "subtopicEditTitle": "Alt konuyu düzenle",
+      "itemCreateTitle": "Yeni öğrenme maddesi",
+      "itemEditTitle": "Öğrenme maddesini düzenle"
+    },
+    "toggle": {
+      "complete": "Tamamlandı olarak işaretle",
+      "incomplete": "Tamamlanmadı olarak işaretle"
+    },
     "confirmDeleteTitle": "Öğrenme konusunu sil",
     "confirmDeleteTopic": "Bu konuyu ve tüm maddelerini silmek istediğine emin misin?",
     "confirmDeleteSubtopicTitle": "Alt konuyu sil",
@@ -1236,5 +1268,44 @@
       "failed": "Metin ayrıştırılamadı. Tekrar dene."
     },
     "triggerTooltip": "Dikte ile hızlı ekle"
+  },
+  "integrations": {
+    "kicker": "Ayarlar",
+    "title": "Entegrasyonlar",
+    "flourish": "bağlantılar",
+    "notConfigured": "Bu entegrasyon sunucuda yapılandırılmamış.",
+    "connected": "Bağlı",
+    "disconnect": "Bağlantıyı kes",
+    "generateCode": "Bağlantı kodu üret",
+    "newCode": "Yeni kod üret",
+    "validUntil": "{{time}} saatine kadar geçerli",
+    "telegram": {
+      "title": "Telegram",
+      "desc": "Anımsatıcıları Telegram'dan al, botla görev ekle.",
+      "instruction": "{{bot}} botuna şu mesajı gönder:"
+    },
+    "slack": {
+      "title": "Slack",
+      "desc": "Bildirimleri Slack DM olarak al, mesajla görev ekle.",
+      "instruction": "Slack'te {{bot}} uygulamasına DM olarak şunu yaz:"
+    },
+    "google": {
+      "title": "Google Takvim",
+      "desc": "Husrevity takvimi Google Takvim ile iki yönlü senkron olur.",
+      "connect": "Google ile bağlan",
+      "connectedToast": "Google Takvim bağlandı",
+      "errorToast": "Google Takvim bağlanamadı"
+    },
+    "mcp": {
+      "title": "Claude / MCP erişimi",
+      "desc": "Claude Code gibi araçların görev ve notlarına erişmesi için kişisel token üret.",
+      "name": "Token adı",
+      "create": "Token üret",
+      "shownOnce": "Token yalnızca bir kez gösterilir, şimdi kopyala:",
+      "command": "Claude Code'a eklemek için:",
+      "revoke": "İptal et",
+      "lastUsed": "Son kullanım {{date}}",
+      "neverUsed": "Hiç kullanılmadı"
+    }
   }
 }

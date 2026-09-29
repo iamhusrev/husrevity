@@ -141,7 +141,8 @@
       "daily": "Daily",
       "system": "System"
     },
-    "more": "More"
+    "more": "More",
+    "integrations": "Integrations"
   },
   "admin": {
     "kicker": "Admin",
@@ -281,11 +282,42 @@
     "error": "Topics could not be loaded.",
     "newTopic": "New topic",
     "newSubtopic": "New subtopic",
-    "empty": { "kicker": "Your learning list is empty", "body": "Create a topic and begin collecting the things you want to master." },
-    "field": { "title": "Title", "description": "Description", "itemText": "Item", "url": "Resource link", "notes": "Notes", "estimatedMinutes": "Estimated minutes", "reviewAt": "Review at", "subtopicSelect": "Subtopic", "subtopicNone": "No subtopic (directly under topic)" },
-    "placeholders": { "title": "Kubernetes", "description": "What do you want to learn?", "itemText": "Add an item…" },
-    "modal": { "newKicker": "New topic", "editKicker": "Edit", "createTitle": "Create topic", "editTitle": "Edit topic", "subtopicNewKicker": "New subtopic", "subtopicEditKicker": "Edit", "subtopicCreateTitle": "Create subtopic", "subtopicEditTitle": "Edit subtopic", "itemCreateTitle": "New learning item", "itemEditTitle": "Edit learning item" },
-    "toggle": { "complete": "Mark complete", "incomplete": "Mark incomplete" },
+    "empty": {
+      "kicker": "Your learning list is empty",
+      "body": "Create a topic and begin collecting the things you want to master."
+    },
+    "field": {
+      "title": "Title",
+      "description": "Description",
+      "itemText": "Item",
+      "url": "Resource link",
+      "notes": "Notes",
+      "estimatedMinutes": "Estimated minutes",
+      "reviewAt": "Review at",
+      "subtopicSelect": "Subtopic",
+      "subtopicNone": "No subtopic (directly under topic)"
+    },
+    "placeholders": {
+      "title": "Kubernetes",
+      "description": "What do you want to learn?",
+      "itemText": "Add an item…"
+    },
+    "modal": {
+      "newKicker": "New topic",
+      "editKicker": "Edit",
+      "createTitle": "Create topic",
+      "editTitle": "Edit topic",
+      "subtopicNewKicker": "New subtopic",
+      "subtopicEditKicker": "Edit",
+      "subtopicCreateTitle": "Create subtopic",
+      "subtopicEditTitle": "Edit subtopic",
+      "itemCreateTitle": "New learning item",
+      "itemEditTitle": "Edit learning item"
+    },
+    "toggle": {
+      "complete": "Mark complete",
+      "incomplete": "Mark incomplete"
+    },
     "confirmDeleteTitle": "Delete learning topic",
     "confirmDeleteTopic": "Are you sure you want to delete this topic and all its items?",
     "confirmDeleteSubtopicTitle": "Delete subtopic",
@@ -1236,5 +1268,44 @@
       "failed": "Could not split the text. Try again."
     },
     "triggerTooltip": "Quick add by dictation"
+  },
+  "integrations": {
+    "kicker": "Settings",
+    "title": "Integrations",
+    "flourish": "connections",
+    "notConfigured": "This integration is not configured on the server.",
+    "connected": "Connected",
+    "disconnect": "Disconnect",
+    "generateCode": "Generate link code",
+    "newCode": "Generate new code",
+    "validUntil": "Valid until {{time}}",
+    "telegram": {
+      "title": "Telegram",
+      "desc": "Get reminders on Telegram and add tasks via the bot.",
+      "instruction": "Send this message to {{bot}}:"
+    },
+    "slack": {
+      "title": "Slack",
+      "desc": "Get notifications as Slack DMs and add tasks by message.",
+      "instruction": "DM this to the {{bot}} app in Slack:"
+    },
+    "google": {
+      "title": "Google Calendar",
+      "desc": "The Husrevity calendar syncs both ways with Google Calendar.",
+      "connect": "Connect with Google",
+      "connectedToast": "Google Calendar connected",
+      "errorToast": "Could not connect Google Calendar"
+    },
+    "mcp": {
+      "title": "Claude / MCP access",
+      "desc": "Create a personal token so tools like Claude Code can reach your tasks and notes.",
+      "name": "Token name",
+      "create": "Create token",
+      "shownOnce": "The token is shown only once, copy it now:",
+      "command": "To add it to Claude Code:",
+      "revoke": "Revoke",
+      "lastUsed": "Last used {{date}}",
+      "neverUsed": "Never used"
+    }
   }
 }
