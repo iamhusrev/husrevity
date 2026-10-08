@@ -38,9 +38,7 @@ describe('DictateService', () => {
       ok: true,
       status: 200,
       json: async () => ({
-        candidates: [
-          { content: { parts: [{ text: JSON.stringify({ items }) }] } },
-        ],
+        candidates: [{ content: { parts: [{ text: JSON.stringify({ items }) }] } }],
       }),
     } as Response);
   }
@@ -66,25 +64,19 @@ describe('DictateService', () => {
         json: async () => ({ error: 'boom' }),
       } as Response);
 
-      await expect(service.splitIntoItems('metin')).rejects.toThrow(
-        ApiException,
-      );
+      await expect(service.splitIntoItems('metin')).rejects.toThrow(ApiException);
     });
 
     it('throws ApiException when the fetch call itself rejects', async () => {
       fetchSpy.mockRejectedValue(new Error('network down'));
 
-      await expect(service.splitIntoItems('metin')).rejects.toThrow(
-        ApiException,
-      );
+      await expect(service.splitIntoItems('metin')).rejects.toThrow(ApiException);
     });
 
     it('throws ApiException when Gemini is not configured', async () => {
       gemini.isConfigured.mockReturnValue(false);
 
-      await expect(service.splitIntoItems('metin')).rejects.toThrow(
-        ApiException,
-      );
+      await expect(service.splitIntoItems('metin')).rejects.toThrow(ApiException);
       expect(fetchSpy).not.toHaveBeenCalled();
     });
   });

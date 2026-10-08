@@ -3,8 +3,7 @@ import { notificationService } from "@/services/notification-service";
 
 const NOTIFICATION_KEYS = {
   all: ["notifications"] as const,
-  list: (unread?: boolean) =>
-    ["notifications", "list", unread ?? null] as const,
+  list: (unread?: boolean) => ["notifications", "list", unread ?? null] as const,
   unreadCount: ["notifications", "unread-count"] as const,
   diagnostics: ["notifications", "diagnostics"] as const,
 };
@@ -64,8 +63,7 @@ export function useSendTestNotification() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => notificationService.sendTest(),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
   });
 }
 
@@ -73,7 +71,6 @@ export function useResyncNotifications() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => notificationService.resync(),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: NOTIFICATION_KEYS.diagnostics }),
   });
 }

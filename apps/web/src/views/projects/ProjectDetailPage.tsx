@@ -173,13 +173,7 @@ const editProjectSchema = z.object({
 
 type EditProjectFormValues = z.infer<typeof editProjectSchema>;
 
-function EditProjectModal({
-  project,
-  onClose,
-}: {
-  project: ProjectResponse;
-  onClose: () => void;
-}) {
+function EditProjectModal({ project, onClose }: { project: ProjectResponse; onClose: () => void }) {
   const showAlert = alertStore((s) => s.show);
   const { t } = useTranslation();
   const updateProject = useUpdateProject();

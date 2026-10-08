@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -7,9 +7,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useToday, BlockSummary, TimelineEntry, ItemSummary } from '../../src/hooks/useToday';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useToday, BlockSummary, TimelineEntry, ItemSummary } from "../../src/hooks/useToday";
 
 export default function TodayScreen() {
   const { data, isLoading, isError, error, refetch, isRefetching } = useToday();
@@ -28,7 +28,7 @@ export default function TodayScreen() {
       <SafeAreaView style={styles.centerContainer}>
         <Text style={styles.errorTitle}>Veriler yüklenemedi</Text>
         <Text style={styles.errorSubtext}>
-          {error?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.'}
+          {error?.message || "Bir hata oluştu. Lütfen tekrar deneyin."}
         </Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
           <Text style={styles.retryButtonText}>Tekrar Dene</Text>
@@ -38,7 +38,7 @@ export default function TodayScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -46,13 +46,13 @@ export default function TodayScreen() {
             refreshing={isRefetching}
             onRefresh={refetch}
             tintColor="#c8732e"
-            colors={['#c8732e']}
+            colors={["#c8732e"]}
           />
         }
       >
         {/* Date / Title */}
         <View style={styles.header}>
-          <Text style={styles.headerDate}>{data?.date || 'Bugün'}</Text>
+          <Text style={styles.headerDate}>{data?.date || "Bugün"}</Text>
           <Text style={styles.headerTitle}>Günlük Özet</Text>
         </View>
 
@@ -71,7 +71,7 @@ export default function TodayScreen() {
             <Text style={styles.currentBlockTitle}>{data.currentBlock.title}</Text>
             <Text style={styles.currentBlockMeta}>
               {formatTime(data.currentBlock.scheduledAt)}
-              {data.currentBlock.durationMin ? ` • ${data.currentBlock.durationMin} dk` : ''}
+              {data.currentBlock.durationMin ? ` • ${data.currentBlock.durationMin} dk` : ""}
             </Text>
           </View>
         ) : null}
@@ -114,10 +114,12 @@ export default function TodayScreen() {
                 <View
                   style={[
                     styles.statusBadge,
-                    item.status === 'done' ? styles.statusCompleted : styles.statusPending,
+                    item.status === "done" ? styles.statusCompleted : styles.statusPending,
                   ]}
                 >
-                  <Text style={styles.statusBadgeText}>{STATUS_LABELS[item.status] ?? item.status}</Text>
+                  <Text style={styles.statusBadgeText}>
+                    {STATUS_LABELS[item.status] ?? item.status}
+                  </Text>
                 </View>
               </View>
             ))
@@ -132,17 +134,17 @@ export default function TodayScreen() {
 
 // Item statuses come from the API's `items.status` CHECK constraint.
 const STATUS_LABELS: Record<string, string> = {
-  open: 'Açık',
-  done: 'Tamam',
-  cancelled: 'İptal',
+  open: "Açık",
+  done: "Tamam",
+  cancelled: "İptal",
 };
 
 function formatTime(isoString: string): string {
-  if (!isoString) return '';
+  if (!isoString) return "";
   try {
     const d = new Date(isoString);
     if (isNaN(d.getTime())) return isoString;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } catch {
     return isoString;
   }
@@ -151,41 +153,41 @@ function formatTime(isoString: string): string {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: "#0f172a",
   },
   centerContainer: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#0f172a",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#94a3b8',
+    color: "#94a3b8",
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#f8fafc',
+    fontWeight: "700",
+    color: "#f8fafc",
     marginBottom: 6,
   },
   errorSubtext: {
     fontSize: 14,
-    color: '#f87171',
-    textAlign: 'center',
+    color: "#f87171",
+    textAlign: "center",
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#c8732e',
+    backgroundColor: "#c8732e",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#ffffff',
-    fontWeight: '600',
+    color: "#ffffff",
+    fontWeight: "600",
     fontSize: 14,
   },
   scrollContent: {
@@ -197,20 +199,20 @@ const styles = StyleSheet.create({
   },
   headerDate: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#c8732e',
-    textTransform: 'uppercase',
+    fontWeight: "600",
+    color: "#c8732e",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '800',
-    color: '#f8fafc',
+    fontWeight: "800",
+    color: "#f8fafc",
     marginTop: 2,
   },
   suggestionCard: {
-    backgroundColor: '#291d18',
-    borderColor: '#5c2d13',
+    backgroundColor: "#291d18",
+    borderColor: "#5c2d13",
     borderWidth: 1,
     borderRadius: 12,
     padding: 14,
@@ -218,18 +220,18 @@ const styles = StyleSheet.create({
   },
   suggestionKicker: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#c8732e',
+    fontWeight: "700",
+    color: "#c8732e",
     marginBottom: 4,
   },
   suggestionText: {
     fontSize: 14,
-    color: '#fed7aa',
+    color: "#fed7aa",
     lineHeight: 20,
   },
   currentBlockCard: {
-    backgroundColor: '#1e293b',
-    borderColor: '#334155',
+    backgroundColor: "#1e293b",
+    borderColor: "#334155",
     borderWidth: 1,
     borderRadius: 12,
     padding: 16,
@@ -237,19 +239,19 @@ const styles = StyleSheet.create({
   },
   sectionKicker: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#94a3b8',
+    fontWeight: "700",
+    color: "#94a3b8",
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   currentBlockTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#f8fafc',
+    fontWeight: "700",
+    color: "#f8fafc",
   },
   currentBlockMeta: {
     fontSize: 13,
-    color: '#cbd5e1',
+    color: "#cbd5e1",
     marginTop: 4,
   },
   section: {
@@ -257,51 +259,51 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#f8fafc',
+    fontWeight: "700",
+    color: "#f8fafc",
     marginBottom: 12,
   },
   timelineItem: {
-    flexDirection: 'row',
-    backgroundColor: '#1e293b',
+    flexDirection: "row",
+    backgroundColor: "#1e293b",
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
   },
   timelineTimeCol: {
     width: 65,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   timelineTime: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#f8fafc',
+    fontWeight: "700",
+    color: "#f8fafc",
   },
   timelineDuration: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginTop: 2,
   },
   timelineContentCol: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingLeft: 8,
   },
   itemTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
   },
   itemBadge: {
     fontSize: 11,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginTop: 2,
   },
   dueCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1e293b',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1e293b",
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
   },
   dueTime: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: "#94a3b8",
     marginTop: 2,
   },
   statusBadge: {
@@ -321,19 +323,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   statusPending: {
-    backgroundColor: '#334155',
+    backgroundColor: "#334155",
   },
   statusCompleted: {
-    backgroundColor: '#166534',
+    backgroundColor: "#166534",
   },
   statusBadgeText: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#f8fafc',
+    fontWeight: "600",
+    color: "#f8fafc",
   },
   emptyText: {
     fontSize: 14,
-    color: '#64748b',
-    fontStyle: 'italic',
+    color: "#64748b",
+    fontStyle: "italic",
   },
 });

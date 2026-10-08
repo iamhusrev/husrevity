@@ -12,9 +12,7 @@ import { OutboxEvent } from './outbox-event.entity';
  */
 @Injectable()
 export class OutboxService {
-  constructor(
-    @InjectRepository(OutboxEvent) private readonly events: Repository<OutboxEvent>,
-  ) {}
+  constructor(@InjectRepository(OutboxEvent) private readonly events: Repository<OutboxEvent>) {}
 
   async write(type: string, payload: object): Promise<void> {
     await this.events.save(this.events.create({ type, payload, processedAt: null }));

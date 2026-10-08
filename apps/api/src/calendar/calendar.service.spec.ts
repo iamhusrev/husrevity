@@ -78,7 +78,7 @@ describe('CalendarService', () => {
       expect(events.restore).not.toHaveBeenCalled();
     });
 
-    it('404s instead of restoring another owner\'s event (owner mismatch not found by the query)', async () => {
+    it("404s instead of restoring another owner's event (owner mismatch not found by the query)", async () => {
       const otherOwnerId = '999';
       events.findOne.mockResolvedValueOnce(null);
 

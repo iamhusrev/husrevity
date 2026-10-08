@@ -19,8 +19,6 @@ export class TransactionDebtLink1715000004000 implements MigrationInterface {
 
   public async down(qr: QueryRunner): Promise<void> {
     await qr.query(`DROP INDEX IF EXISTS idx_finance_transaction_debt`);
-    await qr.query(
-      `ALTER TABLE finance_transaction DROP COLUMN IF EXISTS debt_id`,
-    );
+    await qr.query(`ALTER TABLE finance_transaction DROP COLUMN IF EXISTS debt_id`);
   }
 }

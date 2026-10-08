@@ -25,9 +25,7 @@ export const sportService = {
     return res.data;
   },
 
-  async updateProfile(
-    body: SportProfileRequest,
-  ): Promise<ApiResponse<SportProfileResponse>> {
+  async updateProfile(body: SportProfileRequest): Promise<ApiResponse<SportProfileResponse>> {
     const res = await apiClient.put(SPORT_ENDPOINTS.PROFILE, body);
     return res.data;
   },
@@ -38,9 +36,7 @@ export const sportService = {
     return res.data;
   },
 
-  async createProgram(
-    body: SportProgramRequest,
-  ): Promise<ApiResponse<SportProgramResponse>> {
+  async createProgram(body: SportProgramRequest): Promise<ApiResponse<SportProgramResponse>> {
     const res = await apiClient.post(SPORT_ENDPOINTS.PROGRAMS, body);
     return res.data;
   },
@@ -63,10 +59,7 @@ export const sportService = {
     return res.data;
   },
 
-  async activateProgram(
-    id: string,
-    isActive: boolean,
-  ): Promise<ApiResponse<SportProgramResponse>> {
+  async activateProgram(id: string, isActive: boolean): Promise<ApiResponse<SportProgramResponse>> {
     const res = await apiClient.post(SPORT_ENDPOINTS.PROGRAM_ACTIVATE(id), {
       isActive,
     });
@@ -81,9 +74,7 @@ export const sportService = {
   },
 
   // ─── Sessions ───────────────────────────────────────────────────────────
-  async createSession(
-    body: SportSessionRequest,
-  ): Promise<ApiResponse<SportSessionResponse>> {
+  async createSession(body: SportSessionRequest): Promise<ApiResponse<SportSessionResponse>> {
     const res = await apiClient.post(SPORT_ENDPOINTS.SESSIONS, body);
     return res.data;
   },
@@ -101,9 +92,7 @@ export const sportService = {
     return res.data;
   },
 
-  async reorderSessions(
-    items: SportSessionReorderItem[],
-  ): Promise<ApiResponse<void>> {
+  async reorderSessions(items: SportSessionReorderItem[]): Promise<ApiResponse<void>> {
     const res = await apiClient.patch(SPORT_ENDPOINTS.SESSIONS_REORDER, { items });
     return res.data;
   },
@@ -114,18 +103,12 @@ export const sportService = {
     return res.data;
   },
 
-  async getLogsForPeriod(
-    from: string,
-    to: string,
-  ): Promise<ApiResponse<SportLogResponse[]>> {
+  async getLogsForPeriod(from: string, to: string): Promise<ApiResponse<SportLogResponse[]>> {
     const res = await apiClient.get(SPORT_ENDPOINTS.LOGS_FOR_PERIOD(from, to));
     return res.data;
   },
 
-  async updateLog(
-    id: string,
-    body: SportLogUpdateRequest,
-  ): Promise<ApiResponse<SportLogResponse>> {
+  async updateLog(id: string, body: SportLogUpdateRequest): Promise<ApiResponse<SportLogResponse>> {
     const res = await apiClient.put(SPORT_ENDPOINTS.LOG_BY_ID(id), body);
     return res.data;
   },

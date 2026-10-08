@@ -61,10 +61,7 @@ export class CalendarController {
   }
 
   @Patch(':id/restore')
-  restore(
-    @CurrentUser() u: AuthenticatedUser,
-    @Param('id') id: string,
-  ): Promise<EventResponseDto> {
+  restore(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<EventResponseDto> {
     return this.events.restore(u.userId, id);
   }
 }

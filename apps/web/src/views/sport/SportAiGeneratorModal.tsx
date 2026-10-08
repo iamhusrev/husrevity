@@ -136,9 +136,7 @@ export default function SportAiGeneratorModal({
                             type="button"
                             onClick={() =>
                               field.onChange(
-                                active
-                                  ? field.value.filter((v) => v !== a)
-                                  : [...field.value, a],
+                                active ? field.value.filter((v) => v !== a) : [...field.value, a],
                               )
                             }
                             className={cn(
@@ -216,11 +214,7 @@ export default function SportAiGeneratorModal({
               <button type="button" onClick={onClose} className="husrev-btn-ghost">
                 {t("sport.aiModal.close", "Kapat")}
               </button>
-              <button
-                type="button"
-                onClick={() => onViewProgram(result.id)}
-                className="husrev-btn"
-              >
+              <button type="button" onClick={() => onViewProgram(result.id)} className="husrev-btn">
                 {t("sport.aiModal.viewProgram", "Programı gör")}
               </button>
             </div>

@@ -70,7 +70,9 @@ describe('TaskService', () => {
     notifications = { cancelForSource: jest.fn(), enqueue: jest.fn() };
     users = { findById: jest.fn().mockResolvedValue(null), requireById: jest.fn() };
     mailer = { isConfigured: jest.fn().mockReturnValue(false), sendTaskAssignedEmail: jest.fn() };
-    projectInvites = { buildProjectUrl: jest.fn().mockReturnValue('http://localhost:3090/projects/5') };
+    projectInvites = {
+      buildProjectUrl: jest.fn().mockReturnValue('http://localhost:3090/projects/5'),
+    };
     qb = makeQueryBuilder();
     em = { createQueryBuilder: jest.fn(() => qb) };
     dataSource = {
@@ -189,7 +191,12 @@ describe('TaskService', () => {
 
       expect(access.requireAccess).toHaveBeenCalledWith(ownerId, '5', 'EDITOR');
       expect(tasks.create).toHaveBeenCalledWith(
-        expect.objectContaining({ ownerId: '2', projectId: '5', status: 'TODO', priority: 'MEDIUM' }),
+        expect.objectContaining({
+          ownerId: '2',
+          projectId: '5',
+          status: 'TODO',
+          priority: 'MEDIUM',
+        }),
       );
       expect(notifications.cancelForSource).toHaveBeenCalledWith('2', 'task', '40');
       expect(notifications.enqueue).not.toHaveBeenCalled();
@@ -222,7 +229,12 @@ describe('TaskService', () => {
       } as TaskRequestDto);
 
       expect(notifications.enqueue).toHaveBeenCalledWith(
-        expect.objectContaining({ ownerId: '2', kind: 'task', sourceId: '41', deepLink: '/projects/5' }),
+        expect.objectContaining({
+          ownerId: '2',
+          kind: 'task',
+          sourceId: '41',
+          deepLink: '/projects/5',
+        }),
       );
     });
   });
@@ -242,7 +254,10 @@ describe('TaskService', () => {
         .mockRejectedValueOnce(ApiException.forbidden('nope')); // target project the move is denied on
 
       await expect(
-        service.update(ownerId, actorEmail, '30', { title: 'Old', projectId: '9' } as TaskRequestDto),
+        service.update(ownerId, actorEmail, '30', {
+          title: 'Old',
+          projectId: '9',
+        } as TaskRequestDto),
       ).rejects.toMatchObject({ status: 403 });
 
       expect(tasks.save).not.toHaveBeenCalled();
@@ -296,7 +311,9 @@ describe('TaskService', () => {
       } as TaskRequestDto);
 
       expect(access.isMember).toHaveBeenCalledWith('9', '2');
-      expect(tasks.save).toHaveBeenCalledWith(expect.objectContaining({ projectId: '9', assigneeId: null }));
+      expect(tasks.save).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '9', assigneeId: null }),
+      );
       expect(result.assigneeId).toBeNull();
     });
 
@@ -322,7 +339,9 @@ describe('TaskService', () => {
         projectId: '9',
       } as TaskRequestDto);
 
-      expect(tasks.save).toHaveBeenCalledWith(expect.objectContaining({ projectId: '9', assigneeId: '2' }));
+      expect(tasks.save).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: '9', assigneeId: '2' }),
+      );
     });
 
     it('rejects assigning a non-member of the project, without saving', async () => {

@@ -1,4 +1,8 @@
-import { IntegrationAccount, IntegrationProvider, IntegrationStatus } from './integration-account.entity';
+import {
+  IntegrationAccount,
+  IntegrationProvider,
+  IntegrationStatus,
+} from './integration-account.entity';
 
 describe('IntegrationAccount Entity', () => {
   it('should instantiate correctly with required fields', () => {

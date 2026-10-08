@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../api/client';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "../api/client";
 
 export interface ParsedDraft {
   title: string;
@@ -11,7 +11,7 @@ export interface ParsedDraft {
 }
 
 export interface CreateItemInput {
-  kind?: 'task' | 'event' | 'log';
+  kind?: "task" | "event" | "log";
   title: string;
   notes?: string | null;
   context?: string | null;
@@ -22,9 +22,9 @@ export interface CreateItemInput {
   dueAt?: string | null;
   notifyMinutesBefore?: number | null;
   rrule?: string | null;
-  status?: 'open' | 'done' | 'cancelled';
+  status?: "open" | "done" | "cancelled";
   payload?: Record<string, unknown>;
-  source?: 'web' | 'ios' | 'mcp' | 'telegram' | 'gmail' | 'gcal' | 'slack';
+  source?: "web" | "ios" | "mcp" | "telegram" | "gmail" | "gcal" | "slack";
 }
 
 export interface ItemResponse {
@@ -44,14 +44,14 @@ export interface ItemResponse {
 }
 
 export async function parseQuickAdd(text: string): Promise<ParsedDraft> {
-  const res = await apiClient.post<ParsedDraft>('/items/parse-quick-add', { text });
+  const res = await apiClient.post<ParsedDraft>("/items/parse-quick-add", { text });
   return res.data;
 }
 
 export async function createItem(input: CreateItemInput): Promise<ItemResponse> {
-  const res = await apiClient.post<ItemResponse>('/items', {
-    kind: input.kind || 'task',
-    source: 'ios',
+  const res = await apiClient.post<ItemResponse>("/items", {
+    kind: input.kind || "task",
+    source: "ios",
     ...input,
   });
   return res.data;
@@ -68,7 +68,7 @@ export function useCreateItem() {
   return useMutation<ItemResponse, Error, CreateItemInput>({
     mutationFn: createItem,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['today'] });
+      queryClient.invalidateQueries({ queryKey: ["today"] });
     },
   });
 }

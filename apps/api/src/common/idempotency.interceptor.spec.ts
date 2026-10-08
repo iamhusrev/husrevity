@@ -18,7 +18,11 @@ describe('IdempotencyInterceptor', () => {
   let interceptor: IdempotencyInterceptor;
 
   beforeEach(() => {
-    keys = { findOne: jest.fn(), create: jest.fn((v) => v), save: jest.fn().mockResolvedValue(undefined) };
+    keys = {
+      findOne: jest.fn(),
+      create: jest.fn((v) => v),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
     interceptor = new IdempotencyInterceptor(keys as never);
   });
 
@@ -56,7 +60,14 @@ describe('IdempotencyInterceptor', () => {
     await new Promise((r) => setImmediate(r)); // let the tap's fire-and-forget save settle
 
     expect(keys.save).toHaveBeenCalledWith(
-      expect.objectContaining({ ownerId: '1', key: 'abc', method: 'POST', path: '/items', responseStatus: 201, responseBody: { id: '10' } }),
+      expect.objectContaining({
+        ownerId: '1',
+        key: 'abc',
+        method: 'POST',
+        path: '/items',
+        responseStatus: 201,
+        responseBody: { id: '10' },
+      }),
     );
   });
 });

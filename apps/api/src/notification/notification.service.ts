@@ -75,11 +75,7 @@ export class NotificationService {
    * when the entity is updated (then re-enqueue with new schedule) or
    * deleted/completed (no re-enqueue).
    */
-  async cancelForSource(
-    ownerId: string,
-    kind: NotificationKind,
-    sourceId: string,
-  ): Promise<void> {
+  async cancelForSource(ownerId: string, kind: NotificationKind, sourceId: string): Promise<void> {
     const rows = await this.notifications.find({
       where: {
         ownerId,
@@ -143,10 +139,7 @@ export class NotificationService {
 
   // ─── Push subscription management ───────────────────────────────────────────
 
-  async subscribePush(
-    ownerId: string,
-    dto: PushSubscribeDto,
-  ): Promise<void> {
+  async subscribePush(ownerId: string, dto: PushSubscribeDto): Promise<void> {
     // Reuse an existing live row if endpoint matches (e.g. browser reissues
     // same subscription after permission re-grant) — just refresh keys and
     // ownership in case the device changed accounts.
@@ -268,8 +261,7 @@ export class NotificationService {
 
   isPushConfigured(): boolean {
     return Boolean(
-      this.config.get<string>('VAPID_PUBLIC_KEY') &&
-        this.config.get<string>('VAPID_PRIVATE_KEY'),
+      this.config.get<string>('VAPID_PUBLIC_KEY') && this.config.get<string>('VAPID_PRIVATE_KEY'),
     );
   }
 }

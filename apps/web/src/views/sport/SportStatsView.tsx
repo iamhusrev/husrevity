@@ -90,10 +90,7 @@ export default function SportStatsView() {
     [stats],
   );
   const intensityEntries = useMemo(
-    () =>
-      Object.entries(stats?.intensityDist ?? {}).sort(
-        (a, b) => Number(a[0]) - Number(b[0]),
-      ),
+    () => Object.entries(stats?.intensityDist ?? {}).sort((a, b) => Number(a[0]) - Number(b[0])),
     [stats],
   );
   const weeklyTrend = stats?.weeklyTrend ?? [];

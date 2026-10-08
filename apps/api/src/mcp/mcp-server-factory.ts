@@ -160,10 +160,7 @@ export class McpServerFactory {
             .optional()
             .describe('Priority, defaults to NONE'),
           flag: z.boolean().optional().describe('Whether the reminder is flagged'),
-          listId: z
-            .string()
-            .optional()
-            .describe('Reminder list ID (see list_reminder_lists)'),
+          listId: z.string().optional().describe('Reminder list ID (see list_reminder_lists)'),
           notifyMinutesBefore: z
             .number()
             .int()
@@ -181,8 +178,7 @@ export class McpServerFactory {
           priority: params.priority,
           flag: params.flag,
           listId: params.listId,
-          notifyMinutesBefore:
-            params.notifyMinutesBefore ?? (params.dueAt ? 0 : null),
+          notifyMinutesBefore: params.notifyMinutesBefore ?? (params.dueAt ? 0 : null),
         });
 
         return {
@@ -219,8 +215,7 @@ export class McpServerFactory {
     server.registerTool<any, any>(
       'search',
       {
-        description:
-          'Search items (tasks/events/logs) and notes by title matching a search query',
+        description: 'Search items (tasks/events/logs) and notes by title matching a search query',
         inputSchema: {
           query: z.string().describe('Search query string to match titles against'),
           kinds: z
@@ -439,11 +434,9 @@ export class McpServerFactory {
           );
         }
 
-        const activity = await this.routineService.createActivity(
-          ownerId,
-          String(matches[0].id),
-          { text: params.text },
-        );
+        const activity = await this.routineService.createActivity(ownerId, String(matches[0].id), {
+          text: params.text,
+        });
 
         return {
           content: [

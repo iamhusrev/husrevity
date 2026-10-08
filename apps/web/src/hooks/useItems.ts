@@ -5,7 +5,14 @@ import { CompleteItemRequest, ItemListFilter, ItemRequest } from "@/types/item/i
 const ITEM_KEYS = {
   all: ["items"] as const,
   list: (filter?: ItemListFilter) =>
-    ["items", filter?.from ?? "", filter?.to ?? "", filter?.kind ?? "", filter?.context ?? "", filter?.status ?? ""] as const,
+    [
+      "items",
+      filter?.from ?? "",
+      filter?.to ?? "",
+      filter?.kind ?? "",
+      filter?.context ?? "",
+      filter?.status ?? "",
+    ] as const,
   detail: (id: string) => ["item", id] as const,
 };
 

@@ -11,10 +11,7 @@ interface TodaySuggestionsModalProps {
   onClose: () => void;
 }
 
-export default function TodaySuggestionsModal({
-  isOpen,
-  onClose,
-}: TodaySuggestionsModalProps) {
+export default function TodaySuggestionsModal({ isOpen, onClose }: TodaySuggestionsModalProps) {
   const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
@@ -46,10 +43,7 @@ export default function TodaySuggestionsModal({
       aria-modal="true"
       aria-label={t("dashboard.today.title", "Bugün ne yapsam?")}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl husrev-settle"
-      >
+      <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-3xl husrev-settle">
         <button
           type="button"
           onClick={onClose}

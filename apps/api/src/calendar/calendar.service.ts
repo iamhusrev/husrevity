@@ -4,10 +4,7 @@ import { Repository } from 'typeorm';
 import { CalendarEvent } from './calendar-event.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
-import {
-  formatLeadTimeBody,
-  leadTimeFireAt,
-} from '../notification/notification-scheduling';
+import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { EventRequestDto, EventResponseDto } from './dto/calendar-dtos';
 
 @Injectable()
@@ -111,11 +108,7 @@ export class CalendarService {
       sourceId: e.id,
       scheduledAt: fireAt,
       title: e.title,
-      body: formatLeadTimeBody(
-        e.startAt,
-        e.reminderMinutes ?? 0,
-        e.location ?? e.description,
-      ),
+      body: formatLeadTimeBody(e.startAt, e.reminderMinutes ?? 0, e.location ?? e.description),
       deepLink: '/calendar',
     });
   }

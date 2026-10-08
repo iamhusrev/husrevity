@@ -71,7 +71,8 @@ export function parseAiProgram(raw: string): ParsedAiWeek[] {
       const description = typeof rec.description === 'string' ? rec.description.trim() : '';
       if (!name || !description) continue;
 
-      const activityTypeRaw = typeof rec.activityType === 'string' ? rec.activityType.toUpperCase() : '';
+      const activityTypeRaw =
+        typeof rec.activityType === 'string' ? rec.activityType.toUpperCase() : '';
       const activityType: ActivityType = (ACTIVITY_TYPES as readonly string[]).includes(
         activityTypeRaw,
       )
@@ -92,7 +93,8 @@ export function parseAiProgram(raw: string): ParsedAiWeek[] {
         ? (difficultyRaw as SessionDifficulty)
         : 'MODERATE';
 
-      const dayOfWeekRaw = typeof rec.dayOfWeek === 'number' ? rec.dayOfWeek : Number(rec.dayOfWeek);
+      const dayOfWeekRaw =
+        typeof rec.dayOfWeek === 'number' ? rec.dayOfWeek : Number(rec.dayOfWeek);
       const dayOfWeek = Number.isFinite(dayOfWeekRaw)
         ? Math.min(6, Math.max(0, Math.trunc(dayOfWeekRaw)))
         : 0;

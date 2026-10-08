@@ -13,15 +13,9 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { TimeBlockService } from './time-block.service';
-import {
-  TimeBlockRequestDto,
-  TimeBlockResponseDto,
-} from './dto/time-block-dtos';
+import { TimeBlockRequestDto, TimeBlockResponseDto } from './dto/time-block-dtos';
 import { ApiException } from '../common/api.exception';
-import {
-  AuthenticatedUser,
-  CurrentUser,
-} from '../common/current-user.decorator';
+import { AuthenticatedUser, CurrentUser } from '../common/current-user.decorator';
 
 @ApiTags('time-blocks')
 @ApiBearerAuth()
@@ -43,9 +37,7 @@ export class TimeBlockController {
   ): Promise<TimeBlockResponseDto[]> {
     if (date) return this.blocks.listForDate(u.userId, date);
     if (from && to) return this.blocks.listForRange(u.userId, from, to);
-    throw ApiException.badRequest(
-      'Provide either ?date=YYYY-MM-DD or ?from=ISO&to=ISO',
-    );
+    throw ApiException.badRequest('Provide either ?date=YYYY-MM-DD or ?from=ISO&to=ISO');
   }
 
   @Post()
@@ -76,10 +68,7 @@ export class TimeBlockController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(
-    @CurrentUser() u: AuthenticatedUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  delete(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.blocks.delete(u.userId, id);
   }
 }

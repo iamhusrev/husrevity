@@ -98,7 +98,10 @@ export function UserModal({
   const pending = update.isPending || resetPwd.isPending || remove.isPending;
 
   return (
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={save}
@@ -229,10 +232,7 @@ export function UserModal({
         onConfirm={confirmDelete}
         isPending={remove.isPending}
         title={t("admin.users.confirmDeleteTitle", "Kullanıcıyı sil")}
-        message={t(
-          "admin.users.confirmDelete",
-          "Bu kullanıcıyı silmek istediğine emin misin?",
-        )}
+        message={t("admin.users.confirmDelete", "Bu kullanıcıyı silmek istediğine emin misin?")}
       />
     </div>
   );

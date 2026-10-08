@@ -23,7 +23,10 @@ export class TelegramController {
   async status(@CurrentUser() u: AuthenticatedUser): Promise<TelegramLinkStatusResponseDto> {
     const link = await this.telegramLinkService.findByOwner(u.userId);
     const pending =
-      link?.status === 'pending' && !!link.linkCode && !!link.linkCodeExpiresAt && link.linkCodeExpiresAt > new Date();
+      link?.status === 'pending' &&
+      !!link.linkCode &&
+      !!link.linkCodeExpiresAt &&
+      link.linkCodeExpiresAt > new Date();
     return {
       configured: this.telegramConfig.isConfigured(),
       linked: link?.status === 'linked',

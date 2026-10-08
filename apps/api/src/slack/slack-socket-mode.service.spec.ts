@@ -59,9 +59,7 @@ describe('SlackSocketModeService', () => {
     } as any;
 
     slackApiService = {
-      openSocketConnection: jest
-        .fn()
-        .mockResolvedValue('wss://wss-primary.slack.com/link-ws'),
+      openSocketConnection: jest.fn().mockResolvedValue('wss://wss-primary.slack.com/link-ws'),
     } as any;
 
     slackMessageHandlerService = {
@@ -122,11 +120,9 @@ describe('SlackSocketModeService', () => {
       callOrder.push(`ack:${JSON.parse(data).envelope_id}`);
     };
 
-    slackMessageHandlerService.handleEvent.mockImplementation(
-      async (payload) => {
-        callOrder.push(`handleEvent:${payload.event_id}`);
-      },
-    );
+    slackMessageHandlerService.handleEvent.mockImplementation(async (payload) => {
+      callOrder.push(`handleEvent:${payload.event_id}`);
+    });
 
     ws.emitMessage({
       envelope_id: 'env-100',
@@ -140,9 +136,7 @@ describe('SlackSocketModeService', () => {
     await Promise.resolve();
 
     expect(callOrder).toEqual(['ack:env-100', 'handleEvent:evt-100']);
-    expect(ws.sentMessages).toContain(
-      JSON.stringify({ envelope_id: 'env-100' }),
-    );
+    expect(ws.sentMessages).toContain(JSON.stringify({ envelope_id: 'env-100' }));
   });
 
   it('should de-duplicate events_api payloads by payload.event_id', async () => {

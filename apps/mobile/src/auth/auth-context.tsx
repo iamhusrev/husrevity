@@ -8,7 +8,10 @@ import {
   clearTokens,
   onForceLogout,
 } from "../api/client";
-import { registerPushNotification, unregisterPushNotification } from "../notifications/register-push";
+import {
+  registerPushNotification,
+  unregisterPushNotification,
+} from "../notifications/register-push";
 
 export interface MobileUser {
   id: string;
@@ -101,11 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         accessToken: string;
         refreshToken: string;
         user: MobileUser;
-      }>(
-        "/auth/login",
-        { email, password },
-        { skipAuth: true }
-      );
+      }>("/auth/login", { email, password }, { skipAuth: true });
 
       const { accessToken, refreshToken, user: userProfile } = res.data;
 

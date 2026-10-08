@@ -91,7 +91,9 @@ describe('GoogleCalendarService', () => {
     };
 
     mockGoogleCalendarSyncService = {
-      syncIncremental: jest.fn().mockResolvedValue({ syncedCount: 1, deletedCount: 0, syncToken: 'st' }),
+      syncIncremental: jest
+        .fn()
+        .mockResolvedValue({ syncedCount: 1, deletedCount: 0, syncToken: 'st' }),
     };
 
     mockExternalLinkRepo = {
@@ -186,7 +188,9 @@ describe('GoogleCalendarService', () => {
     });
 
     it('should throw badRequest if Google API insert fails or returns no ID', async () => {
-      mockCalendarApi.calendars.insert.mockRejectedValueOnce(new Error('Google API quota exceeded'));
+      mockCalendarApi.calendars.insert.mockRejectedValueOnce(
+        new Error('Google API quota exceeded'),
+      );
 
       await expect(service.ensureHusrevityCalendar(ownerId)).rejects.toThrow(
         'Failed to create Husrevity calendar: Google API quota exceeded',
@@ -250,7 +254,9 @@ describe('GoogleCalendarService', () => {
 
     it('should return null if extendedProperties or husrevityId is missing', () => {
       expect(service.getHusrevityIdFromEvent({ id: 'gcal-evt-2' })).toBeNull();
-      expect(service.getHusrevityIdFromEvent({ id: 'gcal-evt-3', extendedProperties: {} })).toBeNull();
+      expect(
+        service.getHusrevityIdFromEvent({ id: 'gcal-evt-3', extendedProperties: {} }),
+      ).toBeNull();
     });
   });
 

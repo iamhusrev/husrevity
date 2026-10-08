@@ -15,13 +15,7 @@ const ROLE_FALLBACK: Record<ProjectRole, string> = {
   VIEWER: "Görüntüleyici",
 };
 
-export default function RoleBadge({
-  role,
-  className,
-}: {
-  role: ProjectRole;
-  className?: string;
-}) {
+export default function RoleBadge({ role, className }: { role: ProjectRole; className?: string }) {
   const { t } = useTranslation();
 
   return (

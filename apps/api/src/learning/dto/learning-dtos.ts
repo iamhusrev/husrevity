@@ -1,6 +1,14 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayNotEmpty, IsArray, IsDateString, IsInt, IsNotEmpty, IsOptional, IsUrl, MaxLength, Min,
+  ArrayNotEmpty,
+  IsArray,
+  IsDateString,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsUrl,
+  MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -20,7 +28,11 @@ export class SubtopicRequestDto {
 
 export class ItemRequestDto {
   @ApiProperty() @IsNotEmpty() @MaxLength(300) text!: string;
-  @ApiPropertyOptional() @IsOptional() @MaxLength(512) @IsUrl({}, { message: 'url must be a valid URL' }) url?: string | null;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @MaxLength(512)
+  @IsUrl({}, { message: 'url must be a valid URL' })
+  url?: string | null;
   @ApiPropertyOptional() @IsOptional() notes?: string | null;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) estimatedMinutes?: number | null;
   @ApiPropertyOptional() @IsOptional() @IsDateString() reviewAt?: string | null;
@@ -43,10 +55,19 @@ export class ItemResponseDto {
   @ApiProperty() position!: number;
 
   static from(i: LearningItem): ItemResponseDto {
-    return { id: i.id, topicId: i.topicId, subtopicId: i.subtopicId, text: i.text, url: i.url, notes: i.notes,
-      estimatedMinutes: i.estimatedMinutes, reviewAt: i.reviewAt?.toISOString() ?? null,
-      notifyMinutesBefore: i.notifyMinutesBefore, completedAt: i.completedAt?.toISOString() ?? null,
-      position: i.position };
+    return {
+      id: i.id,
+      topicId: i.topicId,
+      subtopicId: i.subtopicId,
+      text: i.text,
+      url: i.url,
+      notes: i.notes,
+      estimatedMinutes: i.estimatedMinutes,
+      reviewAt: i.reviewAt?.toISOString() ?? null,
+      notifyMinutesBefore: i.notifyMinutesBefore,
+      completedAt: i.completedAt?.toISOString() ?? null,
+      position: i.position,
+    };
   }
 }
 
@@ -63,10 +84,18 @@ export class SubtopicResponseDto {
   @ApiProperty() updatedAt!: string;
 
   static from(s: LearningSubtopic, items: LearningItem[]): SubtopicResponseDto {
-    return { id: s.id, topicId: s.topicId, title: s.title, description: s.description, position: s.position,
-      items: items.map(ItemResponseDto.from), itemCount: items.length,
+    return {
+      id: s.id,
+      topicId: s.topicId,
+      title: s.title,
+      description: s.description,
+      position: s.position,
+      items: items.map(ItemResponseDto.from),
+      itemCount: items.length,
       completedCount: items.filter((i) => i.completedAt !== null).length,
-      createdAt: s.createdAt.toISOString(), updatedAt: s.updatedAt.toISOString() };
+      createdAt: s.createdAt.toISOString(),
+      updatedAt: s.updatedAt.toISOString(),
+    };
   }
 }
 
@@ -82,17 +111,37 @@ export class TopicResponseDto {
   @ApiProperty() createdAt!: string;
   @ApiProperty() updatedAt!: string;
 
-  static from(t: LearningTopic, directItems: LearningItem[], subtopics: SubtopicResponseDto[]): TopicResponseDto {
-    return { id: t.id, title: t.title, description: t.description, position: t.position,
-      items: directItems.map(ItemResponseDto.from), subtopics,
-      itemCount: directItems.length + subtopics.reduce((count, subtopic) => count + subtopic.itemCount, 0),
-      completedCount: directItems.filter((i) => i.completedAt !== null).length + subtopics.reduce((count, subtopic) => count + subtopic.completedCount, 0),
-      createdAt: t.createdAt.toISOString(), updatedAt: t.updatedAt.toISOString() };
+  static from(
+    t: LearningTopic,
+    directItems: LearningItem[],
+    subtopics: SubtopicResponseDto[],
+  ): TopicResponseDto {
+    return {
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      position: t.position,
+      items: directItems.map(ItemResponseDto.from),
+      subtopics,
+      itemCount:
+        directItems.length + subtopics.reduce((count, subtopic) => count + subtopic.itemCount, 0),
+      completedCount:
+        directItems.filter((i) => i.completedAt !== null).length +
+        subtopics.reduce((count, subtopic) => count + subtopic.completedCount, 0),
+      createdAt: t.createdAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
+    };
   }
 }
 
-export class LearningReorderItemDto { @IsNotEmpty() id!: string; @IsInt() position!: number; }
+export class LearningReorderItemDto {
+  @IsNotEmpty() id!: string;
+  @IsInt() position!: number;
+}
 export class LearningReorderRequestDto {
-  @IsArray() @ArrayNotEmpty() @ValidateNested({ each: true }) @Type(() => LearningReorderItemDto)
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => LearningReorderItemDto)
   items!: LearningReorderItemDto[];
 }

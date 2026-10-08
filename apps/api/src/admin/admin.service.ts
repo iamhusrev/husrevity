@@ -2,14 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import {
-  Brackets,
-  DataSource,
-  ILike,
-  IsNull,
-  LessThan,
-  Repository,
-} from 'typeorm';
+import { Brackets, DataSource, ILike, IsNull, LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { User } from '../user/user.entity';
@@ -50,9 +43,7 @@ export class AdminService {
 
   // ─── Users ───────────────────────────────────────────────────────────────
 
-  async listUsers(
-    q: AdminUserListQueryDto,
-  ): Promise<AdminUserListResponseDto> {
+  async listUsers(q: AdminUserListQueryDto): Promise<AdminUserListResponseDto> {
     const limit = Math.min(q.limit ?? 50, 200);
     const offset = q.offset ?? 0;
     const qb = this.users.createQueryBuilder('u').where('1 = 1');
@@ -157,9 +148,7 @@ export class AdminService {
 
     const token = randomBytes(32).toString('base64url');
     const tokenHash = sha256(token);
-    const expiresAt = new Date(
-      now.getTime() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000,
-    );
+    const expiresAt = new Date(now.getTime() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000);
 
     const invite = this.invites.create({
       invitedById: adminId,
@@ -222,10 +211,7 @@ export class AdminService {
     };
   }
 
-  async acceptInvite(
-    token: string,
-    dto: AcceptInviteDto,
-  ): Promise<AuthResponseDto> {
+  async acceptInvite(token: string, dto: AcceptInviteDto): Promise<AuthResponseDto> {
     const inv = await this.requireLiveInvite(token);
     // Race: another user may have signed up with this email between invite
     // creation and acceptance (e.g. via /auth/register). Treat as conflict.
@@ -286,8 +272,7 @@ export class AdminService {
       where: { tokenHash: sha256(token) },
     });
     if (!inv) throw ApiException.notFound('Invite not found');
-    if (inv.acceptedAt)
-      throw ApiException.badRequest('Invite already accepted');
+    if (inv.acceptedAt) throw ApiException.badRequest('Invite already accepted');
     if (inv.expiresAt.getTime() < Date.now()) {
       throw ApiException.badRequest('Invite expired');
     }
@@ -295,9 +280,10 @@ export class AdminService {
   }
 
   private buildInviteUrl(token: string): string {
-    const base = (
-      this.config.get<string>('HUSREVITY_WEB_URL') ?? 'http://localhost:3090'
-    ).replace(/\/+$/, '');
+    const base = (this.config.get<string>('HUSREVITY_WEB_URL') ?? 'http://localhost:3090').replace(
+      /\/+$/,
+      '',
+    );
     return `${base}/invite/${token}`;
   }
 }

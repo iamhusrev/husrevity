@@ -86,7 +86,7 @@ describe("Mobile ApiClient", () => {
             code: 200,
             data: { id: "1", title: "Test Item" },
           }),
-          { status: 200, headers: { "Content-Type": "application/json" } }
+          { status: 200, headers: { "Content-Type": "application/json" } },
         );
       }) as any;
 
@@ -113,20 +113,20 @@ describe("Mobile ApiClient", () => {
             code: 201,
             data: { token: "new_token" },
           }),
-          { status: 201 }
+          { status: 201 },
         );
       }) as any;
 
       const res = await apiClient.post(
         "/auth/login",
         { email: "user@example.com", password: "password123" },
-        { skipAuth: true }
+        { skipAuth: true },
       );
 
       const headers = capturedInit?.headers as Record<string, string>;
       expect(headers["Authorization"]).toBeUndefined();
       expect(capturedInit?.body).toBe(
-        JSON.stringify({ email: "user@example.com", password: "password123" })
+        JSON.stringify({ email: "user@example.com", password: "password123" }),
       );
       expect(res.data).toEqual({ token: "new_token" });
     });
@@ -139,7 +139,7 @@ describe("Mobile ApiClient", () => {
             message: "Bad request error",
             code: 400,
           }),
-          { status: 400 }
+          { status: 400 },
         );
       }) as any;
 
@@ -171,7 +171,7 @@ describe("Mobile ApiClient", () => {
           // First attempt returns 401
           return new Response(
             JSON.stringify({ success: false, message: "Unauthorized", code: 401 }),
-            { status: 401 }
+            { status: 401 },
           );
         }
 
@@ -187,7 +187,7 @@ describe("Mobile ApiClient", () => {
                 refreshToken: "new_refresh_token_888",
               },
             }),
-            { status: 200 }
+            { status: 200 },
           );
         }
 
@@ -202,7 +202,7 @@ describe("Mobile ApiClient", () => {
               code: 200,
               data: [{ id: "1" }],
             }),
-            { status: 200 }
+            { status: 200 },
           );
         }
 
@@ -238,7 +238,7 @@ describe("Mobile ApiClient", () => {
               code: 200,
               data: { accessToken: "shared_new_token" },
             }),
-            { status: 200 }
+            { status: 200 },
           );
         }
 
@@ -246,7 +246,7 @@ describe("Mobile ApiClient", () => {
         if (headers["Authorization"] === "Bearer expired_token") {
           return new Response(
             JSON.stringify({ success: false, message: "Unauthorized", code: 401 }),
-            { status: 401 }
+            { status: 401 },
           );
         }
 
@@ -257,7 +257,7 @@ describe("Mobile ApiClient", () => {
             code: 200,
             data: { authUsed: headers["Authorization"] },
           }),
-          { status: 200 }
+          { status: 200 },
         );
       }) as any;
 
@@ -285,12 +285,12 @@ describe("Mobile ApiClient", () => {
         if (urlStr.endsWith("/auth/refresh")) {
           return new Response(
             JSON.stringify({ success: false, message: "Refresh token revoked", code: 401 }),
-            { status: 401 }
+            { status: 401 },
           );
         }
         return new Response(
           JSON.stringify({ success: false, message: "Unauthorized", code: 401 }),
-          { status: 401 }
+          { status: 401 },
         );
       }) as any;
 
@@ -319,7 +319,12 @@ describe("Mobile ApiClient", () => {
         const urlStr = url.toString();
         if (urlStr.endsWith("/auth/refresh")) {
           return new Response(
-            JSON.stringify({ success: true, message: "ok", code: 200, data: { accessToken: "fresh_token", refreshToken: "fresh_refresh" } }),
+            JSON.stringify({
+              success: true,
+              message: "ok",
+              code: 200,
+              data: { accessToken: "fresh_token", refreshToken: "fresh_refresh" },
+            }),
             { status: 200 },
           );
         }
@@ -361,7 +366,7 @@ describe("Mobile ApiClient", () => {
         }
         return new Response(
           JSON.stringify({ success: false, message: "Invalid credentials", code: 401 }),
-          { status: 401 }
+          { status: 401 },
         );
       }) as any;
 

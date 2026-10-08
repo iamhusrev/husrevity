@@ -21,8 +21,7 @@ export function useRoutineSegments() {
 export function useCreateRoutineSegment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: RoutineSegmentRequest) =>
-      routineService.createSegment(body),
+    mutationFn: (body: RoutineSegmentRequest) => routineService.createSegment(body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ROUTINE_KEYS.segments }),
   });
 }
@@ -47,8 +46,7 @@ export function useDeleteRoutineSegment() {
 export function useReorderRoutineSegments() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (items: RoutineReorderItem[]) =>
-      routineService.reorderSegments(items),
+    mutationFn: (items: RoutineReorderItem[]) => routineService.reorderSegments(items),
     onSuccess: () => qc.invalidateQueries({ queryKey: ROUTINE_KEYS.segments }),
   });
 }
@@ -56,13 +54,8 @@ export function useReorderRoutineSegments() {
 export function useCreateRoutineActivity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      segmentId,
-      body,
-    }: {
-      segmentId: string;
-      body: RoutineActivityRequest;
-    }) => routineService.createActivity(segmentId, body),
+    mutationFn: ({ segmentId, body }: { segmentId: string; body: RoutineActivityRequest }) =>
+      routineService.createActivity(segmentId, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ROUTINE_KEYS.segments }),
   });
 }

@@ -35,7 +35,9 @@ export default function TaskDetailModal({
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
   const [dueAt, setDueAt] = useState<string | null>(task.dueAt ?? null);
-  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(task.notifyMinutesBefore ?? 0);
+  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(
+    task.notifyMinutesBefore ?? 0,
+  );
   const [assigneeId, setAssigneeId] = useState<number | null>(task.assigneeId ?? null);
 
   const submit = async (e: React.FormEvent) => {

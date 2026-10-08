@@ -34,7 +34,10 @@ function ChatLinkCard({ provider }: { provider: ChatProvider }) {
   const qc = useQueryClient();
   const onError = useErrorAlert();
   const key = ["integrations", provider];
-  const { data } = useQuery({ queryKey: key, queryFn: () => integrationsService.linkStatus(provider) });
+  const { data } = useQuery({
+    queryKey: key,
+    queryFn: () => integrationsService.linkStatus(provider),
+  });
   const create = useMutation({
     mutationFn: () => integrationsService.createLinkCode(provider),
     onSuccess: () => qc.invalidateQueries({ queryKey: key }),
@@ -58,12 +61,18 @@ function ChatLinkCard({ provider }: { provider: ChatProvider }) {
       ? `/link ${data.pendingCode}`
       : `link ${data.pendingCode}`
     : null;
-  const bot = data?.botUsername ? (provider === "telegram" ? `@${data.botUsername}` : data.botUsername) : "";
+  const bot = data?.botUsername
+    ? provider === "telegram"
+      ? `@${data.botUsername}`
+      : data.botUsername
+    : "";
 
   return (
     <section className={CARD}>
       <h2 className="text-lg font-semibold">{t(`integrations.${provider}.title`)}</h2>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t(`integrations.${provider}.desc`)}</p>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {t(`integrations.${provider}.desc`)}
+      </p>
       {data && !data.configured ? (
         <p className="mt-4 text-sm text-amber-600">{t("integrations.notConfigured")}</p>
       ) : data?.linked ? (
@@ -78,7 +87,9 @@ function ChatLinkCard({ provider }: { provider: ChatProvider }) {
           {command && (
             <div className="rounded-2xl bg-husrev-sand/40 p-4 dark:bg-white/[0.04]">
               <p className="text-sm">{t(`integrations.${provider}.instruction`, { bot })}</p>
-              <code className="mt-2 block select-all text-xl font-mono tracking-wider">{command}</code>
+              <code className="mt-2 block select-all text-xl font-mono tracking-wider">
+                {command}
+              </code>
               <p className="mt-2 text-xs text-gray-500">
                 {t("integrations.validUntil", {
                   time: new Date(data!.pendingCodeExpiresAt!).toLocaleTimeString(),
@@ -101,7 +112,10 @@ function GoogleCard() {
   const onError = useErrorAlert();
   const params = useSearchParams();
   const show = alertStore((s) => s.show);
-  const { data } = useQuery({ queryKey: ["integrations", "google"], queryFn: integrationsService.googleStatus });
+  const { data } = useQuery({
+    queryKey: ["integrations", "google"],
+    queryFn: integrationsService.googleStatus,
+  });
   const disconnect = useMutation({
     mutationFn: integrationsService.googleDisconnect,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations", "google"] }),
@@ -118,10 +132,20 @@ function GoogleCard() {
   const result = params.get("google");
   useEffect(() => {
     if (result === "connected") {
-      show({ title: t("integrations.google.connectedToast"), message: "", type: "success", position: "top-center" });
+      show({
+        title: t("integrations.google.connectedToast"),
+        message: "",
+        type: "success",
+        position: "top-center",
+      });
       qc.invalidateQueries({ queryKey: ["integrations", "google"] });
     } else if (result === "error") {
-      show({ title: t("integrations.google.errorToast"), message: "", type: "error", position: "top-center" });
+      show({
+        title: t("integrations.google.errorToast"),
+        message: "",
+        type: "error",
+        position: "top-center",
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
@@ -129,18 +153,28 @@ function GoogleCard() {
   return (
     <section className={CARD}>
       <h2 className="text-lg font-semibold">{t("integrations.google.title")}</h2>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("integrations.google.desc")}</p>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        {t("integrations.google.desc")}
+      </p>
       {data && !data.configured ? (
         <p className="mt-4 text-sm text-amber-600">{t("integrations.notConfigured")}</p>
       ) : data?.connected ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-green-600">{t("integrations.connected")}</span>
-          <button className={BTN_GHOST} disabled={disconnect.isPending} onClick={() => disconnect.mutate()}>
+          <button
+            className={BTN_GHOST}
+            disabled={disconnect.isPending}
+            onClick={() => disconnect.mutate()}
+          >
             {t("integrations.disconnect")}
           </button>
         </div>
       ) : (
-        <button className={`${BTN} mt-4`} disabled={connect.isPending} onClick={() => connect.mutate()}>
+        <button
+          className={`${BTN} mt-4`}
+          disabled={connect.isPending}
+          onClick={() => connect.mutate()}
+        >
           {t("integrations.google.connect")}
         </button>
       )}
@@ -155,7 +189,10 @@ function McpCard() {
   const [name, setName] = useState("Claude");
   const [scopes, setScopes] = useState<PatScope[]>([...PAT_SCOPES]);
   const [issued, setIssued] = useState<string | null>(null);
-  const { data: pats } = useQuery({ queryKey: ["integrations", "pats"], queryFn: integrationsService.listPats });
+  const { data: pats } = useQuery({
+    queryKey: ["integrations", "pats"],
+    queryFn: integrationsService.listPats,
+  });
   const issue = useMutation({
     mutationFn: () => integrationsService.issuePat(name.trim(), scopes),
     onSuccess: (r) => {
@@ -223,11 +260,17 @@ function McpCard() {
                 <div className="truncate text-xs text-gray-500">
                   {p.scopes.join(", ")} ·{" "}
                   {p.lastUsedAt
-                    ? t("integrations.mcp.lastUsed", { date: new Date(p.lastUsedAt).toLocaleDateString() })
+                    ? t("integrations.mcp.lastUsed", {
+                        date: new Date(p.lastUsedAt).toLocaleDateString(),
+                      })
                     : t("integrations.mcp.neverUsed")}
                 </div>
               </div>
-              <button className={BTN_GHOST} disabled={revoke.isPending} onClick={() => revoke.mutate(p.id)}>
+              <button
+                className={BTN_GHOST}
+                disabled={revoke.isPending}
+                onClick={() => revoke.mutate(p.id)}
+              >
                 {t("integrations.mcp.revoke")}
               </button>
             </li>

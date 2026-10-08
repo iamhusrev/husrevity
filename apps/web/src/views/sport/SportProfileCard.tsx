@@ -146,9 +146,7 @@ function EditProfileModal({
                         type="button"
                         onClick={() =>
                           field.onChange(
-                            active
-                              ? field.value.filter((v) => v !== a)
-                              : [...field.value, a],
+                            active ? field.value.filter((v) => v !== a) : [...field.value, a],
                           )
                         }
                         className={cn(

@@ -4,7 +4,13 @@ import { PatService } from './pat.service';
 import { PersonalAccessToken } from './personal-access-token.entity';
 import { ApiException } from '../common/api.exception';
 
-type MockRepo = { findOne: jest.Mock; create: jest.Mock; save: jest.Mock; find: jest.Mock; softRemove: jest.Mock };
+type MockRepo = {
+  findOne: jest.Mock;
+  create: jest.Mock;
+  save: jest.Mock;
+  find: jest.Mock;
+  softRemove: jest.Mock;
+};
 
 describe('PatService', () => {
   const ownerId = '1';
@@ -54,7 +60,12 @@ describe('PatService', () => {
     });
 
     it('bumps lastUsedAt and returns {ownerId, scopes} for a valid token', async () => {
-      const pat = { ownerId, scopes: ['items:read', 'notes:write'], expiresAt: null, lastUsedAt: null } as PersonalAccessToken;
+      const pat = {
+        ownerId,
+        scopes: ['items:read', 'notes:write'],
+        expiresAt: null,
+        lastUsedAt: null,
+      } as PersonalAccessToken;
       pats.findOne.mockResolvedValueOnce(pat);
 
       const result = await service.validate('valid');

@@ -89,12 +89,7 @@ describe('IntegrationAccountService', () => {
 
       repo.findOne.mockResolvedValueOnce(existing);
 
-      await service.save(
-        ownerId,
-        provider,
-        { accessToken: 'new-access' },
-        ['calendar.events'],
-      );
+      await service.save(ownerId, provider, { accessToken: 'new-access' }, ['calendar.events']);
 
       expect(existing.encryptedAccessToken).toBe('enc:new-access');
       expect(existing.encryptedRefreshToken).toBe('enc:old-refresh');
@@ -183,7 +178,9 @@ describe('IntegrationAccountService', () => {
     it('throws 404 ApiException when account does not exist', async () => {
       repo.findOne.mockResolvedValueOnce(null);
 
-      await expect(service.updateSyncToken(ownerId, provider, 'token')).rejects.toThrow(ApiException);
+      await expect(service.updateSyncToken(ownerId, provider, 'token')).rejects.toThrow(
+        ApiException,
+      );
     });
   });
 
@@ -207,7 +204,9 @@ describe('IntegrationAccountService', () => {
     it('throws 404 ApiException when account does not exist', async () => {
       repo.findOne.mockResolvedValueOnce(null);
 
-      await expect(service.updateCalendarId(ownerId, provider, 'cal-id')).rejects.toThrow(ApiException);
+      await expect(service.updateCalendarId(ownerId, provider, 'cal-id')).rejects.toThrow(
+        ApiException,
+      );
     });
   });
 

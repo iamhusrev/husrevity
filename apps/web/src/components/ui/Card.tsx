@@ -21,9 +21,7 @@ export default function Card({
   const interactiveClass = interactive ? "husrev-lift" : "";
 
   return (
-    <Component
-      className={`${baseClasses} ${paddingClass} ${interactiveClass} ${className}`.trim()}
-    >
+    <Component className={`${baseClasses} ${paddingClass} ${interactiveClass} ${className}`.trim()}>
       {children}
     </Component>
   );

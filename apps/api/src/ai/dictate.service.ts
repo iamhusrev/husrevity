@@ -50,18 +50,13 @@ export class DictateService {
         throw new Error(`HTTP ${r.status}: ${JSON.stringify(json).slice(0, 200)}`);
       }
       const candidates =
-        (json.candidates as
-          | { content?: { parts?: { text?: string }[] } }[]
-          | undefined) ?? [];
-      const text =
-        candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+        (json.candidates as { content?: { parts?: { text?: string }[] } }[] | undefined) ?? [];
+      const text = candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
       if (!text) throw new Error('empty response');
       return text;
     } catch (e) {
       this.logger.error('Gemini suggestion call failed', e as Error);
-      throw ApiException.badRequest(
-        `AI request failed: ${(e as Error).message}`,
-      );
+      throw ApiException.badRequest(`AI request failed: ${(e as Error).message}`);
     }
   }
 }

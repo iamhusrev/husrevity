@@ -174,7 +174,12 @@ export default function MembersPanel({
                     key={m.id}
                     className="flex items-center gap-3 rounded-xl ring-1 ring-husrev-sand/80 bg-white/60 px-3 py-2 dark:bg-white/[0.02] dark:ring-white/[0.06]"
                   >
-                    <MemberAvatar firstName={m.firstName} lastName={m.lastName} email={m.email} size="md" />
+                    <MemberAvatar
+                      firstName={m.firstName}
+                      lastName={m.lastName}
+                      email={m.email}
+                      size="md"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-sm font-medium text-husrev-ink dark:text-husrev-cream">
@@ -201,7 +206,9 @@ export default function MembersPanel({
                         className="husrev-input w-auto py-1 text-xs"
                       >
                         <option value="EDITOR">{t("projects.roles.EDITOR", "Düzenleyici")}</option>
-                        <option value="VIEWER">{t("projects.roles.VIEWER", "Görüntüleyici")}</option>
+                        <option value="VIEWER">
+                          {t("projects.roles.VIEWER", "Görüntüleyici")}
+                        </option>
                       </select>
                     ) : (
                       <RoleBadge role={m.role} />
@@ -281,7 +288,9 @@ export default function MembersPanel({
         </div>
       )}
 
-      {showAddModal && <AddMemberModal projectId={projectId} onClose={() => setShowAddModal(false)} />}
+      {showAddModal && (
+        <AddMemberModal projectId={projectId} onClose={() => setShowAddModal(false)} />
+      )}
 
       <DeleteConfirmModal
         isOpen={!!removeTarget}

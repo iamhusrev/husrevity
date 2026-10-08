@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,25 +9,25 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useQuickAddPreview, useCreateItem, ParsedDraft } from '../src/hooks/useQuickAdd';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useQuickAddPreview, useCreateItem, ParsedDraft } from "../src/hooks/useQuickAdd";
 
 export default function QuickAddScreen() {
   const router = useRouter();
   const previewMutation = useQuickAddPreview();
   const createMutation = useCreateItem();
 
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [draft, setDraft] = useState<ParsedDraft | null>(null);
-  const [editedTitle, setEditedTitle] = useState('');
+  const [editedTitle, setEditedTitle] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleParse = () => {
     if (!text.trim()) {
-      setErrorMessage('Lütfen eklenecek bir metin girin.');
+      setErrorMessage("Lütfen eklenecek bir metin girin.");
       return;
     }
     setErrorMessage(null);
@@ -39,7 +39,7 @@ export default function QuickAddScreen() {
         setEditedTitle(data.title);
       },
       onError: (err) => {
-        setErrorMessage(err?.message || 'Metin ayrıştırılamadı.');
+        setErrorMessage(err?.message || "Metin ayrıştırılamadı.");
       },
     });
   };
@@ -49,14 +49,14 @@ export default function QuickAddScreen() {
 
     const titleToSave = editedTitle.trim() || draft.title;
     if (!titleToSave) {
-      setErrorMessage('Başlık boş olamaz.');
+      setErrorMessage("Başlık boş olamaz.");
       return;
     }
 
     setErrorMessage(null);
     createMutation.mutate(
       {
-        kind: 'task',
+        kind: "task",
         title: titleToSave,
         scheduledAt: draft.scheduledAt || null,
         context: draft.context || null,
@@ -64,10 +64,10 @@ export default function QuickAddScreen() {
       },
       {
         onSuccess: () => {
-          setSuccessMessage('Öğe başarıyla eklendi!');
-          setText('');
+          setSuccessMessage("Öğe başarıyla eklendi!");
+          setText("");
           setDraft(null);
-          setEditedTitle('');
+          setEditedTitle("");
           setTimeout(() => {
             if (router.canGoBack()) {
               router.back();
@@ -75,16 +75,16 @@ export default function QuickAddScreen() {
           }, 800);
         },
         onError: (err) => {
-          setErrorMessage(err?.message || 'Öğe oluşturulamadı.');
+          setErrorMessage(err?.message || "Öğe oluşturulamadı.");
         },
-      }
+      },
     );
   };
 
   const handleReset = () => {
-    setText('');
+    setText("");
     setDraft(null);
-    setEditedTitle('');
+    setEditedTitle("");
     setErrorMessage(null);
     setSuccessMessage(null);
     previewMutation.reset();
@@ -95,9 +95,9 @@ export default function QuickAddScreen() {
   const isCreating = createMutation.isPending;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -109,7 +109,8 @@ export default function QuickAddScreen() {
             <Text style={styles.kicker}>HIZLI EKLE</Text>
             <Text style={styles.title}>Yeni Görev veya Etkinlik</Text>
             <Text style={styles.subtitle}>
-              Doğal dilde yazın (örn: "yarın 9da HGS kontrol #alican"), akıllı ayrıştırıcı detayları çıkarsın.
+              Doğal dilde yazın (örn: "yarın 9da HGS kontrol #alican"), akıllı ayrıştırıcı detayları
+              çıkarsın.
             </Text>
           </View>
 
@@ -191,7 +192,7 @@ export default function QuickAddScreen() {
                 <View style={styles.fieldGroup}>
                   <Text style={styles.fieldLabel}>Planlanan Zaman</Text>
                   <Text style={styles.fieldValue}>
-                    {new Date(draft.scheduledAt).toLocaleString('tr-TR')}
+                    {new Date(draft.scheduledAt).toLocaleString("tr-TR")}
                   </Text>
                 </View>
               ) : null}
@@ -251,7 +252,7 @@ export default function QuickAddScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0c0a09',
+    backgroundColor: "#0c0a09",
   },
   keyboardView: {
     flex: 1,
@@ -265,119 +266,119 @@ const styles = StyleSheet.create({
   },
   kicker: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#c8732e',
+    fontWeight: "700",
+    color: "#c8732e",
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#f5f5f4',
+    fontWeight: "700",
+    color: "#f5f5f4",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#a8a29e',
+    color: "#a8a29e",
     lineHeight: 20,
   },
   errorCard: {
-    backgroundColor: '#451a1a',
-    borderColor: '#7f1d1d',
+    backgroundColor: "#451a1a",
+    borderColor: "#7f1d1d",
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#fca5a5',
+    color: "#fca5a5",
     fontSize: 14,
   },
   successCard: {
-    backgroundColor: '#143823',
-    borderColor: '#15803d',
+    backgroundColor: "#143823",
+    borderColor: "#15803d",
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
   },
   successText: {
-    color: '#86efac',
+    color: "#86efac",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   inputSection: {
-    backgroundColor: '#1c1917',
+    backgroundColor: "#1c1917",
     borderRadius: 16,
     padding: 16,
-    borderColor: '#292524',
+    borderColor: "#292524",
     borderWidth: 1,
     marginBottom: 20,
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#d6d3d1',
+    fontWeight: "600",
+    color: "#d6d3d1",
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#292524',
+    backgroundColor: "#292524",
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#f5f5f4',
+    color: "#f5f5f4",
     fontSize: 15,
-    borderColor: '#44403c',
+    borderColor: "#44403c",
     borderWidth: 1,
     marginBottom: 12,
   },
   buttonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   parseButton: {
     flex: 1,
-    backgroundColor: '#a14d18',
+    backgroundColor: "#a14d18",
     paddingVertical: 12,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   parseButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   clearButton: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 10,
-    backgroundColor: '#292524',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#292524",
+    alignItems: "center",
+    justifyContent: "center",
   },
   clearButtonText: {
-    color: '#a8a29e',
+    color: "#a8a29e",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   previewCard: {
-    backgroundColor: '#1c1917',
+    backgroundColor: "#1c1917",
     borderRadius: 16,
     padding: 16,
-    borderColor: '#a14d18',
+    borderColor: "#a14d18",
     borderWidth: 1.5,
     marginBottom: 20,
   },
   previewTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#f5f5f4',
+    fontWeight: "700",
+    color: "#f5f5f4",
     marginBottom: 4,
   },
   previewSubtitle: {
     fontSize: 13,
-    color: '#a8a29e',
+    color: "#a8a29e",
     marginBottom: 16,
   },
   fieldGroup: {
@@ -385,48 +386,48 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 12,
-    color: '#a8a29e',
+    color: "#a8a29e",
     marginBottom: 4,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   fieldInput: {
-    backgroundColor: '#292524',
+    backgroundColor: "#292524",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#f5f5f4',
+    color: "#f5f5f4",
     fontSize: 15,
-    borderColor: '#44403c',
+    borderColor: "#44403c",
     borderWidth: 1,
   },
   fieldValue: {
     fontSize: 15,
-    color: '#e7e5e4',
-    fontWeight: '500',
+    color: "#e7e5e4",
+    fontWeight: "500",
   },
   confirmButton: {
-    backgroundColor: '#15803d',
+    backgroundColor: "#15803d",
     paddingVertical: 14,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 8,
   },
   confirmButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   disabledButton: {
     opacity: 0.6,
   },
   cancelButton: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
   },
   cancelButtonText: {
-    color: '#78716c',
+    color: "#78716c",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

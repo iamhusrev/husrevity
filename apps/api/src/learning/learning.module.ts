@@ -8,7 +8,10 @@ import { LearningService } from './learning.service';
 import { LearningTopic } from './learning-topic.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LearningTopic, LearningSubtopic, LearningItem]), NotificationModule],
+  imports: [
+    TypeOrmModule.forFeature([LearningTopic, LearningSubtopic, LearningItem]),
+    NotificationModule,
+  ],
   providers: [LearningService],
   controllers: [LearningController],
 })

@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import { useAuth } from "@/providers/AuthProvider";
-import {
-  useAdminInvites,
-  useAdminUsers,
-} from "@/hooks/useAdmin";
+import { useAdminInvites, useAdminUsers } from "@/hooks/useAdmin";
 import { AdminUser, InviteResponse } from "@/types/admin/admin";
 import { BiPlus, BiSearch, BiShield, BiUser } from "react-icons/bi";
 import { HiOutlineMail } from "react-icons/hi";
@@ -50,10 +47,7 @@ export default function AdminUsersPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="relative inline-flex items-center">
-          <BiSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            size={16}
-          />
+          <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           <input
             type="search"
             value={search}
@@ -62,11 +56,7 @@ export default function AdminUsersPage() {
             className="husrev-input pl-9 w-72"
           />
         </label>
-        <button
-          type="button"
-          onClick={() => setInviteOpen(true)}
-          className="husrev-btn"
-        >
+        <button type="button" onClick={() => setInviteOpen(true)} className="husrev-btn">
           <HiOutlineMail className="h-4 w-4" />
           {t("admin.users.invite", "Davet gönder")}
         </button>
@@ -95,9 +85,7 @@ export default function AdminUsersPage() {
         <header className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-husrev-ink dark:text-husrev-cream">
             {t("admin.users.all", "Tüm kullanıcılar")}
-            {users && (
-              <span className="ml-2 husrev-pill">{users.total}</span>
-            )}
+            {users && <span className="ml-2 husrev-pill">{users.total}</span>}
           </h3>
         </header>
         {usersLoading ? (
@@ -128,8 +116,7 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-husrev-sand/40 dark:divide-white/[0.04]">
                 {users?.items.map((u) => {
                   const fullName =
-                    [u.firstName, u.lastName].filter(Boolean).join(" ") ||
-                    u.email.split("@")[0];
+                    [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email.split("@")[0];
                   return (
                     <tr
                       key={u.id}

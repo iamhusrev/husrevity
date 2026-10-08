@@ -79,9 +79,7 @@ export class TelegramPollerService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.telegramMessageHandlerService.handleUpdate(update);
       } catch (err) {
-        this.logger.error(
-          `Error handling update ${update.update_id}: ${(err as Error).message}`,
-        );
+        this.logger.error(`Error handling update ${update.update_id}: ${(err as Error).message}`);
       }
       this.offset = update.update_id + 1;
     }

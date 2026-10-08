@@ -37,7 +37,7 @@ describe('TelegramLinkService', () => {
   describe('generateLinkCode', () => {
     it('should create a new TelegramLink if none exists for owner', async () => {
       repo.findOne.mockResolvedValue(null);
-      repo.create.mockImplementation((dto) => ({ ...dto } as TelegramLink));
+      repo.create.mockImplementation((dto) => ({ ...dto }) as TelegramLink);
       repo.save.mockImplementation(async (entity) => entity as TelegramLink);
 
       const result = await service.generateLinkCode('owner-1');
@@ -197,7 +197,9 @@ describe('TelegramLinkService', () => {
 
       const result = await service.findByChatId('chat-123');
       expect(result).toBe(link);
-      expect(repo.findOne).toHaveBeenCalledWith({ where: { chatId: 'chat-123', status: 'linked' } });
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { chatId: 'chat-123', status: 'linked' },
+      });
     });
   });
 });

@@ -3,13 +3,7 @@ import { parseSuggestions, ParseContext } from './suggestion-parser';
 
 describe('parseSuggestions', () => {
   const ctx: ParseContext = {
-    validIds: new Set<string>([
-      'note:n1',
-      'reminder:r1',
-      'project:p1',
-      'project:pr1',
-      'task:t1',
-    ]),
+    validIds: new Set<string>(['note:n1', 'reminder:r1', 'project:p1', 'project:pr1', 'task:t1']),
   };
 
   function makeRow(overrides: Record<string, unknown> = {}): unknown {
@@ -48,9 +42,7 @@ describe('parseSuggestions', () => {
 
   describe('malformed input', () => {
     it('throws ApiException on non-JSON', () => {
-      expect(() => parseSuggestions('not json at all', 3, ctx)).toThrow(
-        ApiException,
-      );
+      expect(() => parseSuggestions('not json at all', 3, ctx)).toThrow(ApiException);
     });
 
     it('throws ApiException when result is not an array', () => {
@@ -71,25 +63,19 @@ describe('parseSuggestions', () => {
 
   describe('sourceRef validation', () => {
     it('keeps a sourceRef that hits the context whitelist', () => {
-      const raw = JSON.stringify([
-        makeRow({ sourceRef: { type: 'note', id: 'n1' } }),
-      ]);
+      const raw = JSON.stringify([makeRow({ sourceRef: { type: 'note', id: 'n1' } })]);
       const out = parseSuggestions(raw, 3, ctx);
       expect(out[0].sourceRef).toEqual({ type: 'note', id: 'n1' });
     });
 
     it('drops a sourceRef the model invented (id not in context)', () => {
-      const raw = JSON.stringify([
-        makeRow({ sourceRef: { type: 'note', id: 'made-up-99' } }),
-      ]);
+      const raw = JSON.stringify([makeRow({ sourceRef: { type: 'note', id: 'made-up-99' } })]);
       const out = parseSuggestions(raw, 3, ctx);
       expect(out[0].sourceRef).toBeNull();
     });
 
     it('drops a sourceRef with an unknown type', () => {
-      const raw = JSON.stringify([
-        makeRow({ sourceRef: { type: 'gibberish', id: 'n1' } }),
-      ]);
+      const raw = JSON.stringify([makeRow({ sourceRef: { type: 'gibberish', id: 'n1' } })]);
       const out = parseSuggestions(raw, 3, ctx);
       expect(out[0].sourceRef).toBeNull();
     });
@@ -98,9 +84,7 @@ describe('parseSuggestions', () => {
       const legacyCtx: ParseContext = {
         validIds: new Set([...ctx.validIds, 'plan:p1']),
       };
-      const raw = JSON.stringify([
-        makeRow({ sourceRef: { type: 'plan', id: 'p1' } }),
-      ]);
+      const raw = JSON.stringify([makeRow({ sourceRef: { type: 'plan', id: 'p1' } })]);
       const out = parseSuggestions(raw, 3, legacyCtx);
       expect(out[0].sourceRef).toBeNull();
     });
@@ -115,9 +99,7 @@ describe('parseSuggestions', () => {
 
     it('clamps over-long title / description / reasonShort', () => {
       const long = 'x'.repeat(500);
-      const raw = JSON.stringify([
-        makeRow({ title: long, description: long, reasonShort: long }),
-      ]);
+      const raw = JSON.stringify([makeRow({ title: long, description: long, reasonShort: long })]);
       const out = parseSuggestions(raw, 3, ctx);
       expect(out[0].title.length).toBeLessThanOrEqual(120);
       expect(out[0].description.length).toBeLessThanOrEqual(280);

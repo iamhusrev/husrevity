@@ -86,7 +86,7 @@ describe('ReminderService', () => {
       expect(lists.restore).not.toHaveBeenCalled();
     });
 
-    it('404s instead of restoring another owner\'s list (owner mismatch not found by the query)', async () => {
+    it("404s instead of restoring another owner's list (owner mismatch not found by the query)", async () => {
       const otherOwnerId = '999';
       lists.findOne.mockResolvedValueOnce(null); // DB would not match id+ownerId for a foreign row
 
@@ -148,7 +148,7 @@ describe('ReminderService', () => {
       expect(reminders.restore).not.toHaveBeenCalled();
     });
 
-    it('404s instead of restoring another owner\'s reminder (owner mismatch not found by the query)', async () => {
+    it("404s instead of restoring another owner's reminder (owner mismatch not found by the query)", async () => {
       const otherOwnerId = '999';
       reminders.findOne.mockResolvedValueOnce(null);
 

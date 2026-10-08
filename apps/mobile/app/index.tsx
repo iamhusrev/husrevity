@@ -1,7 +1,7 @@
-import React from 'react';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
-import { Redirect } from 'expo-router';
-import { useAuth } from '../src/auth/auth-context';
+import React from "react";
+import { StyleSheet, ActivityIndicator, View } from "react-native";
+import { Redirect } from "expo-router";
+import { useAuth } from "../src/auth/auth-context";
 
 export default function IndexScreen() {
   const { isLoading, isAuthenticated } = useAuth();
@@ -24,8 +24,8 @@ export default function IndexScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#0f172a",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

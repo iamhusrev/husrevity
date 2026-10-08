@@ -25,7 +25,9 @@ describe('GoogleCalendarController', () => {
 
   beforeEach(async () => {
     mockOAuth2Client = {
-      generateAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?mock=true'),
+      generateAuthUrl: jest
+        .fn()
+        .mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?mock=true'),
       getToken: jest.fn().mockResolvedValue({
         tokens: {
           access_token: 'mock-access-token',
@@ -89,7 +91,9 @@ describe('GoogleCalendarController', () => {
       expect(decoded.sub).toBe('user-123');
       expect(decoded.purpose).toBe('gcal-oauth-state');
 
-      expect(mockRes.redirect).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?mock=true');
+      expect(mockRes.redirect).toHaveBeenCalledWith(
+        'https://accounts.google.com/o/oauth2/v2/auth?mock=true',
+      );
     });
   });
 
@@ -123,7 +127,10 @@ describe('GoogleCalendarController', () => {
     it('should disconnect the caller google account', async () => {
       (mockIntegrationAccountService as any).disconnect = jest.fn().mockResolvedValue(undefined);
       await controller.disconnect(mockUser);
-      expect((mockIntegrationAccountService as any).disconnect).toHaveBeenCalledWith('user-123', 'google_calendar');
+      expect((mockIntegrationAccountService as any).disconnect).toHaveBeenCalledWith(
+        'user-123',
+        'google_calendar',
+      );
     });
   });
 
@@ -134,20 +141,26 @@ describe('GoogleCalendarController', () => {
     it('should redirect to the web app with google=connected on success', async () => {
       const res = { redirect: jest.fn() } as unknown as Response;
       await controller.callback(res, 'auth-code', signState('user-123'));
-      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=connected');
+      expect(res.redirect).toHaveBeenCalledWith(
+        'http://web.test/settings/integrations?google=connected',
+      );
     });
 
     it('should redirect with google=error for a forged state and save nothing', async () => {
       const res = { redirect: jest.fn() } as unknown as Response;
       await controller.callback(res, 'auth-code', 'user-123');
-      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=error');
+      expect(res.redirect).toHaveBeenCalledWith(
+        'http://web.test/settings/integrations?google=error',
+      );
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should redirect with google=error when the user denies consent', async () => {
       const res = { redirect: jest.fn() } as unknown as Response;
       await controller.callback(res, '', undefined, 'access_denied');
-      expect(res.redirect).toHaveBeenCalledWith('http://web.test/settings/integrations?google=error');
+      expect(res.redirect).toHaveBeenCalledWith(
+        'http://web.test/settings/integrations?google=error',
+      );
     });
   });
 
@@ -156,7 +169,9 @@ describe('GoogleCalendarController', () => {
       jwtService.sign({ purpose: 'gcal-oauth-state' }, { subject: userId, expiresIn: '10m' });
 
     it('should throw bad request if code is missing', async () => {
-      await expect(controller.handleCallback('', signState('user-123'))).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('', signState('user-123'))).rejects.toThrow(
+        ApiException,
+      );
     });
 
     it('should throw bad request if both state and user are missing', async () => {
@@ -164,18 +179,26 @@ describe('GoogleCalendarController', () => {
     });
 
     it('should reject a raw/unsigned state value (not just accept it as the ownerId)', async () => {
-      await expect(controller.handleCallback('auth-code', 'user-123')).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', 'user-123')).rejects.toThrow(
+        ApiException,
+      );
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should reject a state token signed for a different purpose', async () => {
-      const forged = jwtService.sign({ purpose: 'not-gcal' }, { subject: 'victim-id', expiresIn: '10m' });
+      const forged = jwtService.sign(
+        { purpose: 'not-gcal' },
+        { subject: 'victim-id', expiresIn: '10m' },
+      );
       await expect(controller.handleCallback('auth-code', forged)).rejects.toThrow(ApiException);
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
 
     it('should reject an expired state token', async () => {
-      const expired = jwtService.sign({ purpose: 'gcal-oauth-state' }, { subject: 'user-123', expiresIn: '-1s' });
+      const expired = jwtService.sign(
+        { purpose: 'gcal-oauth-state' },
+        { subject: 'user-123', expiresIn: '-1s' },
+      );
       await expect(controller.handleCallback('auth-code', expired)).rejects.toThrow(ApiException);
       expect(mockIntegrationAccountService.save).not.toHaveBeenCalled();
     });
@@ -225,7 +248,9 @@ describe('GoogleCalendarController', () => {
         tokens: { access_token: undefined },
       });
 
-      await expect(controller.handleCallback('auth-code', signState('user-123'))).rejects.toThrow(ApiException);
+      await expect(controller.handleCallback('auth-code', signState('user-123'))).rejects.toThrow(
+        ApiException,
+      );
     });
 
     it('should throw bad request if token exchange fails', async () => {

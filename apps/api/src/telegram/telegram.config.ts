@@ -12,9 +12,7 @@ export class TelegramConfig {
 
   constructor(private readonly config: ConfigService) {
     if (!this.isConfigured()) {
-      this.logger.warn(
-        'Telegram integration is unconfigured (missing TELEGRAM_BOT_TOKEN)',
-      );
+      this.logger.warn('Telegram integration is unconfigured (missing TELEGRAM_BOT_TOKEN)');
     }
   }
 

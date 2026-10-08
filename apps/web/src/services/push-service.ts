@@ -16,11 +16,7 @@ const PUSH_PREFERENCE_KEY = "husrevity.pushEnabled";
 
 function isSupported(): boolean {
   if (typeof window === "undefined") return false;
-  return (
-    "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "Notification" in window
-  );
+  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
 export const pushService = {

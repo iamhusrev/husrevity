@@ -91,9 +91,7 @@ export class SportSessionService {
     const expected = Array.from({ length: items.length }, (_, i) => i);
     const isConsecutiveFromZero = positions.every((p, i) => p === expected[i]);
     if (!isConsecutiveFromZero) {
-      throw ApiException.badRequest(
-        'Reorder positions must be a gap-free sequence starting at 0',
-      );
+      throw ApiException.badRequest('Reorder positions must be a gap-free sequence starting at 0');
     }
 
     const owned = await this.sessions.find({ where: { programId: program.id } });

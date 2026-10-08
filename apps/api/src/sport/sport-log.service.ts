@@ -4,11 +4,7 @@ import { Between, IsNull, Repository } from 'typeorm';
 import { SportLog } from './entities/sport-log.entity';
 import { SportSession } from './entities/sport-session.entity';
 import { ApiException } from '../common/api.exception';
-import {
-  LogRequestDto,
-  LogResponseDto,
-  LogUpdateRequestDto,
-} from './dto/sport-log.dto';
+import { LogRequestDto, LogResponseDto, LogUpdateRequestDto } from './dto/sport-log.dto';
 import { SportStatsDto } from './dto/sport-shared.dto';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -126,10 +122,7 @@ export class SportLogService {
 
     const weeklyRaw = await this.logs
       .createQueryBuilder('l')
-      .select(
-        "TO_CHAR(DATE_TRUNC('week', l.executed_date::timestamp), 'YYYY-MM-DD')",
-        'weekStart',
-      )
+      .select("TO_CHAR(DATE_TRUNC('week', l.executed_date::timestamp), 'YYYY-MM-DD')", 'weekStart')
       .addSelect('COALESCE(SUM(l.actual_duration), 0)', 'totalMinutes')
       .where('l.owner_id = :ownerId', { ownerId })
       .andWhere('l.executed_date BETWEEN :from AND :to', { from: fromDate, to: toDate })
@@ -142,7 +135,14 @@ export class SportLogService {
       hoursCompleted: Number(r.totalMinutes) / 60,
     }));
 
-    return { totalCompleted, avgDuration, totalHours, activityBreakdown, intensityDist, weeklyTrend };
+    return {
+      totalCompleted,
+      avgDuration,
+      totalHours,
+      activityBreakdown,
+      intensityDist,
+      weeklyTrend,
+    };
   }
 
   private resolveWindow(from?: string, to?: string): { from: string; to: string } {

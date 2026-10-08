@@ -56,16 +56,20 @@ const roots: Array<[string, Type<unknown>]> = [
 ];
 
 describe('real module graph', () => {
-  it.each(roots)('%s compiles from its own root (no circular imports / unresolved providers)', async (_name, mod) => {
-    await expect(
-      Test.createTestingModule({
-        imports: [
-          ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
-          ScheduleModule.forRoot(),
-          FakeTypeOrmModule,
-          mod,
-        ],
-      }).compile(),
-    ).resolves.toBeDefined();
-  }, 60000);
+  it.each(roots)(
+    '%s compiles from its own root (no circular imports / unresolved providers)',
+    async (_name, mod) => {
+      await expect(
+        Test.createTestingModule({
+          imports: [
+            ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true }),
+            ScheduleModule.forRoot(),
+            FakeTypeOrmModule,
+            mod,
+          ],
+        }).compile(),
+      ).resolves.toBeDefined();
+    },
+    60000,
+  );
 });

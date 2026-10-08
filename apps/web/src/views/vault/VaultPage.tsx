@@ -144,19 +144,10 @@ function EntityModal({ initial, onClose }: { initial?: VaultEntityResponse; onCl
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={!name.trim() || isPending}
-            className="husrev-btn"
-          >
+          <button type="submit" disabled={!name.trim() || isPending} className="husrev-btn">
             {isPending
               ? t("common.saving", "Kaydediliyor…")
               : isEdit
@@ -169,13 +160,7 @@ function EntityModal({ initial, onClose }: { initial?: VaultEntityResponse; onCl
   );
 }
 
-function VaultField({
-  label,
-  children,
-}: {
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function VaultField({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
       <span className="husrev-kicker text-gray-600 dark:text-gray-300">{label}</span>
@@ -270,9 +255,7 @@ function ItemModal({
             <span className="husrev-kicker text-gray-600 dark:text-gray-300">
               {t("vault.field.valueLabel")}{" "}
               <span className="ml-1 text-[10px] tracking-normal normal-case text-gray-400">
-                {isEdit
-                  ? t("vault.field.valueHintEdit")
-                  : t("vault.field.valueHintRequired")}
+                {isEdit ? t("vault.field.valueHintEdit") : t("vault.field.valueHintRequired")}
               </span>
             </span>
             <div className="relative">
@@ -316,12 +299,7 @@ function ItemModal({
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
           <button
@@ -385,9 +363,7 @@ function ImportModal({ entityId, onClose }: { entityId: number; onClose: () => v
           <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
             {t("vault.import_modal.title")}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("vault.import_modal.hint")}
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("vault.import_modal.hint")}</p>
         </div>
 
         <div className="mt-6">
@@ -402,12 +378,7 @@ function ImportModal({ entityId, onClose }: { entityId: number; onClose: () => v
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={loading} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
           <button

@@ -46,7 +46,10 @@ function ClientBootstrap() {
         .then((regs) => regs.forEach((r) => r.unregister()))
         .catch(() => {});
       if (typeof caches !== "undefined") {
-        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+        caches
+          .keys()
+          .then((keys) => keys.forEach((k) => caches.delete(k)))
+          .catch(() => {});
       }
       return;
     }

@@ -111,13 +111,13 @@ describe("Mobile AuthContext & AuthProvider", () => {
                 user: { id: "u1", email: "test@example.com" },
               },
             }),
-            { status: 200 }
+            { status: 200 },
           );
         }
       }
       return new Response(
         JSON.stringify({ success: false, message: "Invalid credentials", code: 401 }),
-        { status: 401 }
+        { status: 401 },
       );
     }) as any;
 

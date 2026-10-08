@@ -5,10 +5,7 @@ import { ReminderList } from './reminder-list.entity';
 import { Reminder } from './reminder.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
-import {
-  formatLeadTimeBody,
-  leadTimeFireAt,
-} from '../notification/notification-scheduling';
+import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import {
   ReminderListRequestDto,
   ReminderListResponseDto,

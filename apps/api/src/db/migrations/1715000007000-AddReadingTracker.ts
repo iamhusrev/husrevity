@@ -46,9 +46,7 @@ export class AddReadingTracker1715000007000 implements MigrationInterface {
         deleted_at    TIMESTAMPTZ
       )
     `);
-    await qr.query(
-      `CREATE INDEX idx_reading_log_track_date ON reading_log(track_id, log_date)`,
-    );
+    await qr.query(`CREATE INDEX idx_reading_log_track_date ON reading_log(track_id, log_date)`);
     await qr.query(
       `CREATE UNIQUE INDEX uq_reading_log_track_date ON reading_log(track_id, log_date) WHERE deleted_at IS NULL`,
     );

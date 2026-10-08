@@ -143,7 +143,6 @@ export default function TaskList({
       setOrdered(next);
       orderedRef.current = next;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]);
 
   const onMove = useCallback(

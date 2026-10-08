@@ -7,10 +7,7 @@ import { ReminderController } from './reminder.controller';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ReminderList, Reminder]),
-    NotificationModule,
-  ],
+  imports: [TypeOrmModule.forFeature([ReminderList, Reminder]), NotificationModule],
   providers: [ReminderService],
   controllers: [ReminderController],
   exports: [ReminderService],

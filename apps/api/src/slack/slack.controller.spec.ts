@@ -114,7 +114,12 @@ describe('SlackController status', () => {
   }
 
   it('should expose an unexpired pending code', async () => {
-    const c = await build({ status: 'pending', linkCode: 'ABC123', linkCodeExpiresAt: future, linkedAt: null });
+    const c = await build({
+      status: 'pending',
+      linkCode: 'ABC123',
+      linkCodeExpiresAt: future,
+      linkedAt: null,
+    });
     await expect(c.status(user)).resolves.toMatchObject({
       linked: false,
       pendingCode: 'ABC123',
@@ -123,7 +128,12 @@ describe('SlackController status', () => {
   });
 
   it('should hide an expired pending code', async () => {
-    const c = await build({ status: 'pending', linkCode: 'ABC123', linkCodeExpiresAt: past, linkedAt: null });
+    const c = await build({
+      status: 'pending',
+      linkCode: 'ABC123',
+      linkCodeExpiresAt: past,
+      linkedAt: null,
+    });
     await expect(c.status(user)).resolves.toMatchObject({ linked: false, pendingCode: null });
   });
 
@@ -140,6 +150,10 @@ describe('SlackController status', () => {
 
   it('should report unlinked when no row exists', async () => {
     const c = await build(null);
-    await expect(c.status(user)).resolves.toMatchObject({ linked: false, pendingCode: null, linkedAt: null });
+    await expect(c.status(user)).resolves.toMatchObject({
+      linked: false,
+      pendingCode: null,
+      linkedAt: null,
+    });
   });
 });

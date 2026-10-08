@@ -241,7 +241,10 @@ describe('TelegramMessageHandlerService', () => {
         chatId: '12345',
         status: 'linked',
       } as TelegramLink);
-      reminderService.createReminder.mockResolvedValueOnce({ id: 'r-1', title: 'HGS kontrol' } as any);
+      reminderService.createReminder.mockResolvedValueOnce({
+        id: 'r-1',
+        title: 'HGS kontrol',
+      } as any);
 
       const update: TelegramUpdate = {
         update_id: 1,
@@ -295,7 +298,10 @@ describe('TelegramMessageHandlerService', () => {
         'user-42',
         expect.objectContaining({ title: 'süt al', notifyMinutesBefore: null }),
       );
-      expect(telegramApi.sendMessage).toHaveBeenCalledWith('12345', '⏰ Anımsatıcı eklendi: "süt al"');
+      expect(telegramApi.sendMessage).toHaveBeenCalledWith(
+        '12345',
+        '⏰ Anımsatıcı eklendi: "süt al"',
+      );
     });
 
     it('should store a recurring message as a recurring task instead of a reminder', async () => {
@@ -322,7 +328,12 @@ describe('TelegramMessageHandlerService', () => {
       expect(reminderService.createReminder).not.toHaveBeenCalled();
       expect(itemService.create).toHaveBeenCalledWith(
         'user-42',
-        expect.objectContaining({ kind: 'task', title: 'vitamin', rrule: expect.any(String), source: 'telegram' }),
+        expect.objectContaining({
+          kind: 'task',
+          title: 'vitamin',
+          rrule: expect.any(String),
+          source: 'telegram',
+        }),
       );
       expect(telegramApi.sendMessage).toHaveBeenCalledWith(
         '12345',

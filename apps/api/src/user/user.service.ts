@@ -4,17 +4,11 @@ import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { ApiException } from '../common/api.exception';
-import {
-  ChangePasswordDto,
-  NotificationPreferencesDto,
-  UpdateProfileDto,
-} from './user.dto';
+import { ChangePasswordDto, NotificationPreferencesDto, UpdateProfileDto } from './user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User) private readonly users: Repository<User>,
-  ) {}
+  constructor(@InjectRepository(User) private readonly users: Repository<User>) {}
 
   findById(id: string): Promise<User | null> {
     return this.users.findOne({ where: { id } });
@@ -45,10 +39,7 @@ export class UserService {
     await this.users.save(u);
   }
 
-  async updateNotificationPreferences(
-    id: string,
-    dto: NotificationPreferencesDto,
-  ): Promise<User> {
+  async updateNotificationPreferences(id: string, dto: NotificationPreferencesDto): Promise<User> {
     const u = await this.requireById(id);
     if (dto.email !== undefined) u.emailNotificationsEnabled = dto.email;
     return this.users.save(u);

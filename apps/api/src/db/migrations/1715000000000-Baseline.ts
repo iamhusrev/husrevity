@@ -254,7 +254,9 @@ export class Baseline1715000000000 implements MigrationInterface {
       )
     `);
     await qr.query(`CREATE INDEX idx_calendar_event_owner ON calendar_event(owner_id)`);
-    await qr.query(`CREATE INDEX idx_calendar_event_owner_range ON calendar_event(owner_id, start_at, end_at)`);
+    await qr.query(
+      `CREATE INDEX idx_calendar_event_owner_range ON calendar_event(owner_id, start_at, end_at)`,
+    );
 
     // ── Reminders ────────────────────────────────────────────────────────
     await qr.query(`
@@ -296,7 +298,9 @@ export class Baseline1715000000000 implements MigrationInterface {
     `);
     await qr.query(`CREATE INDEX idx_reminder_owner ON reminder(owner_id)`);
     await qr.query(`CREATE INDEX idx_reminder_list ON reminder(list_id)`);
-    await qr.query(`CREATE INDEX idx_reminder_owner_due ON reminder(owner_id, due_at) WHERE completed_at IS NULL`);
+    await qr.query(
+      `CREATE INDEX idx_reminder_owner_due ON reminder(owner_id, due_at) WHERE completed_at IS NULL`,
+    );
 
     // ── Vault ────────────────────────────────────────────────────────────
     await qr.query(`
@@ -385,7 +389,9 @@ export class Baseline1715000000000 implements MigrationInterface {
       )
     `);
     await qr.query(`CREATE INDEX idx_gmail_message_account ON gmail_message(gmail_account_id)`);
-    await qr.query(`CREATE INDEX idx_gmail_message_account_received ON gmail_message(gmail_account_id, received_at)`);
+    await qr.query(
+      `CREATE INDEX idx_gmail_message_account_received ON gmail_message(gmail_account_id, received_at)`,
+    );
 
     // ── AI (chatbot) ─────────────────────────────────────────────────────
     await qr.query(`
@@ -461,7 +467,9 @@ export class Baseline1715000000000 implements MigrationInterface {
         deleted_at     TIMESTAMPTZ
       )
     `);
-    await qr.query(`CREATE INDEX idx_notification_owner_scheduled ON notification(owner_id, scheduled_at)`);
+    await qr.query(
+      `CREATE INDEX idx_notification_owner_scheduled ON notification(owner_id, scheduled_at)`,
+    );
     await qr.query(
       `CREATE INDEX idx_notification_pending ON notification(scheduled_at)
          WHERE dispatched_at IS NULL AND deleted_at IS NULL`,
@@ -580,7 +588,9 @@ export class Baseline1715000000000 implements MigrationInterface {
       )
     `);
     await qr.query(`CREATE INDEX idx_finance_transaction_owner ON finance_transaction(owner_id)`);
-    await qr.query(`CREATE INDEX idx_finance_transaction_account ON finance_transaction(account_id)`);
+    await qr.query(
+      `CREATE INDEX idx_finance_transaction_account ON finance_transaction(account_id)`,
+    );
     await qr.query(
       `CREATE INDEX idx_finance_transaction_owner_occurred
          ON finance_transaction(owner_id, occurred_at DESC)`,

@@ -13,10 +13,7 @@ describe('TelegramNotifier', () => {
     } as unknown as jest.Mocked<TelegramApiService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        TelegramNotifier,
-        { provide: TelegramApiService, useValue: telegramApi },
-      ],
+      providers: [TelegramNotifier, { provide: TelegramApiService, useValue: telegramApi }],
     }).compile();
 
     notifier = module.get<TelegramNotifier>(TelegramNotifier);
@@ -39,10 +36,7 @@ describe('TelegramNotifier', () => {
 
     await notifier.send(link, payload);
 
-    expect(telegramApi.sendMessage).toHaveBeenCalledWith(
-      '12345678',
-      'Task Reminder\nDo something',
-    );
+    expect(telegramApi.sendMessage).toHaveBeenCalledWith('12345678', 'Task Reminder\nDo something');
   });
 
   it('formats payload with title only when body is empty', async () => {
@@ -58,10 +52,7 @@ describe('TelegramNotifier', () => {
 
     await notifier.send(link, payload);
 
-    expect(telegramApi.sendMessage).toHaveBeenCalledWith(
-      '12345678',
-      'Quick Alert',
-    );
+    expect(telegramApi.sendMessage).toHaveBeenCalledWith('12345678', 'Quick Alert');
   });
 
   it('skips send if link has no chatId or status is not linked', async () => {

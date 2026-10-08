@@ -53,7 +53,10 @@ describe('McpController', () => {
           provide: ReminderService,
           useValue: { createReminder: jest.fn(), listReminderLists: jest.fn() },
         },
-        { provide: RoutineService, useValue: { listSegments: jest.fn(), createActivity: jest.fn() } },
+        {
+          provide: RoutineService,
+          useValue: { listSegments: jest.fn(), createActivity: jest.fn() },
+        },
         { provide: TaskService, useValue: { createForProject: jest.fn() } },
         PatAuthGuard,
       ],

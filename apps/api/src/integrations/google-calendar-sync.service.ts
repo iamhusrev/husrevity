@@ -44,15 +44,10 @@ export class GoogleCalendarSyncService {
    * (kind='event', source='gcal'), updates `external_link` records, and saves the new `syncToken`.
    */
   async syncIncremental(ownerId: string): Promise<SyncIncrementalResult> {
-    const decryptedAccount = await this.integrationAccountService.get(
-      ownerId,
-      'google_calendar',
-    );
+    const decryptedAccount = await this.integrationAccountService.get(ownerId, 'google_calendar');
 
     if (!decryptedAccount) {
-      throw ApiException.notFound(
-        'Google Calendar integration account not found or disconnected',
-      );
+      throw ApiException.notFound('Google Calendar integration account not found or disconnected');
     }
 
     const { calendar } = await this.googleCalendarService.getCalendarClient(ownerId);
@@ -75,11 +70,7 @@ export class GoogleCalendarSyncService {
         this.logger.warn(
           `Sync token expired or invalid (410 Gone) for owner ${ownerId}, clearing token and performing full resync`,
         );
-        await this.integrationAccountService.updateSyncToken(
-          ownerId,
-          'google_calendar',
-          null,
-        );
+        await this.integrationAccountService.updateSyncToken(ownerId, 'google_calendar', null);
         return await this.fetchAndProcessEvents(calendar, calendarId, ownerId, null);
       }
 
@@ -261,9 +252,8 @@ export class GoogleCalendarSyncService {
    * Performs incremental pull sync for all connected Google Calendar accounts.
    */
   async syncAllConnectedAccounts(): Promise<{ total: number; successful: number; failed: number }> {
-    const connectedAccounts = await this.integrationAccountService.findConnectedAccounts(
-      'google_calendar',
-    );
+    const connectedAccounts =
+      await this.integrationAccountService.findConnectedAccounts('google_calendar');
     let successful = 0;
     let failed = 0;
 

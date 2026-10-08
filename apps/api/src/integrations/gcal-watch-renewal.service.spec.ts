@@ -54,7 +54,9 @@ describe('GcalWatchRenewalService', () => {
     });
 
     it('should return 0 when no accounts require renewal', async () => {
-      (mockIntegrationAccountService.findAccountsNeedingWatchRenewal as jest.Mock).mockResolvedValueOnce([]);
+      (
+        mockIntegrationAccountService.findAccountsNeedingWatchRenewal as jest.Mock
+      ).mockResolvedValueOnce([]);
 
       const count = await service.renewWatchChannels();
 

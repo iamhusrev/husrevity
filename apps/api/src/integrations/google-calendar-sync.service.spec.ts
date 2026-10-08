@@ -49,7 +49,9 @@ describe('GoogleCalendarSyncService', () => {
         calendarId: 'husrevity-cal-123',
       }),
       ensureHusrevityCalendar: jest.fn().mockResolvedValue('husrevity-cal-123'),
-      getHusrevityIdFromEvent: jest.fn((evt: any) => evt.extendedProperties?.private?.husrevityId ?? null),
+      getHusrevityIdFromEvent: jest.fn(
+        (evt: any) => evt.extendedProperties?.private?.husrevityId ?? null,
+      ),
       formatEventForGoogle: jest.fn(),
     };
 

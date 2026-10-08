@@ -22,7 +22,13 @@ export interface GoogleStatus {
   connectedAt: string | null;
 }
 
-export type PatScope = "items:read" | "items:write" | "notes:read" | "notes:write" | "projects:read" | "projects:write";
+export type PatScope =
+  | "items:read"
+  | "items:write"
+  | "notes:read"
+  | "notes:write"
+  | "projects:read"
+  | "projects:write";
 
 export const PAT_SCOPES: PatScope[] = [
   "items:read",
@@ -58,11 +64,15 @@ export const integrationsService = {
   },
 
   async googleStatus(): Promise<GoogleStatus> {
-    const res = await apiClient.get<ApiResponse<GoogleStatus>>("/integrations/google-calendar/status");
+    const res = await apiClient.get<ApiResponse<GoogleStatus>>(
+      "/integrations/google-calendar/status",
+    );
     return res.data.data;
   },
   async googleConnectUrl(): Promise<string> {
-    const res = await apiClient.get<ApiResponse<{ url: string }>>("/integrations/google-calendar/connect-url");
+    const res = await apiClient.get<ApiResponse<{ url: string }>>(
+      "/integrations/google-calendar/connect-url",
+    );
     return res.data.data.url;
   },
   async googleDisconnect(): Promise<void> {
@@ -74,7 +84,10 @@ export const integrationsService = {
     return res.data.data;
   },
   async issuePat(name: string, scopes: PatScope[]): Promise<{ id: string; token: string }> {
-    const res = await apiClient.post<ApiResponse<{ id: string; token: string }>>("/pat", { name, scopes });
+    const res = await apiClient.post<ApiResponse<{ id: string; token: string }>>("/pat", {
+      name,
+      scopes,
+    });
     return res.data.data;
   },
   async revokePat(id: string): Promise<void> {

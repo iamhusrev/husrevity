@@ -1,9 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import {
-  CurrentUser,
-  AuthenticatedUser,
-} from '../common/current-user.decorator';
+import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { UserService } from './user.service';
 import { UserSummaryDto } from './user.dto';
 

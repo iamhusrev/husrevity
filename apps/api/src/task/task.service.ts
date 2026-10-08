@@ -10,10 +10,7 @@ import { NotificationService } from '../notification/notification.service';
 import { MailerService } from '../notification/mailer.service';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
-import {
-  formatLeadTimeBody,
-  leadTimeFireAt,
-} from '../notification/notification-scheduling';
+import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { ReorderItemDto, TaskRequestDto, TaskResponseDto } from './dto/task-dtos';
 
 const TASK_DONE_STATUSES = new Set(['DONE', 'COMPLETED', 'CANCELLED']);
@@ -69,9 +66,7 @@ export class TaskService {
     });
     const saved = await this.tasks.save(t);
     await this.syncNotification(saved);
-    const assigneeName = saved.assigneeId
-      ? await this.resolveAssigneeName(saved.assigneeId)
-      : null;
+    const assigneeName = saved.assigneeId ? await this.resolveAssigneeName(saved.assigneeId) : null;
     return TaskResponseDto.from(saved, assigneeName);
   }
 
@@ -216,10 +211,7 @@ export class TaskService {
   async resyncNotifications(ownerId: string): Promise<number> {
     const rows = await this.tasks.find({ where: { ownerId } });
     const future = rows.filter(
-      (t) =>
-        !TASK_DONE_STATUSES.has(t.status) &&
-        t.dueAt &&
-        t.dueAt.getTime() > Date.now(),
+      (t) => !TASK_DONE_STATUSES.has(t.status) && t.dueAt && t.dueAt.getTime() > Date.now(),
     );
     for (const t of future) await this.syncNotification(t);
     return future.length;
@@ -245,17 +237,24 @@ export class TaskService {
     const ids = Array.from(new Set(rows.map((r) => r.assigneeId).filter((x): x is string => !!x)));
     const nameMap = new Map<string, string>();
     if (ids.length === 0) return nameMap;
-    const users: Array<{ id: string; first_name: string | null; last_name: string | null; email: string }> =
-      await this.dataSource.query(
-        'SELECT id, first_name, last_name, email FROM app_user WHERE id = ANY($1::bigint[])',
-        [ids],
-      );
+    const users: Array<{
+      id: string;
+      first_name: string | null;
+      last_name: string | null;
+      email: string;
+    }> = await this.dataSource.query(
+      'SELECT id, first_name, last_name, email FROM app_user WHERE id = ANY($1::bigint[])',
+      [ids],
+    );
     for (const u of users) {
-      nameMap.set(String(u.id), TaskService.displayName({
-        firstName: u.first_name,
-        lastName: u.last_name,
-        email: u.email,
-      } as User));
+      nameMap.set(
+        String(u.id),
+        TaskService.displayName({
+          firstName: u.first_name,
+          lastName: u.last_name,
+          email: u.email,
+        } as User),
+      );
     }
     return nameMap;
   }
@@ -291,11 +290,7 @@ export class TaskService {
    * task and stays strictly owner-scoped — sharing is project-scoped only.
    * A project task defers to project membership via ProjectAccessService.
    */
-  private async requireTaskAccess(
-    userId: string,
-    id: string,
-    minRole: ProjectRole,
-  ): Promise<Task> {
+  private async requireTaskAccess(userId: string, id: string, minRole: ProjectRole): Promise<Task> {
     const t = await this.tasks.findOne({ where: { id } });
     if (!t) throw ApiException.notFound('Task not found');
     if (!t.projectId) {

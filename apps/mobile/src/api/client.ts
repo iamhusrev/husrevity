@@ -150,10 +150,7 @@ export async function refreshAccessToken(): Promise<string> {
   }
 
   if (!response.ok) {
-    throw new ApiClientError(
-      `Refresh failed with status ${response.status}`,
-      response.status,
-    );
+    throw new ApiClientError(`Refresh failed with status ${response.status}`, response.status);
   }
 
   const text = await response.text();
@@ -286,19 +283,22 @@ export const apiClient = {
     request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
+      body:
+        body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
     }),
   put: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
+      body:
+        body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
     }),
   patch: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
+      body:
+        body !== undefined ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
     }),
   delete: <T = any>(endpoint: string, options?: RequestOptions) =>
     request<T>(endpoint, { ...options, method: "DELETE" }),

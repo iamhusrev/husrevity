@@ -136,70 +136,67 @@ export default function ProfilePage() {
 
       {/* Account details */}
       <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-6 dark:bg-husrev-shadow dark:ring-white/[0.06]">
-          <header className="mb-4 flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="husrev-kicker text-gray-400 dark:text-gray-500">
-                {t("profile.accountInfo")}
-              </span>
-              <h3 className="text-base font-semibold text-husrev-ink dark:text-husrev-cream">
-                {t("profile.title")}
-              </h3>
-            </div>
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
-              <BiUser size={18} />
-            </div>
-          </header>
+        <header className="mb-4 flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="husrev-kicker text-gray-400 dark:text-gray-500">
+              {t("profile.accountInfo")}
+            </span>
+            <h3 className="text-base font-semibold text-husrev-ink dark:text-husrev-cream">
+              {t("profile.title")}
+            </h3>
+          </div>
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
+            <BiUser size={18} />
+          </div>
+        </header>
 
-          <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-            <FieldRow
-              icon={<BiIdCard size={14} />}
-              label={t("profile.userIdLabel")}
-              value={<span className="font-mono tabular-nums">{user.id}</span>}
-            />
-            <FieldRow
-              icon={<BiUser size={14} />}
-              label={t("profile.firstName")}
-              value={firstName || "—"}
-              muted={!firstName}
-            />
-            <FieldRow
-              icon={<BiUser size={14} />}
-              label={t("profile.lastName")}
-              value={lastName || "—"}
-              muted={!lastName}
-            />
-            <FieldRow
-              icon={<BiEnvelope size={14} />}
-              label={t("profile.email")}
-              value={<span className="font-mono text-[13px]">{user.email}</span>}
-            />
-            <FieldRow
-              icon={<StatusIcon size={14} />}
-              label={t("profile.status")}
-              value={
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+          <FieldRow
+            icon={<BiIdCard size={14} />}
+            label={t("profile.userIdLabel")}
+            value={<span className="font-mono tabular-nums">{user.id}</span>}
+          />
+          <FieldRow
+            icon={<BiUser size={14} />}
+            label={t("profile.firstName")}
+            value={firstName || "—"}
+            muted={!firstName}
+          />
+          <FieldRow
+            icon={<BiUser size={14} />}
+            label={t("profile.lastName")}
+            value={lastName || "—"}
+            muted={!lastName}
+          />
+          <FieldRow
+            icon={<BiEnvelope size={14} />}
+            label={t("profile.email")}
+            value={<span className="font-mono text-[13px]">{user.email}</span>}
+          />
+          <FieldRow
+            icon={<StatusIcon size={14} />}
+            label={t("profile.status")}
+            value={
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-mono uppercase tracking-[0.08em] ${
+                  isActive
+                    ? "bg-husrev-moss/15 text-husrev-moss dark:bg-husrev-moss/25 dark:text-husrev-cream"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                }`}
+              >
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-mono uppercase tracking-[0.08em] ${
-                    isActive
-                      ? "bg-husrev-moss/15 text-husrev-moss dark:bg-husrev-moss/25 dark:text-husrev-cream"
-                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    isActive ? "bg-husrev-moss" : "bg-gray-400"
                   }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      isActive ? "bg-husrev-moss" : "bg-gray-400"
-                    }`}
-                  />
-                  {isActive ? t("profile.active") : t("profile.inactive")}
-                </span>
-              }
-            />
-          </dl>
-        </section>
+                />
+                {isActive ? t("profile.active") : t("profile.inactive")}
+              </span>
+            }
+          />
+        </dl>
+      </section>
 
-      <EditCards
-        initialFirstName={user.firstName ?? ""}
-        initialLastName={user.lastName ?? ""}
-      />
+      <EditCards initialFirstName={user.firstName ?? ""} initialLastName={user.lastName ?? ""} />
 
       <NotificationPreferences />
       <NotificationDiagnosticsPanel />
@@ -287,9 +284,7 @@ function NotificationPreferences() {
           onClick={toggle}
           disabled={saving}
           className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-            enabled
-              ? "bg-husrev-ember"
-              : "bg-husrev-sand dark:bg-white/[0.12]"
+            enabled ? "bg-husrev-ember" : "bg-husrev-sand dark:bg-white/[0.12]"
           }`}
         >
           <span

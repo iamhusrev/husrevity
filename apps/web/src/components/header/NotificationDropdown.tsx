@@ -42,7 +42,12 @@ export default function NotificationDropdown() {
       >
         {unread > 0 && (
           <span
-            aria-label={t("notifications.unreadCount", { count: unread, defaultValue: "{{count}} okunmamış" }) as string}
+            aria-label={
+              t("notifications.unreadCount", {
+                count: unread,
+                defaultValue: "{{count}} okunmamış",
+              }) as string
+            }
             className="absolute right-0 top-0.5 z-10 flex h-2 w-2 rounded-full bg-husrev-amber"
           >
             <span className="absolute inline-flex w-full h-full bg-husrev-amber rounded-full opacity-75 motion-safe:animate-ping motion-reduce:animate-none" />
@@ -77,10 +82,13 @@ export default function NotificationDropdown() {
           markAllLabel={t("notifications.markAllRead", "Tümünü okundu işaretle")}
         />
 
-        <Body locale={i18n.language} onClick={(n) => {
-          closeDropdown();
-          if (n.deepLink) router.push(n.deepLink);
-        }} />
+        <Body
+          locale={i18n.language}
+          onClick={(n) => {
+            closeDropdown();
+            if (n.deepLink) router.push(n.deepLink);
+          }}
+        />
       </Dropdown>
     </div>
   );
@@ -101,14 +109,8 @@ function DropdownHeader({
   return (
     <div className="flex items-center justify-between pb-3 mb-3 border-b border-husrev-sand/70 dark:border-white/[0.06]">
       <div className="flex items-baseline gap-2">
-        <h5 className="text-lg font-semibold text-husrev-ink dark:text-husrev-cream">
-          {title}
-        </h5>
-        {unread > 0 && (
-          <span className="husrev-pill text-husrev-amber">
-            {unread}
-          </span>
-        )}
+        <h5 className="text-lg font-semibold text-husrev-ink dark:text-husrev-cream">{title}</h5>
+        {unread > 0 && <span className="husrev-pill text-husrev-amber">{unread}</span>}
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -146,13 +148,7 @@ function DropdownHeader({
   );
 }
 
-function Body({
-  locale,
-  onClick,
-}: {
-  locale: string;
-  onClick: (n: NotificationResponse) => void;
-}) {
+function Body({ locale, onClick }: { locale: string; onClick: (n: NotificationResponse) => void }) {
   const { t } = useTranslation();
   const { data, isLoading, isError } = useNotifications({ limit: 30 });
   const markRead = useMarkNotificationRead();

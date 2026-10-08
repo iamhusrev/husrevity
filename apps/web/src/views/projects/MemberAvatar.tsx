@@ -24,7 +24,9 @@ export default function MemberAvatar({
         .filter(Boolean)
         .map((n) => (n as string)[0])
         .join("")
-        .toUpperCase() || email?.[0]?.toUpperCase() || "?";
+        .toUpperCase() ||
+      email?.[0]?.toUpperCase() ||
+      "?";
 
   const sizeClass = size === "md" ? "h-9 w-9 text-sm" : "h-7 w-7 text-[11px]";
 

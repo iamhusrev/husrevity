@@ -41,11 +41,7 @@ export class McpSearchService {
     private readonly noteRepo: Repository<Note>,
   ) {}
 
-  async search(
-    ownerId: string,
-    query: string,
-    options?: SearchOptions,
-  ): Promise<SearchResult[]> {
+  async search(ownerId: string, query: string, options?: SearchOptions): Promise<SearchResult[]> {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
       return [];

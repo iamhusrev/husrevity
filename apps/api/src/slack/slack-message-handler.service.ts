@@ -69,9 +69,7 @@ export class SlackMessageHandlerService {
 
       await this.handleQuickAdd(channel, link.ownerId, text);
     } catch (err) {
-      this.logger.error(
-        `Unexpected error handling Slack message event: ${(err as Error).message}`,
-      );
+      this.logger.error(`Unexpected error handling Slack message event: ${(err as Error).message}`);
     }
   }
 
@@ -96,17 +94,11 @@ export class SlackMessageHandlerService {
       );
     } catch (err) {
       const msg = (err as Error).message || 'Geçersiz veya süresi dolmuş kod.';
-      await this.slackApiService.postMessage(
-        channel,
-        `❌ Bağlama başarısız: ${msg}`,
-      );
+      await this.slackApiService.postMessage(channel, `❌ Bağlama başarısız: ${msg}`);
     }
   }
 
-  private async handleUnlinkCommand(
-    channel: string,
-    slackUserId: string,
-  ): Promise<void> {
+  private async handleUnlinkCommand(channel: string, slackUserId: string): Promise<void> {
     try {
       await this.slackLinkService.unlink(undefined, slackUserId);
       await this.slackApiService.postMessage(
@@ -115,18 +107,11 @@ export class SlackMessageHandlerService {
       );
     } catch (err) {
       const msg = (err as Error).message || 'Bağlı hesap bulunamadı.';
-      await this.slackApiService.postMessage(
-        channel,
-        `❌ Bağı kaldırma başarısız: ${msg}`,
-      );
+      await this.slackApiService.postMessage(channel, `❌ Bağı kaldırma başarısız: ${msg}`);
     }
   }
 
-  private async handleQuickAdd(
-    channel: string,
-    ownerId: string,
-    text: string,
-  ): Promise<void> {
+  private async handleQuickAdd(channel: string, ownerId: string, text: string): Promise<void> {
     try {
       const result = await addFromChatMessage(
         this.reminderService,
@@ -137,9 +122,7 @@ export class SlackMessageHandlerService {
       );
       await this.slackApiService.postMessage(channel, chatQuickAddReply(result));
     } catch (err) {
-      this.logger.error(
-        `Failed to create reminder from Slack message: ${(err as Error).message}`,
-      );
+      this.logger.error(`Failed to create reminder from Slack message: ${(err as Error).message}`);
       await this.slackApiService.postMessage(
         channel,
         `❌ Anımsatıcı eklenirken bir hata oluştu: ${(err as Error).message}`,

@@ -37,7 +37,7 @@ describe('SlackLinkService', () => {
   describe('generateLinkCode', () => {
     it('should create a new SlackLink if none exists for owner', async () => {
       repo.findOne.mockResolvedValue(null);
-      repo.create.mockImplementation((dto) => ({ ...dto } as SlackLink));
+      repo.create.mockImplementation((dto) => ({ ...dto }) as SlackLink);
       repo.save.mockImplementation(async (entity) => entity as SlackLink);
 
       const result = await service.generateLinkCode('owner-1');
@@ -215,7 +215,9 @@ describe('SlackLinkService', () => {
 
       const result = await service.findBySlackUser('U12345');
       expect(result).toBe(link);
-      expect(repo.findOne).toHaveBeenCalledWith({ where: { slackUserId: 'U12345', status: 'linked' } });
+      expect(repo.findOne).toHaveBeenCalledWith({
+        where: { slackUserId: 'U12345', status: 'linked' },
+      });
     });
   });
 });

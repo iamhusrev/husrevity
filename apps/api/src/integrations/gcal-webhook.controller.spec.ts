@@ -52,7 +52,12 @@ describe('GcalWebhookController', () => {
     it('should return failure message if channelId is not found', async () => {
       (mockIntegrationAccountService.findByChannelId as jest.Mock).mockResolvedValueOnce(null);
 
-      const res = await controller.handleWebhook('unknown-channel', 'res-456', 'exists', 'tok-secret');
+      const res = await controller.handleWebhook(
+        'unknown-channel',
+        'res-456',
+        'exists',
+        'tok-secret',
+      );
 
       expect(res).toEqual({
         success: false,
@@ -62,7 +67,12 @@ describe('GcalWebhookController', () => {
     });
 
     it('should return failure message if resourceId does not match stored resourceId', async () => {
-      const res = await controller.handleWebhook('chan-123', 'wrong-res-id', 'exists', 'tok-secret');
+      const res = await controller.handleWebhook(
+        'chan-123',
+        'wrong-res-id',
+        'exists',
+        'tok-secret',
+      );
 
       expect(res).toEqual({
         success: false,
@@ -75,7 +85,12 @@ describe('GcalWebhookController', () => {
       const missing = await controller.handleWebhook('chan-123', 'res-456', 'exists', undefined);
       expect(missing).toEqual({ success: false, message: 'Channel token mismatch' });
 
-      const wrong = await controller.handleWebhook('chan-123', 'res-456', 'exists', 'attacker-guessed-token');
+      const wrong = await controller.handleWebhook(
+        'chan-123',
+        'res-456',
+        'exists',
+        'attacker-guessed-token',
+      );
       expect(wrong).toEqual({ success: false, message: 'Channel token mismatch' });
 
       expect(mockSyncService.syncIncremental).not.toHaveBeenCalled();

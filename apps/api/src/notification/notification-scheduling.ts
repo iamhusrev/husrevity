@@ -26,8 +26,7 @@ export function formatLeadTimeBody(
   if (minutesBefore <= 0) {
     return trailing ? trailing : 'Şimdi';
   }
-  const hh = at
-    .toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const hh = at.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   const head = `${hh}'de — ${minutesBefore} dk kaldı`;
   return trailing ? `${head}\n${trailing}` : head;
 }

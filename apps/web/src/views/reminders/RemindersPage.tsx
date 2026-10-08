@@ -133,14 +133,7 @@ function toReminderRequest(r: ReminderResponse, patch: ReminderPatch) {
   };
 }
 
-type SmartGroup =
-  | "all"
-  | "today"
-  | "tomorrow"
-  | "thisWeek"
-  | "thisMonth"
-  | "flagged"
-  | "scheduled";
+type SmartGroup = "all" | "today" | "tomorrow" | "thisWeek" | "thisMonth" | "flagged" | "scheduled";
 
 const SMART_GROUPS: SmartGroup[] = [
   "all",
@@ -334,7 +327,10 @@ function ReminderRow({
                     key={p}
                     type="button"
                     onClick={() => {
-                      commit({ dueAt: presetDueAt(p), notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0 });
+                      commit({
+                        dueAt: presetDueAt(p),
+                        notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0,
+                      });
                       setDueOpen(false);
                     }}
                     className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 transition hover:bg-brand-50 hover:text-brand-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-brand-500/10 dark:hover:text-brand-300"
@@ -347,7 +343,9 @@ function ReminderRow({
               <div className="mt-3" onPointerDown={(e) => e.stopPropagation()}>
                 <DateTimePicker
                   value={reminder.dueAt}
-                  onChange={(iso) => commit({ dueAt: iso, notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0 })}
+                  onChange={(iso) =>
+                    commit({ dueAt: iso, notifyMinutesBefore: reminder.notifyMinutesBefore ?? 0 })
+                  }
                 />
               </div>
             </div>
@@ -394,11 +392,7 @@ function ReminderRow({
       </div>
 
       {editing && (
-        <ReminderEditModal
-          reminder={reminder}
-          listId={listId}
-          onClose={() => setEditing(false)}
-        />
+        <ReminderEditModal reminder={reminder} listId={listId} onClose={() => setEditing(false)} />
       )}
     </div>
   );
@@ -425,7 +419,9 @@ function ReminderEditModal({
   const [notes, setNotes] = useState(reminder.notes ?? "");
   const [priority, setPriority] = useState<ReminderPriority>(reminder.priority);
   const [dueAt, setDueAt] = useState<string | null>(reminder.dueAt ?? null);
-  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(reminder.notifyMinutesBefore ?? 0);
+  const [notifyMinutesBefore, setNotifyMinutesBefore] = useState<number | null>(
+    reminder.notifyMinutesBefore ?? 0,
+  );
   const [flag, setFlag] = useState(reminder.flag);
 
   const submit = async (e: React.FormEvent) => {
@@ -588,19 +584,10 @@ function ReminderEditModal({
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={pending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={pending} className="husrev-btn-ghost">
             {t("common.cancel", "İptal")}
           </button>
-          <button
-            type="submit"
-            disabled={!title.trim() || pending}
-            className="husrev-btn"
-          >
+          <button type="submit" disabled={!title.trim() || pending} className="husrev-btn">
             {updateReminder.isPending
               ? t("common.saving", "Kaydediliyor…")
               : t("common.save", "Kaydet")}
@@ -639,7 +626,6 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
       setOrdered(sorted);
       orderedRef.current = sorted;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverReminders]);
 
   const moveItem = useCallback((dragIdx: number, hoverIdx: number) => {
@@ -697,7 +683,11 @@ function RemindersPanel({ list }: { list: ReminderListResponse }) {
   const handleDictateConfirm = async (items: string[]) => {
     for (const item of items) {
       try {
-        await createReminder.mutateAsync({ listId: list.id, title: item, dueAt: presetDueAt("today") });
+        await createReminder.mutateAsync({
+          listId: list.id,
+          title: item,
+          dueAt: presetDueAt("today"),
+        });
       } catch (err) {
         const { title: errTitle, message } = parseAxiosError(err);
         showAlert({ title: errTitle, message, type: "error", position: "top-center" });
@@ -921,9 +911,7 @@ function NewListModal({
             disabled={!name.trim() || createList.isPending}
             className="husrev-btn"
           >
-            {createList.isPending
-              ? t("common.saving", "Kaydediliyor…")
-              : t("common.create")}
+            {createList.isPending ? t("common.saving", "Kaydediliyor…") : t("common.create")}
           </button>
         </div>
       </form>
@@ -1010,15 +998,9 @@ function ReminderListRow({
             : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
         }`}
       >
-        <span
-          className="h-3 w-3 rounded-full shrink-0"
-          style={{ backgroundColor: list.color }}
-        />
+        <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: list.color }} />
         {editing ? (
-          <div
-            className="flex flex-1 items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="flex flex-1 items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <input
               autoFocus
               value={editingName}
@@ -1110,7 +1092,6 @@ export default function RemindersPage({
       setOrderedLists(sorted);
       orderedListsRef.current = sorted;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lists]);
 
   const moveList = useCallback((dragIdx: number, hoverIdx: number) => {
@@ -1188,119 +1169,119 @@ export default function RemindersPage({
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <PageBreadcrumb pageTitle={t("reminders.title")} />
 
-        {/* Mobile list selector — horizontal scrolling pills (sidebar is hidden < md) */}
-        <div className="md:hidden">
-          {isLoading ? (
-            <p className="py-2 text-center text-xs text-gray-400">{t("common.loading")}</p>
-          ) : (
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {orderedLists.map((list) => {
-                const isSel = selectedListId === list.id;
-                return (
-                  <div
-                    key={list.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelectedListId(list.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedListId(list.id);
-                      }
-                    }}
-                    className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
-                      isSel
-                        ? "border-brand-500 bg-brand-50 font-medium text-brand-600 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300"
-                        : "border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300"
-                    }`}
-                  >
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: list.color }}
+          {/* Mobile list selector — horizontal scrolling pills (sidebar is hidden < md) */}
+          <div className="md:hidden">
+            {isLoading ? (
+              <p className="py-2 text-center text-xs text-gray-400">{t("common.loading")}</p>
+            ) : (
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {orderedLists.map((list) => {
+                  const isSel = selectedListId === list.id;
+                  return (
+                    <div
+                      key={list.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setSelectedListId(list.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectedListId(list.id);
+                        }
+                      }}
+                      className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+                        isSel
+                          ? "border-brand-500 bg-brand-50 font-medium text-brand-600 dark:border-brand-500/40 dark:bg-brand-500/10 dark:text-brand-300"
+                          : "border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: list.color }}
+                      />
+                      <span className="max-w-[8rem] truncate">{list.name}</span>
+                      {isSel ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteList(list.id);
+                          }}
+                          className="-mr-1 rounded-full p-0.5 text-brand-500/70 transition hover:text-red-500"
+                          aria-label={t("reminders.deleteAria")}
+                        >
+                          <BiTrash size={13} />
+                        </button>
+                      ) : (
+                        <span className="rounded-full bg-gray-200 px-1.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                          {list.itemCount}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => setShowNewListModal(true)}
+                  className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-brand-300 px-3 py-1.5 text-sm text-brand-500 transition hover:bg-brand-50 dark:border-brand-500/40 dark:hover:bg-brand-500/10"
+                >
+                  <BiPlus size={16} />
+                  {t("reminders.newList")}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex min-h-0 flex-1 gap-4 rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
+            {/* Left sidebar — list of reminder lists (desktop only; mobile uses the pill selector above) */}
+            <div className="hidden w-56 shrink-0 flex-col border-r border-gray-200 p-3 md:flex dark:border-gray-700">
+              {isLoading ? (
+                <p className="py-4 text-center text-xs text-gray-400">{t("common.loading")}</p>
+              ) : (
+                <ul className="space-y-0.5">
+                  {orderedLists.map((list, index) => (
+                    <ReminderListRow
+                      key={list.id}
+                      list={list}
+                      index={index}
+                      selected={selectedListId === list.id}
+                      onSelect={setSelectedListId}
+                      onDelete={handleDeleteList}
+                      moveList={moveList}
+                      onDrop={onListDrop}
+                      editing={editingListId === list.id}
+                      editingName={editingListName}
+                      onRenameStart={() => handleRenameListStart(list)}
+                      onRenameChange={setEditingListName}
+                      onRenameSave={handleRenameSave}
+                      onRenameCancel={handleRenameCancel}
+                      renamePending={renameList.isPending}
                     />
-                    <span className="max-w-[8rem] truncate">{list.name}</span>
-                    {isSel ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteList(list.id);
-                        }}
-                        className="-mr-1 rounded-full p-0.5 text-brand-500/70 transition hover:text-red-500"
-                        aria-label={t("reminders.deleteAria")}
-                      >
-                        <BiTrash size={13} />
-                      </button>
-                    ) : (
-                      <span className="rounded-full bg-gray-200 px-1.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                        {list.itemCount}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  ))}
+                </ul>
+              )}
               <button
                 type="button"
                 onClick={() => setShowNewListModal(true)}
-                className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-brand-300 px-3 py-1.5 text-sm text-brand-500 transition hover:bg-brand-50 dark:border-brand-500/40 dark:hover:bg-brand-500/10"
+                className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-brand-500 transition hover:bg-brand-50 dark:hover:bg-brand-500/10"
               >
                 <BiPlus size={16} />
                 {t("reminders.newList")}
               </button>
             </div>
-          )}
-        </div>
 
-        <div className="flex min-h-0 flex-1 gap-4 rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
-          {/* Left sidebar — list of reminder lists (desktop only; mobile uses the pill selector above) */}
-          <div className="hidden w-56 shrink-0 flex-col border-r border-gray-200 p-3 md:flex dark:border-gray-700">
-            {isLoading ? (
-              <p className="py-4 text-center text-xs text-gray-400">{t("common.loading")}</p>
-            ) : (
-              <ul className="space-y-0.5">
-                {orderedLists.map((list, index) => (
-                  <ReminderListRow
-                    key={list.id}
-                    list={list}
-                    index={index}
-                    selected={selectedListId === list.id}
-                    onSelect={setSelectedListId}
-                    onDelete={handleDeleteList}
-                    moveList={moveList}
-                    onDrop={onListDrop}
-                    editing={editingListId === list.id}
-                    editingName={editingListName}
-                    onRenameStart={() => handleRenameListStart(list)}
-                    onRenameChange={setEditingListName}
-                    onRenameSave={handleRenameSave}
-                    onRenameCancel={handleRenameCancel}
-                    renamePending={renameList.isPending}
-                  />
-                ))}
-              </ul>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowNewListModal(true)}
-              className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-brand-500 transition hover:bg-brand-50 dark:hover:bg-brand-500/10"
-            >
-              <BiPlus size={16} />
-              {t("reminders.newList")}
-            </button>
-          </div>
-
-          {/* Right panel — reminders for selected list */}
-          <div className="min-w-0 flex-1 p-4 md:p-5">
-            {selectedList ? (
-              <RemindersPanel list={selectedList} />
-            ) : (
-              <div className="flex h-full items-center justify-center px-4 text-center text-sm text-gray-400">
-                {lists.length === 0 ? t("reminders.noLists") : t("reminders.selectList")}
-              </div>
-            )}
+            {/* Right panel — reminders for selected list */}
+            <div className="min-w-0 flex-1 p-4 md:p-5">
+              {selectedList ? (
+                <RemindersPanel list={selectedList} />
+              ) : (
+                <div className="flex h-full items-center justify-center px-4 text-center text-sm text-gray-400">
+                  {lists.length === 0 ? t("reminders.noLists") : t("reminders.selectList")}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
       </DndProvider>
 
       {showNewListModal && (

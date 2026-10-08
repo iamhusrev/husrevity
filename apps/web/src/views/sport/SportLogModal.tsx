@@ -49,8 +49,7 @@ export default function SportLogModal({
     resolver: zodResolver(logSchema),
     defaultValues: {
       sessionId: initial?.sessionId ?? "",
-      executedDate:
-        initial?.executedDate ?? defaultDate ?? new Date().toISOString().slice(0, 10),
+      executedDate: initial?.executedDate ?? defaultDate ?? new Date().toISOString().slice(0, 10),
       actualDuration: initial?.actualDuration ?? 30,
       completed: initial?.completed ?? true,
       intensity: initial?.intensity ?? 5,
@@ -163,9 +162,7 @@ export default function SportLogModal({
               <Controller
                 control={control}
                 name="executedDate"
-                render={({ field }) => (
-                  <input type="date" {...field} className="husrev-input" />
-                )}
+                render={({ field }) => <input type="date" {...field} className="husrev-input" />}
               />
             </div>
             <div className="space-y-1.5">
@@ -279,12 +276,7 @@ export default function SportLogModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
           <button type="submit" disabled={isPending} className="husrev-btn">

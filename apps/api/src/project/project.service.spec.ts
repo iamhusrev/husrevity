@@ -189,7 +189,13 @@ describe('ProjectService', () => {
       });
       expect(dataSource.query).not.toHaveBeenCalled();
       expect(result).toEqual([
-        expect.objectContaining({ id: '1', role: 'OWNER', memberCount: 1, ownerName: null, shared: false }),
+        expect.objectContaining({
+          id: '1',
+          role: 'OWNER',
+          memberCount: 1,
+          ownerName: null,
+          shared: false,
+        }),
       ]);
     });
   });
@@ -383,7 +389,10 @@ describe('ProjectService', () => {
 
       const result = await service.restore(ownerId, projectId);
 
-      expect(projects.findOne).toHaveBeenCalledWith({ where: { id: projectId }, withDeleted: true });
+      expect(projects.findOne).toHaveBeenCalledWith({
+        where: { id: projectId },
+        withDeleted: true,
+      });
       expect(projects.restore).toHaveBeenCalledWith({ id: deletedRow.id, ownerId });
       expect(result.code).toBe('ACME');
       // Deliberate design point: restore is owner-only and must never consult

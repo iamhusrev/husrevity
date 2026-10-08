@@ -114,7 +114,9 @@ describe('McpServerFactory', () => {
       const toolHandler = (server as any)._registeredTools['complete_item']?.handler;
       expect(toolHandler).toBeDefined();
 
-      await expect(toolHandler({ id: 'item_1' }, {})).rejects.toThrow('Unauthorized: missing owner context');
+      await expect(toolHandler({ id: 'item_1' }, {})).rejects.toThrow(
+        'Unauthorized: missing owner context',
+      );
       await expect(
         toolHandler(
           { id: 'item_1' },
@@ -267,7 +269,10 @@ describe('McpServerFactory', () => {
       reminderService.createReminder.mockResolvedValue({ id: 'rem_2' });
 
       await toolHandler({ title: 'tarihsiz' }, auth);
-      await toolHandler({ title: 'erken', dueAt: '2026-10-09T09:00:00+03:00', notifyMinutesBefore: 15 }, auth);
+      await toolHandler(
+        { title: 'erken', dueAt: '2026-10-09T09:00:00+03:00', notifyMinutesBefore: 15 },
+        auth,
+      );
 
       expect(reminderService.createReminder.mock.calls[0][1].notifyMinutesBefore).toBeNull();
       expect(reminderService.createReminder.mock.calls[1][1].notifyMinutesBefore).toBe(15);
@@ -308,7 +313,11 @@ describe('McpServerFactory', () => {
       expect(taskService.createForProject).toHaveBeenCalledWith(
         'usr_100',
         '7',
-        expect.objectContaining({ title: 'HGS kontrol', priority: 'HIGH', notifyMinutesBefore: null }),
+        expect.objectContaining({
+          title: 'HGS kontrol',
+          priority: 'HIGH',
+          notifyMinutesBefore: null,
+        }),
       );
       expect(itemService.create).not.toHaveBeenCalled();
       expect(JSON.parse(res.content[0].text).project).toBe('Husrevity Web');
@@ -518,9 +527,7 @@ describe('McpServerFactory', () => {
       const server = factory.createMcpServer();
       const toolHandler = (server as any)._registeredTools['list_projects']?.handler;
 
-      projectService.list.mockResolvedValueOnce([
-        { id: 'proj_1', code: 'HUS', name: 'Husrevity' },
-      ]);
+      projectService.list.mockResolvedValueOnce([{ id: 'proj_1', code: 'HUS', name: 'Husrevity' }]);
 
       const res = await toolHandler(
         { filter: 'mine' },
@@ -579,9 +586,9 @@ describe('McpServerFactory', () => {
       const toolHandler = (server as any)._registeredTools['log_workout']?.handler;
       expect(toolHandler).toBeDefined();
 
-      await expect(
-        toolHandler({ activity: 'Koşu', duration_min: 45 }, {}),
-      ).rejects.toThrow('Unauthorized: missing owner context');
+      await expect(toolHandler({ activity: 'Koşu', duration_min: 45 }, {})).rejects.toThrow(
+        'Unauthorized: missing owner context',
+      );
       await expect(
         toolHandler(
           { activity: 'Koşu', duration_min: 45 },
@@ -689,4 +696,3 @@ describe('McpServerFactory', () => {
     });
   });
 });
-

@@ -49,7 +49,10 @@ describe('ProjectMemberService', () => {
     access = { requireAccess: jest.fn() };
     users = { findByEmail: jest.fn(), requireById: jest.fn() };
     invites = { createInvite: jest.fn(), buildProjectUrl: jest.fn() };
-    mailer = { isConfigured: jest.fn().mockReturnValue(false), sendProjectMemberAddedEmail: jest.fn() };
+    mailer = {
+      isConfigured: jest.fn().mockReturnValue(false),
+      sendProjectMemberAddedEmail: jest.fn(),
+    };
     dataSource = { query: jest.fn() };
 
     const module = await Test.createTestingModule({
@@ -145,7 +148,12 @@ describe('ProjectMemberService', () => {
         withDeleted: true,
       });
       expect(members.create).toHaveBeenCalledWith(
-        expect.objectContaining({ projectId, userId: 'u2', role: 'EDITOR', invitedById: actingUserId }),
+        expect.objectContaining({
+          projectId,
+          userId: 'u2',
+          role: 'EDITOR',
+          invitedById: actingUserId,
+        }),
       );
       expect(members.save).toHaveBeenCalledWith(created);
       expect(result.member).not.toBeNull();
@@ -164,7 +172,9 @@ describe('ProjectMemberService', () => {
         deletedAt: null,
       } as unknown as ProjectMember);
 
-      await expect(service.add(actingUserId, actingUserEmail, projectId, dto)).rejects.toMatchObject({
+      await expect(
+        service.add(actingUserId, actingUserEmail, projectId, dto),
+      ).rejects.toMatchObject({
         status: 409,
       });
       expect(members.create).not.toHaveBeenCalled();
@@ -193,7 +203,12 @@ describe('ProjectMemberService', () => {
 
       expect(members.create).not.toHaveBeenCalled();
       expect(members.save).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'm1', deletedAt: null, role: 'EDITOR', invitedById: actingUserId }),
+        expect.objectContaining({
+          id: 'm1',
+          deletedAt: null,
+          role: 'EDITOR',
+          invitedById: actingUserId,
+        }),
       );
       expect(result.member?.role).toBe('EDITOR');
     });
@@ -338,9 +353,16 @@ describe('ProjectMemberService', () => {
 
     it("throws bad-request when trying to change the OWNER's role, without saving", async () => {
       access.requireAccess.mockResolvedValueOnce({ project: {}, role: 'OWNER' });
-      members.findOne.mockResolvedValueOnce({ id: memberId, projectId, userId: 'u1', role: 'OWNER' });
+      members.findOne.mockResolvedValueOnce({
+        id: memberId,
+        projectId,
+        userId: 'u1',
+        role: 'OWNER',
+      });
 
-      await expect(service.updateRole(actingUserId, projectId, memberId, dto)).rejects.toMatchObject({
+      await expect(
+        service.updateRole(actingUserId, projectId, memberId, dto),
+      ).rejects.toMatchObject({
         status: 400,
       });
       expect(members.save).not.toHaveBeenCalled();
@@ -348,7 +370,13 @@ describe('ProjectMemberService', () => {
 
     it('applies the new role for an EDITOR/VIEWER target member', async () => {
       access.requireAccess.mockResolvedValueOnce({ project: {}, role: 'OWNER' });
-      const member = { id: memberId, projectId, userId: 'u2', role: 'VIEWER', joinedAt: new Date() };
+      const member = {
+        id: memberId,
+        projectId,
+        userId: 'u2',
+        role: 'VIEWER',
+        joinedAt: new Date(),
+      };
       members.findOne.mockResolvedValueOnce(member);
       members.save.mockImplementation((m) => Promise.resolve(m));
       users.requireById.mockResolvedValueOnce({
@@ -358,7 +386,9 @@ describe('ProjectMemberService', () => {
         lastName: 'Y',
       } as unknown as User);
 
-      const result = await service.updateRole(actingUserId, projectId, memberId, { role: 'EDITOR' });
+      const result = await service.updateRole(actingUserId, projectId, memberId, {
+        role: 'EDITOR',
+      });
 
       expect(members.save).toHaveBeenCalledWith(expect.objectContaining({ role: 'EDITOR' }));
       expect(result.role).toBe('EDITOR');
@@ -368,7 +398,9 @@ describe('ProjectMemberService', () => {
       access.requireAccess.mockResolvedValueOnce({ project: {}, role: 'OWNER' });
       members.findOne.mockResolvedValueOnce(null);
 
-      await expect(service.updateRole(actingUserId, projectId, memberId, dto)).rejects.toMatchObject({
+      await expect(
+        service.updateRole(actingUserId, projectId, memberId, dto),
+      ).rejects.toMatchObject({
         status: 404,
       });
     });
@@ -389,7 +421,12 @@ describe('ProjectMemberService', () => {
 
     it('throws bad-request when targeting the OWNER role member, and never calls softRemove', async () => {
       access.requireAccess.mockResolvedValueOnce({ project: {}, role: 'OWNER' });
-      members.findOne.mockResolvedValueOnce({ id: memberId, projectId, userId: 'u1', role: 'OWNER' });
+      members.findOne.mockResolvedValueOnce({
+        id: memberId,
+        projectId,
+        userId: 'u1',
+        role: 'OWNER',
+      });
 
       await expect(service.remove(actingUserId, projectId, memberId)).rejects.toMatchObject({
         status: 400,

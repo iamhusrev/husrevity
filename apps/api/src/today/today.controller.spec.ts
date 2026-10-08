@@ -19,10 +19,23 @@ describe('TodayController', () => {
     controller = module.get(TodayController);
   });
 
-  it("composes dueToday + timeline + currentBlock into TodayResponseDto, with suggestion still null", async () => {
+  it('composes dueToday + timeline + currentBlock into TodayResponseDto, with suggestion still null', async () => {
     const dueTodayRows = [{ itemId: '1', title: 'Rapor', dueAt: null, status: 'open' }];
-    const timelineRows = [{ itemId: '2', title: 'Toplantı', kind: 'event', scheduledAt: '2026-01-05T10:00:00.000Z', durationMin: 30 }];
-    const block = { itemId: '2', title: 'Toplantı', scheduledAt: '2026-01-05T10:00:00.000Z', durationMin: 30 };
+    const timelineRows = [
+      {
+        itemId: '2',
+        title: 'Toplantı',
+        kind: 'event',
+        scheduledAt: '2026-01-05T10:00:00.000Z',
+        durationMin: 30,
+      },
+    ];
+    const block = {
+      itemId: '2',
+      title: 'Toplantı',
+      scheduledAt: '2026-01-05T10:00:00.000Z',
+      durationMin: 30,
+    };
     today.dueToday.mockResolvedValueOnce(dueTodayRows);
     today.timeline.mockResolvedValueOnce(timelineRows);
     today.currentBlock.mockReturnValueOnce(block);

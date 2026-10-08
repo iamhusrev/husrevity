@@ -8,11 +8,7 @@ import {
   useResyncNotifications,
   useSendTestNotification,
 } from "@/hooks/useNotifications";
-import {
-  useDisablePush,
-  useEnablePush,
-  usePushStatus,
-} from "@/hooks/usePush";
+import { useDisablePush, useEnablePush, usePushStatus } from "@/hooks/usePush";
 import { pushService } from "@/services/push-service";
 import { alertStore } from "@/stores/alert-store";
 import { TestNotificationResult } from "@/types/notification/notification";
@@ -32,9 +28,7 @@ export default function NotificationDiagnosticsPanel() {
   const sendTest = useSendTestNotification();
   const resync = useResyncNotifications();
   const [preferenceEnabled, setPreferenceEnabled] = useState(false);
-  const [permission, setPermission] = useState<
-    NotificationPermission | "unsupported"
-  >("default");
+  const [permission, setPermission] = useState<NotificationPermission | "unsupported">("default");
   const [showIosHint, setShowIosHint] = useState(false);
 
   useEffect(() => {
@@ -42,18 +36,13 @@ export default function NotificationDiagnosticsPanel() {
     setPreferenceEnabled(pushService.preferenceEnabled());
 
     const ua = navigator.userAgent;
-    const isIosSafari =
-      /iPhone|iPad|iPod/.test(ua) &&
-      /Safari/.test(ua) &&
-      !/CriOS|FxiOS/.test(ua);
+    const isIosSafari = /iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
     const standalone = window.matchMedia("(display-mode: standalone)").matches;
     setShowIosHint(isIosSafari && !standalone);
   }, []);
 
-  const pushEnabled =
-    status.state === "granted-subscribed" && preferenceEnabled;
-  const pushUnavailable =
-    status.state === "denied" || status.state === "unsupported";
+  const pushEnabled = status.state === "granted-subscribed" && preferenceEnabled;
+  const pushUnavailable = status.state === "denied" || status.state === "unsupported";
   const pushLoading = status.state === "loading" || enabling || disabling;
 
   const togglePush = async () => {
@@ -74,7 +63,7 @@ export default function NotificationDiagnosticsPanel() {
                 ? t("settings.notifications.push.denied")
                 : result.reason === "unsupported"
                   ? t("settings.notifications.push.unsupported")
-                  : result.reason ?? t("common.error"),
+                  : (result.reason ?? t("common.error")),
             type: "error",
             position: "top-center",
           });
@@ -117,8 +106,7 @@ export default function NotificationDiagnosticsPanel() {
       showAlert({
         title: t("settings.notifications.diagnostics.title"),
         message: describeResult(result),
-        type:
-          result.pushSucceeded || result.emailSucceeded ? "success" : "warning",
+        type: result.pushSucceeded || result.emailSucceeded ? "success" : "warning",
         position: "top-center",
       });
     } catch (err) {
@@ -164,14 +152,8 @@ export default function NotificationDiagnosticsPanel() {
             ? t("settings.notifications.diagnostics.deviceRegistered")
             : t("settings.notifications.diagnostics.deviceUnregistered"),
         ],
-        [
-          t("settings.notifications.diagnostics.pending"),
-          diagnostics.data.pendingCount,
-        ],
-        [
-          t("settings.notifications.diagnostics.dispatched24h"),
-          diagnostics.data.dispatchedLast24h,
-        ],
+        [t("settings.notifications.diagnostics.pending"), diagnostics.data.pendingCount],
+        [t("settings.notifications.diagnostics.dispatched24h"), diagnostics.data.dispatchedLast24h],
       ]
     : [];
 
@@ -212,9 +194,7 @@ export default function NotificationDiagnosticsPanel() {
           onClick={togglePush}
           disabled={pushLoading || pushUnavailable}
           className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
-            pushEnabled
-              ? "bg-husrev-ember"
-              : "bg-husrev-sand dark:bg-white/[0.12]"
+            pushEnabled ? "bg-husrev-ember" : "bg-husrev-sand dark:bg-white/[0.12]"
           }`}
         >
           <span
@@ -237,11 +217,12 @@ export default function NotificationDiagnosticsPanel() {
           <div className="py-4 text-sm text-gray-400">{t("common.loading")}</div>
         ) : (
           rows.map(([label, value]) => (
-            <div key={String(label)} className="flex items-center justify-between gap-4 py-3 text-sm">
+            <div
+              key={String(label)}
+              className="flex items-center justify-between gap-4 py-3 text-sm"
+            >
               <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
-              <dd className="font-medium text-husrev-ink dark:text-husrev-cream">
-                {value}
-              </dd>
+              <dd className="font-medium text-husrev-ink dark:text-husrev-cream">{value}</dd>
             </div>
           ))
         )}

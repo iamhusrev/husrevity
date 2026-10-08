@@ -71,7 +71,9 @@ export class GcalWebhookController {
 
     try {
       await this.syncService.syncIncremental(account.ownerId);
-      this.logger.log(`Incremental sync successfully triggered by webhook for owner ${account.ownerId}`);
+      this.logger.log(
+        `Incremental sync successfully triggered by webhook for owner ${account.ownerId}`,
+      );
       return { success: true, message: 'Incremental sync triggered' };
     } catch (error: any) {
       this.logger.error(

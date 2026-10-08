@@ -23,7 +23,10 @@ export class SlackController {
   async status(@CurrentUser() u: AuthenticatedUser): Promise<SlackLinkStatusResponseDto> {
     const link = await this.slackLinkService.findByOwner(u.userId);
     const pending =
-      link?.status === 'pending' && !!link.linkCode && !!link.linkCodeExpiresAt && link.linkCodeExpiresAt > new Date();
+      link?.status === 'pending' &&
+      !!link.linkCode &&
+      !!link.linkCodeExpiresAt &&
+      link.linkCodeExpiresAt > new Date();
     return {
       configured: this.slackConfig.isConfigured(),
       linked: link?.status === 'linked',
@@ -38,9 +41,7 @@ export class SlackController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Generate a short-lived link code to bind a Slack user' })
   @ApiResponse({ status: 200, type: SlackLinkCodeResponseDto })
-  async generateLinkCode(
-    @CurrentUser() u: AuthenticatedUser,
-  ): Promise<SlackLinkCodeResponseDto> {
+  async generateLinkCode(@CurrentUser() u: AuthenticatedUser): Promise<SlackLinkCodeResponseDto> {
     const link = await this.slackLinkService.generateLinkCode(u.userId);
     return {
       code: link.linkCode!,

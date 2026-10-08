@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,23 +10,23 @@ import {
   Platform,
   ScrollView,
   SafeAreaView,
-} from 'react-native';
-import { useAuth } from '../src/auth/auth-context';
+} from "react-native";
+import { useAuth } from "../src/auth/auth-context";
 
 export default function LoginScreen() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email.trim()) {
-      setErrorMessage('E-posta adresi gereklidir.');
+      setErrorMessage("E-posta adresi gereklidir.");
       return;
     }
     if (!password) {
-      setErrorMessage('Parola gereklidir.');
+      setErrorMessage("Parola gereklidir.");
       return;
     }
 
@@ -36,7 +36,7 @@ export default function LoginScreen() {
     try {
       await login(email.trim(), password);
     } catch (err: any) {
-      setErrorMessage(err?.message || 'E-posta veya parola hatalı.');
+      setErrorMessage(err?.message || "E-posta veya parola hatalı.");
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -114,14 +114,14 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: "#0f172a",
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 40,
   },
@@ -130,32 +130,32 @@ const styles = StyleSheet.create({
   },
   kicker: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#c8732e',
+    fontWeight: "700",
+    color: "#c8732e",
     letterSpacing: 1.5,
     marginBottom: 8,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#f8fafc',
+    fontWeight: "bold",
+    color: "#f8fafc",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#94a3b8',
+    color: "#94a3b8",
     lineHeight: 22,
   },
   errorBox: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: "rgba(239, 68, 68, 0.15)",
     borderWidth: 1,
-    borderColor: '#ef4444',
+    borderColor: "#ef4444",
     borderRadius: 8,
     padding: 12,
     marginBottom: 20,
   },
   errorText: {
-    color: '#fca5a5',
+    color: "#fca5a5",
     fontSize: 14,
   },
   form: {
@@ -163,34 +163,34 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#e2e8f0',
+    fontWeight: "600",
+    color: "#e2e8f0",
     marginBottom: 4,
   },
   input: {
-    backgroundColor: '#1e293b',
+    backgroundColor: "#1e293b",
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: "#334155",
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#f8fafc',
+    color: "#f8fafc",
   },
   button: {
-    backgroundColor: '#a14d18',
+    backgroundColor: "#a14d18",
     borderRadius: 8,
     paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 12,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

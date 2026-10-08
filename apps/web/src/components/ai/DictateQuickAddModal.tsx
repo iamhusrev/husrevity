@@ -161,7 +161,10 @@ export default function DictateQuickAddModal({
             <BiX size={20} />
           </button>
 
-          <h2 id="dictate-quick-add-title" className="pr-10 text-xl font-semibold text-husrev-ink dark:text-husrev-cream">
+          <h2
+            id="dictate-quick-add-title"
+            className="pr-10 text-xl font-semibold text-husrev-ink dark:text-husrev-cream"
+          >
             {title}
           </h2>
 

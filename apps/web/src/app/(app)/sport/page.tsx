@@ -8,13 +8,7 @@ import { useSportLogs, useSportPrograms } from "@/hooks/useSport";
 import { SportLogResponse } from "@/types/sport/sport";
 import SportStatsView from "@/views/sport/SportStatsView";
 import SportLogModal, { SessionOption } from "@/views/sport/SportLogModal";
-import {
-  BiCalendarCheck,
-  BiChevronLeft,
-  BiChevronRight,
-  BiPlus,
-  BiTimeFive,
-} from "react-icons/bi";
+import { BiCalendarCheck, BiChevronLeft, BiChevronRight, BiPlus, BiTimeFive } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
 // Faz 2: sadeleştirme — sadece "kayıt ekle" (Antrenman günlüğü) ve
@@ -82,9 +76,7 @@ function LogsTab() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() =>
-              setMonthAnchor((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))
-            }
+            onClick={() => setMonthAnchor((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
             aria-label={t("sport.logs.prevMonth", "Önceki ay")}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-husrev-cream hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-husrev-cream"
           >
@@ -95,9 +87,7 @@ function LogsTab() {
           </span>
           <button
             type="button"
-            onClick={() =>
-              setMonthAnchor((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))
-            }
+            onClick={() => setMonthAnchor((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
             aria-label={t("sport.logs.nextMonth", "Sonraki ay")}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-husrev-cream hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-husrev-cream"
           >
@@ -145,7 +135,8 @@ function LogsTab() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium text-husrev-ink dark:text-husrev-cream">
                     {log.sessionId
-                      ? sessionLabelById.get(log.sessionId) ?? t("sport.logModal.none", "Serbest antrenman")
+                      ? (sessionLabelById.get(log.sessionId) ??
+                        t("sport.logModal.none", "Serbest antrenman"))
                       : t("sport.logModal.none", "Serbest antrenman")}
                   </span>
                   <span className="rounded-full bg-husrev-amber/15 px-2 py-0.5 text-[11px] font-medium text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
@@ -214,10 +205,7 @@ export default function SportPage() {
         </div>
       </div>
 
-      <nav
-        role="tablist"
-        className="-mx-1 flex max-w-full gap-1 overflow-x-auto px-1 no-scrollbar"
-      >
+      <nav role="tablist" className="-mx-1 flex max-w-full gap-1 overflow-x-auto px-1 no-scrollbar">
         {tabs.map((tb) => (
           <button
             key={tb.id}

@@ -57,20 +57,17 @@ describe('SlackApiService', () => {
       const result = await service.postMessage('U123456', 'Hello Slack');
 
       expect(result).toEqual(mockResponse);
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.postMessage',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer xoxb-mock-bot-token',
-            'Content-Type': 'application/json; charset=utf-8',
-          },
-          body: JSON.stringify({
-            channel: 'U123456',
-            text: 'Hello Slack',
-          }),
+      expect(global.fetch).toHaveBeenCalledWith('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer xoxb-mock-bot-token',
+          'Content-Type': 'application/json; charset=utf-8',
         },
-      );
+        body: JSON.stringify({
+          channel: 'U123456',
+          text: 'Hello Slack',
+        }),
+      });
     });
 
     it('should return null if Slack API returns ok: false', async () => {
@@ -119,16 +116,13 @@ describe('SlackApiService', () => {
       const result = await service.openSocketConnection();
 
       expect(result).toBe(mockWssUrl);
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://slack.com/api/apps.connections.open',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: 'Bearer xapp-mock-app-token',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
+      expect(global.fetch).toHaveBeenCalledWith('https://slack.com/api/apps.connections.open', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer xapp-mock-app-token',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-      );
+      });
     });
 
     it('should return null if Slack API returns ok: false', async () => {

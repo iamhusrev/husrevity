@@ -63,7 +63,9 @@ export class ProjectService {
       where: { ownerId: userId },
       order: { updatedAt: 'DESC' },
     });
-    return rows.map((p) => ProjectResponseDto.from(p, { role: 'OWNER', memberCount: 1, ownerName: null }));
+    return rows.map((p) =>
+      ProjectResponseDto.from(p, { role: 'OWNER', memberCount: 1, ownerName: null }),
+    );
   }
 
   async getById(userId: string, projectId: string): Promise<ProjectResponseDto> {
@@ -173,8 +175,7 @@ export class ProjectService {
       updatedById: row.updated_by_id,
       deletedAt: row.deleted_at,
     };
-    const ownerName =
-      [row.owner_first_name, row.owner_last_name].filter(Boolean).join(' ') || null;
+    const ownerName = [row.owner_first_name, row.owner_last_name].filter(Boolean).join(' ') || null;
     return ProjectResponseDto.from(project, {
       role: row.my_role,
       memberCount: Number(row.member_count ?? 1),
@@ -188,10 +189,9 @@ export class ProjectService {
 
   private async ownerName(ownerId: string): Promise<string | null> {
     const owner: { first_name: string | null; last_name: string | null }[] =
-      await this.dataSource.query(
-        `SELECT first_name, last_name FROM app_user WHERE id = $1`,
-        [ownerId],
-      );
+      await this.dataSource.query(`SELECT first_name, last_name FROM app_user WHERE id = $1`, [
+        ownerId,
+      ]);
     if (!owner.length) return null;
     return [owner[0].first_name, owner[0].last_name].filter(Boolean).join(' ') || null;
   }

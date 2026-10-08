@@ -1,10 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Observable, of } from 'rxjs';
@@ -59,7 +53,9 @@ export class IdempotencyInterceptor implements NestInterceptor {
             }),
           )
           .catch((err) =>
-            this.logger.warn(`Failed to persist idempotency key for ${req.method} ${req.path}: ${err}`),
+            this.logger.warn(
+              `Failed to persist idempotency key for ${req.method} ${req.path}: ${err}`,
+            ),
           );
       }),
     );

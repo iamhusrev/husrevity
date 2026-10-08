@@ -26,9 +26,7 @@ export class CreateSportLog1715000014000 implements MigrationInterface {
         deleted_at        TIMESTAMPTZ
       )
     `);
-    await qr.query(
-      `CREATE INDEX idx_sport_log_owner_date ON sport_log(owner_id, executed_date)`,
-    );
+    await qr.query(`CREATE INDEX idx_sport_log_owner_date ON sport_log(owner_id, executed_date)`);
   }
 
   public async down(qr: QueryRunner): Promise<void> {

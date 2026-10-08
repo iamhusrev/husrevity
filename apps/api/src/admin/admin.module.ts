@@ -9,11 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, UserInvite]),
-    AuthModule,
-    NotificationModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, UserInvite]), AuthModule, NotificationModule],
   providers: [AdminService],
   controllers: [AdminController, InviteController],
   exports: [AdminService],

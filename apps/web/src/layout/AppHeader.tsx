@@ -149,10 +149,7 @@ const AppHeader: React.FC = () => {
         </div>
       </div>
 
-      <TodaySuggestionsModal
-        isOpen={showSuggestions}
-        onClose={() => setShowSuggestions(false)}
-      />
+      <TodaySuggestionsModal isOpen={showSuggestions} onClose={() => setShowSuggestions(false)} />
     </header>
   );
 };

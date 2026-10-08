@@ -24,9 +24,7 @@ export class RolesGuard implements CanActivate {
     ]);
     if (!required || required.length === 0) return true;
 
-    const req = ctx
-      .switchToHttp()
-      .getRequest<Request & { user?: AuthenticatedUser }>();
+    const req = ctx.switchToHttp().getRequest<Request & { user?: AuthenticatedUser }>();
     const user = req.user;
     if (!user) throw ApiException.unauthorized('Authentication required');
     if (!required.includes(user.role)) {

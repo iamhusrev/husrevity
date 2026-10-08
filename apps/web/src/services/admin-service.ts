@@ -12,32 +12,25 @@ import {
   InviteResponse,
 } from "@/types/admin/admin";
 import { AuthResponse } from "@/types/auth/auth-response";
-import {
-  ADMIN_ENDPOINTS,
-  INVITE_PUBLIC_ENDPOINTS,
-} from "@/utils/api-endpoints";
+import { ADMIN_ENDPOINTS, INVITE_PUBLIC_ENDPOINTS } from "@/utils/api-endpoints";
 
 export const adminService = {
   // Users
-  async listUsers(params: {
-    search?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<ApiResponse<AdminUserListResponse>> {
+  async listUsers(
+    params: {
+      search?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+  ): Promise<ApiResponse<AdminUserListResponse>> {
     const r = await apiClient.get(ADMIN_ENDPOINTS.USERS, { params });
     return r.data;
   },
-  async updateUser(
-    id: string,
-    body: AdminUpdateUserRequest,
-  ): Promise<ApiResponse<AdminUser>> {
+  async updateUser(id: string, body: AdminUpdateUserRequest): Promise<ApiResponse<AdminUser>> {
     const r = await apiClient.patch(ADMIN_ENDPOINTS.USER_BY_ID(id), body);
     return r.data;
   },
-  async resetPassword(
-    id: string,
-    body: AdminResetPasswordRequest,
-  ): Promise<ApiResponse<void>> {
+  async resetPassword(id: string, body: AdminResetPasswordRequest): Promise<ApiResponse<void>> {
     const r = await apiClient.post(ADMIN_ENDPOINTS.RESET_PASSWORD(id), body);
     return r.data;
   },
@@ -51,9 +44,7 @@ export const adminService = {
     const r = await apiClient.get(ADMIN_ENDPOINTS.INVITES);
     return r.data;
   },
-  async createInvite(
-    body: CreateInviteRequest,
-  ): Promise<ApiResponse<CreatedInviteResponse>> {
+  async createInvite(body: CreateInviteRequest): Promise<ApiResponse<CreatedInviteResponse>> {
     const r = await apiClient.post(ADMIN_ENDPOINTS.INVITES, body);
     return r.data;
   },
@@ -75,14 +66,8 @@ export const invitePublicService = {
     const r = await apiClient.get(INVITE_PUBLIC_ENDPOINTS.LOOKUP(token));
     return r.data;
   },
-  async accept(
-    token: string,
-    body: AcceptInviteRequest,
-  ): Promise<ApiResponse<AuthResponse>> {
-    const r = await apiClient.post(
-      INVITE_PUBLIC_ENDPOINTS.ACCEPT(token),
-      body,
-    );
+  async accept(token: string, body: AcceptInviteRequest): Promise<ApiResponse<AuthResponse>> {
+    const r = await apiClient.post(INVITE_PUBLIC_ENDPOINTS.ACCEPT(token), body);
     return r.data;
   },
 };

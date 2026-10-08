@@ -127,7 +127,9 @@ export class GoogleCalendarController {
       const tokenRes = await client.getToken(code);
       tokens = tokenRes.tokens;
     } catch (error) {
-      throw ApiException.badRequest(`Failed to exchange code for tokens: ${(error as Error).message}`);
+      throw ApiException.badRequest(
+        `Failed to exchange code for tokens: ${(error as Error).message}`,
+      );
     }
 
     if (!tokens.access_token) {

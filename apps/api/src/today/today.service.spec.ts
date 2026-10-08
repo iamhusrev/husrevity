@@ -78,24 +78,76 @@ describe('TodayService', () => {
 
   describe('timeline', () => {
     it('includes a non-recurring event scheduled today, excludes non-event kinds and events outside today', async () => {
-      const todayAt10 = DateTime.now().setZone('Europe/Istanbul').set({ hour: 10, minute: 0 }).toUTC().toJSDate();
-      const yesterday = DateTime.now().setZone('Europe/Istanbul').minus({ days: 1 }).toUTC().toJSDate();
+      const todayAt10 = DateTime.now()
+        .setZone('Europe/Istanbul')
+        .set({ hour: 10, minute: 0 })
+        .toUTC()
+        .toJSDate();
+      const yesterday = DateTime.now()
+        .setZone('Europe/Istanbul')
+        .minus({ days: 1 })
+        .toUTC()
+        .toJSDate();
       items.find.mockResolvedValueOnce([
-        { id: '1', title: 'Ekip toplantısı', kind: 'event', rrule: null, blockId: null, scheduledAt: todayAt10, durationMin: 30 } as Item,
-        { id: '2', title: 'Dün kalan iş', kind: 'event', rrule: null, blockId: null, scheduledAt: yesterday, durationMin: 30 } as Item,
-        { id: '3', title: 'Bugünkü görev', kind: 'task', rrule: null, blockId: null, scheduledAt: todayAt10, durationMin: null } as Item,
+        {
+          id: '1',
+          title: 'Ekip toplantısı',
+          kind: 'event',
+          rrule: null,
+          blockId: null,
+          scheduledAt: todayAt10,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '2',
+          title: 'Dün kalan iş',
+          kind: 'event',
+          rrule: null,
+          blockId: null,
+          scheduledAt: yesterday,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '3',
+          title: 'Bugünkü görev',
+          kind: 'task',
+          rrule: null,
+          blockId: null,
+          scheduledAt: todayAt10,
+          durationMin: null,
+        } as Item,
       ]);
 
       const result = await service.timeline(ownerId);
 
       expect(result).toEqual([
-        { itemId: '1', title: 'Ekip toplantısı', kind: 'event', scheduledAt: todayAt10.toISOString(), durationMin: 30 },
+        {
+          itemId: '1',
+          title: 'Ekip toplantısı',
+          kind: 'event',
+          scheduledAt: todayAt10.toISOString(),
+          durationMin: 30,
+        },
       ]);
     });
 
     it("expands a recurring parent's today occurrence and includes its blockId children at the same occurrence", async () => {
-      const parent = { id: '10', title: 'Güne Hazırlık', kind: 'event', rrule: 'FREQ=DAILY', blockId: null, durationMin: 120 } as Item;
-      const child = { id: '11', title: 'Kuran ve Cevşen', kind: 'task', rrule: null, blockId: '10', durationMin: null } as Item;
+      const parent = {
+        id: '10',
+        title: 'Güne Hazırlık',
+        kind: 'event',
+        rrule: 'FREQ=DAILY',
+        blockId: null,
+        durationMin: 120,
+      } as Item;
+      const child = {
+        id: '11',
+        title: 'Kuran ve Cevşen',
+        kind: 'task',
+        rrule: null,
+        blockId: '10',
+        durationMin: null,
+      } as Item;
       items.find.mockResolvedValueOnce([parent, child]);
       recurrence.expand.mockReturnValueOnce([
         { occursOn: '2026-01-05', occursAt: new Date('2026-01-05T03:00:00Z') },
@@ -104,15 +156,48 @@ describe('TodayService', () => {
       const result = await service.timeline(ownerId);
 
       expect(result).toEqual([
-        { itemId: '10', title: 'Güne Hazırlık', kind: 'event', scheduledAt: '2026-01-05T03:00:00.000Z', durationMin: 120, occursOn: '2026-01-05' },
-        { itemId: '11', title: 'Kuran ve Cevşen', kind: 'task', scheduledAt: '2026-01-05T03:00:00.000Z', durationMin: null, occursOn: '2026-01-05' },
+        {
+          itemId: '10',
+          title: 'Güne Hazırlık',
+          kind: 'event',
+          scheduledAt: '2026-01-05T03:00:00.000Z',
+          durationMin: 120,
+          occursOn: '2026-01-05',
+        },
+        {
+          itemId: '11',
+          title: 'Kuran ve Cevşen',
+          kind: 'task',
+          scheduledAt: '2026-01-05T03:00:00.000Z',
+          durationMin: null,
+          occursOn: '2026-01-05',
+        },
       ]);
     });
 
     it('sorts the merged flat + expanded entries by scheduledAt', async () => {
-      const todayAt14 = DateTime.now().setZone('Europe/Istanbul').set({ hour: 14, minute: 0 }).toUTC().toJSDate();
-      const flatLate = { id: '1', title: 'Öğleden sonra', kind: 'event', rrule: null, blockId: null, scheduledAt: todayAt14, durationMin: 30 } as Item;
-      const recurringEarly = { id: '2', title: 'Sabah bloğu', kind: 'event', rrule: 'FREQ=DAILY', blockId: null, durationMin: 60 } as Item;
+      const todayAt14 = DateTime.now()
+        .setZone('Europe/Istanbul')
+        .set({ hour: 14, minute: 0 })
+        .toUTC()
+        .toJSDate();
+      const flatLate = {
+        id: '1',
+        title: 'Öğleden sonra',
+        kind: 'event',
+        rrule: null,
+        blockId: null,
+        scheduledAt: todayAt14,
+        durationMin: 30,
+      } as Item;
+      const recurringEarly = {
+        id: '2',
+        title: 'Sabah bloğu',
+        kind: 'event',
+        rrule: 'FREQ=DAILY',
+        blockId: null,
+        durationMin: 60,
+      } as Item;
       items.find.mockResolvedValueOnce([flatLate, recurringEarly]);
       recurrence.expand.mockReturnValueOnce([
         { occursOn: '2026-01-05', occursAt: new Date('2026-01-05T03:00:00Z') },

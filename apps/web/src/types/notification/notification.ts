@@ -1,8 +1,4 @@
-export type NotificationKind =
-  | "reminder"
-  | "task"
-  | "calendar_event"
-  | "time_block";
+export type NotificationKind = "reminder" | "task" | "calendar_event" | "time_block";
 
 export interface NotificationResponse {
   id: string;

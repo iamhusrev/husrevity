@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 import { User } from './user.entity';
 
 export class UpdateProfileDto {

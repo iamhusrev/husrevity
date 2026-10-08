@@ -112,7 +112,9 @@ export class TelegramMessageHandlerService {
       );
       await this.telegramApiService.sendMessage(chatId, chatQuickAddReply(result));
     } catch (err) {
-      this.logger.error(`Failed to create reminder from Telegram message: ${(err as Error).message}`);
+      this.logger.error(
+        `Failed to create reminder from Telegram message: ${(err as Error).message}`,
+      );
       await this.telegramApiService.sendMessage(
         chatId,
         `❌ Anımsatıcı eklenirken bir hata oluştu: ${(err as Error).message}`,

@@ -36,25 +36,32 @@ describe('GoogleCalendarConfig', () => {
     config = await createTestingModule({});
 
     expect(() => config.createOAuth2Client()).toThrow(ApiException);
-    expect(() => config.createOAuth2Client()).toThrow('Google Calendar integration is not configured');
+    expect(() => config.createOAuth2Client()).toThrow(
+      'Google Calendar integration is not configured',
+    );
   });
 
   it('should report isConfigured as true and return OAuth2Client when env vars are set', async () => {
     config = await createTestingModule({
       GOOGLE_CALENDAR_CLIENT_ID: 'test-client-id',
       GOOGLE_CALENDAR_CLIENT_SECRET: 'test-client-secret',
-      GOOGLE_CALENDAR_REDIRECT_URI: 'http://localhost:4090/api/integrations/google-calendar/callback',
+      GOOGLE_CALENDAR_REDIRECT_URI:
+        'http://localhost:4090/api/integrations/google-calendar/callback',
     });
 
     expect(config.isConfigured()).toBe(true);
     expect(config.clientId).toBe('test-client-id');
     expect(config.clientSecret).toBe('test-client-secret');
-    expect(config.redirectUri).toBe('http://localhost:4090/api/integrations/google-calendar/callback');
+    expect(config.redirectUri).toBe(
+      'http://localhost:4090/api/integrations/google-calendar/callback',
+    );
 
     const client = config.createOAuth2Client();
     expect(client).toBeDefined();
     expect((client as any)._clientId).toBe('test-client-id');
     expect((client as any)._clientSecret).toBe('test-client-secret');
-    expect((client as any).redirectUri).toBe('http://localhost:4090/api/integrations/google-calendar/callback');
+    expect((client as any).redirectUri).toBe(
+      'http://localhost:4090/api/integrations/google-calendar/callback',
+    );
   });
 });

@@ -44,7 +44,10 @@ export class GoogleCalendarConfig {
 
   /** Web app origin the OAuth callback sends the browser back to. */
   get webUrl(): string {
-    return (this.config.get<string>('HUSREVITY_WEB_URL') || 'http://localhost:3090').replace(/\/+$/, '');
+    return (this.config.get<string>('HUSREVITY_WEB_URL') || 'http://localhost:3090').replace(
+      /\/+$/,
+      '',
+    );
   }
 
   isConfigured(): boolean {
@@ -55,10 +58,6 @@ export class GoogleCalendarConfig {
     if (!this.isConfigured()) {
       throw ApiException.badRequest('Google Calendar integration is not configured');
     }
-    return new google.auth.OAuth2(
-      this.clientId,
-      this.clientSecret,
-      this.redirectUri,
-    );
+    return new google.auth.OAuth2(this.clientId, this.clientSecret, this.redirectUri);
   }
 }

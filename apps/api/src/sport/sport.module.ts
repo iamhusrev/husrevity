@@ -13,9 +13,7 @@ import { GeminiConfig } from '../ai/gemini.config';
 import { SportController } from './sport.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([SportProfile, SportProgram, SportSession, SportLog]),
-  ],
+  imports: [TypeOrmModule.forFeature([SportProfile, SportProgram, SportSession, SportLog])],
   controllers: [SportController],
   providers: [
     GeminiConfig,

@@ -146,8 +146,7 @@ export function useUpdateSportSession() {
 export function useDeleteSportSession() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id }: { id: string; programId?: string }) =>
-      sportService.deleteSession(id),
+    mutationFn: ({ id }: { id: string; programId?: string }) => sportService.deleteSession(id),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: SPORT_KEYS.programs });
       if (vars.programId) {

@@ -305,11 +305,7 @@ export class ItemService {
    * owner-scoped (404, never 403, to avoid leaking existence); a
    * project-attached item defers to project membership.
    */
-  private async requireItemAccess(
-    userId: string,
-    id: string,
-    minRole: ProjectRole,
-  ): Promise<Item> {
+  private async requireItemAccess(userId: string, id: string, minRole: ProjectRole): Promise<Item> {
     const item = await this.items.findOne({ where: { id } });
     if (!item) throw ApiException.notFound('Item not found');
     if (!item.projectId) {

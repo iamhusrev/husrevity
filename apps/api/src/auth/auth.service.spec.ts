@@ -50,7 +50,10 @@ describe('AuthService', () => {
         AuthService,
         { provide: getRepositoryToken(User), useValue: users },
         { provide: getRepositoryToken(RefreshToken), useValue: refreshTokens },
-        { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('access-token') } },
+        {
+          provide: JwtService,
+          useValue: { signAsync: jest.fn().mockResolvedValue('access-token') },
+        },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue(undefined) } },
         { provide: DataSource, useValue: dataSource },
         { provide: ProjectInviteService, useValue: { activatePendingForUser: jest.fn() } },
@@ -86,10 +89,9 @@ describe('AuthService', () => {
 
       expect(qb.update).toHaveBeenCalledWith(RefreshToken);
       expect(qb.set).toHaveBeenCalledWith({ revoked: true });
-      expect(qb.where).toHaveBeenCalledWith(
-        'family_id = :familyId AND revoked = false',
-        { familyId: 'fam-1' },
-      );
+      expect(qb.where).toHaveBeenCalledWith('family_id = :familyId AND revoked = false', {
+        familyId: 'fam-1',
+      });
       // The whole point: no new tokens get issued for a reuse attempt.
       expect(dataSource.transaction).not.toHaveBeenCalled();
     });
@@ -121,7 +123,12 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() + 60_000),
       } as RefreshToken;
       refreshTokens.findOne.mockResolvedValueOnce(token);
-      users.findOne.mockResolvedValueOnce({ id: '1', enabled: true, email: 'a@b.com', role: 'user' } as User);
+      users.findOne.mockResolvedValueOnce({
+        id: '1',
+        enabled: true,
+        email: 'a@b.com',
+        role: 'user',
+      } as User);
 
       await service.refresh({ refreshToken: raw });
 

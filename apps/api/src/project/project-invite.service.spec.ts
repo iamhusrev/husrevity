@@ -347,7 +347,9 @@ describe('ProjectInviteService', () => {
       invites.findOne.mockResolvedValueOnce(makeInvite());
       users.findOne.mockResolvedValueOnce({ id: '9', email: 'newperson@example.com' });
 
-      await expect(service.registerAndCreateMember(token, dto)).rejects.toMatchObject({ status: 409 });
+      await expect(service.registerAndCreateMember(token, dto)).rejects.toMatchObject({
+        status: 409,
+      });
       expect(dataSource.transaction).not.toHaveBeenCalled();
     });
 
@@ -365,14 +367,23 @@ describe('ProjectInviteService', () => {
 
       expect(em.create).toHaveBeenCalledWith(
         User,
-        expect.objectContaining({ email: 'newperson@example.com', firstName: 'New', lastName: 'Person' }),
+        expect.objectContaining({
+          email: 'newperson@example.com',
+          firstName: 'New',
+          lastName: 'Person',
+        }),
       );
       const createdUserArg = em.create.mock.calls[0][1] as { passwordHash: string };
       expect(createdUserArg.passwordHash).toBeDefined();
       expect(createdUserArg.passwordHash).not.toBe(dto.password);
 
       expect(emMemberRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ projectId: '10', userId: 'u99', role: 'VIEWER', invitedById: '2' }),
+        expect.objectContaining({
+          projectId: '10',
+          userId: 'u99',
+          role: 'VIEWER',
+          invitedById: '2',
+        }),
       );
       expect(invite.acceptedAt).not.toBeNull();
       expect(invite.acceptedUserId).toBe('u99');
@@ -380,7 +391,9 @@ describe('ProjectInviteService', () => {
       // Returns the plain User entity — this service has no AuthService/JwtService
       // dependency at all (see constructor providers above), so it can never mint
       // a token itself; the AuthModule caller does that separately.
-      expect(result).toEqual(expect.objectContaining({ id: 'u99', email: 'newperson@example.com' }));
+      expect(result).toEqual(
+        expect.objectContaining({ id: 'u99', email: 'newperson@example.com' }),
+      );
       expect((result as unknown as { passwordHash: string }).passwordHash).not.toBe(dto.password);
     });
   });

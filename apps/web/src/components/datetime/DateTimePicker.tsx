@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 // Layout effect on the client, plain effect on the server (avoids the SSR
 // "useLayoutEffect does nothing on the server" warning for this client tree).
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { useTranslation } from "react-i18next";
-import {
-  BiCalendar,
-  BiChevronLeft,
-  BiChevronRight,
-  BiX,
-} from "react-icons/bi";
+import { BiCalendar, BiChevronLeft, BiChevronRight, BiX } from "react-icons/bi";
 import { getDateLocale } from "@/utils/i18n-date";
 
 export type DateTimePickerMode = "datetime" | "date";
@@ -102,9 +89,7 @@ export default function DateTimePicker({
 
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [cursor, setCursor] = useState<Date>(() =>
-    selected ? new Date(selected) : new Date(),
-  );
+  const [cursor, setCursor] = useState<Date>(() => (selected ? new Date(selected) : new Date()));
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -187,10 +172,7 @@ export default function DateTimePicker({
     if (!open) return;
     const onDown = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (
-        popoverRef.current?.contains(target) ||
-        triggerRef.current?.contains(target)
-      ) {
+      if (popoverRef.current?.contains(target) || triggerRef.current?.contains(target)) {
         return;
       }
       setOpen(false);
@@ -458,7 +440,11 @@ export default function DateTimePicker({
               {t("common.clear", "Temizle")}
             </button>
           )}
-          <button type="button" onClick={() => setOpen(false)} className="husrev-btn h-8 px-3 text-xs">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="husrev-btn h-8 px-3 text-xs"
+          >
             {t("common.done", "Tamam")}
           </button>
         </div>

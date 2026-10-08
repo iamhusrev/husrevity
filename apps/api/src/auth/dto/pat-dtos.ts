@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsDateString, IsIn, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsDateString,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 import { PatScope, PersonalAccessToken } from '../personal-access-token.entity';
 
 export const PAT_SCOPES: PatScope[] = [

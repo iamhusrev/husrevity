@@ -322,10 +322,7 @@ const AppSidebar: React.FC = () => {
           )}
         </div>
 
-        <TodaySuggestionsModal
-          isOpen={showSuggestions}
-          onClose={() => setShowSuggestions(false)}
-        />
+        <TodaySuggestionsModal isOpen={showSuggestions} onClose={() => setShowSuggestions(false)} />
       </div>
     </aside>
   );

@@ -80,9 +80,7 @@ export const AuthService = {
     await apiClient.post(AUTH_ENDPOINTS.ME_PASSWORD, body);
   },
 
-  async updateNotificationPreferences(
-    body: NotificationPreferencesRequest,
-  ): Promise<UserResponse> {
+  async updateNotificationPreferences(body: NotificationPreferencesRequest): Promise<UserResponse> {
     const response = await apiClient.patch<ApiResponse<UserResponse>>(
       AUTH_ENDPOINTS.ME_NOTIFICATION_PREFERENCES,
       body,

@@ -88,13 +88,18 @@ export class SportAiService {
   }
 
   private buildSystemPrompt(
-    profile: { fitnessLevel: string; weeklyHours: number; goals: string | null; notes: string | null },
+    profile: {
+      fitnessLevel: string;
+      weeklyHours: number;
+      goals: string | null;
+      notes: string | null;
+    },
     config: GenerateAiProgramDto,
   ): string {
     return [
-      'You are a professional fitness coach. Generate a '
-        + `${config.weekCount}-week personalized workout program based on the user's `
-        + 'profile and constraints.',
+      'You are a professional fitness coach. Generate a ' +
+        `${config.weekCount}-week personalized workout program based on the user's ` +
+        'profile and constraints.',
       '',
       'User Profile:',
       `- Fitness Level: ${profile.fitnessLevel}`,
@@ -159,19 +164,14 @@ export class SportAiService {
         throw new Error(`HTTP ${r.status}: ${JSON.stringify(json).slice(0, 200)}`);
       }
       const candidates =
-        (json.candidates as
-          | { content?: { parts?: { text?: string }[] } }[]
-          | undefined) ?? [];
-      const text =
-        candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+        (json.candidates as { content?: { parts?: { text?: string }[] } }[] | undefined) ?? [];
+      const text = candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
       if (!text) throw new Error('empty response');
       return text;
     } catch (e) {
       // Detail stays server-side; the client only ever sees a generic message.
       this.logger.error('Gemini sport program generation failed', e as Error);
-      throw ApiException.badRequest(
-        'AI program generation failed. Please try again in a moment.',
-      );
+      throw ApiException.badRequest('AI program generation failed. Please try again in a moment.');
     }
   }
 }

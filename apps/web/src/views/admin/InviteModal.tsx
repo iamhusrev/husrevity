@@ -17,13 +17,10 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<Role>("user");
-  const [result, setResult] = useState<
-    | null
-    | {
-        inviteUrl: string;
-        emailDelivered: boolean;
-      }
-  >(null);
+  const [result, setResult] = useState<null | {
+    inviteUrl: string;
+    emailDelivered: boolean;
+  }>(null);
   const [copied, setCopied] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -57,7 +54,10 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={submit}
@@ -116,7 +116,9 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
                     type="button"
                     onClick={() => setRole("user")}
                     className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                      role === "user" ? "bg-husrev-ember text-husrev-cream" : "text-gray-600 dark:text-gray-300"
+                      role === "user"
+                        ? "bg-husrev-ember text-husrev-cream"
+                        : "text-gray-600 dark:text-gray-300"
                     }`}
                   >
                     {t("admin.role.user", "Kullanıcı")}
@@ -125,7 +127,9 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
                     type="button"
                     onClick={() => setRole("admin")}
                     className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                      role === "admin" ? "bg-husrev-ember text-husrev-cream" : "text-gray-600 dark:text-gray-300"
+                      role === "admin"
+                        ? "bg-husrev-ember text-husrev-cream"
+                        : "text-gray-600 dark:text-gray-300"
                     }`}
                   >
                     {t("admin.role.admin", "Yönetici")}
@@ -142,7 +146,12 @@ export function InviteModal({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
-              <button type="button" onClick={onClose} disabled={create.isPending} className="husrev-btn-ghost">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={create.isPending}
+                className="husrev-btn-ghost"
+              >
                 {t("common.cancel", "İptal")}
               </button>
               <button type="submit" disabled={create.isPending} className="husrev-btn">
@@ -197,11 +206,7 @@ function ResultPanel({
             className="husrev-input flex-1 font-mono text-[12px]"
             onClick={(e) => (e.target as HTMLInputElement).select()}
           />
-          <button
-            type="button"
-            onClick={onCopy}
-            className="husrev-btn-ghost shrink-0"
-          >
+          <button type="button" onClick={onCopy} className="husrev-btn-ghost shrink-0">
             {copied ? (
               <>
                 <HiOutlineCheck className="h-4 w-4" />

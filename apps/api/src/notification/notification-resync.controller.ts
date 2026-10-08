@@ -1,10 +1,7 @@
 import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import {
-  AuthenticatedUser,
-  CurrentUser,
-} from '../common/current-user.decorator';
+import { AuthenticatedUser, CurrentUser } from '../common/current-user.decorator';
 import { NotificationResyncService } from './notification-resync.service';
 
 @ApiTags('notifications')

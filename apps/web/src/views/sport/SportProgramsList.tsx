@@ -17,13 +17,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { PROGRAM_TYPES, ProgramType, SportProgramResponse } from "@/types/sport/sport";
-import {
-  BiCalendarCheck,
-  BiPlus,
-  BiSolidMagicWand,
-  BiTargetLock,
-  BiTrash,
-} from "react-icons/bi";
+import { BiCalendarCheck, BiPlus, BiSolidMagicWand, BiTargetLock, BiTrash } from "react-icons/bi";
 import { HiSparkles } from "react-icons/hi2";
 import SportAiGeneratorModal from "./SportAiGeneratorModal";
 
@@ -156,9 +150,7 @@ function NewProgramModal({ onClose }: { onClose: () => void }) {
               <Controller
                 control={control}
                 name="startDate"
-                render={({ field }) => (
-                  <input type="date" {...field} className="husrev-input" />
-                )}
+                render={({ field }) => <input type="date" {...field} className="husrev-input" />}
               />
             </div>
             <div className="space-y-1.5">
@@ -168,9 +160,7 @@ function NewProgramModal({ onClose }: { onClose: () => void }) {
               <Controller
                 control={control}
                 name="endDate"
-                render={({ field }) => (
-                  <input type="date" {...field} className="husrev-input" />
-                )}
+                render={({ field }) => <input type="date" {...field} className="husrev-input" />}
               />
             </div>
           </div>
@@ -336,11 +326,7 @@ export default function SportProgramsList({
           {t("sport.programs.intro", "Antrenman programlarını oluştur, yönet ya da AI ile üret.")}
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowAiModal(true)}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={() => setShowAiModal(true)} className="husrev-btn-ghost">
             <BiSolidMagicWand size={16} />
             {t("sport.programs.generateAi", "AI ile oluştur")}
           </button>
@@ -379,11 +365,7 @@ export default function SportProgramsList({
               <BiPlus size={16} />
               {t("sport.programs.newProgram", "Yeni program")}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowAiModal(true)}
-              className="husrev-btn-ghost"
-            >
+            <button type="button" onClick={() => setShowAiModal(true)} className="husrev-btn-ghost">
               <BiSolidMagicWand size={16} />
               {t("sport.programs.generateAi", "AI ile oluştur")}
             </button>

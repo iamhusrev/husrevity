@@ -5,11 +5,7 @@ import { NoteService } from '../note/note.service';
 import { ReminderService } from '../reminder/reminder.service';
 import { ProjectService } from '../project/project.service';
 import { TaskService } from '../task/task.service';
-import {
-  SuggestionItemDto,
-  SuggestionMode,
-  SuggestionsRequestDto,
-} from './dto/suggestion-dtos';
+import { SuggestionItemDto, SuggestionMode, SuggestionsRequestDto } from './dto/suggestion-dtos';
 import { parseSuggestions, ParseContext } from './suggestion-parser';
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -40,10 +36,7 @@ type GatheredContext = {
 @Injectable()
 export class AiSuggestionService {
   private readonly logger = new Logger(AiSuggestionService.name);
-  private readonly cache = new Map<
-    string,
-    { value: SuggestionItemDto[]; expiresAt: number }
-  >();
+  private readonly cache = new Map<string, { value: SuggestionItemDto[]; expiresAt: number }>();
 
   constructor(
     private readonly gemini: GeminiConfig,
@@ -53,10 +46,7 @@ export class AiSuggestionService {
     private readonly tasks: TaskService,
   ) {}
 
-  async suggest(
-    ownerId: string,
-    req: SuggestionsRequestDto,
-  ): Promise<SuggestionItemDto[]> {
+  async suggest(ownerId: string, req: SuggestionsRequestDto): Promise<SuggestionItemDto[]> {
     if (!this.gemini.isConfigured()) {
       throw ApiException.badRequest(
         'AI is not configured. Set GOOGLE_GEMINI_API_KEY in apps/api/.env.',
@@ -108,9 +98,7 @@ export class AiSuggestionService {
     // Reminders: all open across every list.
     const reminderRows = (
       await Promise.all(
-        reminderLists.map((l) =>
-          this.reminders.listReminders(ownerId, l.id, false),
-        ),
+        reminderLists.map((l) => this.reminders.listReminders(ownerId, l.id, false)),
       )
     ).flat();
 
@@ -126,18 +114,12 @@ export class AiSuggestionService {
     const now = Date.now();
 
     const notes = [...noteRows]
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      )
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, CTX_NOTES)
       .map((n) => ({
         id: n.id,
         title: n.title,
-        excerpt: (n.bodyMarkdown ?? '')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, NOTE_EXCERPT),
+        excerpt: (n.bodyMarkdown ?? '').replace(/\s+/g, ' ').trim().slice(0, NOTE_EXCERPT),
         updatedAt: n.updatedAt.toISOString(),
       }));
 
@@ -148,12 +130,8 @@ export class AiSuggestionService {
         return due - now <= WEEK_MS; // overdue + this week
       })
       .sort((a, b) => {
-        const ax = a.dueAt
-          ? new Date(a.dueAt).getTime()
-          : Number.MAX_SAFE_INTEGER;
-        const bx = b.dueAt
-          ? new Date(b.dueAt).getTime()
-          : Number.MAX_SAFE_INTEGER;
+        const ax = a.dueAt ? new Date(a.dueAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const bx = b.dueAt ? new Date(b.dueAt).getTime() : Number.MAX_SAFE_INTEGER;
         return ax - bx;
       })
       .slice(0, CTX_REMINDERS)
@@ -178,20 +156,14 @@ export class AiSuggestionService {
     const tasks = taskRows
       .filter((t) => t.status === 'TODO' || t.status === 'IN_PROGRESS')
       .sort((a, b) => {
-        const ax = a.dueAt
-          ? new Date(a.dueAt).getTime()
-          : Number.MAX_SAFE_INTEGER;
-        const bx = b.dueAt
-          ? new Date(b.dueAt).getTime()
-          : Number.MAX_SAFE_INTEGER;
+        const ax = a.dueAt ? new Date(a.dueAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const bx = b.dueAt ? new Date(b.dueAt).getTime() : Number.MAX_SAFE_INTEGER;
         return ax - bx;
       })
       .slice(0, CTX_TASKS_TOTAL)
       .map((t) => ({
         id: t.id,
-        projectCode: t.projectId
-          ? (projectCodeById.get(t.projectId) ?? '')
-          : '',
+        projectCode: t.projectId ? (projectCodeById.get(t.projectId) ?? '') : '',
         title: t.title,
         status: t.status,
         priority: t.priority,
@@ -236,7 +208,7 @@ export class AiSuggestionService {
         : 'The user wants a LEISURE / HOBBY suggestion — something restorative. If the context shows heavy load (overdue items, many tasks), lean lighter and shorter.';
 
     return [
-      'You are the user\'s personal productivity assistant inside a self-hosted app.',
+      "You are the user's personal productivity assistant inside a self-hosted app.",
       `Return EXACTLY ${count} suggestion${count === 1 ? '' : 's'} as a JSON array. No prose. No markdown fences.`,
       modeLine,
       'Each item: { "title": string, "description": string, "kind": "task"|"hobby"|"mixed", "sourceRef": { "type": "reminder"|"task"|"note"|"project", "id": string } | null, "reasonShort": string }',
@@ -244,7 +216,7 @@ export class AiSuggestionService {
       '- title ≤ 80 chars, imperative, single line.',
       '- description ≤ 220 chars, 1–2 sentences, second person.',
       '- reasonShort ≤ 120 chars, explain WHY this surfaces NOW in Turkish (e.g. "2 gün sonra son tarih", "3 haftadır ilerlemedi", "Gecikmiş bir anımsatıcın var").',
-      '- If a task-mode suggestion derives from a real item in the context, set sourceRef to that item\'s exact id and type. Otherwise sourceRef = null.',
+      "- If a task-mode suggestion derives from a real item in the context, set sourceRef to that item's exact id and type. Otherwise sourceRef = null.",
       '- Hobby-mode sourceRef is usually null.',
       '- Always respond in Turkish (Türkçe), regardless of the language of the context titles/notes.',
       '- Never invent ids that are not in the context.',
@@ -263,9 +235,7 @@ export class AiSuggestionService {
 
     lines.push(`\n[reminders ${c.reminders.length}]`);
     for (const r of c.reminders) {
-      lines.push(
-        `- id=${r.id} prio=${r.priority} due=${r.dueAt ?? '-'} :: ${r.title}`,
-      );
+      lines.push(`- id=${r.id} prio=${r.priority} due=${r.dueAt ?? '-'} :: ${r.title}`);
     }
 
     lines.push(`\n[tasks ${c.tasks.length}]`);
@@ -315,18 +285,13 @@ export class AiSuggestionService {
         throw new Error(`HTTP ${r.status}: ${JSON.stringify(json).slice(0, 200)}`);
       }
       const candidates =
-        (json.candidates as
-          | { content?: { parts?: { text?: string }[] } }[]
-          | undefined) ?? [];
-      const text =
-        candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+        (json.candidates as { content?: { parts?: { text?: string }[] } }[] | undefined) ?? [];
+      const text = candidates[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
       if (!text) throw new Error('empty response');
       return text;
     } catch (e) {
       this.logger.error('Gemini suggestion call failed', e as Error);
-      throw ApiException.badRequest(
-        `AI request failed: ${(e as Error).message}`,
-      );
+      throw ApiException.badRequest(`AI request failed: ${(e as Error).message}`);
     }
   }
 

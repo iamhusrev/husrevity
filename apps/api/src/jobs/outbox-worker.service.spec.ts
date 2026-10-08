@@ -16,8 +16,14 @@ describe('OutboxWorkerService', () => {
   let pgBoss: { isReady: jest.Mock; enqueue: jest.Mock };
 
   beforeEach(async () => {
-    events = { find: jest.fn().mockResolvedValue([]), save: jest.fn().mockResolvedValue(undefined) };
-    pgBoss = { isReady: jest.fn().mockReturnValue(true), enqueue: jest.fn().mockResolvedValue('job-1') };
+    events = {
+      find: jest.fn().mockResolvedValue([]),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    pgBoss = {
+      isReady: jest.fn().mockReturnValue(true),
+      enqueue: jest.fn().mockResolvedValue('job-1'),
+    };
     const module = await Test.createTestingModule({
       providers: [
         OutboxWorkerService,
@@ -35,7 +41,12 @@ describe('OutboxWorkerService', () => {
   });
 
   it('enqueues each unprocessed row and marks it processed', async () => {
-    const row = { id: '1', type: 'item.created', payload: { id: '5' }, processedAt: null } as OutboxEvent;
+    const row = {
+      id: '1',
+      type: 'item.created',
+      payload: { id: '5' },
+      processedAt: null,
+    } as OutboxEvent;
     events.find.mockResolvedValueOnce([row]);
 
     await service.tick();

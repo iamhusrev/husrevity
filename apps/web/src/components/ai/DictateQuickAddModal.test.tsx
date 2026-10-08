@@ -92,7 +92,9 @@ describe("DictateQuickAddModal", () => {
     renderModal({ onConfirm });
 
     await user.type(
-      screen.getByPlaceholderText("Speak or dictate freely — we will split it into separate items."),
+      screen.getByPlaceholderText(
+        "Speak or dictate freely — we will split it into separate items.",
+      ),
       "dictated text",
     );
     await user.click(screen.getByRole("button", { name: "Split into items" }));

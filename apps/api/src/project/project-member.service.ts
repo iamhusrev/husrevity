@@ -35,7 +35,9 @@ export class ProjectMemberService {
       return a.joinedAt.getTime() - b.joinedAt.getTime();
     });
     return Promise.all(
-      rows.map(async (m) => ProjectMemberResponseDto.from(m, await this.users.requireById(m.userId))),
+      rows.map(async (m) =>
+        ProjectMemberResponseDto.from(m, await this.users.requireById(m.userId)),
+      ),
     );
   }
 

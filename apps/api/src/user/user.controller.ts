@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { UserService } from './user.service';
@@ -53,10 +44,7 @@ export class UserController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: NotificationPreferencesDto,
   ): Promise<UserDto> {
-    const updated = await this.userService.updateNotificationPreferences(
-      user.userId,
-      body,
-    );
+    const updated = await this.userService.updateNotificationPreferences(user.userId, body);
     return UserDto.from(updated);
   }
 }

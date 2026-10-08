@@ -31,10 +31,7 @@ export class SlackApiService {
    * Post a message to a channel or user DM via chat.postMessage.
    * Requires Bot User OAuth Token (xoxb-...).
    */
-  async postMessage(
-    channel: string,
-    text: string,
-  ): Promise<SlackPostMessageResult | null> {
+  async postMessage(channel: string, text: string): Promise<SlackPostMessageResult | null> {
     if (!this.slackConfig.isConfigured() || !this.slackConfig.botToken) {
       this.logger.warn('Cannot send Slack message: bot token is not configured');
       return null;
@@ -58,17 +55,13 @@ export class SlackApiService {
       const data = (await response.json()) as SlackPostMessageResult;
 
       if (!data.ok) {
-        this.logger.error(
-          `Slack postMessage failed: ${data.error || 'Unknown error'}`,
-        );
+        this.logger.error(`Slack postMessage failed: ${data.error || 'Unknown error'}`);
         return null;
       }
 
       return data;
     } catch (err) {
-      this.logger.error(
-        `Failed to call Slack chat.postMessage API: ${(err as Error).message}`,
-      );
+      this.logger.error(`Failed to call Slack chat.postMessage API: ${(err as Error).message}`);
       return null;
     }
   }
@@ -80,9 +73,7 @@ export class SlackApiService {
    */
   async openSocketConnection(): Promise<string | null> {
     if (!this.slackConfig.isConfigured() || !this.slackConfig.appToken) {
-      this.logger.warn(
-        'Cannot open Slack socket connection: app token is not configured',
-      );
+      this.logger.warn('Cannot open Slack socket connection: app token is not configured');
       return null;
     }
 
@@ -100,9 +91,7 @@ export class SlackApiService {
       const data = (await response.json()) as SlackOpenConnectionResult;
 
       if (!data.ok || !data.url) {
-        this.logger.error(
-          `Slack apps.connections.open failed: ${data.error || 'Unknown error'}`,
-        );
+        this.logger.error(`Slack apps.connections.open failed: ${data.error || 'Unknown error'}`);
         return null;
       }
 

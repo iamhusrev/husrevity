@@ -23,14 +23,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { cn } from "@/utils/utils";
-import {
-  BiPlus,
-  BiTrash,
-  BiPencil,
-  BiChevronUp,
-  BiChevronDown,
-  BiX,
-} from "react-icons/bi";
+import { BiPlus, BiTrash, BiPencil, BiChevronUp, BiChevronDown, BiX } from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -106,9 +99,7 @@ export default function EvkatPage() {
     const [moved] = next.splice(index, 1);
     next.splice(target, 0, moved);
     try {
-      await reorder.mutateAsync(
-        next.map((s, i) => ({ id: s.id, position: i })),
-      );
+      await reorder.mutateAsync(next.map((s, i) => ({ id: s.id, position: i })));
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
@@ -130,11 +121,7 @@ export default function EvkatPage() {
             "Gününü bölen sabit vakitler ve her vakte bağlı işler. Her gün tekrar eden şablonun.",
           )}
         </p>
-        <button
-          type="button"
-          onClick={() => setEditing({ segment: null })}
-          className="husrev-btn"
-        >
+        <button type="button" onClick={() => setEditing({ segment: null })} className="husrev-btn">
           <BiPlus className="h-4 w-4" />
           {t("evkat.newSegment", "Yeni vakit")}
         </button>
@@ -170,10 +157,7 @@ export default function EvkatPage() {
             {t("evkat.empty.kicker", "Vakitlerin hazır değil")}
           </div>
           <p className="mx-auto mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
-            {t(
-              "evkat.empty.body",
-              "Kendi vakitlerini ekleyerek Evkat'ını oluşturmaya başla.",
-            )}
+            {t("evkat.empty.body", "Kendi vakitlerini ekleyerek Evkat'ını oluşturmaya başla.")}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
@@ -323,11 +307,7 @@ function SegmentCard({
             </h3>
           </div>
           <div className="flex flex-none items-center gap-0.5 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-            <IconBtn
-              onClick={onMoveUp}
-              disabled={isFirst}
-              label={t("evkat.moveUp", "Yukarı taşı")}
-            >
+            <IconBtn onClick={onMoveUp} disabled={isFirst} label={t("evkat.moveUp", "Yukarı taşı")}>
               <BiChevronUp className="h-4 w-4" />
             </IconBtn>
             <IconBtn
@@ -442,13 +422,9 @@ function EditSegmentModal({
   const [start, setStart] = useState(minutesToTimeInput(initial?.startMinute ?? null));
   const [end, setEnd] = useState(minutesToTimeInput(initial?.endMinute ?? null));
   const [theme, setTheme] = useState(initial?.theme ?? "");
-  const [colorToken, setColorToken] = useState<RoutineColorToken | "">(
-    initial?.colorToken ?? "",
-  );
+  const [colorToken, setColorToken] = useState<RoutineColorToken | "">(initial?.colorToken ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [daysOfWeek, setDaysOfWeek] = useState<number>(
-    initial?.daysOfWeek ?? ALL_DAYS_MASK,
-  );
+  const [daysOfWeek, setDaysOfWeek] = useState<number>(initial?.daysOfWeek ?? ALL_DAYS_MASK);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -652,12 +628,7 @@ function EditSegmentModal({
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel", "İptal")}
           </button>
           <button type="submit" disabled={isPending} className="husrev-btn">
@@ -685,18 +656,10 @@ function EditSegmentModal({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
-      <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-        {label}
-      </span>
+      <span className="husrev-kicker text-gray-600 dark:text-gray-300">{label}</span>
       {children}
     </label>
   );

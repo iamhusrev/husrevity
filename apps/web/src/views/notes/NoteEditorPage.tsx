@@ -30,15 +30,7 @@ interface Props {
   flushRef?: RefObject<(() => Promise<void>) | null>;
 }
 
-const NOTE_COLORS = [
-  "#FFFFFF",
-  "#FFF8B8",
-  "#FBE2D5",
-  "#D9F2D0",
-  "#D4E8F2",
-  "#E7DCF5",
-  "#FADADD",
-];
+const NOTE_COLORS = ["#FFFFFF", "#FFF8B8", "#FBE2D5", "#D9F2D0", "#D4E8F2", "#E7DCF5", "#FADADD"];
 
 export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushRef }: Props) {
   const router = useRouter();
@@ -65,7 +57,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         tagIds: z.array(z.number()).optional(),
         colorHex: z.string().nullable().optional(),
       }),
-    [t],
+    [],
   );
 
   type FormValues = z.infer<typeof schema>;
@@ -291,11 +283,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         <input type="hidden" {...register("tagIds")} />
 
         <div className="flex gap-3">
-          <Button
-            type="submit"
-            size="sm"
-            disabled={createNote.isPending || updateNote.isPending}
-          >
+          <Button type="submit" size="sm" disabled={createNote.isPending || updateNote.isPending}>
             {createNote.isPending || updateNote.isPending ? t("common.saving") : t("common.save")}
           </Button>
           <button

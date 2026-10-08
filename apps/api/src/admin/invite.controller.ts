@@ -2,10 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestj
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AdminService } from './admin.service';
-import {
-  AcceptInviteDto,
-  InviteLookupDto,
-} from './dto/admin-dtos';
+import { AcceptInviteDto, InviteLookupDto } from './dto/admin-dtos';
 import { AuthResponseDto } from '../auth/dto/auth-dtos';
 import { Public } from '../common/public.decorator';
 
@@ -39,10 +36,7 @@ export class InviteController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(':token/accept')
   @HttpCode(HttpStatus.CREATED)
-  accept(
-    @Param('token') token: string,
-    @Body() body: AcceptInviteDto,
-  ): Promise<AuthResponseDto> {
+  accept(@Param('token') token: string, @Body() body: AcceptInviteDto): Promise<AuthResponseDto> {
     return this.admin.acceptInvite(token, body);
   }
 }

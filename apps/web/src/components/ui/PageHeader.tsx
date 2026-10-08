@@ -65,9 +65,7 @@ export default function PageHeader({
           )}
           {renderTitle()}
           {description && (
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {description}
-            </p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-4">
@@ -83,7 +81,9 @@ export default function PageHeader({
                 </Link>
               </li>
               <li className="text-gray-300 dark:text-gray-600 select-none">·</li>
-              <li className="husrev-kicker text-husrev-shadow dark:text-husrev-cream">{pageTitle}</li>
+              <li className="husrev-kicker text-husrev-shadow dark:text-husrev-cream">
+                {pageTitle}
+              </li>
             </ol>
           </nav>
         </div>

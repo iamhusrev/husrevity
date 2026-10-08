@@ -40,8 +40,7 @@ export async function registerPushNotification(
     }
 
     const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
+      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
 
     const tokenResponse = await Notifications.getExpoPushTokenAsync(
       projectId ? { projectId } : undefined,
@@ -52,8 +51,7 @@ export async function registerPushNotification(
       return { success: false, error: "No push token received" };
     }
 
-    const targetPlatform =
-      options?.platform ?? (Platform.OS === "android" ? "android" : "ios");
+    const targetPlatform = options?.platform ?? (Platform.OS === "android" ? "android" : "ios");
 
     await apiClient.post("/devices", {
       platform: targetPlatform,
@@ -78,8 +76,7 @@ export async function registerPushNotification(
 export async function unregisterPushNotification(): Promise<void> {
   try {
     const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
+      Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
     const tokenResponse = await Notifications.getExpoPushTokenAsync(
       projectId ? { projectId } : undefined,
     );

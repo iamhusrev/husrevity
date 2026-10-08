@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import apiClient from '../api/client';
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "../api/client";
 
 export interface BlockSummary {
   itemId: string;
@@ -33,13 +33,13 @@ export interface TodayResponse {
 }
 
 export async function fetchToday(): Promise<TodayResponse> {
-  const res = await apiClient.get<TodayResponse>('/today');
+  const res = await apiClient.get<TodayResponse>("/today");
   return res.data;
 }
 
 export function useToday() {
   return useQuery<TodayResponse, Error>({
-    queryKey: ['today'],
+    queryKey: ["today"],
     queryFn: fetchToday,
   });
 }

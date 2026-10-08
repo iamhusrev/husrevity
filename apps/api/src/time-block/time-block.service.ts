@@ -4,14 +4,8 @@ import { IsNull, Repository } from 'typeorm';
 import { TimeBlock } from './time-block.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
-import {
-  formatLeadTimeBody,
-  leadTimeFireAt,
-} from '../notification/notification-scheduling';
-import {
-  TimeBlockRequestDto,
-  TimeBlockResponseDto,
-} from './dto/time-block-dtos';
+import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
+import { TimeBlockRequestDto, TimeBlockResponseDto } from './dto/time-block-dtos';
 
 @Injectable()
 export class TimeBlockService {
@@ -51,10 +45,7 @@ export class TimeBlockService {
     return rows.map(TimeBlockResponseDto.from);
   }
 
-  async create(
-    ownerId: string,
-    req: TimeBlockRequestDto,
-  ): Promise<TimeBlockResponseDto> {
+  async create(ownerId: string, req: TimeBlockRequestDto): Promise<TimeBlockResponseDto> {
     this.assertRange(req.startAt, req.endAt);
     const b = this.blocks.create({
       ownerId,
@@ -92,10 +83,7 @@ export class TimeBlockService {
     return TimeBlockResponseDto.from(saved);
   }
 
-  async toggleComplete(
-    ownerId: string,
-    id: string,
-  ): Promise<TimeBlockResponseDto> {
+  async toggleComplete(ownerId: string, id: string): Promise<TimeBlockResponseDto> {
     const b = await this.requireOwned(ownerId, id);
     b.completedAt = b.completedAt ? null : new Date();
     const saved = await this.blocks.save(b);
@@ -130,11 +118,7 @@ export class TimeBlockService {
       sourceId: b.id,
       scheduledAt: fireAt,
       title: b.title,
-      body: formatLeadTimeBody(
-        b.startAt,
-        b.notifyMinutesBefore ?? 0,
-        b.notes,
-      ),
+      body: formatLeadTimeBody(b.startAt, b.notifyMinutesBefore ?? 0, b.notes),
       deepLink: '/evkat',
     });
   }

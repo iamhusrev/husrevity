@@ -22,10 +22,7 @@ import {
   CreatedInviteDto,
   InviteResponseDto,
 } from './dto/admin-dtos';
-import {
-  AuthenticatedUser,
-  CurrentUser,
-} from '../common/current-user.decorator';
+import { AuthenticatedUser, CurrentUser } from '../common/current-user.decorator';
 import { Roles } from '../common/roles.decorator';
 
 @ApiTags('admin')
@@ -38,9 +35,7 @@ export class AdminController {
   // ─── Users ───────────────────────────────────────────────────────────────
 
   @Get('users')
-  listUsers(
-    @Query() q: AdminUserListQueryDto,
-  ): Promise<AdminUserListResponseDto> {
+  listUsers(@Query() q: AdminUserListQueryDto): Promise<AdminUserListResponseDto> {
     return this.admin.listUsers(q);
   }
 
@@ -60,19 +55,13 @@ export class AdminController {
 
   @Post('users/:id/reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
-  resetPassword(
-    @Param('id') id: string,
-    @Body() body: AdminResetPasswordDto,
-  ): Promise<void> {
+  resetPassword(@Param('id') id: string, @Body() body: AdminResetPasswordDto): Promise<void> {
     return this.admin.resetPassword(id, body);
   }
 
   @Delete('users/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteUser(
-    @CurrentUser() u: AuthenticatedUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  deleteUser(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.admin.deleteUser(u.userId, id);
   }
 

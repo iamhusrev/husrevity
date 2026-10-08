@@ -13,10 +13,7 @@ describe('SlackNotifier', () => {
     } as unknown as jest.Mocked<SlackApiService>;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SlackNotifier,
-        { provide: SlackApiService, useValue: slackApi },
-      ],
+      providers: [SlackNotifier, { provide: SlackApiService, useValue: slackApi }],
     }).compile();
 
     notifier = module.get<SlackNotifier>(SlackNotifier);
@@ -39,10 +36,7 @@ describe('SlackNotifier', () => {
 
     await notifier.send(link, payload);
 
-    expect(slackApi.postMessage).toHaveBeenCalledWith(
-      'U12345678',
-      'Task Reminder\nDo something',
-    );
+    expect(slackApi.postMessage).toHaveBeenCalledWith('U12345678', 'Task Reminder\nDo something');
   });
 
   it('formats payload with title only when body is empty', async () => {
@@ -58,10 +52,7 @@ describe('SlackNotifier', () => {
 
     await notifier.send(link, payload);
 
-    expect(slackApi.postMessage).toHaveBeenCalledWith(
-      'U12345678',
-      'Quick Alert',
-    );
+    expect(slackApi.postMessage).toHaveBeenCalledWith('U12345678', 'Quick Alert');
   });
 
   it('skips send if link has no slackUserId or status is not linked', async () => {

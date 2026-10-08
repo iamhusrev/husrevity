@@ -68,11 +68,7 @@ export class MailerService implements OnModuleInit {
    * log and swallow. The notification row stays `dispatched` either way —
    * push already went out (or was attempted).
    */
-  async sendNotificationEmail(
-    to: string,
-    n: Notification,
-    webBaseUrl: string,
-  ): Promise<boolean> {
+  async sendNotificationEmail(to: string, n: Notification, webBaseUrl: string): Promise<boolean> {
     if (!this.transporter) return false;
     const url = `${webBaseUrl.replace(/\/+$/, '')}${n.deepLink ?? '/dashboard'}`;
     const subject = `🔔 ${n.title}`;
@@ -89,9 +85,7 @@ export class MailerService implements OnModuleInit {
       });
       return true;
     } catch (e) {
-      this.logger.warn(
-        `sendMail failed for notification ${n.id}: ${(e as Error).message}`,
-      );
+      this.logger.warn(`sendMail failed for notification ${n.id}: ${(e as Error).message}`);
       return false;
     }
   }

@@ -61,10 +61,7 @@ describe('GoogleCalendarSyncJobService', () => {
   it('should register schedule and worker when pgBoss is ready', async () => {
     await service.onModuleInit();
 
-    expect(mockPgBossService.schedule).toHaveBeenCalledWith(
-      GCAL_PERIODIC_SYNC_JOB,
-      '*/5 * * * *',
-    );
+    expect(mockPgBossService.schedule).toHaveBeenCalledWith(GCAL_PERIODIC_SYNC_JOB, '*/5 * * * *');
     expect(mockPgBossService.work).toHaveBeenCalledWith(
       GCAL_PERIODIC_SYNC_JOB,
       expect.any(Function),

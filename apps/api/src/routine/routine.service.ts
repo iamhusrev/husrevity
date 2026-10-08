@@ -64,8 +64,8 @@ export class RoutineService {
     req: SegmentRequestDto,
   ): Promise<SegmentResponseDto> {
     const s = await this.requireSegment(ownerId, id);
-    const start = req.startMinute !== undefined ? req.startMinute ?? null : s.startMinute;
-    const end = req.endMinute !== undefined ? req.endMinute ?? null : s.endMinute;
+    const start = req.startMinute !== undefined ? (req.startMinute ?? null) : s.startMinute;
+    const end = req.endMinute !== undefined ? (req.endMinute ?? null) : s.endMinute;
     this.validateBounds(start, end);
     s.name = req.name;
     s.startMinute = start;
@@ -183,12 +183,7 @@ export class RoutineService {
   private async requireActivity(ownerId: string, activityId: string): Promise<RoutineActivity> {
     const a = await this.activities
       .createQueryBuilder('a')
-      .innerJoin(
-        RoutineSegment,
-        's',
-        's.id = a.segment_id AND s.owner_id = :ownerId',
-        { ownerId },
-      )
+      .innerJoin(RoutineSegment, 's', 's.id = a.segment_id AND s.owner_id = :ownerId', { ownerId })
       .where('a.id = :activityId', { activityId })
       .getOne();
     if (!a) throw ApiException.notFound('Routine activity not found');

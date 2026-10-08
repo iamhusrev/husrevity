@@ -359,7 +359,9 @@ export class GoogleCalendarService {
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
       if (!resourceId) {
-        this.logger.warn(`Google Calendar events.watch returned no resourceId for owner ${ownerId}`);
+        this.logger.warn(
+          `Google Calendar events.watch returned no resourceId for owner ${ownerId}`,
+        );
         return null;
       }
 

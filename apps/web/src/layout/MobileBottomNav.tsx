@@ -32,9 +32,17 @@ const MORE_ITEMS: MoreItem[] = [
   { key: "nav.vault", path: "/vault", icon: BiLockAlt },
 ];
 
-const INTEGRATIONS_ITEM: MoreItem = { key: "nav.integrations", path: "/settings/integrations", icon: BiLink };
+const INTEGRATIONS_ITEM: MoreItem = {
+  key: "nav.integrations",
+  path: "/settings/integrations",
+  icon: BiLink,
+};
 const ADMIN_ITEM: MoreItem = { key: "nav.admin", path: "/admin/users", icon: BiShield };
-const SETTINGS_ITEM: MoreItem = { key: "nav.settings", path: "/settings/profile", icon: CiSettings };
+const SETTINGS_ITEM: MoreItem = {
+  key: "nav.settings",
+  path: "/settings/profile",
+  icon: CiSettings,
+};
 
 function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { t } = useTranslation();
@@ -42,7 +50,12 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
 
-  const items = [...MORE_ITEMS, ...(user?.role === "admin" ? [ADMIN_ITEM] : []), INTEGRATIONS_ITEM, SETTINGS_ITEM];
+  const items = [
+    ...MORE_ITEMS,
+    ...(user?.role === "admin" ? [ADMIN_ITEM] : []),
+    INTEGRATIONS_ITEM,
+    SETTINGS_ITEM,
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -127,9 +140,7 @@ export default function MobileBottomNav() {
 
   const tabClass = (active: boolean) =>
     `flex flex-col items-center justify-center gap-0.5 transition-colors ${
-      active
-        ? "text-husrev-ember dark:text-husrev-amber"
-        : "text-gray-500 dark:text-gray-400"
+      active ? "text-husrev-ember dark:text-husrev-amber" : "text-gray-500 dark:text-gray-400"
     }`;
 
   return (

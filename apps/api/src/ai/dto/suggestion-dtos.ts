@@ -2,11 +2,7 @@ import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export type SuggestionMode = 'task' | 'hobby';
 export type SuggestionKind = 'task' | 'hobby' | 'mixed';
-export type SuggestionSourceType =
-  | 'reminder'
-  | 'task'
-  | 'note'
-  | 'project';
+export type SuggestionSourceType = 'reminder' | 'task' | 'note' | 'project';
 
 export class SuggestionsRequestDto {
   @IsIn(['task', 'hobby'])

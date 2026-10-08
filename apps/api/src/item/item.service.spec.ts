@@ -51,7 +51,11 @@ describe('ItemService', () => {
       findOne: jest.fn(),
       create: jest.fn((v) => v),
       save: jest.fn((v) =>
-        Promise.resolve({ createdAt: new Date('2026-01-01T00:00:00Z'), updatedAt: new Date('2026-01-01T00:00:00Z'), ...v }),
+        Promise.resolve({
+          createdAt: new Date('2026-01-01T00:00:00Z'),
+          updatedAt: new Date('2026-01-01T00:00:00Z'),
+          ...v,
+        }),
       ),
       softRemove: jest.fn(),
       createQueryBuilder: jest.fn(() => makeQueryBuilder([])),
@@ -100,7 +104,15 @@ describe('ItemService', () => {
     });
 
     it('returns a personal item owned by the caller', async () => {
-      const row = { id: '10', ownerId, projectId: null, payload: {}, status: 'open', createdAt: NOW, updatedAt: NOW } as Item;
+      const row = {
+        id: '10',
+        ownerId,
+        projectId: null,
+        payload: {},
+        status: 'open',
+        createdAt: NOW,
+        updatedAt: NOW,
+      } as Item;
       items.findOne.mockResolvedValueOnce(row);
       const result = await service.get(ownerId, '10');
       expect(result.id).toBe('10');
@@ -117,7 +129,10 @@ describe('ItemService', () => {
         updatedAt: NOW,
       } as Item;
       items.findOne.mockResolvedValueOnce(row);
-      access.requireAccess.mockResolvedValueOnce({ project: { id: '5', ownerId: '999' }, role: 'VIEWER' });
+      access.requireAccess.mockResolvedValueOnce({
+        project: { id: '5', ownerId: '999' },
+        role: 'VIEWER',
+      });
 
       const result = await service.get(ownerId, '10');
 
@@ -139,7 +154,10 @@ describe('ItemService', () => {
 
   describe('create', () => {
     it('creates a personal item owned by the caller when no projectId is given', async () => {
-      const result = await service.create(ownerId, { kind: 'task', title: 'Yarın 9da HGS kontrol' });
+      const result = await service.create(ownerId, {
+        kind: 'task',
+        title: 'Yarın 9da HGS kontrol',
+      });
 
       expect(access.requireAccess).not.toHaveBeenCalled();
       expect(items.save).toHaveBeenCalledWith(
@@ -184,7 +202,7 @@ describe('ItemService', () => {
       expect(googleCalendarService.syncItemToGoogleCalendar).toHaveBeenCalled();
     });
 
-    it('throws 409 when ifMatchMs does not match the item\'s current updatedAt', async () => {
+    it("throws 409 when ifMatchMs does not match the item's current updatedAt", async () => {
       const staleMs = NOW.getTime() - 1000;
       const row = {
         id: '10',
@@ -203,7 +221,7 @@ describe('ItemService', () => {
       expect(items.save).not.toHaveBeenCalled();
     });
 
-    it('succeeds when ifMatchMs exactly matches the item\'s current updatedAt', async () => {
+    it("succeeds when ifMatchMs exactly matches the item's current updatedAt", async () => {
       const row = {
         id: '10',
         ownerId,
@@ -327,7 +345,12 @@ describe('ItemService', () => {
       } as Item;
       items.createQueryBuilder.mockReturnValue(makeQueryBuilder([recurringItem]));
       occurrences.find.mockResolvedValueOnce([
-        { itemId: '20', occursOn: '2026-01-05', status: 'done', completedAt: new Date('2026-01-05T07:00:00Z') },
+        {
+          itemId: '20',
+          occursOn: '2026-01-05',
+          status: 'done',
+          completedAt: new Date('2026-01-05T07:00:00Z'),
+        },
       ]);
       recurrence.expand.mockReturnValueOnce([
         { occursOn: '2026-01-05', occursAt: new Date('2026-01-05T06:00:00Z') },

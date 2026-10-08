@@ -33,7 +33,7 @@ export class ExpoPushNotifier implements Notifier<Device> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Accept-Encoding': 'gzip, deflate',
       },
       body: JSON.stringify({

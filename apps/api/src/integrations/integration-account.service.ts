@@ -42,7 +42,7 @@ export class IntegrationAccountService {
     const encryptedRefresh =
       tokens.refreshToken !== undefined
         ? this.cryptoService.encrypt(tokens.refreshToken)
-        : account?.encryptedRefreshToken ?? null;
+        : (account?.encryptedRefreshToken ?? null);
 
     if (!account) {
       account = this.repo.create({
@@ -181,10 +181,9 @@ export class IntegrationAccountService {
       .createQueryBuilder('account')
       .where('account.provider = :provider', { provider })
       .andWhere('account.status = :status', { status: 'connected' })
-      .andWhere(
-        '(account.channelExpiration IS NULL OR account.channelExpiration <= :threshold)',
-        { threshold },
-      )
+      .andWhere('(account.channelExpiration IS NULL OR account.channelExpiration <= :threshold)', {
+        threshold,
+      })
       .getMany();
   }
 

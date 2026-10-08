@@ -36,7 +36,13 @@ describe('DeviceService', () => {
     });
 
     it('upserts (bumps platform/lastSeenAt) instead of duplicating when the token already exists', async () => {
-      const existing = { id: '5', ownerId, platform: 'android', pushToken: 'tok-1', lastSeenAt: new Date(0) } as Device;
+      const existing = {
+        id: '5',
+        ownerId,
+        platform: 'android',
+        pushToken: 'tok-1',
+        lastSeenAt: new Date(0),
+      } as Device;
       devices.findOne.mockResolvedValueOnce(existing);
 
       await service.register(ownerId, { platform: 'ios', pushToken: 'tok-1' });

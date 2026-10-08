@@ -6,11 +6,7 @@ export const metadata: Metadata = {
   description: "Husrevity'ye katılmak için davetini kabul et ve şifreni belirle.",
 };
 
-export default async function InviteAcceptPage({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+export default async function InviteAcceptPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
   return <InviteAcceptView token={token} />;
 }

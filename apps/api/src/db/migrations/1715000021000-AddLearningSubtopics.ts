@@ -12,9 +12,15 @@ export class AddLearningSubtopics1715000021000 implements MigrationInterface {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_by_id BIGINT, deleted_at TIMESTAMPTZ
       )
     `);
-    await qr.query(`CREATE INDEX idx_learning_subtopic_topic_position ON learning_subtopic(topic_id, position)`);
-    await qr.query(`ALTER TABLE learning_item ADD COLUMN subtopic_id BIGINT REFERENCES learning_subtopic(id) ON DELETE CASCADE`);
-    await qr.query(`CREATE INDEX idx_learning_item_subtopic_position ON learning_item(subtopic_id, position)`);
+    await qr.query(
+      `CREATE INDEX idx_learning_subtopic_topic_position ON learning_subtopic(topic_id, position)`,
+    );
+    await qr.query(
+      `ALTER TABLE learning_item ADD COLUMN subtopic_id BIGINT REFERENCES learning_subtopic(id) ON DELETE CASCADE`,
+    );
+    await qr.query(
+      `CREATE INDEX idx_learning_item_subtopic_position ON learning_item(subtopic_id, position)`,
+    );
   }
 
   public async down(qr: QueryRunner): Promise<void> {

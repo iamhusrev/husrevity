@@ -51,9 +51,7 @@ export class SlackSocketModeService implements OnModuleInit, OnModuleDestroy {
     @Inject(SLACK_WEBSOCKET_FACTORY)
     customWsFactory?: WebSocketFactory,
   ) {
-    this.wsFactory =
-      customWsFactory ||
-      ((url: string) => new (globalThis.WebSocket as any)(url));
+    this.wsFactory = customWsFactory || ((url: string) => new (globalThis.WebSocket as any)(url));
   }
 
   setWebSocketFactory(factory: WebSocketFactory): void {
@@ -147,9 +145,7 @@ export class SlackSocketModeService implements OnModuleInit, OnModuleDestroy {
         this.scheduleReconnect();
       };
     } catch (err) {
-      this.logger.error(
-        `Error connecting Slack Socket Mode: ${(err as Error).message}`,
-      );
+      this.logger.error(`Error connecting Slack Socket Mode: ${(err as Error).message}`);
       this.isConnecting = false;
       this.scheduleReconnect();
     }
@@ -185,8 +181,7 @@ export class SlackSocketModeService implements OnModuleInit, OnModuleDestroy {
 
       // Process events_api with deduplication by event_id
       if (envelope.type === 'events_api' && envelope.payload) {
-        const eventId =
-          envelope.payload.event_id || envelope.payload.event?.event_id;
+        const eventId = envelope.payload.event_id || envelope.payload.event?.event_id;
         if (eventId) {
           if (this.isDuplicateEvent(eventId)) {
             this.logger.debug(`Duplicate event_id ${eventId} ignored`);
@@ -195,18 +190,12 @@ export class SlackSocketModeService implements OnModuleInit, OnModuleDestroy {
         }
 
         // Dispatch must not block ack or socket processing
-        this.slackMessageHandlerService
-          .handleEvent(envelope.payload)
-          .catch((err) => {
-            this.logger.error(
-              `Error processing Slack event payload: ${(err as Error).message}`,
-            );
-          });
+        this.slackMessageHandlerService.handleEvent(envelope.payload).catch((err) => {
+          this.logger.error(`Error processing Slack event payload: ${(err as Error).message}`);
+        });
       }
     } catch (err) {
-      this.logger.error(
-        `Failed to parse Slack Socket message: ${(err as Error).message}`,
-      );
+      this.logger.error(`Failed to parse Slack Socket message: ${(err as Error).message}`);
     }
   }
 
@@ -216,9 +205,7 @@ export class SlackSocketModeService implements OnModuleInit, OnModuleDestroy {
         ws.send(JSON.stringify({ envelope_id: envelopeId }));
       }
     } catch (err) {
-      this.logger.error(
-        `Failed to send ack for envelope ${envelopeId}: ${(err as Error).message}`,
-      );
+      this.logger.error(`Failed to send ack for envelope ${envelopeId}: ${(err as Error).message}`);
     }
   }
 

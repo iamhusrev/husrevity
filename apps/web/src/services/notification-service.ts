@@ -40,18 +40,14 @@ export const notificationService = {
   },
 
   async subscribe(body: PushSubscriptionPayload): Promise<ApiResponse<void>> {
-    const res = await apiClient.post(
-      NOTIFICATION_ENDPOINTS.PUSH_SUBSCRIPTIONS,
-      body,
-    );
+    const res = await apiClient.post(NOTIFICATION_ENDPOINTS.PUSH_SUBSCRIPTIONS, body);
     return res.data;
   },
 
   async unsubscribe(endpoint: string): Promise<ApiResponse<void>> {
-    const res = await apiClient.delete(
-      NOTIFICATION_ENDPOINTS.PUSH_SUBSCRIPTIONS,
-      { data: { endpoint } },
-    );
+    const res = await apiClient.delete(NOTIFICATION_ENDPOINTS.PUSH_SUBSCRIPTIONS, {
+      data: { endpoint },
+    });
     return res.data;
   },
 

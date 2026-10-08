@@ -1,12 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  MaxLength,
-} from 'class-validator';
+import { IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
 import { TimeBlock } from '../time-block.entity';
 
 export const TIME_BLOCK_CATEGORIES = [

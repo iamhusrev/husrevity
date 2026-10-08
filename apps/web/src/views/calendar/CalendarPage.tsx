@@ -66,7 +66,9 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
   const [allDay, setAllDay] = useState(initial.allDay);
   const [location, setLocation] = useState(initial.location ?? "");
   const [colorHex, setColorHex] = useState(initial.colorHex ?? "#007AFF");
-  const [reminderMinutes, setReminderMinutes] = useState<number | null>(initial.reminderMinutes ?? 0);
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(
+    initial.reminderMinutes ?? 0,
+  );
 
   const isEdit = !!initial.id;
 
@@ -218,12 +220,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
           <button
@@ -243,13 +240,7 @@ function EventModal({ initial, onClose }: { initial: EditingEvent; onClose: () =
   );
 }
 
-function CalField({
-  label,
-  children,
-}: {
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function CalField({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
       <span className="husrev-kicker text-gray-600 dark:text-gray-300">{label}</span>
@@ -292,9 +283,7 @@ export default function CalendarPage() {
   }, []);
 
   useEffect(() => {
-    calendarRef.current
-      ?.getApi()
-      .changeView(isMobile ? "listWeek" : "dayGridMonth");
+    calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
   }, [isMobile]);
 
   const qc = useQueryClient();

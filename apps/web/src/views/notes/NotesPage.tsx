@@ -61,7 +61,10 @@ interface DragItem {
 }
 
 /** Builds the "Tags / Created / Updated" footer shared by both export formats. */
-function noteExportMetaLines(note: NoteResponse, t: ReturnType<typeof useTranslation>["t"]): string {
+function noteExportMetaLines(
+  note: NoteResponse,
+  t: ReturnType<typeof useTranslation>["t"],
+): string {
   const tags = note.tags.length > 0 ? note.tags.map((tag) => tag.name).join(", ") : "—";
   const created = note.createdAt ? formatDateTime(note.createdAt) : "—";
   const updated = note.updatedAt ? formatDateTime(note.updatedAt) : "—";
@@ -213,7 +216,11 @@ function DraggableNoteCard({
           <BiTrash size={16} />
         </button>
       </div>
-      <button type="button" onClick={() => onOpen(note.id)} className="block w-full cursor-pointer pl-4 text-left">
+      <button
+        type="button"
+        onClick={() => onOpen(note.id)}
+        className="block w-full cursor-pointer pl-4 text-left"
+      >
         <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">{note.title}</h3>
         <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm text-gray-500 dark:text-gray-400">
           {note.bodyMarkdown ?? ""}
@@ -290,7 +297,11 @@ function PinnedCard({
           <BiTrash size={16} />
         </button>
       </div>
-      <button type="button" onClick={() => onOpen(note.id)} className="block w-full cursor-pointer text-left">
+      <button
+        type="button"
+        onClick={() => onOpen(note.id)}
+        className="block w-full cursor-pointer text-left"
+      >
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-semibold text-husrev-ink dark:text-white/90">
             {note.title}
@@ -565,106 +576,105 @@ export default function NotesPage() {
         }
       />
 
-        <div className="flex flex-wrap items-center gap-3">
-          <input
-            type="search"
-            placeholder={t("notes.searchPlaceholder")}
-            value={filters.q ?? ""}
-            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
-            className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
-          />
-          <select
-            value={filters.tagId ?? ""}
-            onChange={(e) =>
-              setFilters((f) => ({
-                ...f,
-                tagId: e.target.value ? Number(e.target.value) : undefined,
-              }))
-            }
-            className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
-          >
-            <option value="">{t("notes.allTags")}</option>
-            {tags.map((tag) => (
-              <option key={tag.id} value={tag.id}>
-                {tag.name}
-              </option>
-            ))}
-          </select>
-          <label className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={filters.archived ?? false}
-              onChange={(e) => setFilters((f) => ({ ...f, archived: e.target.checked }))}
-            />
-            {t("notes.archived")}
-          </label>
-        </div>
-
-        <form onSubmit={handleQuickAdd}>
-          <input
-            value={quickTitle}
-            onChange={(e) => setQuickTitle(e.target.value)}
-            placeholder={t("notes.quickAddPlaceholder")}
-            className="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
-          />
-        </form>
-
-        {isLoading ? (
-          <p className="text-gray-500">{t("common.loading")}</p>
-        ) : notes.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-husrev-sand p-10 text-center text-gray-500 dark:border-white/10">
-            {t("notes.empty.before")}{" "}
-            <span className="font-instrument-serif italic text-husrev-ember dark:text-husrev-amber">
-              {t("notes.empty.flourish")}
-            </span>
-            .
-          </div>
-        ) : (
-          <NotesGrid
-            notes={notes}
-            onDelete={setDeletingId}
-            onOpen={(id) => setEditingId(Number(id))}
-            onTogglePin={handleTogglePin}
-            onToggleArchive={handleToggleArchive}
-          />
-        )}
-
-        <DeleteConfirmModal
-          isOpen={deletingId !== null}
-          onClose={() => setDeletingId(null)}
-          onConfirm={onDelete}
-          isPending={deleteNote.isPending}
+      <div className="flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          placeholder={t("notes.searchPlaceholder")}
+          value={filters.q ?? ""}
+          onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+          className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
         />
-
-        {showTags && <ManageTagsModal onClose={() => setShowTags(false)} />}
-
-        <DetailModal
-          isOpen={editingId !== null}
-          onClose={handleEditorClose}
-          onExpand={
-            editingId !== null
-              ? () =>
-                  router.push(editingId === "new" ? "/notes/new" : `/notes/${editingId}`)
-              : undefined
+        <select
+          value={filters.tagId ?? ""}
+          onChange={(e) =>
+            setFilters((f) => ({
+              ...f,
+              tagId: e.target.value ? Number(e.target.value) : undefined,
+            }))
           }
+          className="h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900"
         >
-          {editingId === "new" ? (
-            <NoteEditorPage
-              embedded
-              flushRef={editorFlushRef}
-              onSaved={() => setEditingId(null)}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : editingId !== null ? (
-            <NoteEditorPage
-              id={editingId}
-              embedded
-              flushRef={editorFlushRef}
-              onSaved={() => setEditingId(null)}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : null}
-        </DetailModal>
+          <option value="">{t("notes.allTags")}</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
+            </option>
+          ))}
+        </select>
+        <label className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+          <input
+            type="checkbox"
+            checked={filters.archived ?? false}
+            onChange={(e) => setFilters((f) => ({ ...f, archived: e.target.checked }))}
+          />
+          {t("notes.archived")}
+        </label>
       </div>
+
+      <form onSubmit={handleQuickAdd}>
+        <input
+          value={quickTitle}
+          onChange={(e) => setQuickTitle(e.target.value)}
+          placeholder={t("notes.quickAddPlaceholder")}
+          className="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none transition focus:border-brand-400 dark:border-gray-700 dark:bg-gray-900"
+        />
+      </form>
+
+      {isLoading ? (
+        <p className="text-gray-500">{t("common.loading")}</p>
+      ) : notes.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-husrev-sand p-10 text-center text-gray-500 dark:border-white/10">
+          {t("notes.empty.before")}{" "}
+          <span className="font-instrument-serif italic text-husrev-ember dark:text-husrev-amber">
+            {t("notes.empty.flourish")}
+          </span>
+          .
+        </div>
+      ) : (
+        <NotesGrid
+          notes={notes}
+          onDelete={setDeletingId}
+          onOpen={(id) => setEditingId(Number(id))}
+          onTogglePin={handleTogglePin}
+          onToggleArchive={handleToggleArchive}
+        />
+      )}
+
+      <DeleteConfirmModal
+        isOpen={deletingId !== null}
+        onClose={() => setDeletingId(null)}
+        onConfirm={onDelete}
+        isPending={deleteNote.isPending}
+      />
+
+      {showTags && <ManageTagsModal onClose={() => setShowTags(false)} />}
+
+      <DetailModal
+        isOpen={editingId !== null}
+        onClose={handleEditorClose}
+        onExpand={
+          editingId !== null
+            ? () => router.push(editingId === "new" ? "/notes/new" : `/notes/${editingId}`)
+            : undefined
+        }
+      >
+        {editingId === "new" ? (
+          <NoteEditorPage
+            embedded
+            flushRef={editorFlushRef}
+            onSaved={() => setEditingId(null)}
+            onCancel={() => setEditingId(null)}
+          />
+        ) : editingId !== null ? (
+          <NoteEditorPage
+            id={editingId}
+            embedded
+            flushRef={editorFlushRef}
+            onSaved={() => setEditingId(null)}
+            onCancel={() => setEditingId(null)}
+          />
+        ) : null}
+      </DetailModal>
+    </div>
   );
 }

@@ -29,9 +29,7 @@ export class FinanceAssetsLoans1715000002000 implements MigrationInterface {
         deleted_at    TIMESTAMPTZ
       )
     `);
-    await qr.query(
-      `CREATE INDEX idx_finance_asset_owner ON finance_asset(owner_id)`,
-    );
+    await qr.query(`CREATE INDEX idx_finance_asset_owner ON finance_asset(owner_id)`);
 
     await qr.query(`
       CREATE TABLE finance_loan (
@@ -57,9 +55,7 @@ export class FinanceAssetsLoans1715000002000 implements MigrationInterface {
         deleted_at            TIMESTAMPTZ
       )
     `);
-    await qr.query(
-      `CREATE INDEX idx_finance_loan_owner ON finance_loan(owner_id)`,
-    );
+    await qr.query(`CREATE INDEX idx_finance_loan_owner ON finance_loan(owner_id)`);
 
     await qr.query(`
       CREATE TABLE finance_installment (
@@ -77,12 +73,8 @@ export class FinanceAssetsLoans1715000002000 implements MigrationInterface {
         deleted_at    TIMESTAMPTZ
       )
     `);
-    await qr.query(
-      `CREATE INDEX idx_finance_installment_owner ON finance_installment(owner_id)`,
-    );
-    await qr.query(
-      `CREATE INDEX idx_finance_installment_loan ON finance_installment(loan_id)`,
-    );
+    await qr.query(`CREATE INDEX idx_finance_installment_owner ON finance_installment(owner_id)`);
+    await qr.query(`CREATE INDEX idx_finance_installment_loan ON finance_installment(loan_id)`);
     await qr.query(
       `CREATE INDEX idx_finance_installment_owner_due ON finance_installment(owner_id, due_at)`,
     );

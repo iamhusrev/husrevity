@@ -1,10 +1,6 @@
 export type SuggestionMode = "task" | "hobby";
 export type SuggestionKind = "task" | "hobby" | "mixed";
-export type SuggestionSourceType =
-  | "reminder"
-  | "task"
-  | "note"
-  | "project";
+export type SuggestionSourceType = "reminder" | "task" | "note" | "project";
 
 export interface SuggestionSourceRef {
   type: SuggestionSourceType;

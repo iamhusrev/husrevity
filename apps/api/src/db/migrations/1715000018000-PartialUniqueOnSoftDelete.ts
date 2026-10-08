@@ -76,7 +76,9 @@ export class PartialUniqueOnSoftDelete1715000018000 implements MigrationInterfac
     await qr.query(`ALTER TABLE app_user ADD CONSTRAINT app_user_email_key UNIQUE (email)`);
 
     await qr.query(`DROP INDEX IF EXISTS uq_project_owner_code_live`);
-    await qr.query(`ALTER TABLE project ADD CONSTRAINT uq_project_owner_code UNIQUE (owner_id, code)`);
+    await qr.query(
+      `ALTER TABLE project ADD CONSTRAINT uq_project_owner_code UNIQUE (owner_id, code)`,
+    );
     // Deliberately NOT reverting the `__del_<id>` disambiguation suffixes or
     // the VARCHAR(64) widening — both are inert once the constraint is back
     // to plain, and reversing them could reintroduce the very collisions

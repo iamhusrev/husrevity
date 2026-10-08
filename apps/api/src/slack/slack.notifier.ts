@@ -19,16 +19,12 @@ export class SlackNotifier implements Notifier<SlackLink> {
       return;
     }
 
-    const text = payload.body
-      ? `${payload.title}\n${payload.body}`
-      : payload.title;
+    const text = payload.body ? `${payload.title}\n${payload.body}` : payload.title;
 
     const result = await this.slackApi.postMessage(target.slackUserId, text);
 
     if (!result) {
-      throw new Error(
-        `Slack postMessage failed for slackUserId ${target.slackUserId}`,
-      );
+      throw new Error(`Slack postMessage failed for slackUserId ${target.slackUserId}`);
     }
   }
 }

@@ -118,14 +118,8 @@ export function useTask(id: number) {
 export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: number;
-      projectId?: number;
-      body: TaskRequest;
-    }) => projectService.updateTask(id, body),
+    mutationFn: ({ id, body }: { id: number; projectId?: number; body: TaskRequest }) =>
+      projectService.updateTask(id, body),
     onSuccess: (_, vars) => {
       if (vars.projectId) {
         qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.projectId) });

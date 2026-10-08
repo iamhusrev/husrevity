@@ -121,8 +121,7 @@ export const ROUTINE_ENDPOINTS = {
   SEGMENT_BY_ID: (id: string) => `/routine/segments/${id}`,
   SEGMENTS_REORDER: "/routine/segments/reorder",
   SEGMENT_ACTIVITIES: (id: string) => `/routine/segments/${id}/activities`,
-  SEGMENT_ACTIVITIES_REORDER: (id: string) =>
-    `/routine/segments/${id}/activities/reorder`,
+  SEGMENT_ACTIVITIES_REORDER: (id: string) => `/routine/segments/${id}/activities/reorder`,
   ACTIVITY_BY_ID: (id: string) => `/routine/activities/${id}`,
 };
 

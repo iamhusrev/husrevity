@@ -43,7 +43,10 @@ export class SyncService {
    * this query and the response being sent is never silently skipped on
    * the next call — it'll just be re-sent once, which is harmless.
    */
-  async syncSince(ownerId: string, since: Date | null): Promise<{
+  async syncSince(
+    ownerId: string,
+    since: Date | null,
+  ): Promise<{
     items: Delta<Item>;
     notes: Delta<Note>;
     projects: Delta<Project>;

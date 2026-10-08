@@ -23,10 +23,7 @@ import {
   UnreadCountResponseDto,
   VapidPublicKeyResponseDto,
 } from './dto/notification-dtos';
-import {
-  CurrentUser,
-  AuthenticatedUser,
-} from '../common/current-user.decorator';
+import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { UserService } from '../user/user.service';
 import { MailerService } from './mailer.service';
 import { NotificationDispatcherService } from './notification-dispatcher.service';
@@ -51,26 +48,19 @@ export class NotificationController {
   }
 
   @Get('unread-count')
-  async unread(
-    @CurrentUser() u: AuthenticatedUser,
-  ): Promise<UnreadCountResponseDto> {
+  async unread(@CurrentUser() u: AuthenticatedUser): Promise<UnreadCountResponseDto> {
     return { unread: await this.notifications.unreadCount(u.userId) };
   }
 
   @Patch(':id/read')
   @HttpCode(HttpStatus.NO_CONTENT)
-  markRead(
-    @CurrentUser() u: AuthenticatedUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  markRead(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.notifications.markRead(u.userId, id);
   }
 
   @Patch('read-all')
   @HttpCode(HttpStatus.OK)
-  async markAllRead(
-    @CurrentUser() u: AuthenticatedUser,
-  ): Promise<{ updated: number }> {
+  async markAllRead(@CurrentUser() u: AuthenticatedUser): Promise<{ updated: number }> {
     return { updated: await this.notifications.markAllRead(u.userId) };
   }
 
@@ -88,10 +78,7 @@ export class NotificationController {
   @Post('push-subscriptions')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  subscribe(
-    @CurrentUser() u: AuthenticatedUser,
-    @Body() body: PushSubscribeDto,
-  ): Promise<void> {
+  subscribe(@CurrentUser() u: AuthenticatedUser, @Body() body: PushSubscribeDto): Promise<void> {
     return this.notifications.subscribePush(u.userId, body);
   }
 
@@ -105,17 +92,14 @@ export class NotificationController {
   }
 
   @Get('diagnostics')
-  async diagnostics(
-    @CurrentUser() u: AuthenticatedUser,
-  ): Promise<NotificationDiagnosticsDto> {
+  async diagnostics(@CurrentUser() u: AuthenticatedUser): Promise<NotificationDiagnosticsDto> {
     const user = await this.users.findById(u.userId);
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const [subscriptionCount, pendingCount, dispatchedLast24h] =
-      await Promise.all([
-        this.notifications.subscriptionCount(u.userId),
-        this.notifications.pendingCount(u.userId),
-        this.notifications.dispatchedCountSince(u.userId, since),
-      ]);
+    const [subscriptionCount, pendingCount, dispatchedLast24h] = await Promise.all([
+      this.notifications.subscriptionCount(u.userId),
+      this.notifications.pendingCount(u.userId),
+      this.notifications.dispatchedCountSince(u.userId, since),
+    ]);
     return {
       vapidConfigured: this.notifications.isPushConfigured(),
       mailConfigured: this.mailer.isConfigured(),
@@ -130,9 +114,7 @@ export class NotificationController {
   @Post('test')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  async sendTest(
-    @CurrentUser() u: AuthenticatedUser,
-  ): Promise<TestNotificationResultDto> {
+  async sendTest(@CurrentUser() u: AuthenticatedUser): Promise<TestNotificationResultDto> {
     const row = await this.notifications.enqueueTest(u.userId);
     await this.notifications.markDispatched(row.id);
     return this.dispatcher.dispatchOne(row);

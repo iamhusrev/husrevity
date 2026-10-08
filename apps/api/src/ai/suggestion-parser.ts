@@ -1,9 +1,5 @@
 import { ApiException } from '../common/api.exception';
-import {
-  SuggestionItemDto,
-  SuggestionKind,
-  SuggestionSourceType,
-} from './dto/suggestion-dtos';
+import { SuggestionItemDto, SuggestionKind, SuggestionSourceType } from './dto/suggestion-dtos';
 
 /**
  * Pre-built id whitelist for sourceRef validation. Keys are `${type}:${id}`,
@@ -15,12 +11,7 @@ export type ParseContext = {
 };
 
 const KINDS = ['task', 'hobby', 'mixed'] as const;
-const SOURCE_TYPES = [
-  'reminder',
-  'task',
-  'note',
-  'project',
-] as const;
+const SOURCE_TYPES = ['reminder', 'task', 'note', 'project'] as const;
 
 const TITLE_MAX = 120;
 const DESC_MAX = 280;
@@ -58,8 +49,7 @@ export function parseSuggestions(
     const rec = row as Record<string, unknown>;
 
     const title = typeof rec.title === 'string' ? rec.title.trim() : '';
-    const description =
-      typeof rec.description === 'string' ? rec.description.trim() : '';
+    const description = typeof rec.description === 'string' ? rec.description.trim() : '';
     if (!title || !description) continue;
 
     const kindRaw = typeof rec.kind === 'string' ? rec.kind : '';
@@ -67,8 +57,7 @@ export function parseSuggestions(
       ? (kindRaw as SuggestionKind)
       : 'mixed';
 
-    const reasonShort =
-      typeof rec.reasonShort === 'string' ? rec.reasonShort.trim() : '';
+    const reasonShort = typeof rec.reasonShort === 'string' ? rec.reasonShort.trim() : '';
 
     let sourceRef: SuggestionItemDto['sourceRef'] = null;
     const refRaw = rec.sourceRef;

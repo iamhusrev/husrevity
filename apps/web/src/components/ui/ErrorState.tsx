@@ -8,10 +8,7 @@ interface ErrorStateProps {
   onRetry?: () => void;
 }
 
-export default function ErrorState({
-  message,
-  onRetry,
-}: ErrorStateProps) {
+export default function ErrorState({ message, onRetry }: ErrorStateProps) {
   const { t } = useTranslation();
   const errorMessage = message || t("common.error");
 

@@ -19,16 +19,12 @@ export class TelegramNotifier implements Notifier<TelegramLink> {
       return;
     }
 
-    const text = payload.body
-      ? `${payload.title}\n${payload.body}`
-      : payload.title;
+    const text = payload.body ? `${payload.title}\n${payload.body}` : payload.title;
 
     const result = await this.telegramApi.sendMessage(target.chatId, text);
 
     if (!result) {
-      throw new Error(
-        `Telegram sendMessage failed for chatId ${target.chatId}`,
-      );
+      throw new Error(`Telegram sendMessage failed for chatId ${target.chatId}`);
     }
   }
 }

@@ -43,9 +43,7 @@ export default function InviteAcceptView({ token }: { token: string }) {
         const { message } = parseAxiosError(err);
         setState({
           phase: "error",
-          message:
-            message ||
-            t("invite.invalid", "Davet bulunamadı veya süresi doldu."),
+          message: message || t("invite.invalid", "Davet bulunamadı veya süresi doldu."),
         });
       }
     })();
@@ -124,10 +122,7 @@ export default function InviteAcceptView({ token }: { token: string }) {
             <div className="text-center space-y-3">
               <p className="text-sm text-error-500">{state.message}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t(
-                  "invite.errorHint",
-                  "Davet edenle iletişime geç ve yeni bir link iste.",
-                )}
+                {t("invite.errorHint", "Davet edenle iletişime geç ve yeni bir link iste.")}
               </p>
             </div>
           )}
@@ -142,13 +137,17 @@ export default function InviteAcceptView({ token }: { token: string }) {
                   {state.invite.email}
                 </div>
                 <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                  {t("invite.invitedBy", "{{by}} tarafından davet edildi · son geçerlilik: {{date}}", {
-                    by: state.invite.invitedByEmail,
-                    date: new Date(state.invite.expiresAt).toLocaleString("tr-TR", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }),
-                  })}
+                  {t(
+                    "invite.invitedBy",
+                    "{{by}} tarafından davet edildi · son geçerlilik: {{date}}",
+                    {
+                      by: state.invite.invitedByEmail,
+                      date: new Date(state.invite.expiresAt).toLocaleString("tr-TR", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }),
+                    },
+                  )}
                 </div>
               </div>
 
@@ -195,7 +194,11 @@ export default function InviteAcceptView({ token }: { token: string }) {
                 />
               </Field>
 
-              <button type="submit" disabled={submitting} className="husrev-btn w-full justify-center">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="husrev-btn w-full justify-center"
+              >
                 {submitting
                   ? t("invite.creating", "Hesap oluşturuluyor…")
                   : t("invite.submit", "Davete katıl")}

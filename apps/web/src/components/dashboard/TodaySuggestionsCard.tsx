@@ -218,7 +218,9 @@ export default function TodaySuggestionsCard({
             </div>
           )
         ) : isLoading && items.length === 0 ? (
-          <div className={`grid gap-3 ${count === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3"}`}>
+          <div
+            className={`grid gap-3 ${count === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3"}`}
+          >
             {skeletonKeys.map((k) => (
               <div
                 key={k}
@@ -257,10 +259,7 @@ export default function TodaySuggestionsCard({
                     <span
                       className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] ring-1 ${badge.tone} ${badge.text}`}
                     >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${badge.dot}`}
-                        aria-hidden
-                      />
+                      <span className={`h-1.5 w-1.5 rounded-full ${badge.dot}`} aria-hidden />
                       {s.sourceRef
                         ? t(`dashboard.today.source.${s.sourceRef.type}`)
                         : t(`dashboard.today.kind.${s.kind}`)}

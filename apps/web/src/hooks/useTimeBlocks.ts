@@ -5,8 +5,7 @@ import { TimeBlockRequest } from "@/types/time-block/time-block";
 const TIME_BLOCK_KEYS = {
   all: ["time-blocks"] as const,
   byDate: (date: string) => ["time-blocks", "date", date] as const,
-  byRange: (from: string, to: string) =>
-    ["time-blocks", "range", from, to] as const,
+  byRange: (from: string, to: string) => ["time-blocks", "range", from, to] as const,
 };
 
 export function useTimeBlocksForDate(date: string) {

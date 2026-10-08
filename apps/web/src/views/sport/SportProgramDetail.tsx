@@ -284,12 +284,7 @@ function SessionModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="husrev-btn-ghost"
-          >
+          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
             {t("common.cancel")}
           </button>
           <button type="submit" disabled={isPending} className="husrev-btn">
@@ -415,7 +410,10 @@ function SessionRow({
         onConfirm={handleDelete}
         isPending={remove.isPending}
         title={t("sport.sessionModal.confirmDeleteTitle", "Seansı sil")}
-        message={t("sport.sessionModal.confirmDeleteMessage", "Bu seansı silmek istediğine emin misin?")}
+        message={t(
+          "sport.sessionModal.confirmDeleteMessage",
+          "Bu seansı silmek istediğine emin misin?",
+        )}
       />
     </div>
   );
@@ -449,7 +447,6 @@ export default function SportProgramDetail({
       setOrdered(sorted);
       orderedRef.current = sorted;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [program]);
 
   const moveItem = useCallback((dragIdx: number, hoverIdx: number) => {
@@ -497,7 +494,9 @@ export default function SportProgramDetail({
   }
 
   if (!program) {
-    return <p className="text-gray-500">{t("sport.programDetail.notFound", "Program bulunamadı.")}</p>;
+    return (
+      <p className="text-gray-500">{t("sport.programDetail.notFound", "Program bulunamadı.")}</p>
+    );
   }
 
   return (

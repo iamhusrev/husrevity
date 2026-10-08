@@ -87,7 +87,10 @@ export default function DashboardPage() {
           <p className="py-4 text-center text-sm text-gray-400">{t("today.loading")}</p>
         ) : today?.currentBlock ? (
           <div className="flex items-center gap-3">
-            <HiOutlineClock size={22} className="shrink-0 text-husrev-ember dark:text-husrev-amber" />
+            <HiOutlineClock
+              size={22}
+              className="shrink-0 text-husrev-ember dark:text-husrev-amber"
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">
                 {today.currentBlock.title}

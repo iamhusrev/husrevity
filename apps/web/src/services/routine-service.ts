@@ -15,9 +15,7 @@ export const routineService = {
     return res.data;
   },
 
-  async createSegment(
-    body: RoutineSegmentRequest,
-  ): Promise<ApiResponse<RoutineSegmentResponse>> {
+  async createSegment(body: RoutineSegmentRequest): Promise<ApiResponse<RoutineSegmentResponse>> {
     const res = await apiClient.post(ROUTINE_ENDPOINTS.SEGMENTS, body);
     return res.data;
   },
@@ -35,9 +33,7 @@ export const routineService = {
     return res.data;
   },
 
-  async reorderSegments(
-    items: RoutineReorderItem[],
-  ): Promise<ApiResponse<void>> {
+  async reorderSegments(items: RoutineReorderItem[]): Promise<ApiResponse<void>> {
     const res = await apiClient.patch(ROUTINE_ENDPOINTS.SEGMENTS_REORDER, {
       items,
     });
@@ -48,10 +44,7 @@ export const routineService = {
     segmentId: string,
     body: RoutineActivityRequest,
   ): Promise<ApiResponse<RoutineActivityResponse>> {
-    const res = await apiClient.post(
-      ROUTINE_ENDPOINTS.SEGMENT_ACTIVITIES(segmentId),
-      body,
-    );
+    const res = await apiClient.post(ROUTINE_ENDPOINTS.SEGMENT_ACTIVITIES(segmentId), body);
     return res.data;
   },
 
@@ -72,10 +65,9 @@ export const routineService = {
     segmentId: string,
     items: RoutineReorderItem[],
   ): Promise<ApiResponse<void>> {
-    const res = await apiClient.patch(
-      ROUTINE_ENDPOINTS.SEGMENT_ACTIVITIES_REORDER(segmentId),
-      { items },
-    );
+    const res = await apiClient.patch(ROUTINE_ENDPOINTS.SEGMENT_ACTIVITIES_REORDER(segmentId), {
+      items,
+    });
     return res.data;
   },
 };

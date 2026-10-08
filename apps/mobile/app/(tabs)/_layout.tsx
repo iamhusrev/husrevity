@@ -1,7 +1,7 @@
-import React from 'react';
-import { Tabs, router } from 'expo-router';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { useAuth } from '../../src/auth/auth-context';
+import React from "react";
+import { Tabs, router } from "expo-router";
+import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
+import { useAuth } from "../../src/auth/auth-context";
 
 export default function TabsLayout() {
   const { logout } = useAuth();
@@ -10,29 +10,29 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#1c1917',
+          backgroundColor: "#1c1917",
         },
-        headerTintColor: '#fff',
+        headerTintColor: "#fff",
         headerTitleStyle: {
-          fontWeight: '600',
+          fontWeight: "600",
         },
         tabBarStyle: {
-          backgroundColor: '#1c1917',
-          borderTopColor: '#334155',
+          backgroundColor: "#1c1917",
+          borderTopColor: "#334155",
         },
-        tabBarActiveTintColor: '#c8732e',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: "#c8732e",
+        tabBarInactiveTintColor: "#94a3b8",
       }}
     >
       <Tabs.Screen
         name="today"
         options={{
-          title: 'Bugün',
+          title: "Bugün",
           headerRight: () => (
             <View style={styles.headerRightContainer}>
               <TouchableOpacity
                 style={styles.quickAddHeaderBtn}
-                onPress={() => router.push('/quick-add')}
+                onPress={() => router.push("/quick-add")}
                 accessibilityLabel="Hızlı Ekle"
               >
                 <Text style={styles.quickAddHeaderBtnText}>+ Ekle</Text>
@@ -54,29 +54,29 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   headerRightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginRight: 12,
   },
   quickAddHeaderBtn: {
-    backgroundColor: '#c8732e',
+    backgroundColor: "#c8732e",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
     marginRight: 8,
   },
   quickAddHeaderBtnText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   logoutHeaderBtn: {
     paddingHorizontal: 8,
     paddingVertical: 5,
   },
   logoutHeaderBtnText: {
-    color: '#94a3b8',
+    color: "#94a3b8",
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

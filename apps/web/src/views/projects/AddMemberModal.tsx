@@ -94,12 +94,7 @@ export default function AddMemberModal({
         </div>
 
         {result ? (
-          <AddMemberResult
-            result={result}
-            copied={copied}
-            onCopy={copy}
-            onClose={onClose}
-          />
+          <AddMemberResult result={result} copied={copied} onCopy={copy} onClose={onClose} />
         ) : (
           <>
             <div className="space-y-4">

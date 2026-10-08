@@ -241,7 +241,10 @@ export default function ProjectsPage() {
                 : "text-husrev-shadow hover:bg-husrev-cream dark:text-husrev-cream dark:hover:bg-white/5"
             }`}
           >
-            {t(`projects.filter.${f}`, f === "all" ? "Tümü" : f === "mine" ? "Benim" : "Paylaşılan")}
+            {t(
+              `projects.filter.${f}`,
+              f === "all" ? "Tümü" : f === "mine" ? "Benim" : "Paylaşılan",
+            )}
           </button>
         ))}
       </div>

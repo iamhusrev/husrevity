@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  RoutineColorToken,
-  RoutineSegmentResponse,
-} from "@/types/routine/routine";
+import { RoutineColorToken, RoutineSegmentResponse } from "@/types/routine/routine";
 import { useRoutineSegments } from "@/hooks/useRoutine";
 
 const COLOR_STRIPE_CLASS: Record<RoutineColorToken, string> = {
@@ -171,9 +168,7 @@ function ActiveSegment({
           ))}
         </ul>
       ) : (
-        <p className="mt-2 text-xs text-gray-400">
-          {t("dashboard.routineNow.noActivities")}
-        </p>
+        <p className="mt-2 text-xs text-gray-400">{t("dashboard.routineNow.noActivities")}</p>
       )}
     </div>
   );

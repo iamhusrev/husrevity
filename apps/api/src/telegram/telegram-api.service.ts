@@ -95,10 +95,7 @@ export class TelegramApiService {
   /**
    * Fetch incoming updates from Telegram using long-polling.
    */
-  async getUpdates(
-    offset?: number,
-    timeoutSec = 30,
-  ): Promise<TelegramUpdate[]> {
+  async getUpdates(offset?: number, timeoutSec = 30): Promise<TelegramUpdate[]> {
     if (!this.telegramConfig.isConfigured()) {
       this.logger.warn('Cannot fetch Telegram updates: bot token is not configured');
       return [];

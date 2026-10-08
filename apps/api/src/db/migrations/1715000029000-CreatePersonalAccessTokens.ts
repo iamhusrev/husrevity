@@ -27,7 +27,9 @@ export class CreatePersonalAccessTokens1715000029000 implements MigrationInterfa
         deleted_at    TIMESTAMPTZ
       )
     `);
-    await qr.query(`CREATE INDEX idx_personal_access_token_owner ON personal_access_token(owner_id)`);
+    await qr.query(
+      `CREATE INDEX idx_personal_access_token_owner ON personal_access_token(owner_id)`,
+    );
     await qr.query(
       `CREATE UNIQUE INDEX uq_personal_access_token_hash ON personal_access_token(token_hash) WHERE deleted_at IS NULL`,
     );

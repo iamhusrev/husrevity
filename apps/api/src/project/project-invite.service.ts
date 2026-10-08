@@ -176,10 +176,7 @@ export class ProjectInviteService {
    * marks the invite accepted. Does NOT mint tokens — caller (in AuthModule)
    * does that.
    */
-  async registerAndCreateMember(
-    token: string,
-    dto: RegisterViaProjectInviteDto,
-  ): Promise<User> {
+  async registerAndCreateMember(token: string, dto: RegisterViaProjectInviteDto): Promise<User> {
     const invite = await this.requireLiveInvite(token);
     // Race: another user may have signed up with this email between invite
     // creation and acceptance. Treat as conflict, same pattern as
@@ -203,7 +200,13 @@ export class ProjectInviteService {
         role: 'user',
       });
       const savedUser = await em.save(user);
-      await this.upsertMemberRow(em, invite.projectId, savedUser.id, invite.role, invite.invitedById);
+      await this.upsertMemberRow(
+        em,
+        invite.projectId,
+        savedUser.id,
+        invite.role,
+        invite.invitedById,
+      );
       invite.acceptedAt = new Date();
       invite.acceptedUserId = savedUser.id;
       await em.save(invite);
@@ -230,7 +233,13 @@ export class ProjectInviteService {
             .getRepository(ProjectMember)
             .findOne({ where: { projectId: invite.projectId, userId } });
           if (!existingMember) {
-            await this.upsertMemberRow(em, invite.projectId, userId, invite.role, invite.invitedById);
+            await this.upsertMemberRow(
+              em,
+              invite.projectId,
+              userId,
+              invite.role,
+              invite.invitedById,
+            );
           }
           invite.acceptedAt = new Date();
           invite.acceptedUserId = userId;

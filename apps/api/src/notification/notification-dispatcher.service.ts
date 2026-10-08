@@ -73,12 +73,10 @@ export class NotificationDispatcherService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.webBaseUrl =
-      this.config.get<string>('HUSREVITY_WEB_URL') ?? 'http://localhost:3090';
+    this.webBaseUrl = this.config.get<string>('HUSREVITY_WEB_URL') ?? 'http://localhost:3090';
     const publicKey = this.config.get<string>('VAPID_PUBLIC_KEY');
     const privateKey = this.config.get<string>('VAPID_PRIVATE_KEY');
-    const subject =
-      this.config.get<string>('VAPID_SUBJECT') || 'mailto:owner@example.com';
+    const subject = this.config.get<string>('VAPID_SUBJECT') || 'mailto:owner@example.com';
     if (!publicKey || !privateKey) {
       this.logger.warn(
         'VAPID keys not configured — web-push disabled. ' +
@@ -112,9 +110,7 @@ export class NotificationDispatcherService implements OnModuleInit {
       try {
         await this.notifications.markDispatched(n.id);
       } catch (e) {
-        this.logger.error(
-          `markDispatched failed for ${n.id}: ${(e as Error).message}`,
-        );
+        this.logger.error(`markDispatched failed for ${n.id}: ${(e as Error).message}`);
       }
     }
 
@@ -127,21 +123,13 @@ export class NotificationDispatcherService implements OnModuleInit {
     }
 
     for (const [ownerId, items] of byOwner) {
-      const subs = this.vapidReady
-        ? await this.notifications.listSubscriptions(ownerId)
-        : [];
+      const subs = this.vapidReady ? await this.notifications.listSubscriptions(ownerId) : [];
       // Look up the user once per owner — used by the email leg + skipped
       // if they've opted out / SMTP isn't configured.
       const user = await this.users.findById(ownerId).catch(() => null);
-      const telegramLink = await this.telegramLinkService
-        .findByOwner(ownerId)
-        .catch(() => null);
-      const mobileDevices = await this.deviceService
-        .findActiveForOwner(ownerId)
-        .catch(() => []);
-      const slackLink = await this.slackLinkService
-        .findByOwner(ownerId)
-        .catch(() => null);
+      const telegramLink = await this.telegramLinkService.findByOwner(ownerId).catch(() => null);
+      const mobileDevices = await this.deviceService.findActiveForOwner(ownerId).catch(() => []);
+      const slackLink = await this.slackLinkService.findByOwner(ownerId).catch(() => null);
       for (const n of items) {
         await this.deliver(n, subs, user, telegramLink, mobileDevices, slackLink);
       }
@@ -150,19 +138,11 @@ export class NotificationDispatcherService implements OnModuleInit {
   }
 
   async dispatchOne(n: Notification): Promise<DispatchResult> {
-    const subs = this.vapidReady
-      ? await this.notifications.listSubscriptions(n.ownerId)
-      : [];
+    const subs = this.vapidReady ? await this.notifications.listSubscriptions(n.ownerId) : [];
     const user = await this.users.findById(n.ownerId).catch(() => null);
-    const telegramLink = await this.telegramLinkService
-      .findByOwner(n.ownerId)
-      .catch(() => null);
-    const mobileDevices = await this.deviceService
-      .findActiveForOwner(n.ownerId)
-      .catch(() => []);
-    const slackLink = await this.slackLinkService
-      .findByOwner(n.ownerId)
-      .catch(() => null);
+    const telegramLink = await this.telegramLinkService.findByOwner(n.ownerId).catch(() => null);
+    const mobileDevices = await this.deviceService.findActiveForOwner(n.ownerId).catch(() => []);
+    const slackLink = await this.slackLinkService.findByOwner(n.ownerId).catch(() => null);
     return this.deliver(n, subs, user, telegramLink, mobileDevices, slackLink);
   }
 
@@ -201,11 +181,7 @@ export class NotificationDispatcherService implements OnModuleInit {
       result.emailSucceeded = await this.sendEmail(n, user.email);
     }
 
-    if (
-      telegramLink &&
-      telegramLink.status === 'linked' &&
-      telegramLink.chatId
-    ) {
+    if (telegramLink && telegramLink.status === 'linked' && telegramLink.chatId) {
       result.telegramAttempted = true;
       result.telegramSucceeded = await this.sendTelegram(n, telegramLink);
     }
@@ -215,11 +191,7 @@ export class NotificationDispatcherService implements OnModuleInit {
       result.expoSucceeded = await this.sendExpoPush(n, mobileDevices);
     }
 
-    if (
-      slackLink &&
-      slackLink.status === 'linked' &&
-      slackLink.slackUserId
-    ) {
+    if (slackLink && slackLink.status === 'linked' && slackLink.slackUserId) {
       result.slackAttempted = true;
       result.slackSucceeded = await this.sendSlack(n, slackLink);
     }
@@ -236,10 +208,7 @@ export class NotificationDispatcherService implements OnModuleInit {
     return result;
   }
 
-  private async sendSlack(
-    n: Notification,
-    link: SlackLink,
-  ): Promise<boolean> {
+  private async sendSlack(n: Notification, link: SlackLink): Promise<boolean> {
     const payload: NotifierPayload = {
       id: n.id,
       title: n.title,
@@ -251,17 +220,12 @@ export class NotificationDispatcherService implements OnModuleInit {
       await this.slackNotifier.send(link, payload);
       return true;
     } catch (err) {
-      this.logger.warn(
-        `slack-notifier failed: ${(err as Error).message}`,
-      );
+      this.logger.warn(`slack-notifier failed: ${(err as Error).message}`);
       return false;
     }
   }
 
-  private async sendTelegram(
-    n: Notification,
-    link: TelegramLink,
-  ): Promise<boolean> {
+  private async sendTelegram(n: Notification, link: TelegramLink): Promise<boolean> {
     const payload: NotifierPayload = {
       id: n.id,
       title: n.title,
@@ -273,17 +237,12 @@ export class NotificationDispatcherService implements OnModuleInit {
       await this.telegramNotifier.send(link, payload);
       return true;
     } catch (err) {
-      this.logger.warn(
-        `telegram-notifier failed: ${(err as Error).message}`,
-      );
+      this.logger.warn(`telegram-notifier failed: ${(err as Error).message}`);
       return false;
     }
   }
 
-  private async sendExpoPush(
-    n: Notification,
-    devices: Device[],
-  ): Promise<boolean> {
+  private async sendExpoPush(n: Notification, devices: Device[]): Promise<boolean> {
     const payload: NotifierPayload = {
       id: n.id,
       title: n.title,
@@ -297,18 +256,13 @@ export class NotificationDispatcherService implements OnModuleInit {
         await this.expoPushNotifier.send(dev, payload);
         succeeded = true;
       } catch (err) {
-        this.logger.warn(
-          `expo-push failed for device ${dev.id}: ${(err as Error).message}`,
-        );
+        this.logger.warn(`expo-push failed for device ${dev.id}: ${(err as Error).message}`);
       }
     }
     return succeeded;
   }
 
-  private noDeliveryReason(
-    user: User | null,
-    subs: PushSubscription[],
-  ): string {
+  private noDeliveryReason(user: User | null, subs: PushSubscription[]): string {
     if (!this.vapidReady) return 'vapid-not-configured';
     if (subs.length === 0) return 'no-subscriptions';
     if (!this.mailer.isConfigured()) return 'mail-not-configured';
@@ -320,10 +274,7 @@ export class NotificationDispatcherService implements OnModuleInit {
     return this.mailer.sendNotificationEmail(email, n, this.webBaseUrl);
   }
 
-  private async sendPush(
-    n: Notification,
-    subs: PushSubscription[],
-  ): Promise<boolean> {
+  private async sendPush(n: Notification, subs: PushSubscription[]): Promise<boolean> {
     const payload: NotifierPayload = {
       id: n.id,
       title: n.title,
@@ -340,16 +291,10 @@ export class NotificationDispatcherService implements OnModuleInit {
         const status = (err as { statusCode?: number }).statusCode;
         if (status === 404 || status === 410) {
           // Subscription gone — drop it so we don't keep trying.
-          this.logger.log(
-            `Dropping expired subscription (${status}) for owner ${sub.ownerId}`,
-          );
-          await this.notifications
-            .dropSubscriptionByEndpoint(sub.endpoint)
-            .catch(() => undefined);
+          this.logger.log(`Dropping expired subscription (${status}) for owner ${sub.ownerId}`);
+          await this.notifications.dropSubscriptionByEndpoint(sub.endpoint).catch(() => undefined);
         } else {
-          this.logger.warn(
-            `web-push failed (${status ?? '?'}): ${(err as Error).message}`,
-          );
+          this.logger.warn(`web-push failed (${status ?? '?'}): ${(err as Error).message}`);
         }
       }
     }

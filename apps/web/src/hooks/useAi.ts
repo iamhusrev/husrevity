@@ -24,4 +24,3 @@ export function useDictateItems() {
     mutationFn: (text: string) => aiService.splitDictatedText({ text }),
   });
 }
-

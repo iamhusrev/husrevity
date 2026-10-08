@@ -128,7 +128,10 @@ export default function ProjectInviteAcceptView({ token }: { token: string }) {
           {state.phase === "loading" && (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-10 rounded-xl bg-husrev-sand/40 motion-safe:animate-pulse" />
+                <div
+                  key={i}
+                  className="h-10 rounded-xl bg-husrev-sand/40 motion-safe:animate-pulse"
+                />
               ))}
             </div>
           )}
@@ -137,10 +140,7 @@ export default function ProjectInviteAcceptView({ token }: { token: string }) {
             <div className="text-center space-y-3">
               <p className="text-sm text-error-500">{state.message}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t(
-                  "projectInvite.errorHint",
-                  "Davet edenle iletişime geç ve yeni bir link iste.",
-                )}
+                {t("projectInvite.errorHint", "Davet edenle iletişime geç ve yeni bir link iste.")}
               </p>
             </div>
           )}
@@ -220,7 +220,11 @@ export default function ProjectInviteAcceptView({ token }: { token: string }) {
                     />
                   </Field>
 
-                  <button type="submit" disabled={submitting} className="husrev-btn w-full justify-center">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="husrev-btn w-full justify-center"
+                  >
                     {submitting
                       ? t("projectInvite.creating", "Hesap oluşturuluyor…")
                       : t("projectInvite.submitRegister", "Hesap oluştur ve katıl")}

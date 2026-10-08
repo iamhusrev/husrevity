@@ -17,17 +17,7 @@ import { SlackNotifier } from './slack.notifier';
  */
 @Module({
   imports: [TypeOrmModule.forFeature([SlackLink])],
-  providers: [
-    SlackConfig,
-    SlackApiService,
-    SlackLinkService,
-    SlackNotifier,
-  ],
-  exports: [
-    SlackConfig,
-    SlackApiService,
-    SlackLinkService,
-    SlackNotifier,
-  ],
+  providers: [SlackConfig, SlackApiService, SlackLinkService, SlackNotifier],
+  exports: [SlackConfig, SlackApiService, SlackLinkService, SlackNotifier],
 })
 export class SlackCoreModule {}
