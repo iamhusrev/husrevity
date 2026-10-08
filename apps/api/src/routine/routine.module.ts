@@ -9,5 +9,6 @@ import { RoutineController } from './routine.controller';
   imports: [TypeOrmModule.forFeature([RoutineSegment, RoutineActivity])],
   providers: [RoutineService],
   controllers: [RoutineController],
+  exports: [RoutineService],
 })
 export class RoutineModule {}

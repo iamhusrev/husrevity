@@ -22,7 +22,7 @@ export interface GoogleStatus {
   connectedAt: string | null;
 }
 
-export type PatScope = "items:read" | "items:write" | "notes:read" | "notes:write" | "projects:read";
+export type PatScope = "items:read" | "items:write" | "notes:read" | "notes:write" | "projects:read" | "projects:write";
 
 export const PAT_SCOPES: PatScope[] = [
   "items:read",
@@ -30,6 +30,7 @@ export const PAT_SCOPES: PatScope[] = [
   "notes:read",
   "notes:write",
   "projects:read",
+  "projects:write",
 ];
 
 export interface Pat {

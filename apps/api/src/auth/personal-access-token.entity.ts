@@ -7,7 +7,8 @@ export type PatScope =
   | 'items:write'
   | 'notes:read'
   | 'notes:write'
-  | 'projects:read';
+  | 'projects:read'
+  | 'projects:write';
 
 @Entity('personal_access_token')
 @Index('idx_personal_access_token_owner', ['ownerId'])

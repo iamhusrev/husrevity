@@ -6,6 +6,9 @@ import { TodayService } from '../today/today.service';
 import { ItemService } from '../item/item.service';
 import { NoteService } from '../note/note.service';
 import { ProjectService } from '../project/project.service';
+import { TaskService } from '../task/task.service';
+import { RoutineService } from '../routine/routine.service';
+import { ReminderService } from '../reminder/reminder.service';
 import { McpSearchService } from './mcp-search.service';
 import { PAT_SCOPES } from '../auth/dto/pat-dtos';
 
@@ -16,6 +19,9 @@ describe('McpServerFactory', () => {
   let mcpSearchService: { search: jest.Mock };
   let noteService: { create: jest.Mock };
   let projectService: { list: jest.Mock; getById: jest.Mock };
+  let routineService: { listSegments: jest.Mock; createActivity: jest.Mock };
+  let taskService: { createForProject: jest.Mock };
+  let reminderService: { createReminder: jest.Mock; listReminderLists: jest.Mock };
 
   beforeEach(async () => {
     todayService = {
@@ -38,6 +44,12 @@ describe('McpServerFactory', () => {
       list: jest.fn(),
       getById: jest.fn(),
     };
+    routineService = { listSegments: jest.fn(), createActivity: jest.fn() };
+    taskService = { createForProject: jest.fn() };
+    reminderService = {
+      createReminder: jest.fn(),
+      listReminderLists: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,6 +59,9 @@ describe('McpServerFactory', () => {
         { provide: McpSearchService, useValue: mcpSearchService },
         { provide: NoteService, useValue: noteService },
         { provide: ProjectService, useValue: projectService },
+        { provide: ReminderService, useValue: reminderService },
+        { provide: TaskService, useValue: taskService },
+        { provide: RoutineService, useValue: routineService },
       ],
     }).compile();
 
@@ -149,35 +164,255 @@ describe('McpServerFactory', () => {
       ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
     });
 
-    it('parses quick add text and creates item with source mcp', async () => {
+    it('parses quick add text and creates a reminder instead of an item', async () => {
       const server = factory.createMcpServer();
       const toolHandler = (server as any)._registeredTools['quick_add']?.handler;
 
-      itemService.create.mockResolvedValueOnce({
-        id: 'item_qa_1',
-        kind: 'task',
+      reminderService.createReminder.mockResolvedValueOnce({
+        id: 'rem_qa_1',
         title: 'toplantı hazırlığı',
-        source: 'mcp',
+        dueAt: null,
       });
 
       const res = await toolHandler(
-        { text: 'toplantı hazırlığı #is' },
+        { text: 'toplantı hazırlığı' },
         { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
       );
 
-      expect(itemService.create).toHaveBeenCalledWith(
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
         'usr_100',
         expect.objectContaining({
-          kind: 'task',
           title: 'toplantı hazırlığı',
-          context: 'is',
-          source: 'mcp',
+          notifyMinutesBefore: null,
         }),
       );
+      expect(itemService.create).not.toHaveBeenCalled();
 
       const parsed = JSON.parse(res.content[0].text);
-      expect(parsed.id).toBe('item_qa_1');
-      expect(parsed.source).toBe('mcp');
+      expect(parsed.id).toBe('rem_qa_1');
+      expect(parsed.warning).toBeUndefined();
+    });
+
+    it('notifies at due time and warns when the text is recurring', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['quick_add']?.handler;
+
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'rem_qa_2' });
+
+      const res = await toolHandler(
+        { text: 'her gün 9da ilaç al' },
+        { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
+      );
+
+      const [, req] = reminderService.createReminder.mock.calls[0];
+      expect(req.dueAt).toEqual(expect.any(String));
+      expect(req.notifyMinutesBefore).toBe(0);
+      expect(itemService.create).not.toHaveBeenCalled();
+
+      const parsed = JSON.parse(res.content[0].text);
+      expect(parsed.warning).toContain('Recurrence is not supported');
+    });
+  });
+
+  describe('create_reminder tool', () => {
+    const auth = { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } };
+
+    it('throws error when auth context or items:write scope is missing', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_reminder']?.handler;
+      expect(toolHandler).toBeDefined();
+
+      await expect(toolHandler({ title: 'x' }, {})).rejects.toThrow(
+        'Unauthorized: missing owner context',
+      );
+      await expect(
+        toolHandler(
+          { title: 'x' },
+          { authInfo: { scopes: ['items:read'], extra: { ownerId: 'user1' } } },
+        ),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+    });
+
+    it('passes structured fields through and defaults notifyMinutesBefore to 0 with dueAt', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_reminder']?.handler;
+      reminderService.createReminder.mockResolvedValueOnce({ id: 'rem_1' });
+
+      await toolHandler(
+        {
+          title: 'HGS kontrol',
+          dueAt: '2026-10-09T09:00:00+03:00',
+          notes: 'bakiye',
+          priority: 'HIGH',
+          flag: true,
+          listId: 'list_1',
+        },
+        auth,
+      );
+
+      expect(reminderService.createReminder).toHaveBeenCalledWith('usr_100', {
+        title: 'HGS kontrol',
+        dueAt: '2026-10-09T09:00:00+03:00',
+        notes: 'bakiye',
+        priority: 'HIGH',
+        flag: true,
+        listId: 'list_1',
+        notifyMinutesBefore: 0,
+      });
+    });
+
+    it('keeps notifyMinutesBefore null without dueAt and honors an explicit value', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_reminder']?.handler;
+      reminderService.createReminder.mockResolvedValue({ id: 'rem_2' });
+
+      await toolHandler({ title: 'tarihsiz' }, auth);
+      await toolHandler({ title: 'erken', dueAt: '2026-10-09T09:00:00+03:00', notifyMinutesBefore: 15 }, auth);
+
+      expect(reminderService.createReminder.mock.calls[0][1].notifyMinutesBefore).toBeNull();
+      expect(reminderService.createReminder.mock.calls[1][1].notifyMinutesBefore).toBe(15);
+    });
+  });
+
+  describe('create_task tool', () => {
+    const auth = { authInfo: { scopes: ['projects:write'], extra: { ownerId: 'usr_100' } } };
+    const projects = [
+      { id: '7', code: 'WEB', name: 'Husrevity Web' },
+      { id: '8', code: 'API', name: 'Husrevity API' },
+    ];
+
+    it('requires projects:write scope', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_task']?.handler;
+      expect(toolHandler).toBeDefined();
+
+      await expect(
+        toolHandler(
+          { project: 'web', title: 'x' },
+          { authInfo: { scopes: ['items:write', 'projects:read'], extra: { ownerId: 'u' } } },
+        ),
+      ).rejects.toThrow("Forbidden: missing required scope 'projects:write'");
+    });
+
+    it('resolves the project by name case-insensitively and creates the task there', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_task']?.handler;
+      projectService.list.mockResolvedValueOnce(projects);
+      taskService.createForProject.mockResolvedValueOnce({ id: 't1', title: 'HGS kontrol' });
+
+      const res = await toolHandler(
+        { project: 'husrevity web', title: 'HGS kontrol', priority: 'HIGH' },
+        auth,
+      );
+
+      expect(taskService.createForProject).toHaveBeenCalledWith(
+        'usr_100',
+        '7',
+        expect.objectContaining({ title: 'HGS kontrol', priority: 'HIGH', notifyMinutesBefore: null }),
+      );
+      expect(itemService.create).not.toHaveBeenCalled();
+      expect(JSON.parse(res.content[0].text).project).toBe('Husrevity Web');
+    });
+
+    it('resolves by id or code', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_task']?.handler;
+      projectService.list.mockResolvedValue(projects);
+      taskService.createForProject.mockResolvedValue({ id: 't2' });
+
+      await toolHandler({ project: '8', title: 'a' }, auth);
+      await toolHandler({ project: 'web', title: 'b' }, auth);
+
+      expect(taskService.createForProject.mock.calls[0][1]).toBe('8');
+      expect(taskService.createForProject.mock.calls[1][1]).toBe('7');
+    });
+
+    it('fails with available projects when not found, and when ambiguous', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['create_task']?.handler;
+      projectService.list.mockResolvedValue([
+        ...projects,
+        { id: '9', code: 'WEB2', name: 'Husrevity Web' },
+      ]);
+
+      await expect(toolHandler({ project: 'yok', title: 'x' }, auth)).rejects.toThrow(
+        'Project not found',
+      );
+      await expect(toolHandler({ project: 'Husrevity Web', title: 'x' }, auth)).rejects.toThrow(
+        'ambiguous',
+      );
+      expect(taskService.createForProject).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Evkat tools', () => {
+    const segments = [
+      { id: '1', name: 'Sabah', activities: [] },
+      { id: '2', name: 'Akşam', activities: [] },
+    ];
+    const write = { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } };
+
+    it('list_evkat requires items:read and returns segments', async () => {
+      const server = factory.createMcpServer();
+      const handler = (server as any)._registeredTools['list_evkat']?.handler;
+      routineService.listSegments.mockResolvedValueOnce(segments);
+
+      await expect(
+        handler({ authInfo: { scopes: ['notes:read'], extra: { ownerId: 'u' } } }),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:read'");
+      const res = await handler({
+        authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } },
+      });
+      expect(JSON.parse(res.content[0].text)).toEqual(segments);
+    });
+
+    it('add_evkat_item requires items:write and adds to the segment matched by name', async () => {
+      const server = factory.createMcpServer();
+      const handler = (server as any)._registeredTools['add_evkat_item']?.handler;
+      routineService.listSegments.mockResolvedValue(segments);
+      routineService.createActivity.mockResolvedValue({ id: 'a1', text: 'Su iç' });
+
+      await expect(
+        handler(
+          { segment: 'sabah', text: 'x' },
+          { authInfo: { scopes: ['items:read'], extra: { ownerId: 'u' } } },
+        ),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+
+      const res = await handler({ segment: 'akşam', text: 'Su iç' }, write);
+      expect(routineService.createActivity).toHaveBeenCalledWith('usr_100', '2', {
+        text: 'Su iç',
+      });
+      expect(JSON.parse(res.content[0].text).segment).toBe('Akşam');
+    });
+
+    it('add_evkat_item fails when the segment is unknown', async () => {
+      const server = factory.createMcpServer();
+      const handler = (server as any)._registeredTools['add_evkat_item']?.handler;
+      routineService.listSegments.mockResolvedValue(segments);
+
+      await expect(handler({ segment: 'öğle', text: 'x' }, write)).rejects.toThrow(
+        'Evkat segment not found',
+      );
+      expect(routineService.createActivity).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('list_reminder_lists tool', () => {
+    it('requires items:read and returns the lists', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['list_reminder_lists']?.handler;
+      reminderService.listReminderLists.mockResolvedValueOnce([{ id: 'l1', name: 'Genel' }]);
+
+      await expect(
+        toolHandler({ authInfo: { scopes: ['notes:read'], extra: { ownerId: 'u' } } }),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:read'");
+
+      const res = await toolHandler({
+        authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } },
+      });
+      expect(reminderService.listReminderLists).toHaveBeenCalledWith('usr_100');
+      expect(JSON.parse(res.content[0].text)).toEqual([{ id: 'l1', name: 'Genel' }]);
     });
   });
 

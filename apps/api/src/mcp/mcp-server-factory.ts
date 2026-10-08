@@ -7,6 +7,9 @@ import { TodayService } from '../today/today.service';
 import { ItemService } from '../item/item.service';
 import { NoteService } from '../note/note.service';
 import { ProjectService } from '../project/project.service';
+import { TaskService } from '../task/task.service';
+import { RoutineService } from '../routine/routine.service';
+import { ReminderService } from '../reminder/reminder.service';
 import { McpSearchService } from './mcp-search.service';
 import { PatScope } from '../auth/personal-access-token.entity';
 
@@ -36,6 +39,9 @@ export class McpServerFactory {
     private readonly mcpSearchService: McpSearchService,
     private readonly noteService: NoteService,
     private readonly projectService: ProjectService,
+    private readonly reminderService: ReminderService,
+    private readonly taskService: TaskService,
+    private readonly routineService: RoutineService,
   ) {}
 
   createMcpServer(): McpServer {
@@ -100,32 +106,110 @@ export class McpServerFactory {
       'quick_add',
       {
         description:
-          'Quickly add a task or item using Turkish natural language text parsing',
+          'Quickly add a reminder (shown on the Reminders page) from Turkish natural language text. Fires at the parsed due time. Recurrence is not supported: a recurring phrase creates a one-off reminder for its first occurrence.',
         inputSchema: {
           text: z
             .string()
             .describe(
-              'Natural language text to parse and create an item from (e.g. "yarın 9da HGS kontrol #alican !yüksek")',
+              'Natural language text to parse and create a reminder from (e.g. "yarın 9da HGS kontrol")',
             ),
         },
       },
       async (params: any, extra: any) => {
         const { ownerId } = getOwnerAndCheckScope(extra, 'items:write');
         const parsed = await parseQuickAdd(params.text);
-        const result = await this.itemService.create(ownerId, {
-          kind: 'task',
+        const dueAt = parsed.scheduledAt ?? undefined;
+        const reminder = await this.reminderService.createReminder(ownerId, {
           title: parsed.title,
-          scheduledAt: parsed.scheduledAt,
-          context: parsed.context,
-          rrule: parsed.rrule,
-          source: 'mcp',
+          dueAt,
+          notifyMinutesBefore: dueAt ? 0 : null,
         });
+        const result = parsed.rrule
+          ? {
+              ...reminder,
+              warning:
+                'Recurrence is not supported for reminders; created a one-off reminder for the first occurrence.',
+            }
+          : reminder;
 
         return {
           content: [
             {
               type: 'text' as const,
               text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerTool<any, any>(
+      'create_reminder',
+      {
+        description:
+          'Create a reminder shown on the Reminders page. Prefer this over quick_add when you can provide structured fields. Use Europe/Istanbul time for dueAt.',
+        inputSchema: {
+          title: z.string().min(1).max(255).describe('Reminder title'),
+          dueAt: z
+            .string()
+            .optional()
+            .describe('Due date-time in ISO 8601 with offset, e.g. 2026-10-09T09:00:00+03:00'),
+          notes: z.string().optional().describe('Optional notes'),
+          priority: z
+            .enum(['NONE', 'LOW', 'MEDIUM', 'HIGH'])
+            .optional()
+            .describe('Priority, defaults to NONE'),
+          flag: z.boolean().optional().describe('Whether the reminder is flagged'),
+          listId: z
+            .string()
+            .optional()
+            .describe('Reminder list ID (see list_reminder_lists)'),
+          notifyMinutesBefore: z
+            .number()
+            .int()
+            .min(0)
+            .optional()
+            .describe('Minutes before dueAt to notify. Defaults to 0 when dueAt is set'),
+        },
+      },
+      async (params: any, extra: any) => {
+        const { ownerId } = getOwnerAndCheckScope(extra, 'items:write');
+        const reminder = await this.reminderService.createReminder(ownerId, {
+          title: params.title,
+          dueAt: params.dueAt,
+          notes: params.notes,
+          priority: params.priority,
+          flag: params.flag,
+          listId: params.listId,
+          notifyMinutesBefore:
+            params.notifyMinutesBefore ?? (params.dueAt ? 0 : null),
+        });
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(reminder, null, 2),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerTool<any, any>(
+      'list_reminder_lists',
+      {
+        description: 'List reminder lists so a listId can be passed to create_reminder',
+      },
+      async (extra: any) => {
+        const { ownerId } = getOwnerAndCheckScope(extra, 'items:read');
+        const lists = await this.reminderService.listReminderLists(ownerId);
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(lists, null, 2),
             },
           ],
         };
@@ -236,6 +320,136 @@ export class McpServerFactory {
             {
               type: 'text' as const,
               text: JSON.stringify(project, null, 2),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerTool<any, any>(
+      'create_task',
+      {
+        description:
+          'Create a task inside a project (not a reminder). The project can be given by ID, code or name; use list_projects if unsure.',
+        inputSchema: {
+          project: z.string().min(1).describe('Project ID, code or name (case-insensitive)'),
+          title: z.string().min(1).max(255).describe('Task title'),
+          description: z.string().optional().describe('Optional task description'),
+          priority: z
+            .enum(['LOW', 'MEDIUM', 'HIGH'])
+            .optional()
+            .describe('Priority, defaults to MEDIUM'),
+          dueAt: z
+            .string()
+            .optional()
+            .describe('Due date-time in ISO 8601 with offset, e.g. 2026-10-09T09:00:00+03:00'),
+        },
+      },
+      async (params: any, extra: any) => {
+        const { ownerId } = getOwnerAndCheckScope(extra, 'projects:write');
+        const projects = await this.projectService.list(ownerId, 'all');
+        const needle = String(params.project).trim().toLowerCase();
+        const byId = projects.filter((p) => String(p.id) === params.project.trim());
+        const matches = byId.length
+          ? byId
+          : projects.filter(
+              (p) => p.name.toLowerCase() === needle || p.code.toLowerCase() === needle,
+            );
+        if (matches.length === 0) {
+          throw new Error(
+            `Project not found: '${params.project}'. Available: ${projects.map((p) => p.name).join(', ')}`,
+          );
+        }
+        if (matches.length > 1) {
+          throw new Error(
+            `Project '${params.project}' is ambiguous; pass the ID. Matches: ${matches
+              .map((p) => `${p.name} (${p.id})`)
+              .join(', ')}`,
+          );
+        }
+
+        const task = await this.taskService.createForProject(ownerId, String(matches[0].id), {
+          title: params.title,
+          description: params.description,
+          priority: params.priority,
+          dueAt: params.dueAt,
+          notifyMinutesBefore: params.dueAt ? 0 : null,
+        });
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ project: matches[0].name, task }, null, 2),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerTool<any, any>(
+      'list_evkat',
+      {
+        description:
+          'List the Evkat daily routine: time segments (e.g. morning, evening) with their items, so an item can be added with add_evkat_item',
+      },
+      async (extra: any) => {
+        const { ownerId } = getOwnerAndCheckScope(extra, 'items:read');
+        const segments = await this.routineService.listSegments(ownerId);
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(segments, null, 2),
+            },
+          ],
+        };
+      },
+    );
+
+    server.registerTool<any, any>(
+      'add_evkat_item',
+      {
+        description:
+          'Add an item to a segment of the Evkat daily routine. The segment can be given by ID or name; use list_evkat if unsure.',
+        inputSchema: {
+          segment: z.string().min(1).describe('Evkat segment ID or name (case-insensitive)'),
+          text: z.string().min(1).max(300).describe('Routine item text'),
+        },
+      },
+      async (params: any, extra: any) => {
+        const { ownerId } = getOwnerAndCheckScope(extra, 'items:write');
+        const segments = await this.routineService.listSegments(ownerId);
+        const needle = String(params.segment).trim().toLowerCase();
+        const byId = segments.filter((s) => String(s.id) === params.segment.trim());
+        const matches = byId.length
+          ? byId
+          : segments.filter((s) => s.name.toLowerCase() === needle);
+        if (matches.length === 0) {
+          throw new Error(
+            `Evkat segment not found: '${params.segment}'. Available: ${segments.map((s) => s.name).join(', ')}`,
+          );
+        }
+        if (matches.length > 1) {
+          throw new Error(
+            `Evkat segment '${params.segment}' is ambiguous; pass the ID. Matches: ${matches
+              .map((s) => `${s.name} (${s.id})`)
+              .join(', ')}`,
+          );
+        }
+
+        const activity = await this.routineService.createActivity(
+          ownerId,
+          String(matches[0].id),
+          { text: params.text },
+        );
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ segment: matches[0].name, activity }, null, 2),
             },
           ],
         };

@@ -8,6 +8,7 @@ export const PAT_SCOPES: PatScope[] = [
   'notes:read',
   'notes:write',
   'projects:read',
+  'projects:write',
 ];
 
 export class IssuePatRequestDto {

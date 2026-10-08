@@ -5,6 +5,9 @@ import { TodayModule } from '../today/today.module';
 import { ItemModule } from '../item/item.module';
 import { NoteModule } from '../note/note.module';
 import { ProjectModule } from '../project/project.module';
+import { TaskModule } from '../task/task.module';
+import { RoutineModule } from '../routine/routine.module';
+import { ReminderModule } from '../reminder/reminder.module';
 import { Item } from '../item/item.entity';
 import { Note } from '../note/note.entity';
 import { McpController } from './mcp.controller';
@@ -19,6 +22,9 @@ import { PatAuthGuard } from './pat-auth.guard';
     ItemModule,
     NoteModule,
     ProjectModule,
+    TaskModule,
+    ReminderModule,
+    RoutineModule,
     TypeOrmModule.forFeature([Item, Note]),
   ],
   controllers: [McpController],

@@ -9,6 +9,9 @@ import { TodayService } from '../today/today.service';
 import { ItemService } from '../item/item.service';
 import { NoteService } from '../note/note.service';
 import { ProjectService } from '../project/project.service';
+import { TaskService } from '../task/task.service';
+import { RoutineService } from '../routine/routine.service';
+import { ReminderService } from '../reminder/reminder.service';
 import { PatAuthGuard } from './pat-auth.guard';
 
 describe('McpController', () => {
@@ -46,6 +49,12 @@ describe('McpController', () => {
           provide: ProjectService,
           useValue: { list: jest.fn(), getById: jest.fn() },
         },
+        {
+          provide: ReminderService,
+          useValue: { createReminder: jest.fn(), listReminderLists: jest.fn() },
+        },
+        { provide: RoutineService, useValue: { listSegments: jest.fn(), createActivity: jest.fn() } },
+        { provide: TaskService, useValue: { createForProject: jest.fn() } },
         PatAuthGuard,
       ],
     }).compile();
