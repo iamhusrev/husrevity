@@ -10,6 +10,7 @@ import { ProjectInviteService } from '../project/project-invite.service';
 import { NotificationService } from '../notification/notification.service';
 import { UserService } from '../user/user.service';
 import { MailerService } from '../notification/mailer.service';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 
 type MockTaskRepo = {
   findOne: jest.Mock;
@@ -54,10 +55,20 @@ describe('TaskService', () => {
   let users: { findById: jest.Mock; requireById: jest.Mock };
   let mailer: { isConfigured: jest.Mock; sendTaskAssignedEmail: jest.Mock };
   let projectInvites: { buildProjectUrl: jest.Mock };
+  let mirror: {
+    upsertFromTask: jest.Mock;
+    softDeleteMirror: jest.Mock;
+    restoreMirror: jest.Mock;
+  };
   let qb: MockQueryBuilder;
   let em: { createQueryBuilder: jest.Mock };
 
   beforeEach(async () => {
+    mirror = {
+      upsertFromTask: jest.fn().mockResolvedValue(null),
+      softDeleteMirror: jest.fn().mockResolvedValue(undefined),
+      restoreMirror: jest.fn().mockResolvedValue(undefined),
+    };
     tasks = {
       findOne: jest.fn(),
       restore: jest.fn(),
@@ -90,6 +101,7 @@ describe('TaskService', () => {
         { provide: NotificationService, useValue: notifications },
         { provide: UserService, useValue: users },
         { provide: MailerService, useValue: mailer },
+        { provide: ItemMirrorService, useValue: mirror },
       ],
     }).compile();
 
@@ -544,6 +556,128 @@ describe('TaskService', () => {
       await service.reorderForProject(ownerId, '5', []);
 
       expect(dataSource.transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ItemMirror hooks', () => {
+    it('invokes mirror.upsertFromTask upon createForProject', async () => {
+      const project = { id: '5', ownerId: '1' };
+      access.requireAccess.mockResolvedValueOnce({ project, role: 'EDITOR' });
+      access.isMember.mockResolvedValueOnce(true);
+      const savedTask = {
+        id: '10',
+        ownerId: '1',
+        projectId: '5',
+        title: 'Mirrored Task',
+        status: 'TODO',
+        priority: 'MEDIUM',
+        position: 0,
+      } as Task;
+      tasks.create.mockReturnValueOnce(savedTask);
+      tasks.save.mockResolvedValueOnce(savedTask);
+
+      await service.createForProject('1', '5', { title: 'Mirrored Task' });
+
+      expect(mirror.upsertFromTask).toHaveBeenCalledWith(savedTask);
+    });
+
+    it('invokes mirror.upsertFromTask upon update', async () => {
+      const existing = {
+        id: '10',
+        ownerId: '1',
+        projectId: '5',
+        title: 'Old',
+        status: 'TODO',
+      } as Task;
+      tasks.findOne.mockResolvedValueOnce(existing);
+      access.requireAccess.mockResolvedValueOnce({ project: { id: '5' }, role: 'EDITOR' });
+      const updated = { ...existing, title: 'New' };
+      tasks.save.mockResolvedValueOnce(updated);
+
+      await service.update('1', actorEmail, '10', { title: 'New' });
+
+      expect(mirror.upsertFromTask).toHaveBeenCalledWith(updated);
+    });
+
+    it('invokes mirror.softDeleteMirror upon delete', async () => {
+      const existing = {
+        id: '10',
+        ownerId: '1',
+        projectId: null,
+      } as Task;
+      tasks.findOne.mockResolvedValueOnce(existing);
+
+      await service.delete('1', '10');
+
+      expect(mirror.softDeleteMirror).toHaveBeenCalledWith('task', '10', '1');
+    });
+
+    it('invokes mirror.upsertFromTask upon restore', async () => {
+      const deletedTask = {
+        id: '10',
+        ownerId: '1',
+        projectId: null,
+        title: 'Restored Task',
+        status: 'TODO',
+        deletedAt: new Date(),
+      } as Task;
+      const restoredTask = { ...deletedTask, deletedAt: null };
+      tasks.findOne.mockResolvedValueOnce(deletedTask).mockResolvedValueOnce(restoredTask);
+
+      await service.restore('1', '10');
+
+      expect(mirror.upsertFromTask).toHaveBeenCalledWith(
+        expect.objectContaining({ id: '10', ownerId: '1' }),
+      );
+    });
+
+    it('does not fail legacy create when mirror.upsertFromTask throws', async () => {
+      const project = { id: '5', ownerId: '1' };
+      access.requireAccess.mockResolvedValueOnce({ project, role: 'EDITOR' });
+      const savedTask = { id: '10', ownerId: '1', projectId: '5', title: 'Task' } as Task;
+      tasks.create.mockReturnValueOnce(savedTask);
+      tasks.save.mockResolvedValueOnce(savedTask);
+      mirror.upsertFromTask.mockRejectedValueOnce(new Error('mirror explosion'));
+
+      const result = await service.createForProject('1', '5', { title: 'Task' });
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('10');
+    });
+
+    it('does not fail legacy update when mirror.upsertFromTask throws', async () => {
+      const existing = { id: '10', ownerId: '1', projectId: null, title: 'Old' } as Task;
+      const updated = { ...existing, title: 'Updated' } as Task;
+      tasks.findOne.mockResolvedValueOnce(existing);
+      tasks.save.mockResolvedValueOnce(updated);
+      mirror.upsertFromTask.mockRejectedValueOnce(new Error('mirror update explosion'));
+
+      const result = await service.update('1', 'user@example.com', '10', { title: 'Updated' });
+
+      expect(result).toBeDefined();
+      expect(result.title).toBe('Updated');
+    });
+
+    it('does not fail legacy delete when mirror.softDeleteMirror throws', async () => {
+      const existing = { id: '10', ownerId: '1', projectId: null } as Task;
+      tasks.findOne.mockResolvedValueOnce(existing);
+      tasks.softRemove.mockResolvedValueOnce(existing);
+      mirror.softDeleteMirror.mockRejectedValueOnce(new Error('mirror delete explosion'));
+
+      await expect(service.delete('1', '10')).resolves.not.toThrow();
+    });
+
+    it('does not fail legacy restore when mirror.upsertFromTask throws', async () => {
+      const deletedTask = { id: '10', ownerId: '1', projectId: null, deletedAt: new Date() } as Task;
+      const restoredTask = { ...deletedTask, deletedAt: null };
+      tasks.findOne.mockResolvedValueOnce(deletedTask).mockResolvedValueOnce(restoredTask);
+      tasks.restore.mockResolvedValueOnce(undefined);
+      mirror.upsertFromTask.mockRejectedValueOnce(new Error('mirror restore explosion'));
+
+      const result = await service.restore('1', '10');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('10');
     });
   });
 });

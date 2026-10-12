@@ -47,6 +47,7 @@ import {
 } from "react-icons/bi";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
+import Dialog from "@/components/ui/Dialog";
 
 // ─── Priority helpers ─────────────────────────────────────────────────────────
 
@@ -464,137 +465,139 @@ function ReminderEditModal({
   const pending = updateReminder.isPending || deleteReminder.isPending;
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: submit }}
+      labelledBy="reminders-edit-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="mb-5 flex items-start justify-between">
-          <div className="space-y-1">
-            <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-              {t("reminders.edit.kicker", "Düzenle")}
-            </span>
-            <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-              {t("reminders.edit.title", "Anımsatıcı")}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={pending}
-            aria-label={t("reminders.deleteAria")}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-error-50 hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
+      <div className="mb-5 flex items-start justify-between">
+        <div className="space-y-1">
+          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+            {t("reminders.edit.kicker", "Düzenle")}
+          </span>
+          <h3
+            id="reminders-edit-modal-title"
+            className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
           >
-            <BiTrash className="h-4 w-4" />
-          </button>
+            {t("reminders.edit.title", "Anımsatıcı")}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={pending}
+          aria-label={t("reminders.deleteAria")}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-error-50 hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
+        >
+          <BiTrash className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <label className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("reminders.edit.titleField", "Başlık")}
+          </span>
+          <input
+            autoFocus
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={255}
+            className="husrev-input"
+          />
+        </label>
+
+        <label className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("reminders.edit.notesField", "Not")}
+          </span>
+          <textarea
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="husrev-input resize-none"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block space-y-1.5">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("reminders.edit.priorityField", "Öncelik")}
+            </span>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as ReminderPriority)}
+              className="husrev-input"
+            >
+              <option value="NONE">{t("reminders.priority.NONE", "Yok")}</option>
+              <option value="LOW">{t("reminders.priority.LOW", "Düşük")}</option>
+              <option value="MEDIUM">{t("reminders.priority.MEDIUM", "Orta")}</option>
+              <option value="HIGH">{t("reminders.priority.HIGH", "Yüksek")}</option>
+            </select>
+          </label>
+          <label className="block space-y-1.5">
+            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+              {t("reminders.edit.dueField", "Tarih")}
+            </span>
+            <DateTimePicker value={dueAt} onChange={setDueAt} />
+          </label>
         </div>
 
-        <div className="space-y-4">
-          <label className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("reminders.edit.titleField", "Başlık")}
-            </span>
-            <input
-              autoFocus
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={255}
-              className="husrev-input"
-            />
-          </label>
+        <label className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("calendar.field.reminder")}
+          </span>
+          <LeadTimeSelect value={notifyMinutesBefore} onChange={setNotifyMinutesBefore} />
+        </label>
 
-          <label className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("reminders.edit.notesField", "Not")}
-            </span>
-            <textarea
-              rows={2}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="husrev-input resize-none"
-            />
-          </label>
-
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block space-y-1.5">
-              <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-                {t("reminders.edit.priorityField", "Öncelik")}
-              </span>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as ReminderPriority)}
-                className="husrev-input"
-              >
-                <option value="NONE">{t("reminders.priority.NONE", "Yok")}</option>
-                <option value="LOW">{t("reminders.priority.LOW", "Düşük")}</option>
-                <option value="MEDIUM">{t("reminders.priority.MEDIUM", "Orta")}</option>
-                <option value="HIGH">{t("reminders.priority.HIGH", "Yüksek")}</option>
-              </select>
-            </label>
-            <label className="block space-y-1.5">
-              <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-                {t("reminders.edit.dueField", "Tarih")}
-              </span>
-              <DateTimePicker value={dueAt} onChange={setDueAt} />
-            </label>
-          </div>
-
-          <label className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("calendar.field.reminder")}
-            </span>
-            <LeadTimeSelect value={notifyMinutesBefore} onChange={setNotifyMinutesBefore} />
-          </label>
-
-          <button
-            type="button"
-            onClick={() => setFlag((v) => !v)}
-            aria-pressed={flag}
-            className={`flex w-full items-center justify-between gap-3 rounded-xl p-3 text-left ring-1 transition ${
-              flag
-                ? "bg-red-50 ring-red-200 dark:bg-red-500/10 dark:ring-red-500/30"
-                : "bg-husrev-sand/40 ring-husrev-sand/70 dark:bg-white/[0.04] dark:ring-white/[0.06]"
+        <button
+          type="button"
+          onClick={() => setFlag((v) => !v)}
+          aria-pressed={flag}
+          className={`flex w-full items-center justify-between gap-3 rounded-xl p-3 text-left ring-1 transition ${
+            flag
+              ? "bg-red-50 ring-red-200 dark:bg-red-500/10 dark:ring-red-500/30"
+              : "bg-husrev-sand/40 ring-husrev-sand/70 dark:bg-white/[0.04] dark:ring-white/[0.06]"
+          }`}
+        >
+          <span className="flex items-center gap-2 text-sm font-medium text-husrev-ink dark:text-husrev-cream">
+            {flag ? (
+              <BiSolidFlag className="h-4 w-4 text-red-500" />
+            ) : (
+              <BiFlag className="h-4 w-4 text-gray-400" />
+            )}
+            {t("reminders.edit.flagField", "Bayrak")}
+          </span>
+          <span
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+              flag ? "bg-red-500" : "bg-gray-300 dark:bg-white/20"
             }`}
           >
-            <span className="flex items-center gap-2 text-sm font-medium text-husrev-ink dark:text-husrev-cream">
-              {flag ? (
-                <BiSolidFlag className="h-4 w-4 text-red-500" />
-              ) : (
-                <BiFlag className="h-4 w-4 text-gray-400" />
-              )}
-              {t("reminders.edit.flagField", "Bayrak")}
-            </span>
             <span
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
-                flag ? "bg-red-500" : "bg-gray-300 dark:bg-white/20"
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                flag ? "translate-x-4" : "translate-x-0.5"
               }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                  flag ? "translate-x-4" : "translate-x-0.5"
-                }`}
-              />
-            </span>
-          </button>
-        </div>
+            />
+          </span>
+        </button>
+      </div>
 
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} disabled={pending} className="husrev-btn-ghost">
-            {t("common.cancel", "İptal")}
-          </button>
-          <button type="submit" disabled={!title.trim() || pending} className="husrev-btn">
-            {updateReminder.isPending
-              ? t("common.saving", "Kaydediliyor…")
-              : t("common.save", "Kaydet")}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button type="button" onClick={onClose} disabled={pending} className="husrev-btn-ghost">
+          {t("common.cancel", "İptal")}
+        </button>
+        <button type="submit" disabled={!title.trim() || pending} className="husrev-btn">
+          {updateReminder.isPending
+            ? t("common.saving", "Kaydediliyor…")
+            : t("common.save", "Kaydet")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -841,81 +844,83 @@ function NewListModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: handleSubmit }}
+      labelledBy="reminders-new-list-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {t("reminders.modal.kicker", "Yeni liste")}
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {t("reminders.modal.kicker", "Yeni liste")}
+        </span>
+        <h3
+          id="reminders-new-list-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("reminders.modal.title")}
+        </h3>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        <label className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("reminders.modal.nameField")}
           </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("reminders.modal.title")}
-          </h3>
-        </div>
+          <input
+            autoFocus
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("reminders.modal.nameField")}
+            className="husrev-input"
+          />
+        </label>
 
-        <div className="mt-6 space-y-4">
-          <label className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("reminders.modal.nameField")}
-            </span>
-            <input
-              autoFocus
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("reminders.modal.nameField")}
-              className="husrev-input"
-            />
-          </label>
-
-          <div className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("reminders.modal.colorField", "Renk")}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  aria-label={c}
-                  className={`h-8 w-8 rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
-                    color === c
-                      ? "ring-2 ring-offset-2 ring-offset-husrev-cream ring-husrev-ember dark:ring-offset-husrev-ink"
-                      : ""
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
+        <div className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("reminders.modal.colorField", "Renk")}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={c}
+                className={`h-8 w-8 rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
+                  color === c
+                    ? "ring-2 ring-offset-2 ring-offset-husrev-cream ring-husrev-ember dark:ring-offset-husrev-ink"
+                    : ""
+                }`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
           </div>
         </div>
+      </div>
 
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={createList.isPending}
-            className="husrev-btn-ghost"
-          >
-            {t("common.cancel")}
-          </button>
-          <button
-            type="submit"
-            disabled={!name.trim() || createList.isPending}
-            className="husrev-btn"
-          >
-            {createList.isPending ? t("common.saving", "Kaydediliyor…") : t("common.create")}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={createList.isPending}
+          className="husrev-btn-ghost"
+        >
+          {t("common.cancel")}
+        </button>
+        <button
+          type="submit"
+          disabled={!name.trim() || createList.isPending}
+          className="husrev-btn"
+        >
+          {createList.isPending ? t("common.saving", "Kaydediliyor…") : t("common.create")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

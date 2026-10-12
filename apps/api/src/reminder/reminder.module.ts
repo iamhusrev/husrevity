@@ -5,9 +5,14 @@ import { Reminder } from './reminder.entity';
 import { ReminderService } from './reminder.service';
 import { ReminderController } from './reminder.controller';
 import { NotificationModule } from '../notification/notification.module';
+import { ItemMirrorModule } from '../item-mirror/item-mirror.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReminderList, Reminder]), NotificationModule],
+  imports: [
+    TypeOrmModule.forFeature([ReminderList, Reminder]),
+    NotificationModule,
+    ItemMirrorModule,
+  ],
   providers: [ReminderService],
   controllers: [ReminderController],
   exports: [ReminderService],

@@ -191,10 +191,41 @@ export const ITEM_ENDPOINTS = {
   ITEM_BY_ID: (id: string) => `/items/${id}`,
   ITEM_COMPLETE: (id: string) => `/items/${id}/complete`,
   PARSE_QUICK_ADD: "/items/parse-quick-add",
+  EXPORT_ICS: "/items/export.ics",
+};
+
+// ─── Goals ────────────────────────────────────────────────────────────────────
+
+export const GOAL_ENDPOINTS = {
+  GOALS: "/goals",
+  GOAL_BY_ID: (id: string) => `/goals/${id}`,
+  GOAL_RESTORE: (id: string) => `/goals/${id}/restore`,
+};
+
+// ─── Note links ───────────────────────────────────────────────────────────────
+
+export const NOTE_LINK_ENDPOINTS = {
+  FOR_NOTE: (noteId: string) => `/notes/${noteId}/links`,
+  LINK_BY_ID: (noteId: string, linkId: string) => `/notes/${noteId}/links/${linkId}`,
+  BY_TARGET: "/note-links",
 };
 
 // ─── Today ────────────────────────────────────────────────────────────────────
 
 export const TODAY_ENDPOINTS = {
   TODAY: "/today",
+};
+
+// ─── Change sets ─────────────────────────────────────────────────────────────
+
+export const CHANGE_SET_ENDPOINTS = {
+  LIST: (limit?: number, before?: string) => {
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", String(limit));
+    if (before) params.set("before", before);
+    const qs = params.toString();
+    return qs ? `/change-sets?${qs}` : "/change-sets";
+  },
+  BY_ID: (id: string) => `/change-sets/${id}`,
+  UNDO: (id: string) => `/change-sets/${id}/undo`,
 };

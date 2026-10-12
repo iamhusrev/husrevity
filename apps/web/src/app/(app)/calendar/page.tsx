@@ -1,7 +1,5 @@
-"use client";
-
-import CalendarPage from "@/views/calendar/CalendarPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <CalendarPage />;
+  redirect("/month");
 }

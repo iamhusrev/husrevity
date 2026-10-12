@@ -37,6 +37,7 @@ import {
   BiTimeFive,
   BiTrash,
 } from "react-icons/bi";
+import Dialog from "@/components/ui/Dialog";
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -103,196 +104,198 @@ function SessionModal({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: submit }}
+      labelledBy="sport-session-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
-      >
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {initial
+            ? t("sport.sessionModal.editKicker", "Seansı düzenle")
+            : t("sport.sessionModal.newKicker", "Yeni seans")}
+        </span>
+        <h3
+          id="sport-session-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {initial
+            ? t("sport.sessionModal.editTitle", "Seansı düzenle")
+            : t("sport.sessionModal.createTitle", "Yeni seans")}
+        </h3>
+      </div>
+      <div className="husrev-rule mt-5" />
+
+      <div className="mt-5 space-y-4">
         <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {initial
-              ? t("sport.sessionModal.editKicker", "Seansı düzenle")
-              : t("sport.sessionModal.newKicker", "Yeni seans")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {initial
-              ? t("sport.sessionModal.editTitle", "Seansı düzenle")
-              : t("sport.sessionModal.createTitle", "Yeni seans")}
-          </h3>
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.sessionModal.name", "Seans adı")}
+          </label>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <div>
+                <input {...field} autoFocus className="husrev-input" />
+                {fieldState.error && (
+                  <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
+                )}
+              </div>
+            )}
+          />
         </div>
-        <div className="husrev-rule mt-5" />
 
-        <div className="mt-5 space-y-4">
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.sessionModal.name", "Seans adı")}
+              {t("sport.sessionModal.activityType", "Aktivite")}
             </label>
             <Controller
               control={control}
-              name="name"
-              render={({ field, fieldState }) => (
-                <div>
-                  <input {...field} autoFocus className="husrev-input" />
-                  {fieldState.error && (
-                    <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
-                  )}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.sessionModal.activityType", "Aktivite")}
-              </label>
-              <Controller
-                control={control}
-                name="activityType"
-                render={({ field }) => (
-                  <select
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value as ActivityType)}
-                    className="husrev-input"
-                  >
-                    {ACTIVITY_TYPES.map((a) => (
-                      <option key={a} value={a}>
-                        {t(`sport.activity.${a}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.sessionModal.location", "Konum")}
-              </label>
-              <Controller
-                control={control}
-                name="location"
-                render={({ field }) => (
-                  <select
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value as SportLocation)}
-                    className="husrev-input"
-                  >
-                    {SPORT_LOCATIONS.map((l) => (
-                      <option key={l} value={l}>
-                        {t(`sport.location.${l}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.sessionModal.plannedDayOfWeek", "Gün")}
-              </label>
-              <Controller
-                control={control}
-                name="plannedDayOfWeek"
-                render={({ field }) => (
-                  <select
-                    value={field.value}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="husrev-input"
-                  >
-                    {DAYS.map((d) => (
-                      <option key={d} value={d}>
-                        {t(`sport.day.${d}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.sessionModal.plannedDuration", "Süre (dk)")}
-              </label>
-              <Controller
-                control={control}
-                name="plannedDuration"
-                render={({ field }) => (
-                  <input
-                    type="number"
-                    min={1}
-                    value={field.value}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="husrev-input"
-                  />
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.sessionModal.difficulty", "Zorluk")}
-            </label>
-            <Controller
-              control={control}
-              name="difficulty"
+              name="activityType"
               render={({ field }) => (
-                <div className="flex gap-2">
-                  {DIFFICULTIES.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => field.onChange(d)}
-                      className={cn(
-                        "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
-                        field.value === d
-                          ? "bg-husrev-ember text-husrev-cream"
-                          : "bg-husrev-sand/40 text-gray-600 hover:bg-husrev-sand/70 dark:bg-white/[0.04] dark:text-gray-300",
-                      )}
-                    >
-                      {t(`sport.difficulty.${d}`)}
-                    </button>
+                <select
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value as ActivityType)}
+                  className="husrev-input"
+                >
+                  {ACTIVITY_TYPES.map((a) => (
+                    <option key={a} value={a}>
+                      {t(`sport.activity.${a}`)}
+                    </option>
                   ))}
-                </div>
+                </select>
               )}
             />
           </div>
-
           <div className="space-y-1.5">
             <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.sessionModal.description", "Açıklama")}
+              {t("sport.sessionModal.location", "Konum")}
             </label>
             <Controller
               control={control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <div>
-                  <textarea {...field} rows={3} className="husrev-input resize-none" />
-                  {fieldState.error && (
-                    <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
-                  )}
-                </div>
+              name="location"
+              render={({ field }) => (
+                <select
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value as SportLocation)}
+                  className="husrev-input"
+                >
+                  {SPORT_LOCATIONS.map((l) => (
+                    <option key={l} value={l}>
+                      {t(`sport.location.${l}`)}
+                    </option>
+                  ))}
+                </select>
               )}
             />
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
-            {t("common.cancel")}
-          </button>
-          <button type="submit" disabled={isPending} className="husrev-btn">
-            {isPending ? t("common.saving") : initial ? t("common.save") : t("common.create")}
-          </button>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.sessionModal.plannedDayOfWeek", "Gün")}
+            </label>
+            <Controller
+              control={control}
+              name="plannedDayOfWeek"
+              render={({ field }) => (
+                <select
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  className="husrev-input"
+                >
+                  {DAYS.map((d) => (
+                    <option key={d} value={d}>
+                      {t(`sport.day.${d}`)}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.sessionModal.plannedDuration", "Süre (dk)")}
+            </label>
+            <Controller
+              control={control}
+              name="plannedDuration"
+              render={({ field }) => (
+                <input
+                  type="number"
+                  min={1}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  className="husrev-input"
+                />
+              )}
+            />
+          </div>
         </div>
-      </form>
-    </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.sessionModal.difficulty", "Zorluk")}
+          </label>
+          <Controller
+            control={control}
+            name="difficulty"
+            render={({ field }) => (
+              <div className="flex gap-2">
+                {DIFFICULTIES.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => field.onChange(d)}
+                    className={cn(
+                      "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
+                      field.value === d
+                        ? "bg-husrev-ember text-husrev-cream"
+                        : "bg-husrev-sand/40 text-gray-600 hover:bg-husrev-sand/70 dark:bg-white/[0.04] dark:text-gray-300",
+                    )}
+                  >
+                    {t(`sport.difficulty.${d}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.sessionModal.description", "Açıklama")}
+          </label>
+          <Controller
+            control={control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <div>
+                <textarea {...field} rows={3} className="husrev-input resize-none" />
+                {fieldState.error && (
+                  <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
+                )}
+              </div>
+            )}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
+          {t("common.cancel")}
+        </button>
+        <button type="submit" disabled={isPending} className="husrev-btn">
+          {isPending ? t("common.saving") : initial ? t("common.save") : t("common.create")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

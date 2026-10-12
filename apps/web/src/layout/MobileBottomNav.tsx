@@ -11,6 +11,9 @@ import {
   BiBell,
   BiNote,
   BiCalendar,
+  BiCalendarWeek,
+  BiArchiveIn,
+  BiTargetLock,
   BiDotsHorizontalRounded,
   BiFolder,
   BiDumbbell,
@@ -18,13 +21,20 @@ import {
   BiShield,
   BiBookOpen,
   BiLink,
+  BiPlus,
 } from "react-icons/bi";
 import { HiOutlineClock } from "react-icons/hi2";
 import { useAuth } from "@/providers/AuthProvider";
+import { useQuickAdd } from "@/providers/QuickAddContext";
+import { isNavItemActive } from "@/utils/navigation";
+import Dialog from "@/components/ui/Dialog";
 
 type MoreItem = { key: string; path: string; icon: IconType };
 
 const MORE_ITEMS: MoreItem[] = [
+  { key: "nav.inbox", path: "/inbox", icon: BiArchiveIn },
+  { key: "nav.week", path: "/week", icon: BiCalendarWeek },
+  { key: "nav.goals", path: "/goals", icon: BiTargetLock },
   { key: "nav.projects", path: "/projects", icon: BiFolder },
   { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
   { key: "nav.learning", path: "/learning", icon: BiBookOpen },
@@ -61,60 +71,41 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handler);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [isOpen, onClose]);
-
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100000] bg-husrev-ink/40 backdrop-blur-sm xl:hidden"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("nav.more")}
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] bg-husrev-ink/40 backdrop-blur-sm xl:hidden"
+      panelClassName="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-card-warm dark:bg-husrev-shadow husrev-settle"
+      label={t("nav.more")}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-card-warm dark:bg-husrev-shadow husrev-settle"
-      >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-husrev-sand dark:bg-white/10" />
-        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-          {t("nav.more")}
-        </span>
-        <div className="mt-4 grid grid-cols-4 gap-3">
-          {items.map(({ key, path, icon: Icon }) => {
-            const active = pathname === path || pathname.startsWith(`${path}/`);
-            return (
-              <Link
-                key={path}
-                href={path}
-                onClick={onClose}
-                className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition ${
-                  active
-                    ? "bg-husrev-amber/15 text-husrev-ember dark:text-husrev-amber"
-                    : "text-gray-600 hover:bg-husrev-cream dark:text-gray-300 dark:hover:bg-white/5"
-                }`}
-              >
-                <Icon size={22} />
-                <span className="text-[11px] font-medium leading-tight">{t(key)}</span>
-              </Link>
-            );
-          })}
-        </div>
+      <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-husrev-sand dark:bg-white/10" />
+      <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+        {t("nav.more")}
+      </span>
+      <div className="mt-4 grid grid-cols-4 gap-3">
+        {items.map(({ key, path, icon: Icon }) => {
+          const active = isNavItemActive(pathname, path);
+          return (
+            <Link
+              key={path}
+              href={path}
+              onClick={onClose}
+              className={`flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition ${
+                active
+                  ? "bg-husrev-amber/15 text-husrev-ember dark:text-husrev-amber"
+                  : "text-gray-600 hover:bg-husrev-cream dark:text-gray-300 dark:hover:bg-white/5"
+              }`}
+            >
+              <Icon size={22} />
+              <span className="text-[11px] font-medium leading-tight">{t(key)}</span>
+            </Link>
+          );
+        })}
       </div>
-    </div>,
+    </Dialog>,
     document.body,
   );
 }
@@ -125,13 +116,14 @@ const TABS: { key: string; path: string; icon: IconType }[] = [
 ];
 
 const TABS_RIGHT: { key: string; path: string; icon: IconType }[] = [
-  { key: "nav.calendar", path: "/calendar", icon: BiCalendar },
+  { key: "nav.calendar", path: "/month", icon: BiCalendar },
 ];
 
 export default function MobileBottomNav() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
+  const { openQuickAdd } = useQuickAdd();
 
   // Route changes (e.g. via a sheet link) must always dismiss the sheet.
   useEffect(() => {
@@ -145,13 +137,22 @@ export default function MobileBottomNav() {
 
   return (
     <>
+      <button
+        type="button"
+        onClick={openQuickAdd}
+        aria-label={t("quickAdd.title", "Hızlı Ekle")}
+        className="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 flex h-12 w-12 items-center justify-center rounded-full bg-husrev-ember text-white shadow-lg transition hover:scale-105 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-husrev-amber dark:text-husrev-ink xl:hidden"
+      >
+        <BiPlus size={26} />
+      </button>
+
       <nav
         aria-label={t("nav.more")}
         className="fixed inset-x-0 bottom-0 z-50 border-t border-husrev-sand/70 bg-husrev-cream/90 backdrop-blur-md pb-[env(safe-area-inset-bottom)] dark:border-white/5 dark:bg-husrev-ink/90 xl:hidden"
       >
         <div className="grid h-16 grid-cols-5">
           {TABS.map(({ key, path, icon: Icon }) => (
-            <Link key={path} href={path} className={tabClass(pathname === path)}>
+            <Link key={path} href={path} className={tabClass(isNavItemActive(pathname, path))}>
               <Icon size={22} />
               <span className="text-[10px] font-medium">{t(key)}</span>
             </Link>
@@ -162,7 +163,7 @@ export default function MobileBottomNav() {
               href="/dashboard"
               aria-label={t("nav.dashboard")}
               className={`-mt-6 flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-4 ring-husrev-cream transition dark:ring-husrev-ink ${
-                pathname === "/dashboard"
+                isNavItemActive(pathname, "/dashboard")
                   ? "bg-husrev-ember text-husrev-cream"
                   : "bg-husrev-ink text-husrev-amber dark:bg-husrev-cream dark:text-husrev-ember"
               }`}
@@ -172,7 +173,7 @@ export default function MobileBottomNav() {
           </div>
 
           {TABS_RIGHT.map(({ key, path, icon: Icon }) => (
-            <Link key={path} href={path} className={tabClass(pathname === path)}>
+            <Link key={path} href={path} className={tabClass(isNavItemActive(pathname, path))}>
               <Icon size={22} />
               <span className="text-[10px] font-medium">{t(key)}</span>
             </Link>

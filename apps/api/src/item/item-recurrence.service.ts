@@ -1,9 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { RRule } from 'rrule';
 import { Item } from './item.entity';
 
 const ISTANBUL = 'Europe/Istanbul';
+
+/** Hard cap on occurrences returned per series per expand() call. */
+export const MAX_OCCURRENCES_PER_SERIES = 1000;
+/**
+ * Hard cap on rule iterations per expand() call, including occurrences before
+ * the requested range. Protects the single Node thread from already-stored
+ * rules with a very high frequency and a far-past anchor.
+ */
+export const MAX_SCAN_ITERATIONS = 100_000;
 
 export interface RecurrenceOccurrence {
   /** The item's local (Europe/Istanbul) calendar date — YYYY-MM-DD. */
@@ -27,8 +36,10 @@ export interface RecurrenceOccurrence {
  */
 @Injectable()
 export class ItemRecurrenceService {
+  private readonly logger = new Logger(ItemRecurrenceService.name);
+
   expand(
-    item: Pick<Item, 'scheduledAt' | 'rrule'>,
+    item: Pick<Item, 'scheduledAt' | 'rrule'> & { id?: string },
     fromUtc: Date,
     toUtc: Date,
   ): RecurrenceOccurrence[] {
@@ -42,7 +53,30 @@ export class ItemRecurrenceService {
     const fakeFrom = this.toFakeUtc(this.toIstanbul(fromUtc));
     const fakeTo = this.toFakeUtc(this.toIstanbul(toUtc));
 
-    return rule.between(fakeFrom, fakeTo, true).map((fakeOccurrence) => {
+    const fakeOccurrences: Date[] = [];
+    let truncated = false;
+    rule.all((date, index) => {
+      if (date > fakeTo) return false;
+      if (index >= MAX_SCAN_ITERATIONS) {
+        truncated = true;
+        return false;
+      }
+      if (date < fakeFrom) return true;
+      if (fakeOccurrences.length >= MAX_OCCURRENCES_PER_SERIES) {
+        truncated = true;
+        return false;
+      }
+      fakeOccurrences.push(date);
+      return true;
+    });
+    if (truncated) {
+      this.logger.warn(
+        `Recurrence expansion truncated for item ${item.id ?? 'unknown'} ` +
+          `(cap ${MAX_OCCURRENCES_PER_SERIES} occurrences / ${MAX_SCAN_ITERATIONS} iterations)`,
+      );
+    }
+
+    return fakeOccurrences.map((fakeOccurrence) => {
       const real = DateTime.fromObject(
         {
           year: fakeOccurrence.getUTCFullYear(),

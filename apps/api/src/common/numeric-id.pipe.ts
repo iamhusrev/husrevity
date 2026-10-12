@@ -1,6 +1,14 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { ApiException } from './api.exception';
 
+export const NUMERIC_ID_REGEX = /^\d{1,19}$/;
+export const BIGINT_MAX = '9223372036854775807';
+
+export function isValidNumericId(val: unknown): val is string {
+  if (typeof val !== 'string' || !NUMERIC_ID_REGEX.test(val)) return false;
+  return val.length < BIGINT_MAX.length || val <= BIGINT_MAX;
+}
+
 const NUMERIC_ID_RE = /^\d+$/;
 
 /**

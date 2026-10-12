@@ -21,6 +21,7 @@ export interface ProjectResponse {
   role: ProjectRole;
   shared: boolean;
   memberCount: number;
+  goalId?: string | null;
 }
 
 export interface ProjectRequest {
@@ -30,6 +31,7 @@ export interface ProjectRequest {
   status?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  goalId?: string | null;
 }
 
 export interface ProjectUpdateRequest {
@@ -40,6 +42,7 @@ export interface ProjectUpdateRequest {
   endDate?: string | null;
   pinned?: boolean;
   archived?: boolean;
+  goalId?: string | null;
 }
 
 export interface TaskResponse {

@@ -6,15 +6,26 @@ import { ReminderList } from './reminder-list.entity';
 import { Reminder } from './reminder.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 
 type MockRepo = {
   findOne: jest.Mock;
   restore: jest.Mock;
   count: jest.Mock;
+  create?: jest.Mock;
+  save?: jest.Mock;
+  softRemove?: jest.Mock;
 };
 
 function makeRepo(): MockRepo {
-  return { findOne: jest.fn(), restore: jest.fn(), count: jest.fn() };
+  return {
+    findOne: jest.fn(),
+    restore: jest.fn(),
+    count: jest.fn(),
+    create: jest.fn((attrs) => ({ ...attrs })),
+    save: jest.fn((entity) => Promise.resolve({ id: '1', ...entity })),
+    softRemove: jest.fn((entity) => Promise.resolve(entity)),
+  };
 }
 
 describe('ReminderService', () => {
@@ -24,11 +35,21 @@ describe('ReminderService', () => {
   let lists: MockRepo;
   let reminders: MockRepo;
   let notifications: { cancelForSource: jest.Mock; enqueue: jest.Mock };
+  let mirror: {
+    upsertFromReminder: jest.Mock;
+    softDeleteMirror: jest.Mock;
+    restoreMirror: jest.Mock;
+  };
 
   beforeEach(async () => {
     lists = makeRepo();
     reminders = makeRepo();
     notifications = { cancelForSource: jest.fn(), enqueue: jest.fn() };
+    mirror = {
+      upsertFromReminder: jest.fn().mockResolvedValue(null),
+      softDeleteMirror: jest.fn().mockResolvedValue(undefined),
+      restoreMirror: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -37,6 +58,7 @@ describe('ReminderService', () => {
         { provide: getRepositoryToken(Reminder), useValue: reminders },
         { provide: DataSource, useValue: {} },
         { provide: NotificationService, useValue: notifications },
+        { provide: ItemMirrorService, useValue: mirror },
       ],
     }).compile();
 
@@ -158,6 +180,144 @@ describe('ReminderService', () => {
         withDeleted: true,
       });
       expect(reminders.restore).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ItemMirror hooks', () => {
+    it('invokes mirror.upsertFromReminder upon createReminder', async () => {
+      const savedReminder = {
+        id: '20',
+        ownerId: '1',
+        title: 'New Reminder',
+        completedAt: null,
+      } as Reminder;
+      reminders.create!.mockReturnValueOnce(savedReminder);
+      reminders.save!.mockResolvedValueOnce(savedReminder);
+
+      await service.createReminder('1', { title: 'New Reminder' });
+
+      expect(mirror.upsertFromReminder).toHaveBeenCalledWith(savedReminder);
+    });
+
+    it('invokes mirror.upsertFromReminder upon updateReminder', async () => {
+      const existing = {
+        id: '20',
+        ownerId: '1',
+        title: 'Old',
+        completedAt: null,
+      } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+      const updated = { ...existing, title: 'Updated' };
+      reminders.save!.mockResolvedValueOnce(updated);
+
+      await service.updateReminder('1', '20', { title: 'Updated' });
+
+      expect(mirror.upsertFromReminder).toHaveBeenCalledWith(updated);
+    });
+
+    it('invokes mirror.upsertFromReminder upon toggleReminder', async () => {
+      const existing = {
+        id: '20',
+        ownerId: '1',
+        title: 'Reminder',
+        completedAt: null,
+      } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+      const updated = { ...existing, completedAt: new Date() };
+      reminders.save!.mockResolvedValueOnce(updated);
+
+      await service.toggleReminder('1', '20');
+
+      expect(mirror.upsertFromReminder).toHaveBeenCalledWith(updated);
+    });
+
+    it('invokes mirror.softDeleteMirror upon deleteReminder', async () => {
+      const existing = {
+        id: '20',
+        ownerId: '1',
+      } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+
+      await service.deleteReminder('1', '20');
+
+      expect(mirror.softDeleteMirror).toHaveBeenCalledWith('reminder', '20', '1');
+    });
+
+    it('invokes mirror.upsertFromReminder upon restoreReminder', async () => {
+      const deletedRow = {
+        id: '20',
+        ownerId: '1',
+        title: 'Restored Reminder',
+        deletedAt: new Date(),
+      } as Reminder;
+      const liveRow = { ...deletedRow, deletedAt: null };
+      reminders.findOne.mockResolvedValueOnce(deletedRow).mockResolvedValueOnce(liveRow);
+
+      await service.restoreReminder('1', '20');
+
+      expect(mirror.upsertFromReminder).toHaveBeenCalledWith(
+        expect.objectContaining({ id: '20', ownerId: '1' }),
+      );
+    });
+
+    it('does not fail createReminder when mirror throws', async () => {
+      const savedReminder = { id: '20', ownerId: '1', title: 'R' } as Reminder;
+      reminders.create!.mockReturnValueOnce(savedReminder);
+      reminders.save!.mockResolvedValueOnce(savedReminder);
+      mirror.upsertFromReminder.mockRejectedValueOnce(new Error('mirror fail'));
+
+      const result = await service.createReminder('1', { title: 'R' });
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('20');
+    });
+
+    it('does not fail updateReminder when mirror throws', async () => {
+      const existing = { id: '20', ownerId: '1', title: 'Old' } as Reminder;
+      const updated = { ...existing, title: 'Updated' } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+      reminders.save!.mockResolvedValueOnce(updated);
+      mirror.upsertFromReminder.mockRejectedValueOnce(new Error('mirror fail'));
+
+      const result = await service.updateReminder('1', '20', { title: 'Updated' });
+
+      expect(result).toBeDefined();
+      expect(result.title).toBe('Updated');
+    });
+
+    it('does not fail toggleReminder when mirror throws', async () => {
+      const existing = { id: '20', ownerId: '1', title: 'R', completedAt: null } as Reminder;
+      const updated = { ...existing, completedAt: new Date() } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+      reminders.save!.mockResolvedValueOnce(updated);
+      mirror.upsertFromReminder.mockRejectedValueOnce(new Error('mirror fail'));
+
+      const result = await service.toggleReminder('1', '20');
+
+      expect(result).toBeDefined();
+      expect(result.completedAt).toBeDefined();
+    });
+
+    it('does not fail deleteReminder when mirror throws', async () => {
+      const existing = { id: '20', ownerId: '1' } as Reminder;
+      reminders.findOne.mockResolvedValueOnce(existing);
+      reminders.softRemove!.mockResolvedValueOnce(existing);
+      mirror.softDeleteMirror.mockRejectedValueOnce(new Error('mirror fail'));
+
+      await expect(service.deleteReminder('1', '20')).resolves.not.toThrow();
+    });
+
+    it('does not fail restoreReminder when mirror throws', async () => {
+      const deletedRow = { id: '20', ownerId: '1', deletedAt: new Date() } as Reminder;
+      const liveRow = { ...deletedRow, deletedAt: null };
+      reminders.findOne.mockResolvedValueOnce(deletedRow).mockResolvedValueOnce(liveRow);
+      reminders.restore!.mockResolvedValueOnce(undefined);
+      mirror.upsertFromReminder.mockRejectedValueOnce(new Error('mirror fail'));
+
+      const result = await service.restoreReminder('1', '20');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('20');
     });
   });
 });

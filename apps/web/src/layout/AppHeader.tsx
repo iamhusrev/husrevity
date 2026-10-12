@@ -6,11 +6,13 @@ import { ThemeToggleButton } from "@/components/header/ThemeToggleButton";
 import UserDropdown from "@/components/header/UserDropdown";
 import TodaySuggestionsModal from "@/components/ai/TodaySuggestionsModal";
 import { useSidebar } from "@/providers/SidebarContext";
+import { useQuickAdd } from "@/providers/QuickAddContext";
 import { HOME_PAGE } from "@/utils/constants-url";
 import { useTranslation } from "react-i18next";
 import { HiSparkles } from "react-icons/hi2";
+import { BiPlus } from "react-icons/bi";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -18,27 +20,11 @@ const AppHeader: React.FC = () => {
   const { t } = useTranslation();
 
   const { toggleSidebar } = useSidebar();
+  const { openQuickAdd } = useQuickAdd();
 
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-        event.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
 
   return (
     <header className="sticky top-0 flex w-full bg-husrev-cream/80 dark:bg-husrev-ink/80 backdrop-blur border-husrev-sand z-99999 dark:border-white/5 xl:border-b">
@@ -90,40 +76,6 @@ const AppHeader: React.FC = () => {
               />
             </svg>
           </button>
-
-          <div className="hidden xl:block">
-            <form>
-              <div className="relative">
-                <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none">
-                  <svg
-                    className="fill-gray-500 dark:fill-gray-400"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z"
-                      fill=""
-                    />
-                  </svg>
-                </span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder={t("appheader.search")}
-                  className="h-11 w-full rounded-lg ring-1 ring-husrev-sand bg-white/70 dark:bg-husrev-shadow/70 py-2.5 pl-12 pr-14 text-sm text-husrev-ink shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:ring-white/[0.06] dark:text-husrev-cream dark:placeholder:text-white/30 dark:focus:ring-brand-500/30 xl:w-[430px]"
-                />
-                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-md ring-1 ring-husrev-sand bg-husrev-cream/60 px-[7px] py-[4.5px] font-mono text-[11px] -tracking-[0.2px] text-gray-500 dark:bg-white/3 dark:ring-white/[0.06] dark:text-gray-400">
-                  <span> ⌘ </span>
-                  <span> K </span>
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
         <div
           className={`${
@@ -132,6 +84,15 @@ const AppHeader: React.FC = () => {
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
             <DateTimeClock />
+            <button
+              type="button"
+              onClick={openQuickAdd}
+              aria-label={t("quickAdd.title", "Hızlı Ekle")}
+              title={t("quickAdd.title", "Hızlı Ekle")}
+              className="hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-husrev-ember ring-1 ring-husrev-sand backdrop-blur transition hover:bg-husrev-amber/15 hover:ring-husrev-amber/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:bg-white/5 dark:text-husrev-amber dark:ring-white/10 dark:hover:bg-white/10"
+            >
+              <BiPlus className="h-5 w-5" />
+            </button>
             <button
               type="button"
               onClick={() => setShowSuggestions(true)}

@@ -131,8 +131,8 @@ JWT defaults: 15-min access tokens, 30-day opaque refresh tokens (SHA-256 hashed
 
 ## Commit messages
 
-The owner commits/pushes themselves (per global HARD CONSTRAINT #0). Prepared
+The owner commits/pushes themselves (global rule: never commit or push). Prepared
 commit messages and PR bodies describe the work only — no AI attribution. No
 `Co-Authored-By: Claude …`, no `🤖 Generated with [Claude Code]`, no mention
 of Claude / Anthropic / AI / "asistan". Use neutral imperative voice
-("adds X", "fixes Y") — see global HARD CONSTRAINT #1 for the full rule.
+("adds X", "fixes Y") — see the global no-AI-attribution rule.

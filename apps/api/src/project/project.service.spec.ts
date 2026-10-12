@@ -7,6 +7,7 @@ import { ProjectMember } from './project-member.entity';
 import { ProjectAccessService } from './project-access.service';
 import { ApiException } from '../common/api.exception';
 import { ProjectRequestDto } from './dto/project-dtos';
+import { GoalService } from '../goal/goal.service';
 
 type MockProjectRepo = {
   findOne: jest.Mock;
@@ -39,19 +40,21 @@ describe('ProjectService', () => {
   let access: MockAccessService;
   let dataSource: { query: jest.Mock; transaction: jest.Mock };
   let em: { getRepository: jest.Mock };
+  let goalService: { validateLiveGoal: jest.Mock };
 
   beforeEach(async () => {
     projects = {
       findOne: jest.fn(),
       findOneOrFail: jest.fn(),
       restore: jest.fn(),
-      create: jest.fn(),
-      save: jest.fn(),
+      create: jest.fn((v) => ({ id: '1', ...v })),
+      save: jest.fn((v) => Promise.resolve({ id: '1', ...v })),
       softRemove: jest.fn(),
       find: jest.fn(),
     };
     members = { create: jest.fn(), save: jest.fn(), count: jest.fn() };
     access = { requireAccess: jest.fn(), findAccess: jest.fn(), isMember: jest.fn() };
+    goalService = { validateLiveGoal: jest.fn().mockResolvedValue({ id: '5', ownerId: '1' }) };
 
     // Mimics DataSource#transaction: runs the callback synchronously with an
     // EntityManager stand-in whose getRepository() returns the same mocks the
@@ -76,6 +79,7 @@ describe('ProjectService', () => {
         { provide: getRepositoryToken(ProjectMember), useValue: members },
         { provide: ProjectAccessService, useValue: access },
         { provide: DataSource, useValue: dataSource },
+        { provide: GoalService, useValue: goalService },
       ],
     }).compile();
 
@@ -442,6 +446,148 @@ describe('ProjectService', () => {
       projects.restore.mockRejectedValueOnce(dbError);
 
       await expect(service.restore(ownerId, projectId)).rejects.toBe(dbError);
+    });
+  });
+
+  describe('goalId on projects', () => {
+    it('sets goalId on create when valid', async () => {
+      projects.findOne.mockResolvedValueOnce(null);
+      const res = await service.create(ownerId, {
+        code: 'NEWP',
+        name: 'New Project',
+        goalId: '5',
+      });
+      expect(goalService.validateLiveGoal).toHaveBeenCalledWith(ownerId, '5', undefined);
+      expect(res.goalId).toBe('5');
+    });
+
+    it('rejects foreign or nonexistent goalId on create with 404', async () => {
+      projects.findOne.mockResolvedValueOnce(null);
+      goalService.validateLiveGoal.mockRejectedValueOnce(ApiException.notFound('Goal not found'));
+
+      await expect(
+        service.create(ownerId, {
+          code: 'NEWP',
+          name: 'New Project',
+          goalId: '999',
+        }),
+      ).rejects.toMatchObject({
+        status: 404,
+      });
+    });
+
+    it('sets goalId on update when valid', async () => {
+      const existing = {
+        id: '1',
+        ownerId,
+        code: 'P1',
+        name: 'Project 1',
+        goalId: null,
+      } as Project;
+      access.requireAccess.mockResolvedValueOnce({ project: existing, role: 'OWNER' });
+      projects.save.mockImplementationOnce((p: any) => Promise.resolve(p));
+
+      const res = await service.update(ownerId, '1', { goalId: '5' });
+      expect(goalService.validateLiveGoal).toHaveBeenCalledWith(ownerId, '5', undefined);
+      expect(res.goalId).toBe('5');
+    });
+
+    it('clears goalId on update when null is passed', async () => {
+      const existing = {
+        id: '1',
+        ownerId,
+        code: 'P1',
+        name: 'Project 1',
+        goalId: '5',
+      } as Project;
+      access.requireAccess.mockResolvedValueOnce({ project: existing, role: 'OWNER' });
+      projects.save.mockImplementationOnce((p: any) => Promise.resolve(p));
+
+      const res = await service.update(ownerId, '1', { goalId: null });
+      expect(goalService.validateLiveGoal).not.toHaveBeenCalled();
+      expect(res.goalId).toBeNull();
+    });
+
+    it('absence of goalId on update leaves existing value untouched', async () => {
+      const existing = {
+        id: '1',
+        ownerId,
+        code: 'P1',
+        name: 'Project 1',
+        goalId: '5',
+      } as Project;
+      access.requireAccess.mockResolvedValueOnce({ project: existing, role: 'OWNER' });
+      projects.save.mockImplementationOnce((p: any) => Promise.resolve(p));
+
+      const res = await service.update(ownerId, '1', { name: 'Renamed' });
+      expect(goalService.validateLiveGoal).not.toHaveBeenCalled();
+      expect(res.goalId).toBe('5');
+    });
+
+    it('rejects foreign or deleted goalId on update with 404', async () => {
+      const existing = {
+        id: '1',
+        ownerId,
+        code: 'P1',
+        name: 'Project 1',
+        goalId: null,
+      } as Project;
+      access.requireAccess.mockResolvedValueOnce({ project: existing, role: 'OWNER' });
+      goalService.validateLiveGoal.mockRejectedValueOnce(ApiException.notFound('Goal not found'));
+
+      await expect(service.update(ownerId, '1', { goalId: '999' })).rejects.toMatchObject({
+        status: 404,
+      });
+    });
+
+    it('throws forbidden 403 when an EDITOR tries to change the project goal', async () => {
+      const existing = {
+        id: '1',
+        ownerId: '999',
+        code: 'P1',
+        name: 'Project 1',
+        goalId: null,
+      } as Project;
+      access.requireAccess.mockResolvedValueOnce({ project: existing, role: 'EDITOR' });
+
+      await expect(service.update(ownerId, '1', { goalId: '5' })).rejects.toMatchObject({
+        status: 403,
+      });
+      expect(projects.save).not.toHaveBeenCalled();
+    });
+
+    it('rejects empty string goalId on project DTOs with validation error', async () => {
+      const { validate } = require('class-validator');
+      const { plainToInstance } = require('class-transformer');
+      const { ProjectRequestDto, ProjectUpdateRequestDto } = require('./dto/project-dtos');
+
+      const invalidCreate = plainToInstance(ProjectRequestDto, {
+        code: 'P1',
+        name: 'Project 1',
+        goalId: '',
+      });
+      const createErrors = await validate(invalidCreate);
+      expect(createErrors.some((e: any) => e.property === 'goalId')).toBe(true);
+
+      const invalidUpdate = plainToInstance(ProjectUpdateRequestDto, {
+        goalId: '',
+      });
+      const updateErrors = await validate(invalidUpdate);
+      expect(updateErrors.some((e: any) => e.property === 'goalId')).toBe(true);
+
+      for (const goalId of [null, '123', undefined]) {
+        const validCreate = plainToInstance(ProjectRequestDto, {
+          code: 'P1',
+          name: 'Project 1',
+          goalId,
+        });
+        const vCreateErrors = await validate(validCreate);
+        expect(vCreateErrors.some((e: any) => e.property === 'goalId')).toBe(false);
+
+        const validUpdate = plainToInstance(ProjectUpdateRequestDto, { goalId });
+        const vUpdateErrors = await validate(validUpdate);
+        expect(vUpdateErrors.some((e: any) => e.property === 'goalId')).toBe(false);
+      }
     });
   });
 });

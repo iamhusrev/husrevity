@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Project } from '../project.entity';
 import { ProjectRole } from '../project-member.entity';
+import { IsNullableNumericId } from '../../goal/dto/goal-dtos';
 
 export class ProjectRequestDto {
   @IsNotEmpty()
@@ -36,6 +37,11 @@ export class ProjectRequestDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNullableNumericId({ message: 'goalId must be null or a numeric ID (1-19 digits)' })
+  goalId?: string | null;
 }
 
 export class ProjectUpdateRequestDto {
@@ -67,6 +73,11 @@ export class ProjectUpdateRequestDto {
   @IsOptional()
   @IsBoolean()
   archived?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNullableNumericId({ message: 'goalId must be null or a numeric ID (1-19 digits)' })
+  goalId?: string | null;
 }
 
 export class ProjectResponseDto {
@@ -77,6 +88,7 @@ export class ProjectResponseDto {
   status!: string;
   startDate!: string | null;
   endDate!: string | null;
+  @ApiPropertyOptional() goalId!: string | null;
   @ApiProperty() pinned!: boolean;
   @ApiProperty() archived!: boolean;
   createdAt!: Date;
@@ -102,6 +114,7 @@ export class ProjectResponseDto {
       status: p.status,
       startDate: p.startDate,
       endDate: p.endDate,
+      goalId: p.goalId ?? null,
       pinned: p.pinned,
       archived: p.archived,
       createdAt: p.createdAt,

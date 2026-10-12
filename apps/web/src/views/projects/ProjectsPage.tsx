@@ -29,6 +29,7 @@ import {
   BiDownload,
   BiGroup,
 } from "react-icons/bi";
+import Dialog from "@/components/ui/Dialog";
 
 function NewProjectModal({ onClose }: { onClose: () => void }) {
   const showAlert = alertStore((s) => s.show);
@@ -55,85 +56,86 @@ function NewProjectModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      labelledBy="project-new-modal-title"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="flex items-start justify-between">
-          <div className="space-y-1.5">
-            <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-              {t("projects.modal.kicker")}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1.5">
+          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+            {t("projects.modal.kicker")}
+          </span>
+          <h3
+            id="project-new-modal-title"
+            className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+          >
+            {t("projects.modal.title")}{" "}
+            <span className="font-instrument-serif italic font-normal text-husrev-ember dark:text-husrev-amber">
+              {t("projects.modal.flourish")}
             </span>
-            <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-              {t("projects.modal.title")}{" "}
-              <span className="font-instrument-serif italic font-normal text-husrev-ember dark:text-husrev-amber">
-                {t("projects.modal.flourish")}
-              </span>
-            </h3>
-          </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
-            <BiFolder size={18} />
-          </div>
+          </h3>
         </div>
-
-        <div className="husrev-rule mt-5" />
-
-        <form onSubmit={submit} className="mt-5 space-y-4">
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("projects.modal.codeField")}
-            </label>
-            <input
-              autoFocus
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder={t("projects.modal.codePlaceholder")}
-              maxLength={32}
-              className="husrev-input font-mono tracking-widest"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("projects.modal.nameField")}
-            </label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("projects.modal.namePlaceholder")}
-              className="husrev-input"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("projects.modal.descriptionField")}
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("projects.modal.descriptionPlaceholder")}
-              rows={3}
-              className="husrev-input resize-none"
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="husrev-btn-ghost">
-              {t("common.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={!code.trim() || !name.trim() || create.isPending}
-              className="husrev-btn"
-            >
-              {create.isPending ? t("projects.modal.submitting") : t("projects.modal.submit")}
-            </button>
-          </div>
-        </form>
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
+          <BiFolder size={18} />
+        </div>
       </div>
-    </div>
+
+      <div className="husrev-rule mt-5" />
+
+      <form onSubmit={submit} className="mt-5 space-y-4">
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("projects.modal.codeField")}
+          </label>
+          <input
+            autoFocus
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder={t("projects.modal.codePlaceholder")}
+            maxLength={32}
+            className="husrev-input font-mono tracking-widest"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("projects.modal.nameField")}
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("projects.modal.namePlaceholder")}
+            className="husrev-input"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("projects.modal.descriptionField")}
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t("projects.modal.descriptionPlaceholder")}
+            rows={3}
+            className="husrev-input resize-none"
+          />
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="husrev-btn-ghost">
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            disabled={!code.trim() || !name.trim() || create.isPending}
+            className="husrev-btn"
+          >
+            {create.isPending ? t("projects.modal.submitting") : t("projects.modal.submit")}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 

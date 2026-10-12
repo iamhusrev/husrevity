@@ -19,6 +19,8 @@ export class ItemSummaryDto {
   title!: string;
   dueAt!: string | null;
   status!: string;
+  isRecurring!: boolean;
+  durationMin!: number | null;
 }
 
 export class TodayResponseDto {

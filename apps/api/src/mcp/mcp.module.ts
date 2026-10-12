@@ -8,6 +8,15 @@ import { ProjectModule } from '../project/project.module';
 import { TaskModule } from '../task/task.module';
 import { RoutineModule } from '../routine/routine.module';
 import { ReminderModule } from '../reminder/reminder.module';
+import { UserModule } from '../user/user.module';
+import { CalendarModule } from '../calendar/calendar.module';
+import { TimeBlockModule } from '../time-block/time-block.module';
+import { LearningModule } from '../learning/learning.module';
+import { SportModule } from '../sport/sport.module';
+import { NotificationModule } from '../notification/notification.module';
+import { ChangeSetModule } from '../change-set/change-set.module';
+import { GoalModule } from '../goal/goal.module';
+import { NoteLinkModule } from '../note-link/note-link.module';
 import { Item } from '../item/item.entity';
 import { Note } from '../note/note.entity';
 import { McpController } from './mcp.controller';
@@ -25,6 +34,15 @@ import { PatAuthGuard } from './pat-auth.guard';
     TaskModule,
     ReminderModule,
     RoutineModule,
+    UserModule,
+    CalendarModule,
+    TimeBlockModule,
+    LearningModule,
+    SportModule,
+    NotificationModule,
+    ChangeSetModule,
+    GoalModule,
+    NoteLinkModule,
     TypeOrmModule.forFeature([Item, Note]),
   ],
   controllers: [McpController],

@@ -13,6 +13,7 @@ import {
   PatScope,
   integrationsService,
 } from "@/services/integrations-service";
+import IcsExportCard from "./IcsExportCard";
 
 const CARD =
   "rounded-3xl ring-1 ring-husrev-sand/90 bg-white/60 p-5 sm:p-6 dark:bg-husrev-shadow/60 dark:ring-white/[0.06]";
@@ -295,6 +296,7 @@ export default function IntegrationsPage() {
         <ChatLinkCard provider="slack" />
         <GoogleCard />
         <McpCard />
+        <IcsExportCard />
       </div>
     </div>
   );

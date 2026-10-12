@@ -8,6 +8,7 @@ import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import DateTimePicker from "@/components/datetime/DateTimePicker";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import Dialog from "@/components/ui/Dialog";
 import LeadTimeSelect from "@/components/notifications/LeadTimeSelect";
 import {
   useCreateLearningItem,
@@ -456,9 +457,10 @@ function TopicModal({
     }
   };
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} titleId="learning-topic-modal-title">
       <form onSubmit={submit}>
         <ModalTitle
+          id="learning-topic-modal-title"
           kicker={initial ? t("learning.modal.editKicker") : t("learning.modal.newKicker")}
           title={initial ? t("learning.modal.editTitle") : t("learning.modal.createTitle")}
         />
@@ -552,9 +554,10 @@ function SubtopicModal({
     }
   };
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} titleId="learning-subtopic-modal-title">
       <form onSubmit={submit}>
         <ModalTitle
+          id="learning-subtopic-modal-title"
           kicker={
             initial ? t("learning.modal.subtopicEditKicker") : t("learning.modal.subtopicNewKicker")
           }
@@ -662,9 +665,10 @@ function ItemModal({
     }
   };
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} titleId="learning-item-modal-title">
       <form onSubmit={submit}>
         <ModalTitle
+          id="learning-item-modal-title"
           kicker={t("learning.modal.editKicker")}
           title={t("learning.modal.itemEditTitle")}
         />
@@ -729,26 +733,35 @@ function ItemModal({
     </Modal>
   );
 }
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Modal({
+  children,
+  onClose,
+  titleId,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  titleId: string;
+}) {
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 p-4 backdrop-blur-sm"
-      onClick={onClose}
+    <Dialog
+      open
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 p-4 backdrop-blur-sm"
+      panelClassName="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+      labelledBy={titleId}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
-      >
-        {children}
-      </div>
-    </div>
+      {children}
+    </Dialog>
   );
 }
-function ModalTitle({ kicker, title }: { kicker: string; title: string }) {
+function ModalTitle({ id, kicker, title }: { id: string; kicker: string; title: string }) {
   return (
     <div>
       <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">{kicker}</span>
-      <h3 className="mt-1 text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
+      <h3
+        id={id}
+        className="mt-1 text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+      >
         {title}
       </h3>
     </div>

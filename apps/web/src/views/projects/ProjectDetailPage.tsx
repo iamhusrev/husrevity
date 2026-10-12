@@ -24,6 +24,7 @@ import MembersPanel from "./MembersPanel";
 import AssigneePicker from "./AssigneePicker";
 import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
 import { ProjectResponse, TaskPriority, TaskResponse, TaskStatus } from "@/types/project/project";
+import Dialog from "@/components/ui/Dialog";
 
 type ViewMode = "kanban" | "list";
 
@@ -59,105 +60,102 @@ function NewTaskModal({ projectId, onClose }: { projectId: number; onClose: () =
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      labelledBy="project-new-task-modal-title"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {t("kanban.modal.kicker")}
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {t("kanban.modal.kicker")}
+        </span>
+        <h3
+          id="project-new-task-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("kanban.modal.title")}{" "}
+          <span className="font-instrument-serif italic font-normal text-husrev-ember dark:text-husrev-amber">
+            {t("kanban.modal.flourish")}
           </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("kanban.modal.title")}{" "}
-            <span className="font-instrument-serif italic font-normal text-husrev-ember dark:text-husrev-amber">
-              {t("kanban.modal.flourish")}
-            </span>
-          </h3>
-        </div>
-        <div className="husrev-rule mt-5" />
-
-        <form onSubmit={submit} className="mt-5 space-y-4">
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("kanban.modal.titleField")}
-            </label>
-            <input
-              autoFocus
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t("kanban.modal.titlePlaceholder")}
-              className="husrev-input"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("kanban.modal.descriptionField")}
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("kanban.modal.descriptionPlaceholder")}
-              rows={3}
-              className="husrev-input resize-none"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("kanban.modal.columnField")}
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="husrev-input"
-              >
-                <option value="TODO">{t("kanban.status.TODO")}</option>
-                <option value="IN_PROGRESS">{t("kanban.status.IN_PROGRESS")}</option>
-                <option value="DONE">{t("kanban.status.DONE")}</option>
-                <option value="CANCELLED">{t("kanban.status.CANCELLED")}</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("kanban.modal.priorityField")}
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="husrev-input"
-              >
-                <option value="LOW">{t("kanban.priority.LOW")}</option>
-                <option value="MEDIUM">{t("kanban.priority.MEDIUM")}</option>
-                <option value="HIGH">{t("kanban.priority.HIGH")}</option>
-                <option value="CRITICAL">{t("kanban.priority.CRITICAL")}</option>
-              </select>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("kanban.modal.assigneeField", "Atanan kişi")}
-            </label>
-            <AssigneePicker projectId={projectId} value={assigneeId} onChange={setAssigneeId} />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="husrev-btn-ghost">
-              {t("common.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={!title.trim() || create.isPending}
-              className="husrev-btn"
-            >
-              {create.isPending ? t("kanban.modal.submitting") : t("kanban.modal.submit")}
-            </button>
-          </div>
-        </form>
+        </h3>
       </div>
-    </div>
+      <div className="husrev-rule mt-5" />
+
+      <form onSubmit={submit} className="mt-5 space-y-4">
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("kanban.modal.titleField")}
+          </label>
+          <input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t("kanban.modal.titlePlaceholder")}
+            className="husrev-input"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("kanban.modal.descriptionField")}
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t("kanban.modal.descriptionPlaceholder")}
+            rows={3}
+            className="husrev-input resize-none"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("kanban.modal.columnField")}
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as TaskStatus)}
+              className="husrev-input"
+            >
+              <option value="TODO">{t("kanban.status.TODO")}</option>
+              <option value="IN_PROGRESS">{t("kanban.status.IN_PROGRESS")}</option>
+              <option value="DONE">{t("kanban.status.DONE")}</option>
+              <option value="CANCELLED">{t("kanban.status.CANCELLED")}</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("kanban.modal.priorityField")}
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
+              className="husrev-input"
+            >
+              <option value="LOW">{t("kanban.priority.LOW")}</option>
+              <option value="MEDIUM">{t("kanban.priority.MEDIUM")}</option>
+              <option value="HIGH">{t("kanban.priority.HIGH")}</option>
+              <option value="CRITICAL">{t("kanban.priority.CRITICAL")}</option>
+            </select>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("kanban.modal.assigneeField", "Atanan kişi")}
+          </label>
+          <AssigneePicker projectId={projectId} value={assigneeId} onChange={setAssigneeId} />
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="husrev-btn-ghost">
+            {t("common.cancel")}
+          </button>
+          <button type="submit" disabled={!title.trim() || create.isPending} className="husrev-btn">
+            {create.isPending ? t("kanban.modal.submitting") : t("kanban.modal.submit")}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 
@@ -209,112 +207,104 @@ function EditProjectModal({ project, onClose }: { project: ProjectResponse; onCl
   });
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: submit }}
+      labelledBy="project-edit-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {project.code}
+        </span>
+        <h3
+          id="project-edit-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("projects.edit")}
+        </h3>
+      </div>
+      <div className="husrev-rule mt-5" />
+
+      <div className="mt-5 space-y-4">
+        <FormFieldText
+          control={control}
+          name="name"
+          label={t("projects.modal.nameField")}
+          required
+        />
+
+        <FormFieldTextarea
+          control={control}
+          name="description"
+          label={t("projects.modal.descriptionField")}
+          rows={3}
+        />
+
         <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {project.code}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("projects.edit")}
-          </h3>
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("projects.status")}
+          </label>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <select {...field} value={field.value ?? ""} className="husrev-input">
+                {PROJECT_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {t(`projects.statuses.${s}`)}
+                  </option>
+                ))}
+              </select>
+            )}
+          />
         </div>
-        <div className="husrev-rule mt-5" />
 
-        <div className="mt-5 space-y-4">
-          <FormFieldText
-            control={control}
-            name="name"
-            label={t("projects.modal.nameField")}
-            required
-          />
-
-          <FormFieldTextarea
-            control={control}
-            name="description"
-            label={t("projects.modal.descriptionField")}
-            rows={3}
-          />
-
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("projects.status")}
+              {t("projects.startDate")}
             </label>
             <Controller
               control={control}
-              name="status"
+              name="startDate"
               render={({ field }) => (
-                <select {...field} value={field.value ?? ""} className="husrev-input">
-                  {PROJECT_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {t(`projects.statuses.${s}`)}
-                    </option>
-                  ))}
-                </select>
+                <input type="date" {...field} value={field.value ?? ""} className="husrev-input" />
               )}
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("projects.startDate")}
-              </label>
-              <Controller
-                control={control}
-                name="startDate"
-                render={({ field }) => (
-                  <input
-                    type="date"
-                    {...field}
-                    value={field.value ?? ""}
-                    className="husrev-input"
-                  />
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("projects.endDate")}
-              </label>
-              <Controller
-                control={control}
-                name="endDate"
-                render={({ field }) => (
-                  <input
-                    type="date"
-                    {...field}
-                    value={field.value ?? ""}
-                    className="husrev-input"
-                  />
-                )}
-              />
-            </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("projects.endDate")}
+            </label>
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field }) => (
+                <input type="date" {...field} value={field.value ?? ""} className="husrev-input" />
+              )}
+            />
           </div>
         </div>
+      </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={updateProject.isPending}
-            className="husrev-btn-ghost"
-          >
-            {t("common.cancel")}
-          </button>
-          <button type="submit" disabled={updateProject.isPending} className="husrev-btn">
-            {updateProject.isPending ? t("common.saving") : t("common.save")}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="mt-6 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={updateProject.isPending}
+          className="husrev-btn-ghost"
+        >
+          {t("common.cancel")}
+        </button>
+        <button type="submit" disabled={updateProject.isPending} className="husrev-btn">
+          {updateProject.isPending ? t("common.saving") : t("common.save")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

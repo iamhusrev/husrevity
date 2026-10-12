@@ -4,3 +4,5 @@ export { default as EmptyState } from "./EmptyState";
 export { default as ErrorState } from "./ErrorState";
 export { default as PageHeader } from "./PageHeader";
 export { default as PageShell } from "./PageShell";
+export { default as Dialog } from "./Dialog";
+export type { DialogProps } from "./Dialog";

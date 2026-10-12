@@ -20,6 +20,7 @@ import { PROGRAM_TYPES, ProgramType, SportProgramResponse } from "@/types/sport/
 import { BiCalendarCheck, BiPlus, BiSolidMagicWand, BiTargetLock, BiTrash } from "react-icons/bi";
 import { HiSparkles } from "react-icons/hi2";
 import SportAiGeneratorModal from "./SportAiGeneratorModal";
+import Dialog from "@/components/ui/Dialog";
 
 const programSchema = z.object({
   name: z.string().min(1).max(120),
@@ -67,120 +68,122 @@ function NewProgramModal({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: submit }}
+      labelledBy="sport-program-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {t("sport.programs.modal.kicker", "Yeni program")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("sport.programs.modal.title", "Antrenman programı oluştur")}
-          </h3>
-        </div>
-        <div className="husrev-rule mt-5" />
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {t("sport.programs.modal.kicker", "Yeni program")}
+        </span>
+        <h3
+          id="sport-program-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("sport.programs.modal.title", "Antrenman programı oluştur")}
+        </h3>
+      </div>
+      <div className="husrev-rule mt-5" />
 
-        <div className="mt-5 space-y-4">
-          <FormFieldText
-            control={control}
-            name="name"
-            label={t("sport.programs.field.name", "Program adı")}
-            required
-          />
-          <FormFieldTextarea
-            control={control}
-            name="description"
-            label={t("sport.programs.field.description", "Açıklama")}
-            rows={3}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.programs.field.weekCount", "Hafta sayısı")}
-              </label>
-              <Controller
-                control={control}
-                name="weekCount"
-                render={({ field }) => (
-                  <input
-                    type="number"
-                    min={4}
-                    max={52}
-                    value={field.value}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="husrev-input"
-                  />
-                )}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.programs.field.programType", "Tür")}
-              </label>
-              <Controller
-                control={control}
-                name="programType"
-                render={({ field }) => (
-                  <select
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value as ProgramType)}
-                    className="husrev-input"
-                  >
-                    {PROGRAM_TYPES.map((pt) => (
-                      <option key={pt} value={pt}>
-                        {t(`sport.programType.${pt}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-            </div>
+      <div className="mt-5 space-y-4">
+        <FormFieldText
+          control={control}
+          name="name"
+          label={t("sport.programs.field.name", "Program adı")}
+          required
+        />
+        <FormFieldTextarea
+          control={control}
+          name="description"
+          label={t("sport.programs.field.description", "Açıklama")}
+          rows={3}
+        />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.programs.field.weekCount", "Hafta sayısı")}
+            </label>
+            <Controller
+              control={control}
+              name="weekCount"
+              render={({ field }) => (
+                <input
+                  type="number"
+                  min={4}
+                  max={52}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  className="husrev-input"
+                />
+              )}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.programs.field.startDate", "Başlangıç")}
-              </label>
-              <Controller
-                control={control}
-                name="startDate"
-                render={({ field }) => <input type="date" {...field} className="husrev-input" />}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-                {t("sport.programs.field.endDate", "Bitiş")}
-              </label>
-              <Controller
-                control={control}
-                name="endDate"
-                render={({ field }) => <input type="date" {...field} className="husrev-input" />}
-              />
-            </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.programs.field.programType", "Tür")}
+            </label>
+            <Controller
+              control={control}
+              name="programType"
+              render={({ field }) => (
+                <select
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value as ProgramType)}
+                  className="husrev-input"
+                >
+                  {PROGRAM_TYPES.map((pt) => (
+                    <option key={pt} value={pt}>
+                      {t(`sport.programType.${pt}`)}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
           </div>
         </div>
-
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={create.isPending}
-            className="husrev-btn-ghost"
-          >
-            {t("common.cancel")}
-          </button>
-          <button type="submit" disabled={create.isPending} className="husrev-btn">
-            {create.isPending ? t("common.saving") : t("common.create")}
-          </button>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.programs.field.startDate", "Başlangıç")}
+            </label>
+            <Controller
+              control={control}
+              name="startDate"
+              render={({ field }) => <input type="date" {...field} className="husrev-input" />}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              {t("sport.programs.field.endDate", "Bitiş")}
+            </label>
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field }) => <input type="date" {...field} className="husrev-input" />}
+            />
+          </div>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={create.isPending}
+          className="husrev-btn-ghost"
+        >
+          {t("common.cancel")}
+        </button>
+        <button type="submit" disabled={create.isPending} className="husrev-btn">
+          {create.isPending ? t("common.saving") : t("common.create")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

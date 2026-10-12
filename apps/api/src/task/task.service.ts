@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Task } from './task.entity';
@@ -12,11 +12,14 @@ import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { ReorderItemDto, TaskRequestDto, TaskResponseDto } from './dto/task-dtos';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 
 const TASK_DONE_STATUSES = new Set(['DONE', 'COMPLETED', 'CANCELLED']);
 
 @Injectable()
 export class TaskService {
+  private readonly logger = new Logger(TaskService.name);
+
   constructor(
     @InjectRepository(Task) private readonly tasks: Repository<Task>,
     private readonly access: ProjectAccessService,
@@ -25,6 +28,7 @@ export class TaskService {
     private readonly users: UserService,
     private readonly mailer: MailerService,
     private readonly projectInvites: ProjectInviteService,
+    @Optional() private readonly mirror?: ItemMirrorService,
   ) {}
 
   async listForProject(userId: string, projectId: string): Promise<TaskResponseDto[]> {
@@ -66,6 +70,7 @@ export class TaskService {
     });
     const saved = await this.tasks.save(t);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror?.upsertFromTask(saved));
     const assigneeName = saved.assigneeId ? await this.resolveAssigneeName(saved.assigneeId) : null;
     return TaskResponseDto.from(saved, assigneeName);
   }
@@ -123,6 +128,7 @@ export class TaskService {
     }
     const saved = await this.tasks.save(t);
     await this.syncNotification(saved, previousAssigneeId);
+    await this.safeMirror(() => this.mirror?.upsertFromTask(saved));
 
     let assigneeUser: User | null = null;
     if (saved.assigneeId) {
@@ -165,6 +171,7 @@ export class TaskService {
       await this.notifications.cancelForSource(uid, 'task', t.id);
     }
     await this.tasks.softRemove(t);
+    await this.safeMirror(() => this.mirror?.softDeleteMirror('task', t.id, t.ownerId));
   }
 
   async restore(userId: string, id: string): Promise<TaskResponseDto> {
@@ -180,6 +187,7 @@ export class TaskService {
     await this.tasks.restore({ id });
     const restored = await this.requireTaskAccess(userId, id, 'VIEWER');
     await this.syncNotification(restored);
+    await this.safeMirror(() => this.mirror?.upsertFromTask(restored));
     const assigneeName = restored.assigneeId
       ? await this.resolveAssigneeName(restored.assigneeId)
       : null;
@@ -299,5 +307,13 @@ export class TaskService {
     }
     await this.access.requireAccess(userId, t.projectId, minRole);
     return t;
+  }
+
+  private async safeMirror(fn: () => Promise<unknown> | unknown): Promise<void> {
+    try {
+      await fn();
+    } catch (e) {
+      this.logger.warn(`Item mirror hook failed: ${(e as Error).message}`);
+    }
   }
 }

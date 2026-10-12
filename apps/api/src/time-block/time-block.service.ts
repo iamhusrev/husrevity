@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { TimeBlock } from './time-block.entity';
@@ -6,13 +6,17 @@ import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
 import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { TimeBlockRequestDto, TimeBlockResponseDto } from './dto/time-block-dtos';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 
 @Injectable()
 export class TimeBlockService {
+  private readonly logger = new Logger(TimeBlockService.name);
+
   constructor(
     @InjectRepository(TimeBlock)
     private readonly blocks: Repository<TimeBlock>,
     private readonly notifications: NotificationService,
+    @Optional() private readonly mirror?: ItemMirrorService,
   ) {}
 
   async listForDate(ownerId: string, date: string): Promise<TimeBlockResponseDto[]> {
@@ -59,6 +63,7 @@ export class TimeBlockService {
     });
     const saved = await this.blocks.save(b);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror!.upsertFromTimeBlock(saved));
     return TimeBlockResponseDto.from(saved);
   }
 
@@ -80,6 +85,7 @@ export class TimeBlockService {
     }
     const saved = await this.blocks.save(b);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror!.upsertFromTimeBlock(saved));
     return TimeBlockResponseDto.from(saved);
   }
 
@@ -88,6 +94,7 @@ export class TimeBlockService {
     b.completedAt = b.completedAt ? null : new Date();
     const saved = await this.blocks.save(b);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror!.upsertFromTimeBlock(saved));
     return TimeBlockResponseDto.from(saved);
   }
 
@@ -95,6 +102,17 @@ export class TimeBlockService {
     const b = await this.requireOwned(ownerId, id);
     await this.notifications.cancelForSource(ownerId, 'time_block', b.id);
     await this.blocks.softRemove(b);
+    await this.safeMirror(() => this.mirror!.softDeleteMirror('time_block', b.id, ownerId));
+  }
+
+  private async safeMirror(action: () => Promise<unknown>): Promise<void> {
+    if (!this.mirror) return;
+    try {
+      await action();
+    } catch (e) {
+      // Mirror failure must not fail the legacy time block request
+      this.logger.warn(`Item mirror hook failed: ${(e as Error).message}`);
+    }
   }
 
   async resyncNotifications(ownerId: string): Promise<number> {

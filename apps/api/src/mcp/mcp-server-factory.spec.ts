@@ -9,46 +9,94 @@ import { ProjectService } from '../project/project.service';
 import { TaskService } from '../task/task.service';
 import { RoutineService } from '../routine/routine.service';
 import { ReminderService } from '../reminder/reminder.service';
+import { UserService } from '../user/user.service';
+import { CalendarService } from '../calendar/calendar.service';
+import { TimeBlockService } from '../time-block/time-block.service';
+import { LearningService } from '../learning/learning.service';
+import { SportLogService } from '../sport/sport-log.service';
+import { SportProgramService } from '../sport/sport-program.service';
+import { SportSessionService } from '../sport/sport-session.service';
+import { SportProfileService } from '../sport/sport-profile.service';
+import { NotificationService } from '../notification/notification.service';
 import { McpSearchService } from './mcp-search.service';
+import { ChangeSetService } from '../change-set/change-set.service';
+import { GoalService } from '../goal/goal.service';
+import { NoteLinkService } from '../note-link/note-link.service';
 import { PAT_SCOPES } from '../auth/dto/pat-dtos';
 
 describe('McpServerFactory', () => {
   let factory: McpServerFactory;
-  let todayService: { dueToday: jest.Mock; timeline: jest.Mock; currentBlock: jest.Mock };
-  let itemService: { complete: jest.Mock; create: jest.Mock; list: jest.Mock };
-  let mcpSearchService: { search: jest.Mock };
-  let noteService: { create: jest.Mock };
-  let projectService: { list: jest.Mock; getById: jest.Mock };
-  let routineService: { listSegments: jest.Mock; createActivity: jest.Mock };
-  let taskService: { createForProject: jest.Mock };
-  let reminderService: { createReminder: jest.Mock; listReminderLists: jest.Mock };
+  let todayService: any;
+  let itemService: any;
+  let mcpSearchService: any;
+  let noteService: any;
+  let projectService: any;
+  let routineService: any;
+  let taskService: any;
+  let reminderService: any;
+  let userService: any;
+  let calendarService: any;
+  let timeBlockService: any;
+  let learningService: any;
+  let sportLogService: any;
+  let sportProgramService: any;
+  let sportSessionService: any;
+  let sportProfileService: any;
+  let notificationService: any;
+  let goalService: any;
+  let noteLinkService: any;
 
   beforeEach(async () => {
-    todayService = {
-      dueToday: jest.fn(),
-      timeline: jest.fn(),
-      currentBlock: jest.fn(),
-    };
+    todayService = { dueToday: jest.fn(), timeline: jest.fn(), currentBlock: jest.fn() };
     itemService = {
       complete: jest.fn(),
+      completeWithDetails: jest.fn().mockResolvedValue({ item: { id: 'item_1', status: 'done' } }),
+      findOccurrence: jest.fn().mockResolvedValue(null),
       create: jest.fn(),
       list: jest.fn(),
+      update: jest.fn(),
+      get: jest.fn().mockResolvedValue({ id: 'i1', title: 'Test' }),
     };
-    mcpSearchService = {
-      search: jest.fn(),
-    };
-    noteService = {
-      create: jest.fn(),
-    };
-    projectService = {
-      list: jest.fn(),
-      getById: jest.fn(),
-    };
+    mcpSearchService = { search: jest.fn() };
+    noteService = { create: jest.fn() };
+    projectService = { list: jest.fn(), getById: jest.fn() };
     routineService = { listSegments: jest.fn(), createActivity: jest.fn() };
-    taskService = { createForProject: jest.fn() };
-    reminderService = {
-      createReminder: jest.fn(),
-      listReminderLists: jest.fn(),
+    taskService = {
+      createForProject: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      restore: jest.fn(),
+      listForProject: jest.fn(),
+    };
+    reminderService = { createReminder: jest.fn(), listReminderLists: jest.fn() };
+    userService = { requireById: jest.fn() };
+    calendarService = {};
+    timeBlockService = {};
+    learningService = {};
+    sportLogService = {};
+    sportProgramService = {};
+    sportSessionService = {};
+    sportProfileService = {};
+    notificationService = {};
+    goalService = {
+      list: jest.fn().mockResolvedValue([]),
+      get: jest.fn().mockResolvedValue({ id: 'g1', title: 'Goal 1' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({
+          id: 'g1',
+          title: 'Goal 1',
+          horizon: 'month',
+          periodStart: '2026-10-01',
+          periodEnd: '2026-10-31',
+        }),
+      update: jest.fn().mockResolvedValue({ id: 'g1', title: 'Goal 1' }),
+    };
+    noteLinkService = {
+      createLink: jest
+        .fn()
+        .mockResolvedValue({ id: 'nl-1', noteId: 'n1', targetType: 'goal', targetId: 'g1' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -62,6 +110,29 @@ describe('McpServerFactory', () => {
         { provide: ReminderService, useValue: reminderService },
         { provide: TaskService, useValue: taskService },
         { provide: RoutineService, useValue: routineService },
+        { provide: UserService, useValue: userService },
+        { provide: CalendarService, useValue: calendarService },
+        { provide: TimeBlockService, useValue: timeBlockService },
+        { provide: LearningService, useValue: learningService },
+        { provide: SportLogService, useValue: sportLogService },
+        { provide: SportProgramService, useValue: sportProgramService },
+        { provide: SportSessionService, useValue: sportSessionService },
+        { provide: SportProfileService, useValue: sportProfileService },
+        { provide: NotificationService, useValue: notificationService },
+        {
+          provide: ChangeSetService,
+          useValue: {
+            runWithChangeSet: jest.fn(async (_ownerId: string, _meta: any, fn: any) => {
+              const result = await fn('cs-1');
+              return { result, changeSetId: 'cs-1' };
+            }),
+            recordEntry: jest.fn().mockResolvedValue({}),
+            list: jest.fn().mockResolvedValue({ items: [] }),
+            undo: jest.fn().mockResolvedValue({}),
+          },
+        },
+        { provide: GoalService, useValue: goalService },
+        { provide: NoteLinkService, useValue: noteLinkService },
       ],
     }).compile();
 
@@ -129,9 +200,11 @@ describe('McpServerFactory', () => {
       const server = factory.createMcpServer();
       const toolHandler = (server as any)._registeredTools['complete_item']?.handler;
 
-      itemService.complete.mockResolvedValueOnce({
-        id: 'item_1',
-        status: 'done',
+      itemService.completeWithDetails.mockResolvedValueOnce({
+        item: {
+          id: 'item_1',
+          status: 'done',
+        },
       });
 
       const res = await toolHandler(
@@ -139,9 +212,12 @@ describe('McpServerFactory', () => {
         { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
       );
 
-      expect(itemService.complete).toHaveBeenCalledWith('usr_100', 'item_1', {
-        occursOn: '2026-09-28',
-      });
+      expect(itemService.completeWithDetails).toHaveBeenCalledWith(
+        'usr_100',
+        'item_1',
+        { occursOn: '2026-09-28' },
+        undefined,
+      );
 
       const parsed = JSON.parse(res.content[0].text);
       expect(parsed.id).toBe('item_1');
@@ -232,7 +308,7 @@ describe('McpServerFactory', () => {
           { title: 'x' },
           { authInfo: { scopes: ['items:read'], extra: { ownerId: 'user1' } } },
         ),
-      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+      ).rejects.toThrow("Forbidden: missing required scope 'reminders:write' (or 'items:write')");
     });
 
     it('passes structured fields through and defaults notifyMinutesBefore to 0 with dueAt', async () => {
@@ -361,21 +437,21 @@ describe('McpServerFactory', () => {
     ];
     const write = { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } };
 
-    it('list_evkat requires items:read and returns segments', async () => {
+    it('list_evkat requires routine:read (or items:read) and returns segments', async () => {
       const server = factory.createMcpServer();
       const handler = (server as any)._registeredTools['list_evkat']?.handler;
       routineService.listSegments.mockResolvedValueOnce(segments);
 
       await expect(
         handler({ authInfo: { scopes: ['notes:read'], extra: { ownerId: 'u' } } }),
-      ).rejects.toThrow("Forbidden: missing required scope 'items:read'");
+      ).rejects.toThrow("Forbidden: missing required scope 'routine:read' (or 'items:read')");
       const res = await handler({
         authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } },
       });
       expect(JSON.parse(res.content[0].text)).toEqual(segments);
     });
 
-    it('add_evkat_item requires items:write and adds to the segment matched by name', async () => {
+    it('add_evkat_item requires routine:write (or items:write) and adds to the segment matched by name', async () => {
       const server = factory.createMcpServer();
       const handler = (server as any)._registeredTools['add_evkat_item']?.handler;
       routineService.listSegments.mockResolvedValue(segments);
@@ -386,7 +462,7 @@ describe('McpServerFactory', () => {
           { segment: 'sabah', text: 'x' },
           { authInfo: { scopes: ['items:read'], extra: { ownerId: 'u' } } },
         ),
-      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+      ).rejects.toThrow("Forbidden: missing required scope 'routine:write' (or 'items:write')");
 
       const res = await handler({ segment: 'akşam', text: 'Su iç' }, write);
       expect(routineService.createActivity).toHaveBeenCalledWith('usr_100', '2', {
@@ -408,14 +484,14 @@ describe('McpServerFactory', () => {
   });
 
   describe('list_reminder_lists tool', () => {
-    it('requires items:read and returns the lists', async () => {
+    it('requires reminders:read (or items:read) and returns the lists', async () => {
       const server = factory.createMcpServer();
       const toolHandler = (server as any)._registeredTools['list_reminder_lists']?.handler;
       reminderService.listReminderLists.mockResolvedValueOnce([{ id: 'l1', name: 'Genel' }]);
 
       await expect(
         toolHandler({ authInfo: { scopes: ['notes:read'], extra: { ownerId: 'u' } } }),
-      ).rejects.toThrow("Forbidden: missing required scope 'items:read'");
+      ).rejects.toThrow("Forbidden: missing required scope 'reminders:read' (or 'items:read')");
 
       const res = await toolHandler({
         authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } },
@@ -615,20 +691,24 @@ describe('McpServerFactory', () => {
         { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
       );
 
-      expect(itemService.create).toHaveBeenCalledWith('usr_100', {
-        kind: 'log',
-        title: 'Koşu',
-        context: 'spor',
-        scheduledAt: expect.any(String),
-        durationMin: 45,
-        notes: '5km tempolu',
-        source: 'mcp',
-        payload: {
-          activity: 'Koşu',
-          duration_min: 45,
-          details: '5km tempolu',
+      expect(itemService.create).toHaveBeenCalledWith(
+        'usr_100',
+        {
+          kind: 'log',
+          title: 'Koşu',
+          context: 'spor',
+          scheduledAt: expect.any(String),
+          durationMin: 45,
+          notes: '5km tempolu',
+          source: 'mcp',
+          payload: {
+            activity: 'Koşu',
+            duration_min: 45,
+            details: '5km tempolu',
+          },
         },
-      });
+        undefined,
+      );
 
       const parsed = JSON.parse(res.content[0].text);
       expect(parsed.id).toBe('item_log_1');
@@ -671,6 +751,175 @@ describe('McpServerFactory', () => {
 
       const parsed = JSON.parse(res.content[0].text);
       expect(parsed).toEqual([{ id: 'item_wk_1', title: 'Weekly Planning', kind: 'task' }]);
+    });
+  });
+
+  describe('capture tool', () => {
+    it('throws error when auth context or items:write scope is missing', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['capture']?.handler;
+      expect(toolHandler).toBeDefined();
+
+      await expect(toolHandler({ text: 'toplantı' }, {})).rejects.toThrow(
+        'Unauthorized: missing owner context',
+      );
+      await expect(
+        toolHandler(
+          { text: 'toplantı' },
+          { authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } } },
+        ),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+    });
+
+    it('captures an item via ItemService and ChangeSetService when items:write is present', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['capture']?.handler;
+
+      itemService.create.mockResolvedValueOnce({
+        id: 'item_cap_1',
+        kind: 'task',
+        title: 'HGS kontrol',
+        status: 'open',
+      });
+
+      const res = await toolHandler(
+        { text: 'HGS kontrol' },
+        { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
+      );
+
+      expect(itemService.create).toHaveBeenCalledWith(
+        'usr_100',
+        expect.objectContaining({ title: 'HGS kontrol', source: 'mcp' }),
+        undefined,
+      );
+
+      const parsed = JSON.parse(res.content[0].text);
+      expect(parsed.item.id).toBe('item_cap_1');
+      expect(parsed.changeSetId).toBe('cs-1');
+      expect(parsed.interpretation).toBeDefined();
+    });
+  });
+
+  describe('get_life_context tool', () => {
+    it('throws error when auth context or items:read scope is missing', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['get_life_context']?.handler;
+      expect(toolHandler).toBeDefined();
+
+      await expect(toolHandler({}, {})).rejects.toThrow('Unauthorized: missing owner context');
+      await expect(
+        toolHandler({}, { authInfo: { scopes: ['notes:read'], extra: { ownerId: 'usr_100' } } }),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:read'");
+    });
+
+    it('returns life context when items:read is present', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['get_life_context']?.handler;
+
+      todayService.timeline.mockResolvedValueOnce([]);
+      todayService.dueToday.mockResolvedValueOnce([]);
+      todayService.currentBlock.mockReturnValueOnce(null);
+      itemService.list.mockResolvedValue([]);
+
+      const res = await toolHandler(
+        {},
+        { authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } } },
+      );
+
+      const parsed = JSON.parse(res.content[0].text);
+      expect(parsed.today).toBeDefined();
+      expect(parsed.upcoming).toBeDefined();
+      expect(parsed.overdue).toBeDefined();
+      expect(parsed.recentChanges).toBeDefined();
+      expect(parsed.counts).toBeDefined();
+      expect(parsed.activeProjects).toBeUndefined();
+    });
+  });
+
+  describe('apply_plan tool', () => {
+    it('throws error when auth context or items:write scope is missing', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['apply_plan']?.handler;
+      expect(toolHandler).toBeDefined();
+
+      await expect(toolHandler({ label: 'Plan', operations: [] }, {})).rejects.toThrow(
+        'Unauthorized: missing owner context',
+      );
+      await expect(
+        toolHandler(
+          { label: 'Plan', operations: [] },
+          { authInfo: { scopes: ['items:read'], extra: { ownerId: 'usr_100' } } },
+        ),
+      ).rejects.toThrow("Forbidden: missing required scope 'items:write'");
+    });
+
+    it('executes plan operations when items:write is present', async () => {
+      const server = factory.createMcpServer();
+      const toolHandler = (server as any)._registeredTools['apply_plan']?.handler;
+
+      itemService.create.mockResolvedValueOnce({
+        id: 'item_plan_1',
+        title: 'New Plan Task',
+        status: 'open',
+      });
+
+      const res = await toolHandler(
+        {
+          label: 'My Plan',
+          operations: [{ op: 'create', title: 'New Plan Task' }],
+        },
+        { authInfo: { scopes: ['items:write'], extra: { ownerId: 'usr_100' } } },
+      );
+
+      const parsed = JSON.parse(res.content[0].text);
+      expect(parsed.changeSetId).toBe('cs-1');
+      expect(parsed.operations).toHaveLength(1);
+      expect(parsed.operations[0].id).toBe('item_plan_1');
+    });
+  });
+
+  describe('planning prompts', () => {
+    it('registers plan_day, plan_week, review_month, and set_goal prompts with expected schemas', async () => {
+      const server = factory.createMcpServer();
+      const prompts = (server as any)._registeredPrompts || {};
+      expect(prompts['plan_day']).toBeDefined();
+      expect(prompts['plan_week']).toBeDefined();
+      expect(prompts['review_month']).toBeDefined();
+      expect(prompts['set_goal']).toBeDefined();
+
+      const dayRes = await prompts['plan_day'].callback({ date: '2026-10-15' }, {});
+      expect(dayRes.messages[0].content.text).toContain('get_life_context');
+
+      const weekRes = await prompts['plan_week'].callback({ startDate: '2026-10-19' }, {});
+      expect(weekRes.messages[0].content.text).toContain('apply_plan');
+
+      const monthRes = await prompts['review_month'].callback({ month: '2026-10' }, {});
+      expect(monthRes.messages[0].content.text).toContain('get_life_context');
+      expect(monthRes.messages[0].content.text).toContain('list_goals');
+
+      const setGoalRes = await prompts['set_goal'].callback({ title: 'G1', horizon: 'month' }, {});
+      expect(setGoalRes.messages[0].content.text).toContain('create_goal');
+    });
+  });
+
+  describe('goal tools registration', () => {
+    it('registers all 5 goal tools and routes calls with PAT scopes', async () => {
+      const server = factory.createMcpServer();
+      const tools = (server as any)._registeredTools || {};
+
+      expect(tools['list_goals']).toBeDefined();
+      expect(tools['create_goal']).toBeDefined();
+      expect(tools['update_goal']).toBeDefined();
+      expect(tools['link_to_goal']).toBeDefined();
+      expect(tools['link_note']).toBeDefined();
+
+      const listGoalsHandler = tools['list_goals'].handler;
+      const res = await listGoalsHandler(
+        {},
+        { authInfo: { scopes: ['goals:read'], extra: { ownerId: 'user1' } } },
+      );
+      expect(res.isError).toBeFalsy();
+      expect(goalService.list).toHaveBeenCalledWith('user1', expect.anything());
     });
   });
 

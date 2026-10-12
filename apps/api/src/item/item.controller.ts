@@ -14,15 +14,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ParsedDraft } from '@husrevity/parser';
 import { ItemService } from './item.service';
 import {
   CompleteItemRequestDto,
+  ItemExportQueryDto,
   ItemListQueryDto,
   ItemRequestDto,
   ItemResponseDto,
   ParseQuickAddRequestDto,
+  ItemUpdateRequestDto,
 } from './dto/item-dtos';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { NumericIdPipe } from '../common/numeric-id.pipe';
@@ -40,6 +42,32 @@ export class ItemController {
     @Query() query: ItemListQueryDto,
   ): Promise<ItemResponseDto[]> {
     return this.items.list(u.userId, query);
+  }
+
+  /**
+   * Raw text/calendar body: uses @Res() without passthrough so the JSON
+   * ResponseInterceptor envelope is not applied. Must stay above `:id`.
+   */
+  @Get('export.ics')
+  @ApiOperation({
+    summary:
+      "Export the caller's schedule as an ICS file. Skipped occurrences of a recurring series become EXDATE; " +
+      'completed occurrences are NOT exported and will still appear in an external calendar.',
+  })
+  async exportIcs(
+    @CurrentUser() u: AuthenticatedUser,
+    @Query() query: ItemExportQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const ics = await this.items.exportIcs(u.userId, query);
+    res.status(HttpStatus.OK);
+    res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="husrevity-${query.from}_${query.to}.ics"`,
+    );
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(ics);
   }
 
   @Get(':id')
@@ -73,7 +101,7 @@ export class ItemController {
   update(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id', NumericIdPipe) id: string,
-    @Body() body: Partial<ItemRequestDto>,
+    @Body() body: ItemUpdateRequestDto,
     @Headers('if-match') ifMatch?: string,
   ): Promise<ItemResponseDto> {
     const ifMatchMs = ifMatch ? Number(ifMatch.replace(/"/g, '')) : undefined;

@@ -17,6 +17,22 @@ export const PAT_SCOPES: PatScope[] = [
   'notes:write',
   'projects:read',
   'projects:write',
+  'calendar:read',
+  'calendar:write',
+  'reminders:read',
+  'reminders:write',
+  'routine:read',
+  'routine:write',
+  'timeblocks:read',
+  'timeblocks:write',
+  'learning:read',
+  'learning:write',
+  'sport:read',
+  'sport:write',
+  'notifications:read',
+  'notifications:write',
+  'goals:read',
+  'goals:write',
 ];
 
 export class IssuePatRequestDto {

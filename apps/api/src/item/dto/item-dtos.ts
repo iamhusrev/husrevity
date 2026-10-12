@@ -1,5 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsDateString,
   IsIn,
   IsInt,
@@ -11,6 +13,7 @@ import {
 } from 'class-validator';
 import { Item, ItemKind, ItemSource, ItemStatus } from '../item.entity';
 import { ItemOccurrenceStatus } from '../item-occurrence.entity';
+import { IsNullableNumericId, IsRealIsoDate } from '../../goal/dto/goal-dtos';
 
 export const ITEM_KINDS: ItemKind[] = ['task', 'event', 'log'];
 export const ITEM_STATUSES: ItemStatus[] = ['open', 'done', 'cancelled'];
@@ -46,6 +49,11 @@ export class ItemRequestDto {
   @ApiPropertyOptional()
   @IsOptional()
   projectId?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNullableNumericId({ message: 'goalId must be null or a numeric ID (1-19 digits)' })
+  goalId?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -121,6 +129,62 @@ export class ItemListQueryDto {
   @IsOptional()
   @IsIn(ITEM_STATUSES)
   status?: ItemStatus;
+
+  @ApiPropertyOptional({
+    description:
+      'When true, returns only unsorted open tasks (no date, goal, project, block or rrule), newest first, max 200. ' +
+      'The from, to, kind, context and status filters are ignored when inbox is true.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
+  @IsBoolean()
+  inbox?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      "Numeric goal id. Returns the work behind that goal's progress bar: items linked to the goal or to any of its " +
+      'live descendant goals, plus items of projects linked to those goals (only projects the caller is a live ' +
+      'member of). Cancelled items are excluded unless status is given. Recurring items are NOT expanded: ' +
+      'template rows are returned once. Max 200 rows. Takes precedence over inbox; from and to are ignored. ' +
+      "404 when the goal is not the caller's.",
+  })
+  @IsOptional()
+  @IsNullableNumericId({ message: 'goalId must be a numeric ID (1-19 digits)' })
+  goalId?: string;
+}
+
+/**
+ * Query of GET /items/export.ics.
+ *
+ * Per-occurrence overrides of a recurring series: occurrences marked `skipped`
+ * are emitted as EXDATE; occurrences marked completed (`done`) are NOT exported
+ * and will still appear as open occurrences in an external calendar. Series
+ * whose rule does not parse are not exported.
+ */
+export class ItemExportQueryDto {
+  @ApiProperty({ description: 'First day (Europe/Istanbul), YYYY-MM-DD, a real calendar date.' })
+  @IsNotEmpty()
+  @IsRealIsoDate()
+  from!: string;
+
+  @ApiProperty({
+    description:
+      'Last day, inclusive (Europe/Istanbul), YYYY-MM-DD. Must be >= from; the range spans at most 366 days.',
+  })
+  @IsNotEmpty()
+  @IsRealIsoDate()
+  to!: string;
+
+  @ApiPropertyOptional({
+    description: 'Include open/done tasks that only have a dueAt, as VTODO. Defaults to true.',
+    default: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    value === undefined ? true : value === 'true' ? true : value === 'false' ? false : value,
+  )
+  @IsBoolean()
+  includeTasks?: boolean = true;
 }
 
 export class ParseQuickAddRequestDto {
@@ -129,6 +193,13 @@ export class ParseQuickAddRequestDto {
   @MaxLength(500)
   text!: string;
 }
+
+/**
+ * Body of PATCH /items/:id. Must be a real class (not Partial<ItemRequestDto>):
+ * a type alias is erased at runtime, so the global ValidationPipe would skip
+ * validation and whitelisting entirely.
+ */
+export class ItemUpdateRequestDto extends PartialType(ItemRequestDto) {}
 
 export class CompleteItemRequestDto {
   /**
@@ -149,6 +220,7 @@ export class ItemResponseDto {
   @ApiPropertyOptional() notes!: string | null;
   @ApiPropertyOptional() context!: string | null;
   @ApiPropertyOptional() projectId!: string | null;
+  @ApiPropertyOptional() goalId!: string | null;
   @ApiPropertyOptional() blockId!: string | null;
   @ApiPropertyOptional() scheduledAt!: string | null;
   @ApiPropertyOptional() durationMin!: number | null;
@@ -192,6 +264,7 @@ export class ItemResponseDto {
       notes: item.notes,
       context: item.context,
       projectId: item.projectId,
+      goalId: item.goalId ?? null,
       blockId: item.blockId,
       scheduledAt: item.scheduledAt ? item.scheduledAt.toISOString() : null,
       durationMin: item.durationMin,

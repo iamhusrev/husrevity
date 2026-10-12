@@ -7,6 +7,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { ItemModule } from './item/item.module';
+import { GoalModule } from './goal/goal.module';
+import { ChangeSetModule } from './change-set/change-set.module';
 import { NotificationModule } from './notification/notification.module';
 import { ProjectModule } from './project/project.module';
 import { TelegramModule } from './telegram/telegram.module';
@@ -15,6 +17,8 @@ import { DeviceModule } from './device/device.module';
 import { McpModule } from './mcp/mcp.module';
 import { SlackCoreModule } from './slack/slack-core.module';
 import { SlackModule } from './slack/slack.module';
+import { ItemMirrorModule } from './item-mirror/item-mirror.module';
+import { NoteLinkModule } from './note-link/note-link.module';
 
 /**
  * Guards the REAL module import graph. Per-service unit tests build isolated
@@ -46,6 +50,8 @@ class FakeTypeOrmModule {}
 const roots: Array<[string, Type<unknown>]> = [
   ['NotificationModule', NotificationModule],
   ['ItemModule', ItemModule],
+  ['GoalModule', GoalModule],
+  ['ChangeSetModule', ChangeSetModule],
   ['ProjectModule', ProjectModule],
   ['TelegramModule', TelegramModule],
   ['IntegrationsModule', IntegrationsModule],
@@ -53,6 +59,8 @@ const roots: Array<[string, Type<unknown>]> = [
   ['McpModule', McpModule],
   ['SlackCoreModule', SlackCoreModule],
   ['SlackModule', SlackModule],
+  ['ItemMirrorModule', ItemMirrorModule],
+  ['NoteLinkModule', NoteLinkModule],
 ];
 
 describe('real module graph', () => {

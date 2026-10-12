@@ -1,6 +1,10 @@
 {
   "common": {
     "loading": "Yükleniyor…",
+    "networkErrorTitle": "Ağ hatası",
+    "networkErrorMessage": "Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.",
+    "timeoutErrorTitle": "İstek zaman aşımına uğradı",
+    "timeoutErrorMessage": "İstek çok uzun sürdü. Lütfen tekrar deneyin.",
     "openFull": "Tam sayfada aç",
     "error": "Bir hata oluştu",
     "home": "Ana Sayfa",
@@ -39,7 +43,8 @@
     "deleted": "Silindi",
     "saved": "Kaydedildi",
     "open": "Aç",
-    "undo": "Geri Al"
+    "undo": "Geri Al",
+    "retry": "Tekrar dene"
   },
   "datepicker": {
     "label": "Tarih seç",
@@ -95,12 +100,14 @@
     },
     "notFound": {
       "title": "Sayfa Bulunamadı",
-      "message": "Aradığınız sayfayı bulamadık."
+      "message": "Aradığınız sayfayı bulamadık.",
+      "kicker": "Kayıp sayfa"
     },
     "internal": {
       "title": "Sunucu Hatası",
       "message": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin.",
-      "tryAgain": "Tekrar Dene"
+      "tryAgain": "Tekrar Dene",
+      "kicker": "Beklenmedik bir hata"
     },
     "maintenance": {
       "title": "Hizmet Kullanılamıyor",
@@ -128,6 +135,9 @@
     "reminders": "Anımsatıcılar",
     "projects": "Projeler",
     "calendar": "Takvim",
+    "month": "Ay",
+    "week": "Hafta",
+    "inbox": "Gelen Kutusu",
     "vault": "Vault",
     "evkat": "Evkat",
     "learning": "Öğrenme",
@@ -142,7 +152,8 @@
       "system": "Sistem"
     },
     "more": "Diğer",
-    "integrations": "Entegrasyonlar"
+    "integrations": "Entegrasyonlar",
+    "goals": "Hedefler"
   },
   "admin": {
     "kicker": "Yönetim",
@@ -172,7 +183,8 @@
         "role": "Rol",
         "status": "Durum",
         "created": "Kayıt"
-      }
+      },
+      "confirmDeleteTitle": "Kullanıcıyı sil"
     },
     "invites": {
       "kicker": "Yeni davet",
@@ -249,7 +261,10 @@
       "category": "Kategori",
       "color": "Renk",
       "notifyBefore": "Hatırlatma",
-      "notes": "Notlar"
+      "notes": "Notlar",
+      "name": "Vakit adı",
+      "theme": "Tema",
+      "daysOfWeek": "Günler"
     },
     "category": {
       "none": "Yok",
@@ -266,13 +281,28 @@
     },
     "placeholders": {
       "title": "Odak çalışması",
-      "notes": "İsteğe bağlı not…"
+      "notes": "İsteğe bağlı not…",
+      "name": "Güne Hazırlık",
+      "theme": "Gelişim"
     },
     "modal": {
       "kicker": "Düzenle",
       "createTitle": "Yeni zaman bloğu",
-      "editTitle": "Bloğu düzenle"
-    }
+      "editTitle": "Bloğu düzenle",
+      "editKicker": "Düzenle",
+      "newKicker": "Yeni vakit"
+    },
+    "intro": "Gününü bölen sabit vakitler ve her vakte bağlı işler. Her gün tekrar eden şablonun.",
+    "newSegment": "Yeni vakit",
+    "allWeek": "Tüm hafta",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "addActivity": "İş ekle…",
+    "timeHint": "Saat boş bırakılırsa vakit açık uçlu olur (örn. yalnızca bitiş = ‘öncesi’).",
+    "colorAuto": "Otomatik",
+    "daysHint": "Varsayılan olarak her gün gösterilir; belirli günler için sadece onları işaretle.",
+    "confirmDeleteTitle": "Vakti sil",
+    "confirmDelete": "Bu vakti ve içindeki işleri silmek istediğine emin misin?"
   },
   "learning": {
     "title": "Öğrenme",
@@ -483,6 +513,7 @@
     "now": "Şu an",
     "loading": "Yükleniyor…",
     "nextUp": "Sırada",
+    "empty": "Bugün için bir şey yok.",
     "currentBlock": {
       "title": "Şu an",
       "empty": "Şu an aktif bir blok yok."
@@ -494,6 +525,174 @@
     "dueToday": {
       "title": "Gecikmiş / bugün teslim",
       "empty": "Gecikmiş veya bugün teslim işin yok."
+    },
+    "board": {
+      "pendingTitle": "Bekleyen işler",
+      "pendingEmpty": "Bekleyen iş yok.",
+      "schedule": "Zamanla",
+      "scheduleModalTitle": "İşi zamanla",
+      "timeLabel": "Saat",
+      "durationLabel": "Süre",
+      "confirm": "Zamanla",
+      "cancel": "İptal",
+      "dropTargetAria": "24 saatlik zaman ekseni",
+      "retry": "Tekrar dene",
+      "error": "Bugünün verileri yüklenemedi.",
+      "axis24h": "24 saat",
+      "minutesSuffix": "dk",
+      "minuteOption": "{{count}} dk",
+      "taskBadge": "Görev",
+      "recurringTask": "Tekrarlayan",
+      "recurringTaskTooltip": "Tekrarlayan görevlerin zamanı kuralından belirlenir"
+    }
+  },
+  "month": {
+    "title": "Ay",
+    "prevMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "today": "Bugün",
+    "loading": "Yükleniyor…",
+    "error": "Ay verileri yüklenemedi.",
+    "retry": "Tekrar dene",
+    "empty": "Bu ay için herhangi bir kayıt yok.",
+    "overflowChip": "+{{count}}",
+    "cellAriaLabel": "{{date}}, {{count}} öğe",
+    "weekdays": {
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt",
+      "sun": "Paz"
+    },
+    "panel": {
+      "title": "Gün Detayları",
+      "empty": "Bu gün için kayıt yok.",
+      "complete": "Tamamla",
+      "reschedule": "Zamanla",
+      "delete": "Sil",
+      "deleteSeriesConfirm": "Bu işlem tekrarlayan serinin tamamını silecektir. Devam etmek istiyor musunuz?",
+      "occurrenceDeleteHint": "Tekrarlayan serinin parçası",
+      "mobileRescheduleHint": "Yeniden zamanlamak için öğenin yanındaki zamanla simgesini kullanın.",
+      "addItem": "Öğe Ekle",
+      "titlePlaceholder": "Başlık...",
+      "timeOptional": "Saat (isteğe bağlı)",
+      "kind": "Tür",
+      "kindTask": "Görev",
+      "kindEvent": "Etkinlik",
+      "submit": "Ekle"
+    }
+  },
+  "week": {
+    "title": "Hafta",
+    "prevWeek": "Önceki hafta",
+    "nextWeek": "Sonraki hafta",
+    "thisWeek": "Bu hafta",
+    "loading": "Yükleniyor…",
+    "error": "Hafta verileri yüklenemedi.",
+    "retry": "Tekrar dene",
+    "empty": "Bu hafta için kayıt yok.",
+    "noItemsDay": "Kayıt yok",
+    "dayAriaLabel": "{{date}}, {{count}} öğe, {{duration}}",
+    "durationHours": "{{count}} saat",
+    "durationMinutes": "{{count}} dk",
+    "durationHoursMinutes": "{{hours}} saat {{minutes}} dk",
+    "loadLabel": "Günlük yük: {{duration}} / {{capacity}}",
+    "summary": {
+      "label": "Hafta özeti",
+      "total": "Toplam",
+      "done": "Tamamlanan",
+      "open": "Açık",
+      "slipped": "Kayan"
+    },
+    "weekdays": {
+      "mon": "Pazartesi",
+      "tue": "Salı",
+      "wed": "Çarşamba",
+      "thu": "Perşembe",
+      "fri": "Cuma",
+      "sat": "Cumartesi",
+      "sun": "Pazar"
+    },
+    "today": "Bugün",
+    "complete": "Tamamla",
+    "schedule": "Zamanla",
+    "add": "Ekle",
+    "addTo": "{{date}} gününe ekle",
+    "titlePlaceholder": "Başlık...",
+    "timeOptional": "Saat (isteğe bağlı)",
+    "kind": "Tür",
+    "kindTask": "Görev",
+    "kindEvent": "Etkinlik",
+    "submit": "Ekle",
+    "cancel": "Vazgeç",
+    "dragHint": "Öğeyi başka güne sürükleyin ya da Zamanla düğmesini kullanın."
+  },
+  "inbox": {
+    "title": "Gelen Kutusu",
+    "subtitle": "Henüz tarihi, projesi veya hedefi olmayan görevler.",
+    "loading": "Yükleniyor…",
+    "error": "Gelen kutusu yüklenemedi.",
+    "retry": "Tekrar dene",
+    "empty": "Gelen kutusu boş",
+    "emptyHint": "Yeni bir şey yakalamak için hızlı eklemeyi kullan.",
+    "capture": "Hızlı ekle",
+    "count": "{{count}} öğe",
+    "setDate": "Tarih ata",
+    "dateLabel": "Tarih",
+    "timeOptional": "Saat (isteğe bağlı)",
+    "saveDate": "Kaydet",
+    "schedule": "Zamanla",
+    "attachProject": "Projeye ekle",
+    "projectLabel": "Proje",
+    "projectPlaceholder": "Proje seç",
+    "noProjects": "Henüz proje yok.",
+    "attach": "Ekle",
+    "complete": "Tamamla",
+    "delete": "Sil",
+    "cancel": "Vazgeç",
+    "actionsFor": "{{title}} için işlemler",
+    "deleteConfirm": "Bu görev kalıcı olarak silinecek. Devam edilsin mi?",
+    "errorAction": "İşlem tamamlanamadı.",
+    "attachGoal": "Hedefe ekle",
+    "goalLabel": "Hedef",
+    "goalPlaceholder": "Hedef seç",
+    "noGoals": "Dönemi bugünü kapsayan veya sonrasında olan aktif hedef yok."
+  },
+  "claudeActivity": {
+    "title": "Claude Aktivitesi",
+    "sourceClaude": "Claude",
+    "sources": {
+      "mcp": "Claude",
+      "web": "Web",
+      "telegram": "Telegram",
+      "slack": "Slack",
+      "system": "Sistem"
+    },
+    "undo": "Geri al",
+    "undoing": "Geri alınıyor…",
+    "status": {
+      "applied": "Uygulandı",
+      "undone": "Geri alındı",
+      "partially_undone": "Kısmen geri alındı"
+    },
+    "undoSuccess": "{{count}} değişiklik geri alındı.",
+    "undoNone": "Hiçbir değişiklik geri alınamadı.",
+    "undoConflictWarning": "{{count}} madde atlandı:",
+    "reasons": {
+      "not_owner": "Öğenin sahibi siz değilsiniz",
+      "no_access": "Erişim izniniz yok",
+      "modified_after": "Değişiklikten sonra tekrar güncellenmiş",
+      "item_not_found": "Öğe bulunamadı",
+      "occurrence_not_found": "Kayıt bulunamadı",
+      "unknown": "Bilinmeyen çakışma"
+    },
+    "timeAgo": {
+      "justNow": "az önce",
+      "minutesAgo": "{{count}} dk önce",
+      "hoursAgo": "{{count}} sa önce",
+      "daysAgo": "{{count}} gün önce"
     }
   },
   "projects": {
@@ -669,7 +868,9 @@
     "noReminders": "Bu listede henüz anımsatıcı yok.",
     "modal": {
       "title": "Yeni Liste",
-      "nameField": "Liste adı"
+      "nameField": "Liste adı",
+      "kicker": "Yeni liste",
+      "colorField": "Renk"
     },
     "priority": {
       "NONE": "Yok",
@@ -729,6 +930,7 @@
     "createdMessage": "Not oluşturuldu.",
     "searchPlaceholder": "Ara…",
     "allTags": "Tüm etiketler",
+    "editorDialogLabel": "Not düzenleyici",
     "manageTags": "Etiketleri yönet",
     "tagName": "Etiket adı",
     "addTag": "Ekle",
@@ -763,7 +965,8 @@
       "createdLabel": "Oluşturma",
       "updatedLabel": "Güncelleme"
     },
-    "dictateFocusTooltip": "Dikte için odaklan"
+    "dictateFocusTooltip": "Dikte için odaklan",
+    "emptyMessage": "Bir başlık ya da içerik gir."
   },
   "calendar": {
     "title": "Takvim",
@@ -784,7 +987,11 @@
       "eventDeleted": "\"{{title}}\" etkinliği silindi."
     },
     "export": "Dışa Aktar",
-    "exportEmpty": "Görünen aralıkta dışa aktarılacak etkinlik yok."
+    "exportEmpty": "Görünen aralıkta dışa aktarılacak etkinlik yok.",
+    "modal": {
+      "kickerEdit": "Düzenle",
+      "kickerNew": "Yeni etkinlik"
+    }
   },
   "vault": {
     "title": "Vault",
@@ -805,7 +1012,11 @@
       "valueHintRequired": "*",
       "valuePlaceholderNew": "Gizli değer",
       "valuePlaceholderEdit": "Yeni değer (isteğe bağlı)",
-      "descriptionPlaceholder": "Açıklama (isteğe bağlı)"
+      "descriptionPlaceholder": "Açıklama (isteğe bağlı)",
+      "name": "İsim",
+      "category": "Kategori",
+      "color": "Renk",
+      "description": "Açıklama"
     },
     "table": {
       "key": "Anahtar",
@@ -865,7 +1076,17 @@
     "noItemsHint": "Alan ekle veya .env içe aktar.",
     "noEntities": "Henüz entity yok.",
     "startNew": "Başlamak için bir entity oluşturun.",
-    "selectEntity": "Bir entity seçin."
+    "selectEntity": "Bir entity seçin.",
+    "modal": {
+      "kickerEditEntity": "Düzenle",
+      "kickerNewEntity": "Yeni vault",
+      "kickerEditItem": "Düzenle",
+      "kickerNewItem": "Yeni kayıt",
+      "kickerImport": ".env içe aktar"
+    },
+    "confirmDeleteItemTitle": "Kaydı sil",
+    "confirmDeleteEntityTitle": "Vault'u sil",
+    "confirmDeleteEntityWithName": "\"{{name}}\" vault'unu ve içindeki tüm kayıtları silmek istediğinize emin misiniz?"
   },
   "users": {
     "title": "Kullanıcılar",
@@ -1012,7 +1233,8 @@
     "delete": "Sil",
     "confirmDeleteTitle": "Kaydı Sil",
     "confirmDeleteMessage": "Bu kaydı silmek istediğinize emin misiniz?",
-    "rowsPerPage": "Sayfa başına satır"
+    "rowsPerPage": "Sayfa başına satır",
+    "confirmDeleteKicker": "Dikkat"
   },
   "landing": {
     "menu": {
@@ -1306,6 +1528,150 @@
       "revoke": "İptal et",
       "lastUsed": "Son kullanım {{date}}",
       "neverUsed": "Hiç kullanılmadı"
+    },
+    "ics": {
+      "title": "Takvimi dışa aktar (ICS)",
+      "desc": "Zamanlanmış işlerini ve etkinliklerini harici bir takvim uygulamasına aktarmak için .ics dosyası indir.",
+      "from": "Başlangıç",
+      "to": "Bitiş",
+      "includeTasks": "Görevleri de ekle",
+      "download": "İndir",
+      "downloading": "Hazırlanıyor…",
+      "success": "Takvim indirildi",
+      "failed": "Takvim dışa aktarılamadı",
+      "errors": {
+        "invalid": "İki tarih de geçerli bir takvim günü olmalı.",
+        "endBeforeStart": "Bitiş başlangıçtan önce olamaz.",
+        "tooLong": "Aralık en fazla 366 gün olabilir."
+      },
+      "note": "Tekrarlayan işlerin tamamlanan oluşumları harici takvimde yine de görünür; yalnızca atlananlar çıkarılır."
+    }
+  },
+  "goals": {
+    "title": "Hedefler",
+    "subtitle": "Yıl, çeyrek ve ay hedeflerin; ilerleme bağlı işlerden hesaplanır.",
+    "newGoal": "Yeni hedef",
+    "prevYear": "Önceki yıl",
+    "nextYear": "Sonraki yıl",
+    "thisYear": "Bu yıl",
+    "statusFilter": "Durum filtresi",
+    "statusAll": "Tümü",
+    "status": {
+      "active": "Aktif",
+      "done": "Tamamlandı",
+      "dropped": "Vazgeçildi"
+    },
+    "horizon": {
+      "year": "Yıl",
+      "quarter": "Çeyrek",
+      "month": "Ay"
+    },
+    "loading": "Yükleniyor…",
+    "error": "Hedefler yüklenemedi.",
+    "retry": "Tekrar dene",
+    "empty": "{{year}} için hedef yok",
+    "emptyHint": "Önce yıllık bir hedef koy, sonra çeyrek ve aylara böl.",
+    "truncated": "İlk {{count}} hedef gösteriliyor; listede daha fazlası olabilir.",
+    "expand": "Aç",
+    "collapse": "Daralt",
+    "actionsFor": "{{title}} için işlemler",
+    "edit": "Düzenle",
+    "markDone": "Tamamlandı işaretle",
+    "drop": "Vazgeç",
+    "reopen": "Yeniden aç",
+    "delete": "Sil",
+    "deleted": "Hedef silindi",
+    "deletedMessage": "\"{{title}}\" silindi.",
+    "progressFor": "{{title}} ilerlemesi",
+    "form": {
+      "newTitle": "Yeni hedef",
+      "editTitle": "Hedefi düzenle",
+      "customPeriodHint": "Bu hedefin dönemi takvim yıl, çeyrek veya ayına denk gelmiyor; tarihleri elle düzenleyebilirsin."
+    },
+    "field": {
+      "horizon": "Ufuk",
+      "year": "Yıl",
+      "quarter": "Çeyrek",
+      "month": "Ay",
+      "title": "Başlık",
+      "notes": "Notlar",
+      "parent": "Üst hedef",
+      "periodStart": "Başlangıç",
+      "periodEnd": "Bitiş"
+    },
+    "quarterOption": "Ç{{n}}",
+    "monthName": {
+      "1": "Ocak",
+      "2": "Şubat",
+      "3": "Mart",
+      "4": "Nisan",
+      "5": "Mayıs",
+      "6": "Haziran",
+      "7": "Temmuz",
+      "8": "Ağustos",
+      "9": "Eylül",
+      "10": "Ekim",
+      "11": "Kasım",
+      "12": "Aralık"
+    },
+    "parentNone": "Üst hedef yok",
+    "parentCurrent": "Mevcut üst hedef",
+    "noWorkYet": "Henüz bağlı iş yok",
+    "errors": {
+      "titleRequired": "Başlık zorunlu.",
+      "titleTooLong": "Başlık en fazla 200 karakter olabilir.",
+      "notesTooLong": "Notlar en fazla 2000 karakter olabilir.",
+      "periodStartInvalid": "Başlangıç geçerli bir takvim tarihi olmalı.",
+      "periodEndInvalid": "Bitiş geçerli bir takvim tarihi olmalı.",
+      "periodEndBeforeStart": "Bitiş başlangıçtan önce olamaz.",
+      "periodTooLong": "Dönem bu ufuk için çok uzun (yıl 366, çeyrek 93, ay 31 gün)."
+    },
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "cancel": "Vazgeç",
+    "detail": {
+      "linkedWork": "Bağlı işler",
+      "noLinkedWork": "Bu hedefe bağlı iş yok.",
+      "itemsError": "Bağlı işler yüklenemedi.",
+      "itemsTruncated": "İlk {{count}} iş gösteriliyor.",
+      "noTime": "Zamansız",
+      "itemStatus": {
+        "open": "Açık",
+        "done": "Yapıldı",
+        "cancelled": "İptal"
+      },
+      "recurring": "Tekrarlayan",
+      "complete": "Tamamla",
+      "completeFailed": "İş tamamlanamadı.",
+      "linkedNotes": "Bağlı notlar",
+      "noLinkedNotes": "Bu hedefe bağlı not yok.",
+      "notesError": "Bağlı notlar yüklenemedi."
+    }
+  },
+  "noteLinks": {
+    "title": "Bağlantılar",
+    "add": "Bağlantı ekle",
+    "empty": "Bu nota bağlı hedef veya proje yok.",
+    "error": "Bağlantılar yüklenemedi.",
+    "retry": "Tekrar dene",
+    "dangling": "Silinmiş veya erişilemeyen",
+    "remove": "Bağlantıyı kaldır",
+    "removed": "Bağlantı kaldırıldı",
+    "undo": "Geri al",
+    "itemHelper": "Bir notu tek bir işe arayüzden bağlayamazsın; bunu Claude'a yaptırabilirsin.",
+    "type": {
+      "goal": "Hedef",
+      "project": "Proje",
+      "item": "İş"
+    },
+    "dialog": {
+      "title": "Bağlantı ekle",
+      "type": "Tür",
+      "target": "Hedef",
+      "placeholder": "Seç",
+      "noTargets": "Bu türde bağlanabilecek kayıt yok.",
+      "submit": "Ekle",
+      "cancel": "Vazgeç"
     }
   }
 }

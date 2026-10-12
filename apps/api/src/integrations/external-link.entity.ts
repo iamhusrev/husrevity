@@ -1,4 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { BaseEntity } from '../common/base.entity';
 import { Item } from '../item/item.entity';
 
@@ -13,7 +14,7 @@ export class ExternalLink extends BaseEntity {
 
   @ManyToOne(() => Item, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'item_id' })
-  item?: Item;
+  item?: Relation<Item>;
 
   @Column({ type: 'varchar', length: 64 })
   provider!: ExternalLinkProvider;

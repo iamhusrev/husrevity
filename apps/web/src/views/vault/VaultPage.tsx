@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/ui";
 import { Dropdown } from "@/components/dropdown/Dropdown";
@@ -34,6 +33,7 @@ import {
   BiChevronDown,
   BiFile,
 } from "react-icons/bi";
+import Dialog from "@/components/ui/Dialog";
 
 const PRESET_COLORS = [
   "#6366F1",
@@ -80,83 +80,84 @@ function EntityModal({ initial, onClose }: { initial?: VaultEntityResponse; onCl
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ autoComplete: "off", onSubmit: handleSubmit }}
+      labelledBy="vault-entity-modal-title"
     >
-      <form
-        autoComplete="off"
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {isEdit
-              ? t("vault.modal.kickerEditEntity", "Düzenle")
-              : t("vault.modal.kickerNewEntity", "Yeni vault")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {isEdit ? t("vault.editEntity") : t("vault.newEntity")}
-          </h3>
-        </div>
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {isEdit
+            ? t("vault.modal.kickerEditEntity", "Düzenle")
+            : t("vault.modal.kickerNewEntity", "Yeni vault")}
+        </span>
+        <h3
+          id="vault-entity-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {isEdit ? t("vault.editEntity") : t("vault.newEntity")}
+        </h3>
+      </div>
 
-        <div className="mt-6 space-y-4">
-          <VaultField label={t("vault.field.name", "İsim")}>
-            <input
-              autoFocus
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t("vault.namePlaceholder")}
-              className="husrev-input"
-            />
-          </VaultField>
-          <VaultField label={t("vault.field.category", "Kategori")}>
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder={t("vault.categoryPlaceholder")}
-              className="husrev-input"
-            />
-          </VaultField>
-          <div className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("vault.field.color", "Renk")}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  aria-label={c}
-                  className={`h-8 w-8 rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
-                    color === c
-                      ? "ring-2 ring-offset-2 ring-offset-husrev-cream ring-husrev-ember dark:ring-offset-husrev-ink"
-                      : ""
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
+      <div className="mt-6 space-y-4">
+        <VaultField label={t("vault.field.name", "İsim")}>
+          <input
+            autoFocus
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("vault.namePlaceholder")}
+            className="husrev-input"
+          />
+        </VaultField>
+        <VaultField label={t("vault.field.category", "Kategori")}>
+          <input
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder={t("vault.categoryPlaceholder")}
+            className="husrev-input"
+          />
+        </VaultField>
+        <div className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("vault.field.color", "Renk")}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={c}
+                className={`h-8 w-8 rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber ${
+                  color === c
+                    ? "ring-2 ring-offset-2 ring-offset-husrev-cream ring-husrev-ember dark:ring-offset-husrev-ink"
+                    : ""
+                }`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
           </div>
         </div>
+      </div>
 
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
-            {t("common.cancel")}
-          </button>
-          <button type="submit" disabled={!name.trim() || isPending} className="husrev-btn">
-            {isPending
-              ? t("common.saving", "Kaydediliyor…")
-              : isEdit
-                ? t("vault.submit.edit")
-                : t("vault.submit.create")}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
+          {t("common.cancel")}
+        </button>
+        <button type="submit" disabled={!name.trim() || isPending} className="husrev-btn">
+          {isPending
+            ? t("common.saving", "Kaydediliyor…")
+            : isEdit
+              ? t("vault.submit.edit")
+              : t("vault.submit.create")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -219,103 +220,104 @@ function ItemModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ autoComplete: "off", onSubmit: handleSubmit }}
+      labelledBy="vault-item-modal-title"
     >
-      <form
-        autoComplete="off"
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {isEdit
-              ? t("vault.modal.kickerEditItem", "Düzenle")
-              : t("vault.modal.kickerNewItem", "Yeni kayıt")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {isEdit ? t("vault.editItem") : t("vault.newItem")}
-          </h3>
-        </div>
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {isEdit
+            ? t("vault.modal.kickerEditItem", "Düzenle")
+            : t("vault.modal.kickerNewItem", "Yeni kayıt")}
+        </span>
+        <h3
+          id="vault-item-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {isEdit ? t("vault.editItem") : t("vault.newItem")}
+        </h3>
+      </div>
 
-        <div className="mt-6 space-y-4">
-          <VaultField label={t("vault.field.keyLabel")}>
-            <input
-              autoFocus
-              required
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder={t("vault.field.keyPlaceholder")}
-              className="husrev-input font-mono"
-            />
-          </VaultField>
-          <label className="block space-y-1.5">
-            <span className="husrev-kicker text-gray-600 dark:text-gray-300">
-              {t("vault.field.valueLabel")}{" "}
-              <span className="ml-1 text-[10px] tracking-normal normal-case text-gray-400">
-                {isEdit ? t("vault.field.valueHintEdit") : t("vault.field.valueHintRequired")}
-              </span>
+      <div className="mt-6 space-y-4">
+        <VaultField label={t("vault.field.keyLabel")}>
+          <input
+            autoFocus
+            required
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder={t("vault.field.keyPlaceholder")}
+            className="husrev-input font-mono"
+          />
+        </VaultField>
+        <label className="block space-y-1.5">
+          <span className="husrev-kicker text-gray-600 dark:text-gray-300">
+            {t("vault.field.valueLabel")}{" "}
+            <span className="ml-1 text-[10px] tracking-normal normal-case text-gray-400">
+              {isEdit ? t("vault.field.valueHintEdit") : t("vault.field.valueHintRequired")}
             </span>
-            <div className="relative">
-              <input
-                type={showValue ? "text" : "password"}
-                autoComplete="new-password"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                data-1p-ignore
-                data-lpignore="true"
-                data-bwignore
-                data-form-type="other"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder={
-                  isEdit
-                    ? t("vault.field.valuePlaceholderEdit")
-                    : t("vault.field.valuePlaceholderNew")
-                }
-                className="husrev-input pr-10 font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => setShowValue((v) => !v)}
-                aria-label={showValue ? t("vault.action.hide") : t("vault.action.show")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-husrev-sand/40 hover:text-husrev-ink dark:hover:bg-white/5 dark:hover:text-husrev-cream focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
-              >
-                {showValue ? <BiHide size={16} /> : <BiShow size={16} />}
-              </button>
-            </div>
-          </label>
-          <VaultField label={t("vault.field.description", "Açıklama")}>
+          </span>
+          <div className="relative">
             <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("vault.field.descriptionPlaceholder")}
-              className="husrev-input"
+              type={showValue ? "text" : "password"}
+              autoComplete="new-password"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
+              data-form-type="other"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder={
+                isEdit
+                  ? t("vault.field.valuePlaceholderEdit")
+                  : t("vault.field.valuePlaceholderNew")
+              }
+              className="husrev-input pr-10 font-mono"
             />
-          </VaultField>
-        </div>
+            <button
+              type="button"
+              onClick={() => setShowValue((v) => !v)}
+              aria-label={showValue ? t("vault.action.hide") : t("vault.action.show")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-400 transition hover:bg-husrev-sand/40 hover:text-husrev-ink dark:hover:bg-white/5 dark:hover:text-husrev-cream focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber"
+            >
+              {showValue ? <BiHide size={16} /> : <BiShow size={16} />}
+            </button>
+          </div>
+        </label>
+        <VaultField label={t("vault.field.description", "Açıklama")}>
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t("vault.field.descriptionPlaceholder")}
+            className="husrev-input"
+          />
+        </VaultField>
+      </div>
 
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
-            {t("common.cancel")}
-          </button>
-          <button
-            type="submit"
-            disabled={!label.trim() || (!isEdit && !value) || isPending}
-            className="husrev-btn"
-          >
-            {isPending
-              ? t("common.saving", "Kaydediliyor…")
-              : isEdit
-                ? t("vault.submit.edit")
-                : t("vault.submit.addItem")}
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">
+          {t("common.cancel")}
+        </button>
+        <button
+          type="submit"
+          disabled={!label.trim() || (!isEdit && !value) || isPending}
+          className="husrev-btn"
+        >
+          {isPending
+            ? t("common.saving", "Kaydediliyor…")
+            : isEdit
+              ? t("vault.submit.edit")
+              : t("vault.submit.addItem")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -348,50 +350,51 @@ function ImportModal({ entityId, onClose }: { entityId: number; onClose: () => v
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+      labelledBy="vault-import-modal-title"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {t("vault.modal.kickerImport", ".env içe aktar")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("vault.import_modal.title")}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t("vault.import_modal.hint")}</p>
-        </div>
-
-        <div className="mt-6">
-          <textarea
-            autoFocus
-            value={raw}
-            onChange={(e) => setRaw(e.target.value)}
-            rows={10}
-            placeholder={t("vault.import_modal.placeholder")}
-            className="husrev-input font-mono text-xs resize-none"
-          />
-        </div>
-
-        <div className="mt-6 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} disabled={loading} className="husrev-btn-ghost">
-            {t("common.cancel")}
-          </button>
-          <button
-            type="button"
-            onClick={handleImport}
-            disabled={!raw.trim() || loading}
-            className="husrev-btn"
-          >
-            {loading ? t("vault.import_modal.submitting") : t("vault.import_modal.submit")}
-          </button>
-        </div>
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {t("vault.modal.kickerImport", ".env içe aktar")}
+        </span>
+        <h3
+          id="vault-import-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("vault.import_modal.title")}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("vault.import_modal.hint")}</p>
       </div>
-    </div>
+
+      <div className="mt-6">
+        <textarea
+          autoFocus
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          rows={10}
+          placeholder={t("vault.import_modal.placeholder")}
+          className="husrev-input font-mono text-xs resize-none"
+        />
+      </div>
+
+      <div className="mt-6 flex items-center justify-end gap-2">
+        <button type="button" onClick={onClose} disabled={loading} className="husrev-btn-ghost">
+          {t("common.cancel")}
+        </button>
+        <button
+          type="button"
+          onClick={handleImport}
+          disabled={!raw.trim() || loading}
+          className="husrev-btn"
+        >
+          {loading ? t("vault.import_modal.submitting") : t("vault.import_modal.submit")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -498,27 +501,16 @@ function ItemRow({
           </button>
         </div>
       </td>
-      <DeleteConfirmModalPortal>
-        <DeleteConfirmModal
-          isOpen={confirmingDelete}
-          onClose={() => setConfirmingDelete(false)}
-          onConfirm={confirmDelete}
-          isPending={deleteItem.isPending}
-          title={t("vault.confirmDeleteItemTitle", "Kaydı sil")}
-          message={t("vault.confirmDeleteItem", { label: item.label })}
-        />
-      </DeleteConfirmModalPortal>
+      <DeleteConfirmModal
+        isOpen={confirmingDelete}
+        onClose={() => setConfirmingDelete(false)}
+        onConfirm={confirmDelete}
+        isPending={deleteItem.isPending}
+        title={t("vault.confirmDeleteItemTitle", "Kaydı sil")}
+        message={t("vault.confirmDeleteItem", { label: item.label })}
+      />
     </tr>
   );
-}
-
-function DeleteConfirmModalPortal({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) return null;
-  return createPortal(children, document.body);
 }
 
 // ─── Items panel ──────────────────────────────────────────────────────────────

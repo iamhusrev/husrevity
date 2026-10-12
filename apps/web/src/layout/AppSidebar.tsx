@@ -13,6 +13,9 @@ import {
   BiLockAlt,
   BiFolder,
   BiCalendar,
+  BiCalendarWeek,
+  BiArchiveIn,
+  BiTargetLock,
   BiShield,
   BiDumbbell,
   BiBookOpen,
@@ -21,6 +24,9 @@ import { useAuth } from "@/providers/AuthProvider";
 import { HiSparkles, HiOutlineClock } from "react-icons/hi2";
 import { FaChevronDown } from "react-icons/fa";
 import { useSidebar } from "@/providers/SidebarContext";
+import { isNavItemActive } from "@/utils/navigation";
+
+export { isNavItemActive };
 
 type NavItem = {
   name: string;
@@ -37,7 +43,7 @@ type NavSection = {
 
 type TFunc = (key: string) => string;
 
-const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
+export const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
   {
     label: null,
     items: [
@@ -77,9 +83,24 @@ const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
     label: t("nav.section.daily"),
     items: [
       {
+        icon: <BiArchiveIn size={"1.5rem"} />,
+        name: t("nav.inbox"),
+        path: "/inbox",
+      },
+      {
+        icon: <BiCalendarWeek size={"1.5rem"} />,
+        name: t("nav.week"),
+        path: "/week",
+      },
+      {
         icon: <BiCalendar size={"1.5rem"} />,
         name: t("nav.calendar"),
-        path: "/calendar",
+        path: "/month",
+      },
+      {
+        icon: <BiTargetLock size={"1.5rem"} />,
+        name: t("nav.goals"),
+        path: "/goals",
       },
       {
         icon: <HiOutlineClock size={"1.5rem"} />,
@@ -133,7 +154,7 @@ const AppSidebar: React.FC = () => {
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const isActive = useCallback((path: string) => path === pathname, [pathname]);
+  const isActive = useCallback((path: string) => isNavItemActive(pathname, path), [pathname]);
   const showText = isExpanded || isHovered;
 
   useEffect(() => {
@@ -170,48 +191,52 @@ const AppSidebar: React.FC = () => {
         const key = `${sectionIndex}-${itemIndex}`;
         return (
           <li key={nav.name}>
-            {nav.subItems ? (
-              <button
-                onClick={() => handleSubmenuToggle(key)}
-                className={`menu-item group cursor-pointer ${
-                  openSubmenu === key ? "menu-item-active" : "menu-item-inactive"
-                } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
-              >
-                <span
-                  className={`${
-                    openSubmenu === key ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                  }`}
-                >
-                  {nav.icon}
-                </span>
-                {showText && <span className="menu-item-text">{nav.name}</span>}
-                {showText && (
-                  <FaChevronDown
-                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                      openSubmenu === key ? "rotate-180 text-brand-500" : ""
-                    }`}
-                  />
-                )}
-              </button>
-            ) : (
-              nav.path && (
-                <Link
-                  href={nav.path}
-                  className={`menu-item group ${
-                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
-                >
-                  <span
-                    className={`${
-                      isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+            {nav.subItems
+              ? (() => {
+                  const isChildActive = nav.subItems?.some((sub) => isActive(sub.path)) ?? false;
+                  const isParentActive = openSubmenu === key || isChildActive;
+                  return (
+                    <button
+                      onClick={() => handleSubmenuToggle(key)}
+                      className={`menu-item group cursor-pointer ${
+                        isParentActive ? "menu-item-active" : "menu-item-inactive"
+                      } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+                    >
+                      <span
+                        className={`${
+                          isParentActive ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                        }`}
+                      >
+                        {nav.icon}
+                      </span>
+                      {showText && <span className="menu-item-text">{nav.name}</span>}
+                      {showText && (
+                        <FaChevronDown
+                          className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                            openSubmenu === key ? "rotate-180 text-brand-500" : ""
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                })()
+              : nav.path && (
+                  <Link
+                    href={nav.path}
+                    className={`menu-item group ${
+                      isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                     }`}
                   >
-                    {nav.icon}
-                  </span>
-                  {showText && <span className="menu-item-text">{nav.name}</span>}
-                </Link>
-              )
-            )}
+                    <span
+                      className={`${
+                        isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                      }`}
+                    >
+                      {nav.icon}
+                    </span>
+                    {showText && <span className="menu-item-text">{nav.name}</span>}
+                  </Link>
+                )}
             {nav.subItems && showText && (
               <div
                 ref={(el) => {

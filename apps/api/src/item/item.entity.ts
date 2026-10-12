@@ -24,6 +24,7 @@ export type ItemSource = 'web' | 'ios' | 'mcp' | 'telegram' | 'gmail' | 'gcal' |
 @Index('idx_items_owner', ['ownerId'])
 @Index('idx_items_project', ['projectId'])
 @Index('idx_items_block', ['blockId'])
+@Index('idx_items_goal', ['goalId'])
 export class Item extends BaseEntity {
   @Column({ name: 'owner_id', type: 'bigint' })
   ownerId!: string;
@@ -42,6 +43,9 @@ export class Item extends BaseEntity {
 
   @Column({ name: 'project_id', type: 'bigint', nullable: true })
   projectId!: string | null;
+
+  @Column({ name: 'goal_id', type: 'bigint', nullable: true })
+  goalId!: string | null;
 
   /** Parent item this one belongs to (e.g. a routine activity's segment). */
   @Column({ name: 'block_id', type: 'bigint', nullable: true })

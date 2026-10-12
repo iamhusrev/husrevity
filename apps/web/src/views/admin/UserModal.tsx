@@ -12,6 +12,7 @@ import { AdminUser, Role } from "@/types/admin/admin";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import Dialog from "@/components/ui/Dialog";
 
 export function UserModal({
   initial,
@@ -98,21 +99,25 @@ export function UserModal({
   const pending = update.isPending || resetPwd.isPending || remove.isPending;
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={save}
-        className="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+    <>
+      <Dialog
+        open={true}
+        onClose={onClose}
+        overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+        panelClassName="w-full max-w-lg rounded-3xl husrev-modal grain p-7 husrev-settle"
+        panelAs="form"
+        panelProps={{ onSubmit: save }}
+        labelledBy="user-modal-title"
       >
         <div className="flex items-start justify-between mb-5">
           <div className="space-y-1 min-w-0">
             <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
               {t("admin.users.modalKicker", "Kullanıcı")}
             </span>
-            <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream truncate">
+            <h3
+              id="user-modal-title"
+              className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream truncate"
+            >
               {initial.email}
             </h3>
           </div>
@@ -224,7 +229,7 @@ export function UserModal({
             {pending ? t("common.saving", "Kaydediliyor…") : t("common.save", "Kaydet")}
           </button>
         </div>
-      </form>
+      </Dialog>
 
       <DeleteConfirmModal
         isOpen={confirmingDelete}
@@ -234,7 +239,7 @@ export function UserModal({
         title={t("admin.users.confirmDeleteTitle", "Kullanıcıyı sil")}
         message={t("admin.users.confirmDelete", "Bu kullanıcıyı silmek istediğine emin misin?")}
       />
-    </div>
+    </>
   );
 }
 

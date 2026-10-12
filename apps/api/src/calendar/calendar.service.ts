@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CalendarEvent } from './calendar-event.entity';
@@ -6,12 +6,16 @@ import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
 import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { EventRequestDto, EventResponseDto } from './dto/calendar-dtos';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 
 @Injectable()
 export class CalendarService {
+  private readonly logger = new Logger(CalendarService.name);
+
   constructor(
     @InjectRepository(CalendarEvent) private readonly events: Repository<CalendarEvent>,
     private readonly notifications: NotificationService,
+    @Optional() private readonly mirror?: ItemMirrorService,
   ) {}
 
   async list(
@@ -46,6 +50,7 @@ export class CalendarService {
     });
     const saved = await this.events.save(e);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror!.upsertFromCalendarEvent(saved));
     return EventResponseDto.from(saved);
   }
 
@@ -62,6 +67,7 @@ export class CalendarService {
     if (req.recurrenceRule !== undefined) e.recurrenceRule = req.recurrenceRule ?? null;
     const saved = await this.events.save(e);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror!.upsertFromCalendarEvent(saved));
     return EventResponseDto.from(saved);
   }
 
@@ -69,6 +75,7 @@ export class CalendarService {
     const e = await this.requireOwned(ownerId, id);
     await this.notifications.cancelForSource(ownerId, 'calendar_event', e.id);
     await this.events.softRemove(e);
+    await this.safeMirror(() => this.mirror!.softDeleteMirror('calendar_event', e.id, ownerId));
   }
 
   async restore(ownerId: string, id: string): Promise<EventResponseDto> {
@@ -77,7 +84,18 @@ export class CalendarService {
     await this.events.restore({ id, ownerId });
     const restored = await this.requireOwned(ownerId, id);
     await this.syncNotification(restored);
+    await this.safeMirror(() => this.mirror!.upsertFromCalendarEvent(restored));
     return EventResponseDto.from(restored);
+  }
+
+  private async safeMirror(action: () => Promise<unknown>): Promise<void> {
+    if (!this.mirror) return;
+    try {
+      await action();
+    } catch (e) {
+      // Mirror failure must not fail the legacy calendar request
+      this.logger.warn(`Item mirror hook failed: ${(e as Error).message}`);
+    }
   }
 
   async resyncNotifications(ownerId: string): Promise<number> {

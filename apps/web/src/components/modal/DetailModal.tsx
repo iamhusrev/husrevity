@@ -11,6 +11,8 @@ interface DetailModalProps {
   /** When provided, renders a ↗ button that opens the full dedicated page. */
   onExpand?: () => void;
   title?: string;
+  /** Accessible name when the modal has no visible title. */
+  label?: string;
   className?: string;
   children: React.ReactNode;
 }
@@ -25,6 +27,7 @@ export default function DetailModal({
   onClose,
   onExpand,
   title,
+  label,
   className,
   children,
 }: DetailModalProps) {
@@ -38,6 +41,7 @@ export default function DetailModal({
       isOpen={isOpen}
       onClose={onClose}
       showCloseButton={false}
+      label={title || label || undefined}
       className={className ?? "max-h-[90vh] w-full max-w-3xl overflow-y-auto p-7"}
     >
       <div className="mb-4 flex items-center gap-3">
@@ -58,6 +62,7 @@ export default function DetailModal({
         <button
           type="button"
           onClick={onClose}
+          data-dialog-close
           aria-label={t("common.cancel")}
           className={`${iconBtn} shrink-0`}
         >

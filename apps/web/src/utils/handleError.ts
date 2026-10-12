@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import i18n from "@/configs/i18n";
 
 export function parseAxiosError(error: unknown): {
   title: string;
@@ -15,16 +16,16 @@ export function parseAxiosError(error: unknown): {
   // Network Error
   if (error.code === "ERR_NETWORK") {
     return {
-      title: "Network Error",
-      message: "Unable to connect to the server. Please check your internet connection.",
+      title: i18n.t("common.networkErrorTitle"),
+      message: i18n.t("common.networkErrorMessage"),
     };
   }
 
   // Timeout
   if (error.code === "ECONNABORTED") {
     return {
-      title: "Request Timeout",
-      message: "The request took too long. Please try again.",
+      title: i18n.t("common.timeoutErrorTitle"),
+      message: i18n.t("common.timeoutErrorMessage"),
     };
   }
 

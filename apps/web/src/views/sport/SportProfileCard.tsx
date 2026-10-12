@@ -11,6 +11,7 @@ import { parseAxiosError } from "@/utils/handleError";
 import { cn } from "@/utils/utils";
 import { ACTIVITY_TYPES, ActivityType, FITNESS_LEVELS, FitnessLevel } from "@/types/sport/sport";
 import { BiEditAlt, BiRun, BiTargetLock } from "react-icons/bi";
+import Dialog from "@/components/ui/Dialog";
 
 const profileSchema = z.object({
   fitnessLevel: z.enum(FITNESS_LEVELS),
@@ -55,163 +56,165 @@ function EditProfileModal({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <Dialog
+      open={true}
+      onClose={onClose}
+      overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+      panelClassName="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+      panelAs="form"
+      panelProps={{ onSubmit: submit }}
+      labelledBy="sport-profile-modal-title"
     >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
-      >
-        <div className="space-y-1.5">
-          <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
-            {t("sport.profile.editKicker", "Profil")}
-          </span>
-          <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-            {t("sport.profile.editTitle", "Spor profilini düzenle")}
-          </h3>
-        </div>
-        <div className="husrev-rule mt-5" />
+      <div className="space-y-1.5">
+        <span className="husrev-kicker text-husrev-ember/80 dark:text-husrev-amber/80">
+          {t("sport.profile.editKicker", "Profil")}
+        </span>
+        <h3
+          id="sport-profile-modal-title"
+          className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+        >
+          {t("sport.profile.editTitle", "Spor profilini düzenle")}
+        </h3>
+      </div>
+      <div className="husrev-rule mt-5" />
 
-        <div className="mt-5 space-y-4">
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.profile.fitnessLevel", "Seviye")}
-            </label>
-            <Controller
-              control={control}
-              name="fitnessLevel"
-              render={({ field }) => (
-                <div className="flex gap-2">
-                  {FITNESS_LEVELS.map((lvl) => (
+      <div className="mt-5 space-y-4">
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.profile.fitnessLevel", "Seviye")}
+          </label>
+          <Controller
+            control={control}
+            name="fitnessLevel"
+            render={({ field }) => (
+              <div className="flex gap-2">
+                {FITNESS_LEVELS.map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => field.onChange(lvl)}
+                    className={cn(
+                      "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
+                      field.value === lvl
+                        ? "bg-husrev-ember text-husrev-cream"
+                        : "bg-husrev-sand/40 text-gray-600 hover:bg-husrev-sand/70 dark:bg-white/[0.04] dark:text-gray-300",
+                    )}
+                  >
+                    {t(`sport.fitnessLevel.${lvl}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.profile.weeklyHours", "Haftalık hedef saat")}
+          </label>
+          <Controller
+            control={control}
+            name="weeklyHours"
+            render={({ field, fieldState }) => (
+              <div>
+                <input
+                  type="number"
+                  min={1}
+                  max={168}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  className="husrev-input"
+                />
+                {fieldState.error && (
+                  <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
+                )}
+              </div>
+            )}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.profile.activities", "Tercih edilen aktiviteler")}
+          </label>
+          <Controller
+            control={control}
+            name="preferredActivities"
+            render={({ field }) => (
+              <div className="flex flex-wrap gap-2">
+                {ACTIVITY_TYPES.map((a) => {
+                  const active = field.value.includes(a);
+                  return (
                     <button
-                      key={lvl}
+                      key={a}
                       type="button"
-                      onClick={() => field.onChange(lvl)}
+                      onClick={() =>
+                        field.onChange(
+                          active ? field.value.filter((v) => v !== a) : [...field.value, a],
+                        )
+                      }
                       className={cn(
-                        "flex-1 rounded-xl px-3 py-2 text-sm font-medium transition",
-                        field.value === lvl
-                          ? "bg-husrev-ember text-husrev-cream"
-                          : "bg-husrev-sand/40 text-gray-600 hover:bg-husrev-sand/70 dark:bg-white/[0.04] dark:text-gray-300",
+                        "rounded-full px-3 py-1.5 text-sm transition",
+                        active
+                          ? "bg-husrev-amber text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
                       )}
                     >
-                      {t(`sport.fitnessLevel.${lvl}`)}
+                      {t(`sport.activity.${a}`)}
                     </button>
-                  ))}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.profile.weeklyHours", "Haftalık hedef saat")}
-            </label>
-            <Controller
-              control={control}
-              name="weeklyHours"
-              render={({ field, fieldState }) => (
-                <div>
-                  <input
-                    type="number"
-                    min={1}
-                    max={168}
-                    value={field.value}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="husrev-input"
-                  />
-                  {fieldState.error && (
-                    <p className="mt-1.5 text-xs text-error-500">{fieldState.error.message}</p>
-                  )}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.profile.activities", "Tercih edilen aktiviteler")}
-            </label>
-            <Controller
-              control={control}
-              name="preferredActivities"
-              render={({ field }) => (
-                <div className="flex flex-wrap gap-2">
-                  {ACTIVITY_TYPES.map((a) => {
-                    const active = field.value.includes(a);
-                    return (
-                      <button
-                        key={a}
-                        type="button"
-                        onClick={() =>
-                          field.onChange(
-                            active ? field.value.filter((v) => v !== a) : [...field.value, a],
-                          )
-                        }
-                        className={cn(
-                          "rounded-full px-3 py-1.5 text-sm transition",
-                          active
-                            ? "bg-husrev-amber text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600",
-                        )}
-                      >
-                        {t(`sport.activity.${a}`)}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.profile.goals", "Hedefler")}
-            </label>
-            <Controller
-              control={control}
-              name="goals"
-              render={({ field }) => (
-                <textarea
-                  {...field}
-                  rows={2}
-                  className="husrev-input resize-none"
-                  placeholder={t("sport.profile.goalsPlaceholder", "Örn. 10km koşu, esneklik…")}
-                />
-              )}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
-              {t("sport.profile.notes", "Notlar")}
-            </label>
-            <Controller
-              control={control}
-              name="notes"
-              render={({ field }) => (
-                <textarea {...field} rows={2} className="husrev-input resize-none" />
-              )}
-            />
-          </div>
+                  );
+                })}
+              </div>
+            )}
+          />
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={update.isPending}
-            className="husrev-btn-ghost"
-          >
-            {t("common.cancel")}
-          </button>
-          <button type="submit" disabled={update.isPending} className="husrev-btn">
-            {update.isPending ? t("common.saving") : t("common.save")}
-          </button>
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.profile.goals", "Hedefler")}
+          </label>
+          <Controller
+            control={control}
+            name="goals"
+            render={({ field }) => (
+              <textarea
+                {...field}
+                rows={2}
+                className="husrev-input resize-none"
+                placeholder={t("sport.profile.goalsPlaceholder", "Örn. 10km koşu, esneklik…")}
+              />
+            )}
+          />
         </div>
-      </form>
-    </div>
+
+        <div className="space-y-1.5">
+          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            {t("sport.profile.notes", "Notlar")}
+          </label>
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field }) => (
+              <textarea {...field} rows={2} className="husrev-input resize-none" />
+            )}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={update.isPending}
+          className="husrev-btn-ghost"
+        >
+          {t("common.cancel")}
+        </button>
+        <button type="submit" disabled={update.isPending} className="husrev-btn">
+          {update.isPending ? t("common.saving") : t("common.save")}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

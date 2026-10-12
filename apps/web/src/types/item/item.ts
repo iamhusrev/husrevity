@@ -10,6 +10,8 @@ export interface ItemResponse {
   context: string | null;
   projectId: string | null;
   blockId: string | null;
+  /** Goal this item counts toward (absent on payloads from before goals existed). */
+  goalId?: string | null;
   scheduledAt: string | null;
   durationMin: number | null;
   dueAt: string | null;
@@ -32,6 +34,7 @@ export interface ItemRequest {
   context?: string | null;
   projectId?: string | null;
   blockId?: string | null;
+  goalId?: string | null;
   scheduledAt?: string | null;
   durationMin?: number | null;
   dueAt?: string | null;
@@ -48,6 +51,10 @@ export interface ItemListFilter {
   kind?: ItemKind;
   context?: string;
   status?: ItemStatus;
+  /** When true the API returns only unsorted open tasks (the inbox). */
+  inbox?: boolean;
+  /** Items that count toward this goal (direct, via linked projects and sub-goals). */
+  goalId?: string;
 }
 
 export interface CompleteItemRequest {

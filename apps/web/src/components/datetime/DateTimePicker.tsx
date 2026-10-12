@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { useTranslation } from "react-i18next";
 import { BiCalendar, BiChevronLeft, BiChevronRight, BiX } from "react-icons/bi";
+import { useEscapeLayer } from "@/hooks/useDialogLayer";
 import { getDateLocale } from "@/utils/i18n-date";
 
 export type DateTimePickerMode = "datetime" | "date";
@@ -167,7 +168,13 @@ export default function DateTimePicker({
     };
   }, [open, isMobile, place]);
 
-  // Close on outside click / Escape.
+  // Escape goes through the shared layer stack so the picker closes before a dialog it sits in.
+  useEscapeLayer(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, open);
+
+  // Close on outside click.
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -177,18 +184,9 @@ export default function DateTimePicker({
       }
       setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
     document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 

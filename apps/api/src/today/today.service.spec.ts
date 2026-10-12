@@ -56,16 +56,46 @@ describe('TodayService', () => {
       expect(result[1].dueAt).toBe(late.toISOString());
     });
 
-    it('maps rows to ItemSummaryDto shape', async () => {
+    it('maps rows to ItemSummaryDto shape including isRecurring and durationMin', async () => {
       const dueAt = new Date('2026-01-05T10:00:00Z');
       items.find.mockResolvedValueOnce([
-        { id: '10', title: 'Rapor teslim et', dueAt, status: 'open' } as Item,
+        {
+          id: '10',
+          title: 'Rapor teslim et',
+          dueAt,
+          status: 'open',
+          rrule: null,
+          durationMin: 45,
+        } as Item,
+        {
+          id: '11',
+          title: 'Her gün spor',
+          dueAt,
+          status: 'open',
+          rrule: 'FREQ=DAILY',
+          durationMin: null,
+        } as Item,
       ]);
 
       const result = await service.dueToday(ownerId);
 
       expect(result).toEqual([
-        { itemId: '10', title: 'Rapor teslim et', dueAt: dueAt.toISOString(), status: 'open' },
+        {
+          itemId: '10',
+          title: 'Rapor teslim et',
+          dueAt: dueAt.toISOString(),
+          status: 'open',
+          isRecurring: false,
+          durationMin: 45,
+        },
+        {
+          itemId: '11',
+          title: 'Her gün spor',
+          dueAt: dueAt.toISOString(),
+          status: 'open',
+          isRecurring: true,
+          durationMin: null,
+        },
       ]);
     });
 
@@ -77,7 +107,7 @@ describe('TodayService', () => {
   });
 
   describe('timeline', () => {
-    it('includes a non-recurring event scheduled today, excludes non-event kinds and events outside today', async () => {
+    it('includes non-recurring event and open task scheduled today, excludes events/tasks outside today, done tasks, recurring tasks, block tasks, and other kinds', async () => {
       const todayAt10 = DateTime.now()
         .setZone('Europe/Istanbul')
         .set({ hour: 10, minute: 0 })
@@ -109,12 +139,63 @@ describe('TodayService', () => {
         } as Item,
         {
           id: '3',
-          title: 'Bugünkü görev',
+          title: 'Bugünkü açık görev',
           kind: 'task',
+          status: 'open',
           rrule: null,
           blockId: null,
           scheduledAt: todayAt10,
-          durationMin: null,
+          durationMin: 45,
+        } as Item,
+        {
+          id: '4',
+          title: 'Tamamlanmış görev',
+          kind: 'task',
+          status: 'done',
+          rrule: null,
+          blockId: null,
+          scheduledAt: todayAt10,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '5',
+          title: 'Tekrarlayan görev',
+          kind: 'task',
+          status: 'open',
+          rrule: 'FREQ=DAILY',
+          blockId: null,
+          scheduledAt: todayAt10,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '6',
+          title: 'Bloklu görev',
+          kind: 'task',
+          status: 'open',
+          rrule: null,
+          blockId: '99',
+          scheduledAt: todayAt10,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '7',
+          title: 'Dünkü görev',
+          kind: 'task',
+          status: 'open',
+          rrule: null,
+          blockId: null,
+          scheduledAt: yesterday,
+          durationMin: 30,
+        } as Item,
+        {
+          id: '8',
+          title: 'Log kaydı',
+          kind: 'log',
+          status: 'open',
+          rrule: null,
+          blockId: null,
+          scheduledAt: todayAt10,
+          durationMin: 30,
         } as Item,
       ]);
 
@@ -127,6 +208,13 @@ describe('TodayService', () => {
           kind: 'event',
           scheduledAt: todayAt10.toISOString(),
           durationMin: 30,
+        },
+        {
+          itemId: '3',
+          title: 'Bugünkü açık görev',
+          kind: 'task',
+          scheduledAt: todayAt10.toISOString(),
+          durationMin: 45,
         },
       ]);
     });

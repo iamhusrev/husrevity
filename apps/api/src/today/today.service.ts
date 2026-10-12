@@ -40,12 +40,14 @@ export class TodayService {
         title: r.title,
         dueAt: effectiveAt(r)?.toISOString() ?? null,
         status: r.status,
+        isRecurring: Boolean(r.rrule),
+        durationMin: r.durationMin ?? null,
       }));
   }
 
   /**
-   * Today's event-kind items (Europe/Istanbul day), sorted by time. A
-   * recurring event's rrule is expanded to today's occurrence (if any);
+   * Today's event-kind items and open scheduled task-kind items (Europe/Istanbul day),
+   * sorted by time. A recurring event's rrule is expanded to today's occurrence (if any);
    * a blockId-linked item with no rrule of its own (e.g. a routine
    * activity) rides along with its recurring parent's occurrence date,
    * mirroring ItemService.list()'s exact merge pattern.
@@ -63,6 +65,25 @@ export class TodayService {
     const entries: TimelineEntryDto[] = [];
 
     for (const item of rows) {
+      if (
+        item.kind === 'task' &&
+        item.status === 'open' &&
+        !item.rrule &&
+        !item.blockId &&
+        item.scheduledAt &&
+        item.scheduledAt >= from &&
+        item.scheduledAt <= to
+      ) {
+        entries.push({
+          itemId: item.id,
+          title: item.title,
+          kind: item.kind,
+          scheduledAt: item.scheduledAt.toISOString(),
+          durationMin: item.durationMin,
+        });
+        continue;
+      }
+
       if (item.kind !== 'event' || item.rrule) continue;
       if (item.blockId && recurringEventIds.has(item.blockId)) continue;
       if (!item.scheduledAt) continue;

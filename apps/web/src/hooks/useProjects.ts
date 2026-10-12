@@ -22,6 +22,9 @@ const PROJECT_KEYS = {
   invites: (id: number) => ["project-invites", id] as const,
 };
 
+/** Goal progress counts items of linked projects, so project changes must refresh it. */
+const GOALS_KEY = ["goals"] as const;
+
 export function useProjects(filter?: ProjectFilter) {
   return useQuery({
     queryKey: PROJECT_KEYS.list(filter ?? "all"),
@@ -55,6 +58,7 @@ export function useUpdateProject() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: PROJECT_KEYS.all });
       qc.invalidateQueries({ queryKey: PROJECT_KEYS.detail(vars.id) });
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
     },
   });
 }
@@ -63,7 +67,10 @@ export function useDeleteProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => projectService.deleteProject(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: PROJECT_KEYS.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: PROJECT_KEYS.all });
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
+    },
   });
 }
 
@@ -71,7 +78,10 @@ export function useRestoreProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => projectService.restoreProject(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: PROJECT_KEYS.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: PROJECT_KEYS.all });
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
+    },
   });
 }
 
@@ -91,6 +101,7 @@ export function useCreateTask() {
       projectService.createTask(projectId, body),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.projectId) });
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
     },
   });
 }
@@ -125,6 +136,7 @@ export function useUpdateTask() {
         qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.projectId) });
       }
       qc.invalidateQueries({ queryKey: PROJECT_KEYS.task(vars.id) });
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
     },
   });
 }
@@ -137,6 +149,7 @@ export function useDeleteTask() {
       if (vars.projectId) {
         qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.projectId) });
       }
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
     },
   });
 }
@@ -149,6 +162,7 @@ export function useRestoreTask() {
       if (vars.projectId) {
         qc.invalidateQueries({ queryKey: PROJECT_KEYS.tasks(vars.projectId) });
       }
+      qc.invalidateQueries({ queryKey: GOALS_KEY });
     },
   });
 }

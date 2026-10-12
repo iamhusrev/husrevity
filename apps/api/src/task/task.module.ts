@@ -6,9 +6,16 @@ import { TaskController } from './task.controller';
 import { ProjectModule } from '../project/project.module';
 import { NotificationModule } from '../notification/notification.module';
 import { UserModule } from '../user/user.module';
+import { ItemMirrorModule } from '../item-mirror/item-mirror.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task]), ProjectModule, NotificationModule, UserModule],
+  imports: [
+    TypeOrmModule.forFeature([Task]),
+    ProjectModule,
+    NotificationModule,
+    UserModule,
+    ItemMirrorModule,
+  ],
   providers: [TaskService],
   controllers: [TaskController],
   exports: [TaskService],

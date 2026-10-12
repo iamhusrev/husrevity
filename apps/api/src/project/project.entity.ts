@@ -12,9 +12,13 @@ import { BaseEntity } from '../common/base.entity';
 @Entity('project')
 @Index('idx_project_owner', ['ownerId'])
 @Index('idx_project_owner_archived', ['ownerId', 'archived'])
+@Index('idx_project_goal', ['goalId'])
 export class Project extends BaseEntity {
   @Column({ name: 'owner_id', type: 'bigint' })
   ownerId!: string;
+
+  @Column({ name: 'goal_id', type: 'bigint', nullable: true })
+  goalId!: string | null;
 
   @Column({ type: 'varchar', length: 64 })
   code!: string;

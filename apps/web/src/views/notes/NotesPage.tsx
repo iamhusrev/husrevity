@@ -439,8 +439,16 @@ function ManageTagsModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal isOpen onClose={onClose} className="mx-4 my-6 w-full max-w-md p-6">
-      <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+    <Modal
+      isOpen
+      onClose={onClose}
+      labelledBy="manage-tags-title"
+      className="mx-4 my-6 w-full max-w-md p-6"
+    >
+      <h3
+        id="manage-tags-title"
+        className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90"
+      >
         {t("notes.manageTags")}
       </h3>
       <form onSubmit={add} className="mb-4 flex gap-2">
@@ -652,6 +660,7 @@ export default function NotesPage() {
       <DetailModal
         isOpen={editingId !== null}
         onClose={handleEditorClose}
+        label={t("notes.editorDialogLabel")}
         onExpand={
           editingId !== null
             ? () => router.push(editingId === "new" ? "/notes/new" : `/notes/${editingId}`)

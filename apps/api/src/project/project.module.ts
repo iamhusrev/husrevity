@@ -13,12 +13,14 @@ import { ProjectInviteController } from './project-invite.controller';
 import { ProjectInviteAdminController } from './project-invite-admin.controller';
 import { UserModule } from '../user/user.module';
 import { NotificationModule } from '../notification/notification.module';
+import { GoalModule } from '../goal/goal.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Project, ProjectMember, ProjectInvite]),
     UserModule,
     NotificationModule,
+    GoalModule,
   ],
   providers: [ProjectService, ProjectAccessService, ProjectMemberService, ProjectInviteService],
   controllers: [

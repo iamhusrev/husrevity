@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Repository } from 'typeorm';
 import { ReminderList } from './reminder-list.entity';
@@ -6,6 +6,7 @@ import { Reminder } from './reminder.entity';
 import { ApiException } from '../common/api.exception';
 import { NotificationService } from '../notification/notification.service';
 import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
+import { ItemMirrorService } from '../item-mirror/item-mirror.service';
 import {
   ReminderListRequestDto,
   ReminderListResponseDto,
@@ -16,11 +17,14 @@ import {
 
 @Injectable()
 export class ReminderService {
+  private readonly logger = new Logger(ReminderService.name);
+
   constructor(
     @InjectRepository(ReminderList) private readonly lists: Repository<ReminderList>,
     @InjectRepository(Reminder) private readonly reminders: Repository<Reminder>,
     private readonly dataSource: DataSource,
     private readonly notifications: NotificationService,
+    @Optional() private readonly mirror?: ItemMirrorService,
   ) {}
 
   // ─── Lists ──────────────────────────────────────────────────────────────────
@@ -138,6 +142,7 @@ export class ReminderService {
     });
     const saved = await this.reminders.save(r);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror?.upsertFromReminder(saved));
     return ReminderResponseDto.from(saved);
   }
 
@@ -161,6 +166,7 @@ export class ReminderService {
     }
     const saved = await this.reminders.save(r);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror?.upsertFromReminder(saved));
     return ReminderResponseDto.from(saved);
   }
 
@@ -169,6 +175,7 @@ export class ReminderService {
     r.completedAt = r.completedAt ? null : new Date();
     const saved = await this.reminders.save(r);
     await this.syncNotification(saved);
+    await this.safeMirror(() => this.mirror?.upsertFromReminder(saved));
     return ReminderResponseDto.from(saved);
   }
 
@@ -176,6 +183,7 @@ export class ReminderService {
     const r = await this.requireReminder(ownerId, id);
     await this.notifications.cancelForSource(ownerId, 'reminder', r.id);
     await this.reminders.softRemove(r);
+    await this.safeMirror(() => this.mirror?.softDeleteMirror('reminder', r.id, r.ownerId));
   }
 
   async restoreReminder(ownerId: string, id: string): Promise<ReminderResponseDto> {
@@ -184,6 +192,7 @@ export class ReminderService {
     await this.reminders.restore({ id, ownerId });
     const restored = await this.requireReminder(ownerId, id);
     await this.syncNotification(restored);
+    await this.safeMirror(() => this.mirror?.upsertFromReminder(restored));
     return ReminderResponseDto.from(restored);
   }
 
@@ -244,5 +253,13 @@ export class ReminderService {
     const r = await this.reminders.findOne({ where: { id, ownerId } });
     if (!r) throw ApiException.notFound('Reminder not found');
     return r;
+  }
+
+  private async safeMirror(fn: () => Promise<unknown> | unknown): Promise<void> {
+    try {
+      await fn();
+    } catch (e) {
+      this.logger.warn(`Item mirror hook failed: ${(e as Error).message}`);
+    }
   }
 }

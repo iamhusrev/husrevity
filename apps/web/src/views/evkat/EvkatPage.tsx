@@ -25,6 +25,7 @@ import { parseAxiosError } from "@/utils/handleError";
 import { cn } from "@/utils/utils";
 import { BiPlus, BiTrash, BiPencil, BiChevronUp, BiChevronDown, BiX } from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
+import Dialog from "@/components/ui/Dialog";
 
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
@@ -467,14 +468,15 @@ function EditSegmentModal({
   const isPending = create.isPending || update.isPending || remove.isPending;
 
   return (
-    <div
-      className="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+    <>
+      <Dialog
+        open={true}
+        onClose={onClose}
+        overlayClassName="fixed inset-0 z-[100000] flex items-center justify-center bg-husrev-ink/40 backdrop-blur-sm p-4"
+        panelClassName="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl husrev-modal grain p-5 sm:p-7 husrev-settle"
+        panelAs="form"
+        panelProps={{ onSubmit: handleSubmit }}
+        labelledBy="evkat-segment-modal-title"
       >
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
@@ -483,7 +485,10 @@ function EditSegmentModal({
                 ? t("evkat.modal.editKicker", "Düzenle")
                 : t("evkat.modal.newKicker", "Yeni vakit")}
             </span>
-            <h3 className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
+            <h3
+              id="evkat-segment-modal-title"
+              className="text-2xl font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream"
+            >
               {initial
                 ? t("evkat.modal.editTitle", "Vakti düzenle")
                 : t("evkat.modal.createTitle", "Yeni vakit")}
@@ -639,7 +644,7 @@ function EditSegmentModal({
                 : t("common.create", "Oluştur")}
           </button>
         </div>
-      </form>
+      </Dialog>
 
       <DeleteConfirmModal
         isOpen={confirmingDelete}
@@ -652,7 +657,7 @@ function EditSegmentModal({
           "Bu vakti ve içindeki işleri silmek istediğine emin misin?",
         )}
       />
-    </div>
+    </>
   );
 }
 

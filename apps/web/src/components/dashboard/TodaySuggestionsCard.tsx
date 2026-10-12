@@ -8,9 +8,10 @@
  * scale (instrument-serif for the question, sans for content), and 1–3
  * suggestion cards keyed to a Mode (Görev/Hobi) + Count (1·3) toggle.
  *
- * Cost discipline: mounts → one call; mode/count changes → one call each;
- * Refresh → manual call. Backend caches identical context for 5 min so
- * dashboard revisits typically don't re-spend.
+ * Cost discipline: nothing is fetched on mount. The user triggers each call
+ * explicitly; the last result is kept for the browser session, keyed by
+ * user, mode, count and active block, so revisiting the dashboard does not
+ * re-spend. The backend also caches identical context for 5 min.
  */
 
 import Link from "next/link";
@@ -19,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { BiRefresh } from "react-icons/bi";
 import { HiSparkles } from "react-icons/hi2";
 import { useAiSuggestions } from "@/hooks/useAi";
+import { useAuth } from "@/providers/AuthProvider";
 import type {
   SuggestionItem,
   SuggestionKind,
@@ -58,6 +60,60 @@ function sourceHref(ref: SuggestionSourceRef): string {
   }
 }
 
+const SESSION_CACHE_KEY = "husrevity:today_suggestions_cache";
+
+type SuggestionContext = {
+  mode: SuggestionMode;
+  count: Count;
+  activeBlockTitle: string | null;
+};
+
+type SuggestionCacheEntry = SuggestionContext & { items: SuggestionItem[] };
+
+/** Scoped per user so a second account in the same tab never sees another user's suggestions. */
+function cacheKeyFor(userId: unknown): string {
+  return `${SESSION_CACHE_KEY}:${userId ?? "anon"}`;
+}
+
+function sameContext(a: SuggestionContext, b: SuggestionContext): boolean {
+  return a.mode === b.mode && a.count === b.count && a.activeBlockTitle === b.activeBlockTitle;
+}
+
+function readSessionCache(key: string): SuggestionCacheEntry | null {
+  try {
+    if (typeof window === "undefined" || !window.sessionStorage) return null;
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      Array.isArray(parsed.items) &&
+      typeof parsed.mode === "string" &&
+      typeof parsed.count === "number"
+    ) {
+      return {
+        mode: parsed.mode,
+        count: parsed.count,
+        activeBlockTitle: parsed.activeBlockTitle ?? null,
+        items: parsed.items,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionCache(key: string, entry: SuggestionCacheEntry): void {
+  try {
+    if (typeof window === "undefined" || !window.sessionStorage) return;
+    window.sessionStorage.setItem(key, JSON.stringify(entry));
+  } catch {
+    // Ignore quota or private browsing access restrictions.
+  }
+}
+
 export default function TodaySuggestionsCard({
   activeBlockTitle,
 }: {
@@ -65,21 +121,31 @@ export default function TodaySuggestionsCard({
   activeBlockTitle?: string;
 } = {}) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [mode, setMode] = useState<SuggestionMode>("task");
   const [count, setCount] = useState<Count>(3);
+  const storageKey = cacheKeyFor(user?.id);
+  const [cache, setCache] = useState<SuggestionCacheEntry | null>(() =>
+    readSessionCache(storageKey),
+  );
 
   const suggest = useAiSuggestions();
-  const suggestNow = () => suggest.mutate({ mode, count, activeBlockTitle });
+  const requested: SuggestionContext = { mode, count, activeBlockTitle: activeBlockTitle ?? null };
+  const suggestNow = () => {
+    suggest.mutate(
+      { mode, count, activeBlockTitle },
+      {
+        onSuccess: (res) => {
+          const entry: SuggestionCacheEntry = { ...requested, items: res?.data ?? [] };
+          setCache(entry);
+          writeSessionCache(storageKey, entry);
+        },
+      },
+    );
+  };
 
-  // Auto-call on mount + whenever mode/count/the active block changes.
-  // Suggest is referentially stable enough for our purposes; we deliberately
-  // depend on mode/count/activeBlockTitle only to avoid loop on every render.
-  useEffect(() => {
-    suggestNow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, count, activeBlockTitle]);
-
-  const items: SuggestionItem[] = suggest.data?.data ?? [];
+  // A cached result is only shown for the mode/count/block it was generated for.
+  const items: SuggestionItem[] = cache && sameContext(cache, requested) ? cache.items : [];
   const isLoading = suggest.isPending;
   const isError = suggest.isError;
 

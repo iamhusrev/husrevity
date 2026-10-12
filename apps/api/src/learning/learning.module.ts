@@ -14,5 +14,6 @@ import { LearningTopic } from './learning-topic.entity';
   ],
   providers: [LearningService],
   controllers: [LearningController],
+  exports: [LearningService],
 })
 export class LearningModule {}

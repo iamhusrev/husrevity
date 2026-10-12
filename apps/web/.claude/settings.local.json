@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)",
+      "Bash(find /c/Users/iamhu/Projects/nakliya-ui/src -name *ompanier* -o -name *company*)",
+      "Bash(find /Users/husrev/Projects/nakliya-ui -type d -name *settings* -o -type d -name *ayarlar* -o -type d -name *setting* -o -type d -name *config*)",
+      "Bash(find /Users/husrev/Projects/nakliya-ui -type f \\\\\\(-name *mobiliz* -o -name *Mobiliz* \\\\\\))",
+      "Bash(ls /Users/husrev/Projects/nakliya-ui/src/app/\\\\\\(admin\\\\\\)/settings/)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in list\\(d.keys\\(\\)\\)[-5:] if k in d}, ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(npm run:*)",
+      "Bash(grep -rn \"VehicleStepperSelect\\\\|vehicleId\\\\|initialVehicle\" /Users/husrev/Projects/nakliya-ui/src/views/purchase* /Users/husrev/Projects/nakliya-ui/src/views/invoices*)",
+      "Bash(xargs cat:*)"
+    ]
+  }
+}

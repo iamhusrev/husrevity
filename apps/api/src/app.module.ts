@@ -25,6 +25,8 @@ import { AdminModule } from './admin/admin.module';
 import { SportModule } from './sport/sport.module';
 import { LearningModule } from './learning/learning.module';
 import { ItemModule } from './item/item.module';
+import { GoalModule } from './goal/goal.module';
+import { ChangeSetModule } from './change-set/change-set.module';
 import { TodayModule } from './today/today.module';
 import { SyncModule } from './sync/sync.module';
 import { DeviceModule } from './device/device.module';
@@ -33,6 +35,8 @@ import { McpModule } from './mcp/mcp.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { SlackModule } from './slack/slack.module';
+import { ItemMirrorModule } from './item-mirror/item-mirror.module';
+import { NoteLinkModule } from './note-link/note-link.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -49,6 +53,7 @@ import { HealthController } from './common/health.controller';
     TaskModule,
     CalendarModule,
     ReminderModule,
+    ItemMirrorModule,
     VaultModule,
     AiModule,
     NotificationModule,
@@ -59,6 +64,8 @@ import { HealthController } from './common/health.controller';
     SportModule,
     LearningModule,
     ItemModule,
+    GoalModule,
+    ChangeSetModule,
     TodayModule,
     SyncModule,
     DeviceModule,
@@ -67,6 +74,7 @@ import { HealthController } from './common/health.controller';
     IntegrationsModule,
     TelegramModule,
     SlackModule,
+    NoteLinkModule,
   ],
   controllers: [HealthController],
   providers: [

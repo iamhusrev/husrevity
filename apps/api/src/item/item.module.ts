@@ -8,6 +8,7 @@ import { ItemController } from './item.controller';
 import { ProjectModule } from '../project/project.module';
 import { NotificationModule } from '../notification/notification.module';
 import { IntegrationsModule } from '../integrations/integrations.module';
+import { GoalModule } from '../goal/goal.module';
 import { IdempotencyKey } from '../common/idempotency-key.entity';
 import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
 
@@ -17,6 +18,7 @@ import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
     ProjectModule,
     NotificationModule,
     IntegrationsModule,
+    GoalModule,
   ],
   providers: [ItemService, ItemRecurrenceService, IdempotencyInterceptor],
   controllers: [ItemController],

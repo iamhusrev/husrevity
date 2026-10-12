@@ -15,6 +15,7 @@ import FormFieldTextarea from "@/components/form/FormFieldTextarea";
 import FormFieldCheckbox from "@/components/form/FormFieldCheckbox";
 import { useCreateNote, useNote, useNoteTags, useUpdateNote } from "@/hooks/useNotes";
 import { alertStore } from "@/stores/alert-store";
+import NoteLinksPanel from "./NoteLinksPanel";
 import { parseAxiosError } from "@/utils/handleError";
 
 interface Props {
@@ -200,101 +201,114 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         <PageBreadcrumb pageTitle={heading} />
       )}
 
-      <form onSubmit={handleSubmit(handleSave)} className="space-y-5">
-        <FormFieldText control={control} name="title" label={t("notes.field.title")} required />
+      {/* Links sit below the form on small screens and in a side column from xl up. */}
+      <div className="space-y-6 xl:flex xl:items-start xl:gap-8 xl:space-y-0">
+        <form onSubmit={handleSubmit(handleSave)} className="min-w-0 space-y-5 xl:flex-1">
+          <FormFieldText control={control} name="title" label={t("notes.field.title")} required />
 
-        <div className="relative">
-          <FormFieldTextarea
-            control={control}
-            name="bodyMarkdown"
-            label={t("notes.field.body")}
-            rows={14}
-          />
-          <button
-            type="button"
-            onClick={() => setFocus("bodyMarkdown")}
-            title={t("notes.dictateFocusTooltip")}
-            aria-label={t("notes.dictateFocusTooltip")}
-            className="absolute right-0 top-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-brand-500 dark:hover:bg-gray-800"
-          >
-            <BiMicrophone size={16} />
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-6">
-          <FormFieldCheckbox control={control} name="pinned" label={t("notes.field.pinned")} />
-          <FormFieldCheckbox control={control} name="archived" label={t("notes.field.archived")} />
-        </div>
-
-        <div>
-          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t("notes.field.color")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {NOTE_COLORS.map((c) => {
-              const isNone = c === "#FFFFFF";
-              const selected = (watch("colorHex") ?? null) === (isNone ? null : c);
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setValue("colorHex", isNone ? null : c, { shouldDirty: true })}
-                  className={`h-8 w-8 rounded-full border transition hover:scale-110 ${
-                    selected
-                      ? "ring-2 ring-offset-2 ring-husrev-ember ring-offset-white dark:ring-offset-husrev-shadow"
-                      : "border-gray-200 dark:border-gray-700"
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={isNone ? t("notes.colorNone") : c}
-                />
-              );
-            })}
+          <div className="relative">
+            <FormFieldTextarea
+              control={control}
+              name="bodyMarkdown"
+              label={t("notes.field.body")}
+              rows={14}
+            />
+            <button
+              type="button"
+              onClick={() => setFocus("bodyMarkdown")}
+              title={t("notes.dictateFocusTooltip")}
+              aria-label={t("notes.dictateFocusTooltip")}
+              className="absolute right-0 top-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-brand-500 dark:hover:bg-gray-800"
+            >
+              <BiMicrophone size={16} />
+            </button>
           </div>
-        </div>
 
-        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-6">
+            <FormFieldCheckbox control={control} name="pinned" label={t("notes.field.pinned")} />
+            <FormFieldCheckbox
+              control={control}
+              name="archived"
+              label={t("notes.field.archived")}
+            />
+          </div>
+
           <div>
             <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t("notes.field.tags")}
+              {t("notes.field.color")}
             </p>
             <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => {
-                const on = selectedTagIds.includes(tag.id);
+              {NOTE_COLORS.map((c) => {
+                const isNone = c === "#FFFFFF";
+                const selected = (watch("colorHex") ?? null) === (isNone ? null : c);
                 return (
                   <button
-                    key={tag.id}
+                    key={c}
                     type="button"
-                    onClick={() => toggleTag(tag.id)}
-                    className={
-                      "rounded-full px-3 py-1 text-xs transition " +
-                      (on
-                        ? "bg-brand-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")
-                    }
-                  >
-                    #{tag.name}
-                  </button>
+                    onClick={() => setValue("colorHex", isNone ? null : c, { shouldDirty: true })}
+                    className={`h-8 w-8 rounded-full border transition hover:scale-110 ${
+                      selected
+                        ? "ring-2 ring-offset-2 ring-husrev-ember ring-offset-white dark:ring-offset-husrev-shadow"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                    style={{ backgroundColor: c }}
+                    aria-label={isNone ? t("notes.colorNone") : c}
+                  />
                 );
               })}
             </div>
           </div>
-        )}
 
-        <input type="hidden" {...register("tagIds")} />
+          {tags.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t("notes.field.tags")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => {
+                  const on = selectedTagIds.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => toggleTag(tag.id)}
+                      className={
+                        "rounded-full px-3 py-1 text-xs transition " +
+                        (on
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")
+                      }
+                    >
+                      #{tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-        <div className="flex gap-3">
-          <Button type="submit" size="sm" disabled={createNote.isPending || updateNote.isPending}>
-            {createNote.isPending || updateNote.isPending ? t("common.saving") : t("common.save")}
-          </Button>
-          <button
-            type="button"
-            onClick={() => (onCancel ? onCancel() : router.push("/notes"))}
-            className="rounded-xl border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            {t("common.cancel")}
-          </button>
-        </div>
-      </form>
+          <input type="hidden" {...register("tagIds")} />
+
+          <div className="flex gap-3">
+            <Button type="submit" size="sm" disabled={createNote.isPending || updateNote.isPending}>
+              {createNote.isPending || updateNote.isPending ? t("common.saving") : t("common.save")}
+            </Button>
+            <button
+              type="button"
+              onClick={() => (onCancel ? onCancel() : router.push("/notes"))}
+              className="rounded-xl border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              {t("common.cancel")}
+            </button>
+          </div>
+        </form>
+
+        {!isNew && id ? (
+          <div className="xl:w-80 xl:shrink-0">
+            <NoteLinksPanel noteId={String(id)} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

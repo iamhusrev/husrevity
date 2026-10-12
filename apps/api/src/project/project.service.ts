@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Project } from './project.entity';
 import { ProjectMember, ProjectRole } from './project-member.entity';
 import { ProjectAccessService } from './project-access.service';
 import { ApiException } from '../common/api.exception';
 import { ProjectRequestDto, ProjectResponseDto, ProjectUpdateRequestDto } from './dto/project-dtos';
+import { Goal } from '../goal/goal.entity';
+import { GoalService } from '../goal/goal.service';
+import { isValidNumericId } from '../common/numeric-id.pipe';
 
 type ProjectListFilter = 'all' | 'mine' | 'shared';
 
@@ -17,6 +20,7 @@ interface ProjectListRow {
   status: string;
   start_date: string | null;
   end_date: string | null;
+  goal_id: string | null;
   pinned: boolean;
   archived: boolean;
   created_at: Date;
@@ -38,6 +42,7 @@ export class ProjectService {
     @InjectRepository(ProjectMember) private readonly members: Repository<ProjectMember>,
     private readonly access: ProjectAccessService,
     private readonly dataSource: DataSource,
+    @Optional() private readonly goalService?: GoalService,
   ) {}
 
   async list(userId: string, filter?: ProjectListFilter): Promise<ProjectResponseDto[]> {
@@ -85,6 +90,10 @@ export class ProjectService {
       throw ApiException.conflict(`Project code "${req.code}" already exists`);
     }
 
+    if (req.goalId) {
+      await this.validateGoal(ownerId, req.goalId);
+    }
+
     const saved = await this.dataSource.transaction(async (em) => {
       const p = em.getRepository(Project).create({
         ownerId,
@@ -94,6 +103,7 @@ export class ProjectService {
         status: req.status ?? 'ACTIVE',
         startDate: req.startDate ?? null,
         endDate: req.endDate ?? null,
+        goalId: req.goalId ?? null,
       });
       const savedProject = await em.getRepository(Project).save(p);
       const member = em.getRepository(ProjectMember).create({
@@ -117,6 +127,17 @@ export class ProjectService {
     const { project: p, role } = await this.access.requireAccess(userId, projectId, 'EDITOR');
     if (req.archived !== undefined && role !== 'OWNER') {
       throw ApiException.forbidden('Only the project owner can archive this project');
+    }
+    if (req.goalId !== undefined && role !== 'OWNER') {
+      throw ApiException.forbidden('Only the project owner can change the project goal');
+    }
+    if (req.goalId !== undefined) {
+      if (req.goalId) {
+        await this.validateGoal(p.ownerId, req.goalId);
+        p.goalId = req.goalId;
+      } else {
+        p.goalId = null;
+      }
     }
     if (req.name !== undefined) p.name = req.name;
     if (req.description !== undefined) p.description = req.description ?? null;
@@ -167,6 +188,7 @@ export class ProjectService {
       status: row.status,
       startDate: row.start_date,
       endDate: row.end_date,
+      goalId: row.goal_id ?? null,
       pinned: row.pinned,
       archived: row.archived,
       createdAt: row.created_at,
@@ -192,7 +214,28 @@ export class ProjectService {
       await this.dataSource.query(`SELECT first_name, last_name FROM app_user WHERE id = $1`, [
         ownerId,
       ]);
-    if (!owner.length) return null;
+    if (!owner || !owner.length) return null;
     return [owner[0].first_name, owner[0].last_name].filter(Boolean).join(' ') || null;
+  }
+
+  private async validateGoal(
+    ownerId: string,
+    goalId: string,
+    manager?: EntityManager,
+  ): Promise<void> {
+    if (this.goalService) {
+      await this.goalService.validateLiveGoal(ownerId, goalId, manager);
+      return;
+    }
+    if (!isValidNumericId(goalId)) {
+      throw ApiException.notFound('Goal not found');
+    }
+    const repo = manager ? manager.getRepository(Goal) : this.dataSource.getRepository(Goal);
+    const goal = await repo.findOne({
+      where: { id: goalId, ownerId },
+    });
+    if (!goal) {
+      throw ApiException.notFound('Goal not found');
+    }
   }
 }

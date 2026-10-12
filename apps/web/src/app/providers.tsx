@@ -10,6 +10,8 @@ import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { SidebarProvider } from "@/providers/SidebarContext";
 import { ThemeProvider } from "@/providers/ThemeContext";
 
+import { applyStoredLanguage } from "@/utils/language";
+
 /**
  * Keeps <html lang> in sync with the active i18n language and registers the
  * service worker for PWA install/offline. Lives inside I18nProvider so it can
@@ -18,6 +20,10 @@ import { ThemeProvider } from "@/providers/ThemeContext";
  */
 function ClientBootstrap() {
   const { i18n } = useTranslation();
+
+  useEffect(() => {
+    applyStoredLanguage(i18n);
+  }, [i18n]);
 
   useEffect(() => {
     if (i18n.language) {
