@@ -20,6 +20,7 @@ export const ITEM_STATUSES: ItemStatus[] = ['open', 'done', 'cancelled'];
 export const ITEM_SOURCES: ItemSource[] = [
   'web',
   'ios',
+  'macos',
   'mcp',
   'telegram',
   'gmail',

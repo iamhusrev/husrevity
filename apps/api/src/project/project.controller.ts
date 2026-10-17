@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,10 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
+import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
+import { parseIfMatch } from '../common/if-match';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { ProjectRequestDto, ProjectResponseDto, ProjectUpdateRequestDto } from './dto/project-dtos';
@@ -42,6 +46,7 @@ export class ProjectController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(IdempotencyInterceptor)
   create(
     @CurrentUser() u: AuthenticatedUser,
     @Body() body: ProjectRequestDto,
@@ -50,21 +55,25 @@ export class ProjectController {
   }
 
   @Put(':projectId')
+  @UseInterceptors(IdempotencyInterceptor)
   update(
     @CurrentUser() u: AuthenticatedUser,
     @Param('projectId', NumericIdPipe) projectId: string,
     @Body() body: ProjectUpdateRequestDto,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<ProjectResponseDto> {
-    return this.projects.update(u.userId, projectId, body);
+    return this.projects.update(u.userId, projectId, body, parseIfMatch(ifMatch));
   }
 
   @Delete(':projectId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseInterceptors(IdempotencyInterceptor)
   remove(
     @CurrentUser() u: AuthenticatedUser,
     @Param('projectId', NumericIdPipe) projectId: string,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<void> {
-    return this.projects.delete(u.userId, projectId);
+    return this.projects.delete(u.userId, projectId, parseIfMatch(ifMatch));
   }
 
   @Patch(':projectId/restore')

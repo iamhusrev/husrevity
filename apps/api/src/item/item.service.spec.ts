@@ -24,6 +24,7 @@ type MockOccurrenceRepo = {
   create: jest.Mock;
   save: jest.Mock;
   delete: jest.Mock;
+  softRemove: jest.Mock;
 };
 
 function makeQueryBuilder(rows: Item[]) {
@@ -71,6 +72,7 @@ describe('ItemService', () => {
       create: jest.fn((v) => v),
       save: jest.fn((v) => Promise.resolve(v)),
       delete: jest.fn().mockResolvedValue({ affected: 1 }),
+      softRemove: jest.fn((v) => Promise.resolve(v)),
     };
     access = { requireAccess: jest.fn() };
     notifications = { cancelForSource: jest.fn(), enqueue: jest.fn() };
@@ -1127,19 +1129,69 @@ describe('ItemService', () => {
     });
   });
 
+  describe('delete / complete with ifMatchMs', () => {
+    const row = () =>
+      ({
+        id: '10',
+        ownerId,
+        projectId: null,
+        rrule: null,
+        status: 'open',
+        payload: {},
+        updatedAt: NOW,
+        createdAt: NOW,
+      }) as Item;
+
+    it('delete throws 409 and removes nothing when ifMatchMs is stale', async () => {
+      items.findOne.mockResolvedValueOnce(row());
+
+      await expect(
+        service.delete(ownerId, '10', undefined, NOW.getTime() - 1000),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(items.softRemove).not.toHaveBeenCalled();
+    });
+
+    it('delete proceeds when ifMatchMs equals updatedAt', async () => {
+      items.findOne.mockResolvedValueOnce(row());
+
+      await service.delete(ownerId, '10', undefined, NOW.getTime());
+
+      expect(items.softRemove).toHaveBeenCalled();
+    });
+
+    it('complete throws 409 and does not save when ifMatchMs is stale', async () => {
+      items.findOne.mockResolvedValueOnce(row());
+
+      await expect(
+        service.complete(ownerId, '10', {}, undefined, NOW.getTime() - 1000),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(items.save).not.toHaveBeenCalled();
+    });
+
+    it('complete proceeds when ifMatchMs equals updatedAt', async () => {
+      items.findOne.mockResolvedValueOnce(row());
+
+      const result = await service.complete(ownerId, '10', {}, undefined, NOW.getTime());
+
+      expect(result.status).toBe('done');
+    });
+  });
+
   describe('removeOccurrence', () => {
-    it('deletes the occurrence row for the owner', async () => {
-      occurrences.findOne.mockResolvedValueOnce({
+    it('soft-removes the occurrence so sync clients receive a tombstone', async () => {
+      const row = {
         id: 'occ-1',
         ownerId,
         itemId: '10',
         occursOn: '2026-01-05',
         status: 'done',
-      });
+      };
+      occurrences.findOne.mockResolvedValueOnce(row);
 
       await service.removeOccurrence(ownerId, 'occ-1');
 
-      expect(occurrences.delete).toHaveBeenCalledWith({ id: 'occ-1' });
+      expect(occurrences.softRemove).toHaveBeenCalledWith(row);
+      expect(occurrences.delete).not.toHaveBeenCalled();
     });
 
     it('throws 404 when occurrence belongs to another owner', async () => {
@@ -1151,6 +1203,7 @@ describe('ItemService', () => {
       });
 
       await expect(service.removeOccurrence(ownerId, 'occ-1')).rejects.toThrow(ApiException);
+      expect(occurrences.softRemove).not.toHaveBeenCalled();
       expect(occurrences.delete).not.toHaveBeenCalled();
     });
   });

@@ -1,8 +1,11 @@
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../common/base.entity';
 
 @Entity('note_tag')
-@Unique('uq_note_tag_owner_name', ['ownerId', 'name'])
+@Index('uq_note_tag_owner_name_live', ['ownerId', 'name'], {
+  unique: true,
+  where: '"deleted_at" IS NULL',
+})
 export class NoteTag extends BaseEntity {
   @Index('idx_note_tag_owner')
   @Column({ name: 'owner_id', type: 'bigint' })

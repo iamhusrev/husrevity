@@ -54,7 +54,13 @@ describe('GoalController contract', () => {
 
     const module = await Test.createTestingModule({
       controllers: [GoalController],
-      providers: [{ provide: GoalService, useValue: service }],
+      providers: [
+        { provide: GoalService, useValue: service },
+        {
+          provide: 'IdempotencyKeyRepository',
+          useValue: { findOne: jest.fn(), create: jest.fn(), save: jest.fn() },
+        },
+      ],
     }).compile();
 
     controller = module.get(GoalController);
@@ -98,7 +104,13 @@ describe('GoalController contract', () => {
   it('PATCH /api/goals/:id updates goal', async () => {
     const res = await controller.update(user, '10', { title: 'Updated' });
     expect(res).toEqual(sampleGoal);
-    expect(service.update).toHaveBeenCalledWith('1', '10', { title: 'Updated' });
+    expect(service.update).toHaveBeenCalledWith(
+      '1',
+      '10',
+      { title: 'Updated' },
+      undefined,
+      undefined,
+    );
   });
 
   it('PATCH /api/goals/:id rejects id exceeding int64 max with 400', async () => {
@@ -114,7 +126,7 @@ describe('GoalController contract', () => {
 
   it('DELETE /api/goals/:id removes goal', async () => {
     await controller.remove(user, '10');
-    expect(service.delete).toHaveBeenCalledWith('1', '10');
+    expect(service.delete).toHaveBeenCalledWith('1', '10', undefined, undefined);
   });
 
   it('DELETE /api/goals/:id rejects id exceeding int64 max with 400', async () => {

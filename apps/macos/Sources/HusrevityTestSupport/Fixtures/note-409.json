@@ -1,0 +1,6 @@
+{
+  "success": false,
+  "message": "Note has been modified since you last fetched it (current updatedAt: 2026-10-17T21:02:07.345Z)",
+  "code": 409,
+  "data": null
+}

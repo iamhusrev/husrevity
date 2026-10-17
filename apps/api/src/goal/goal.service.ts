@@ -11,6 +11,7 @@ import {
   isRealIsoDate,
 } from './dto/goal-dtos';
 import { ApiException } from '../common/api.exception';
+import { assertIfMatch } from '../common/if-match';
 import { isValidNumericId } from '../common/numeric-id.pipe';
 
 const HORIZON_RANKS: Record<GoalHorizon, number> = {
@@ -382,6 +383,7 @@ export class GoalService {
     id: string,
     req: GoalUpdateRequestDto,
     manager?: EntityManager,
+    ifMatchMs?: number,
   ): Promise<GoalResponseDto> {
     if (!isValidNumericId(id)) {
       throw ApiException.badRequest('Invalid goal id: must be numeric');
@@ -394,6 +396,7 @@ export class GoalService {
     if (!goal) {
       throw ApiException.notFound('Goal not found');
     }
+    assertIfMatch(goal.updatedAt, ifMatchMs, 'Goal');
 
     const nextHorizon = req.horizon ?? goal.horizon;
     const nextStart =
@@ -494,6 +497,7 @@ export class GoalService {
     ownerId: string,
     id: string,
     manager?: EntityManager,
+    ifMatchMs?: number,
   ): Promise<void> {
     if (!isValidNumericId(id)) {
       throw ApiException.badRequest('Invalid goal id: must be numeric');
@@ -506,6 +510,7 @@ export class GoalService {
     if (!goal) {
       throw ApiException.notFound('Goal not found');
     }
+    assertIfMatch(goal.updatedAt, ifMatchMs, 'Goal');
 
     // Soft delete leaves children in place. Children whose parent is soft-deleted
     // simply have no live parent and the list treats them as roots.

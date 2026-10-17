@@ -2,7 +2,7 @@ import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } fr
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { concatMap } from 'rxjs/operators';
 import type { Request, Response } from 'express';
 import { IdempotencyKey } from './idempotency-key.entity';
 import { AuthenticatedUser } from './current-user.decorator';
@@ -35,28 +35,32 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const existing = await this.keys.findOne({ where: { ownerId, key } });
     if (existing) {
       context.switchToHttp().getResponse<Response>().status(existing.responseStatus);
-      return of(existing.responseBody);
+      // 204 was stored as the `{}` placeholder (see below); replay it as the empty response it was.
+      return of(existing.responseStatus === 204 ? undefined : existing.responseBody);
     }
 
     return next.handle().pipe(
-      tap((body) => {
+      // The key is persisted BEFORE the response goes out: a client that retries the moment it
+      // gets the response (or after a timeout) must find the key, or the write is applied twice.
+      // A failed save only costs the replay guarantee, never the response.
+      concatMap(async (body) => {
         const res = context.switchToHttp().getResponse<Response>();
-        this.keys
-          .save(
+        try {
+          await this.keys.save(
             this.keys.create({
               ownerId,
               key,
               method: req.method,
               path: req.path,
               responseStatus: res.statusCode,
-              responseBody: body ?? null,
+              // response_body is JSONB NOT NULL, and a bodiless response (DELETE 204) has none.
+              responseBody: body ?? {},
             }),
-          )
-          .catch((err) =>
-            this.logger.warn(
-              `Failed to persist idempotency key for ${req.method} ${req.path}: ${err}`,
-            ),
           );
+        } catch (err) {
+          this.logger.warn(`Failed to persist idempotency key for ${req.method} ${req.path}: ${err}`);
+        }
+        return body;
       }),
     );
   }

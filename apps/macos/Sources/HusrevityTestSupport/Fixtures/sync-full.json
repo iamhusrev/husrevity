@@ -1,0 +1,133 @@
+{
+  "success": true,
+  "message": "OK",
+  "code": 200,
+  "data": {
+    "items": [
+      {
+        "id": "1",
+        "kind": "task",
+        "title": "Run",
+        "notes": null,
+        "context": null,
+        "projectId": null,
+        "goalId": null,
+        "blockId": null,
+        "scheduledAt": "2026-02-01T05:00:00.000Z",
+        "durationMin": 30,
+        "dueAt": null,
+        "notifyMinutesBefore": 10,
+        "rrule": "FREQ=DAILY",
+        "status": "open",
+        "completedAt": null,
+        "payload": {},
+        "source": "web",
+        "createdAt": "2026-10-17T21:02:07.290Z",
+        "updatedAt": "2026-10-17T21:02:07.290Z"
+      },
+      {
+        "id": "2",
+        "kind": "task",
+        "title": "Pay rent",
+        "notes": null,
+        "context": null,
+        "projectId": null,
+        "goalId": null,
+        "blockId": null,
+        "scheduledAt": null,
+        "durationMin": null,
+        "dueAt": null,
+        "notifyMinutesBefore": null,
+        "rrule": null,
+        "status": "open",
+        "completedAt": null,
+        "payload": {},
+        "source": "web",
+        "createdAt": "2026-10-17T21:02:07.292Z",
+        "updatedAt": "2026-10-17T21:02:07.292Z"
+      }
+    ],
+    "itemOccurrences": [
+      {
+        "id": "1",
+        "itemId": "1",
+        "occursOn": "2026-02-03",
+        "status": "done",
+        "completedAt": "2026-02-03T05:40:00.000Z",
+        "updatedAt": "2026-10-17T21:02:07.293Z"
+      }
+    ],
+    "notes": [
+      {
+        "id": "1",
+        "title": "Plan the week",
+        "bodyMarkdown": "# Plan\n- ship sync",
+        "pinned": false,
+        "archived": false,
+        "position": 0,
+        "colorHex": null,
+        "tags": [
+          {
+            "id": "1",
+            "name": "work",
+            "color": "#3366ff"
+          }
+        ],
+        "createdAt": "2026-10-17T21:02:07.287Z",
+        "updatedAt": "2026-10-17T21:02:07.287Z"
+      }
+    ],
+    "noteTags": [
+      {
+        "id": "1",
+        "name": "work",
+        "color": "#3366ff",
+        "updatedAt": "2026-10-17T21:02:07.278Z"
+      }
+    ],
+    "projects": [
+      {
+        "id": "1",
+        "code": "HOME",
+        "name": "Home",
+        "description": null,
+        "status": "ACTIVE",
+        "startDate": null,
+        "endDate": null,
+        "goalId": null,
+        "pinned": false,
+        "archived": false,
+        "createdAt": "2026-10-17T21:02:07.295Z",
+        "updatedAt": "2026-10-17T21:02:07.295Z",
+        "ownerId": "1",
+        "ownerName": null,
+        "role": "OWNER",
+        "shared": false,
+        "memberCount": 1
+      }
+    ],
+    "goals": [
+      {
+        "id": "1",
+        "title": "Ship the Mac app",
+        "notes": null,
+        "horizon": "month",
+        "periodStart": "2026-02-01",
+        "periodEnd": "2026-02-28",
+        "parentGoalId": null,
+        "status": "active",
+        "createdAt": "2026-10-17T21:02:07.296Z",
+        "updatedAt": "2026-10-17T21:02:07.296Z"
+      }
+    ],
+    "tombstones": {
+      "items": [],
+      "itemOccurrences": [],
+      "notes": [],
+      "noteTags": [],
+      "projects": [],
+      "goals": []
+    },
+    "cursor": "2026-10-17T21:02:07.301Z"
+  }
+}

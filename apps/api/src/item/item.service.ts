@@ -6,6 +6,7 @@ import { Item, ItemStatus } from './item.entity';
 import { ItemOccurrence, ItemOccurrenceStatus } from './item-occurrence.entity';
 import { ItemRecurrenceService } from './item-recurrence.service';
 import { ApiException } from '../common/api.exception';
+import { assertIfMatch } from '../common/if-match';
 import { NotificationService } from '../notification/notification.service';
 import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification-scheduling';
 import { ProjectAccessService } from '../project/project-access.service';
@@ -414,11 +415,7 @@ export class ItemService {
     manager?: EntityManager,
   ): Promise<ItemResponseDto> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
-    if (ifMatchMs !== undefined && item.updatedAt.getTime() !== ifMatchMs) {
-      throw ApiException.conflict(
-        `Item has been modified since you last fetched it (current updatedAt: ${item.updatedAt.toISOString()})`,
-      );
-    }
+    assertIfMatch(item.updatedAt, ifMatchMs, 'Item');
     if (req.kind !== undefined) item.kind = req.kind;
     if (req.title !== undefined) item.title = req.title;
     if (req.notes !== undefined) item.notes = req.notes ?? null;
@@ -478,8 +475,14 @@ export class ItemService {
     return ItemResponseDto.from(saved);
   }
 
-  async delete(userId: string, id: string, manager?: EntityManager): Promise<void> {
+  async delete(
+    userId: string,
+    id: string,
+    manager?: EntityManager,
+    ifMatchMs?: number,
+  ): Promise<void> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertIfMatch(item.updatedAt, ifMatchMs, 'Item');
     const itemRepo = this.getItemRepo(manager);
     await itemRepo.softRemove(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
@@ -495,8 +498,10 @@ export class ItemService {
     id: string,
     req: CompleteItemRequestDto,
     manager?: EntityManager,
+    ifMatchMs?: number,
   ): Promise<{ item: ItemResponseDto; occurrenceId?: string }> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertIfMatch(item.updatedAt, ifMatchMs, 'Item');
     const itemRepo = this.getItemRepo(manager);
     const occRepo = this.getOccurrenceRepo(manager);
 
@@ -553,8 +558,9 @@ export class ItemService {
     id: string,
     req: CompleteItemRequestDto,
     manager?: EntityManager,
+    ifMatchMs?: number,
   ): Promise<ItemResponseDto> {
-    const result = await this.completeWithDetails(userId, id, req, manager);
+    const result = await this.completeWithDetails(userId, id, req, manager, ifMatchMs);
     return result.item;
   }
 
@@ -603,7 +609,8 @@ export class ItemService {
     const occ = await occRepo.findOne({ where: { id } });
     if (!occ) return;
     if (occ.ownerId !== userId) throw ApiException.notFound('Occurrence not found');
-    await occRepo.delete({ id });
+    // Soft delete, not a hard delete: sync clients learn about it from the tombstone.
+    await occRepo.softRemove(occ);
   }
 
   async findOccurrence(

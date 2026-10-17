@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "message": "OK",
+  "code": 201,
+  "data": {
+    "id": "2",
+    "title": "Created offline",
+    "bodyMarkdown": "body",
+    "pinned": false,
+    "archived": false,
+    "position": 0,
+    "colorHex": null,
+    "tags": [],
+    "createdAt": "2026-10-17T21:02:07.361Z",
+    "updatedAt": "2026-10-17T21:02:07.361Z"
+  }
+}

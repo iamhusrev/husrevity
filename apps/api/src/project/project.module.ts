@@ -14,15 +14,23 @@ import { ProjectInviteAdminController } from './project-invite-admin.controller'
 import { UserModule } from '../user/user.module';
 import { NotificationModule } from '../notification/notification.module';
 import { GoalModule } from '../goal/goal.module';
+import { IdempotencyKey } from '../common/idempotency-key.entity';
+import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Project, ProjectMember, ProjectInvite]),
+    TypeOrmModule.forFeature([Project, ProjectMember, ProjectInvite, IdempotencyKey]),
     UserModule,
     NotificationModule,
     GoalModule,
   ],
-  providers: [ProjectService, ProjectAccessService, ProjectMemberService, ProjectInviteService],
+  providers: [
+    ProjectService,
+    ProjectAccessService,
+    ProjectMemberService,
+    ProjectInviteService,
+    IdempotencyInterceptor,
+  ],
   controllers: [
     ProjectController,
     ProjectMemberController,

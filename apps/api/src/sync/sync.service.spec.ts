@@ -4,6 +4,9 @@ import { SyncService } from './sync.service';
 import { Item } from '../item/item.entity';
 import { Note } from '../note/note.entity';
 import { Project } from '../project/project.entity';
+import { Goal } from '../goal/goal.entity';
+import { ItemOccurrence } from '../item/item-occurrence.entity';
+import { NoteTag } from '../note/note-tag.entity';
 
 type MockRepo = { find: jest.Mock };
 
@@ -14,17 +17,26 @@ describe('SyncService', () => {
   let items: MockRepo;
   let notes: MockRepo;
   let projects: MockRepo;
+  let goals: MockRepo;
+  let occurrences: MockRepo;
+  let noteTags: MockRepo;
 
   beforeEach(async () => {
     items = { find: jest.fn().mockResolvedValue([]) };
     notes = { find: jest.fn().mockResolvedValue([]) };
     projects = { find: jest.fn().mockResolvedValue([]) };
+    goals = { find: jest.fn().mockResolvedValue([]) };
+    occurrences = { find: jest.fn().mockResolvedValue([]) };
+    noteTags = { find: jest.fn().mockResolvedValue([]) };
     const module = await Test.createTestingModule({
       providers: [
         SyncService,
         { provide: getRepositoryToken(Item), useValue: items },
         { provide: getRepositoryToken(Note), useValue: notes },
         { provide: getRepositoryToken(Project), useValue: projects },
+        { provide: getRepositoryToken(Goal), useValue: goals },
+        { provide: getRepositoryToken(ItemOccurrence), useValue: occurrences },
+        { provide: getRepositoryToken(NoteTag), useValue: noteTags },
       ],
     }).compile();
     service = module.get(SyncService);
@@ -58,7 +70,43 @@ describe('SyncService', () => {
     });
   });
 
+  describe.each([
+    ['goalsDelta', () => goals],
+    ['itemOccurrencesDelta', () => occurrences],
+    ['noteTagsDelta', () => noteTags],
+  ] as const)('%s', (method, repo) => {
+    it('is owner-scoped and returns live rows and tombstone ids separately', async () => {
+      const live = { id: '10', ownerId, updatedAt: since, deletedAt: null };
+      const dead = { id: '11', ownerId, updatedAt: since, deletedAt: new Date() };
+      repo().find.mockResolvedValueOnce([live]).mockResolvedValueOnce([dead]);
+
+      const result = await (service as any)[method](ownerId, since);
+
+      expect(repo().find).toHaveBeenNthCalledWith(1, {
+        where: { ownerId, updatedAt: expect.anything() },
+        order: { updatedAt: 'ASC' },
+      });
+      const second = repo().find.mock.calls[1][0];
+      expect(second.withDeleted).toBe(true);
+      expect(second.where).toEqual(
+        expect.objectContaining({ ownerId, deletedAt: expect.anything() }),
+      );
+      expect(result).toEqual({ live: [live], tombstoneIds: ['11'] });
+    });
+  });
+
   describe('syncSince', () => {
+    it('also queries goals, item occurrences and note tags', async () => {
+      const result = await service.syncSince(ownerId, since);
+
+      expect(goals.find).toHaveBeenCalled();
+      expect(occurrences.find).toHaveBeenCalled();
+      expect(noteTags.find).toHaveBeenCalled();
+      expect(result.goals).toEqual({ live: [], tombstoneIds: [] });
+      expect(result.itemOccurrences).toEqual({ live: [], tombstoneIds: [] });
+      expect(result.noteTags).toEqual({ live: [], tombstoneIds: [] });
+    });
+
     it('queries items/notes/projects in parallel and returns a fresh ISO cursor', async () => {
       const before = Date.now();
       const result = await service.syncSince(ownerId, since);

@@ -1,0 +1,54 @@
+{
+  "success": true,
+  "message": "OK",
+  "code": 200,
+  "data": {
+    "items": [],
+    "itemOccurrences": [],
+    "notes": [
+      {
+        "id": "1",
+        "title": "Plan the week (v2)",
+        "bodyMarkdown": "# Plan\n- ship sync",
+        "pinned": false,
+        "archived": false,
+        "position": 0,
+        "colorHex": null,
+        "tags": [],
+        "createdAt": "2026-10-17T21:02:07.287Z",
+        "updatedAt": "2026-10-17T21:02:07.345Z"
+      }
+    ],
+    "noteTags": [],
+    "projects": [],
+    "goals": [
+      {
+        "id": "1",
+        "title": "Ship the Mac app (v1)",
+        "notes": null,
+        "horizon": "month",
+        "periodStart": "2026-02-01",
+        "periodEnd": "2026-02-28",
+        "parentGoalId": null,
+        "status": "active",
+        "createdAt": "2026-10-17T21:02:07.296Z",
+        "updatedAt": "2026-10-17T21:02:07.351Z"
+      }
+    ],
+    "tombstones": {
+      "items": [
+        "2"
+      ],
+      "itemOccurrences": [
+        "1"
+      ],
+      "notes": [],
+      "noteTags": [
+        "1"
+      ],
+      "projects": [],
+      "goals": []
+    },
+    "cursor": "2026-10-17T21:02:07.354Z"
+  }
+}

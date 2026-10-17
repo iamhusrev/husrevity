@@ -349,6 +349,66 @@ describe('GoalService', () => {
     });
   });
 
+  describe('If-Match', () => {
+    const UPDATED_AT = new Date('2026-01-01T00:00:00.000Z');
+    const row = (): Goal => ({
+      id: '1',
+      ownerId,
+      title: 'Year Goal',
+      notes: null,
+      horizon: 'year',
+      periodStart: '2026-01-01',
+      periodEnd: '2026-12-31',
+      parentGoalId: null,
+      status: 'active',
+      createdAt: UPDATED_AT,
+      createdById: null,
+      updatedAt: UPDATED_AT,
+      updatedById: null,
+      deletedAt: null,
+    });
+
+    it('update throws 409 and saves nothing when ifMatchMs is stale', async () => {
+      goals.findOne.mockResolvedValue(row());
+
+      await expect(
+        service.update(ownerId, '1', { title: 'New' }, undefined, UPDATED_AT.getTime() - 1),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(goals.save).not.toHaveBeenCalled();
+    });
+
+    it('update applies when ifMatchMs equals updatedAt', async () => {
+      goals.findOne.mockResolvedValue(row());
+
+      const result = await service.update(
+        ownerId,
+        '1',
+        { title: 'New' },
+        undefined,
+        UPDATED_AT.getTime(),
+      );
+
+      expect(result.title).toBe('New');
+    });
+
+    it('delete throws 409 and removes nothing when ifMatchMs is stale', async () => {
+      goals.findOne.mockResolvedValue(row());
+
+      await expect(
+        service.delete(ownerId, '1', undefined, UPDATED_AT.getTime() - 1),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(goals.softRemove).not.toHaveBeenCalled();
+    });
+
+    it('delete proceeds when ifMatchMs equals updatedAt', async () => {
+      goals.findOne.mockResolvedValue(row());
+
+      await service.delete(ownerId, '1', undefined, UPDATED_AT.getTime());
+
+      expect(goals.softRemove).toHaveBeenCalled();
+    });
+  });
+
   describe('soft delete and restore', () => {
     it('soft deletes a goal leaving children in place', async () => {
       const existing: Goal = {

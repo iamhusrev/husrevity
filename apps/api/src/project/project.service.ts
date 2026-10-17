@@ -5,6 +5,7 @@ import { Project } from './project.entity';
 import { ProjectMember, ProjectRole } from './project-member.entity';
 import { ProjectAccessService } from './project-access.service';
 import { ApiException } from '../common/api.exception';
+import { assertIfMatch } from '../common/if-match';
 import { ProjectRequestDto, ProjectResponseDto, ProjectUpdateRequestDto } from './dto/project-dtos';
 import { ProjectListFilter } from './dto/project-list-query.dto';
 import { Goal } from '../goal/goal.entity';
@@ -124,8 +125,10 @@ export class ProjectService {
     userId: string,
     projectId: string,
     req: ProjectUpdateRequestDto,
+    ifMatchMs?: number,
   ): Promise<ProjectResponseDto> {
     const { project: p, role } = await this.access.requireAccess(userId, projectId, 'EDITOR');
+    assertIfMatch(p.updatedAt, ifMatchMs, 'Project');
     if (req.archived !== undefined && role !== 'OWNER') {
       throw ApiException.forbidden('Only the project owner can archive this project');
     }
@@ -153,8 +156,9 @@ export class ProjectService {
     return ProjectResponseDto.from(saved, { role, memberCount, ownerName });
   }
 
-  async delete(userId: string, projectId: string): Promise<void> {
+  async delete(userId: string, projectId: string, ifMatchMs?: number): Promise<void> {
     const { project } = await this.access.requireAccess(userId, projectId, 'OWNER');
+    assertIfMatch(project.updatedAt, ifMatchMs, 'Project');
     await this.projects.softRemove(project);
   }
 

@@ -3,7 +3,15 @@ import { BaseEntity } from '../common/base.entity';
 
 export type ItemKind = 'task' | 'event' | 'log';
 export type ItemStatus = 'open' | 'done' | 'cancelled';
-export type ItemSource = 'web' | 'ios' | 'mcp' | 'telegram' | 'gmail' | 'gcal' | 'slack';
+export type ItemSource =
+  | 'web'
+  | 'ios'
+  | 'macos'
+  | 'mcp'
+  | 'telegram'
+  | 'gmail'
+  | 'gcal'
+  | 'slack';
 
 /**
  * The unified Item model (Faz 1 of the Husrevity simplification plan — see

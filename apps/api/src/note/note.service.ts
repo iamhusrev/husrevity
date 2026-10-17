@@ -4,6 +4,7 @@ import { In, Repository, DataSource } from 'typeorm';
 import { Note } from './note.entity';
 import { NoteTag } from './note-tag.entity';
 import { ApiException } from '../common/api.exception';
+import { assertIfMatch } from '../common/if-match';
 import {
   NoteRequestDto,
   NoteResponseDto,
@@ -39,7 +40,11 @@ export class NoteService {
     }
     if (tagId) {
       qb.andWhere(
-        'EXISTS (SELECT 1 FROM note_tag_assignment a WHERE a.note_id = n.id AND a.tag_id = :tagId)',
+        `EXISTS (
+          SELECT 1 FROM note_tag_assignment a
+          JOIN note_tag t ON t.id = a.tag_id AND t.deleted_at IS NULL
+          WHERE a.note_id = n.id AND a.tag_id = :tagId
+        )`,
         { tagId },
       );
     }
@@ -73,8 +78,14 @@ export class NoteService {
     return NoteResponseDto.from(saved);
   }
 
-  async update(ownerId: string, id: string, req: NoteRequestDto): Promise<NoteResponseDto> {
+  async update(
+    ownerId: string,
+    id: string,
+    req: NoteRequestDto,
+    ifMatchMs?: number,
+  ): Promise<NoteResponseDto> {
     const note = await this.requireOwned(ownerId, id);
+    assertIfMatch(note.updatedAt, ifMatchMs, 'Note');
     note.title = req.title;
     note.bodyMarkdown = req.bodyMarkdown ?? null;
     if (req.pinned !== undefined) note.pinned = req.pinned;
@@ -85,8 +96,9 @@ export class NoteService {
     return NoteResponseDto.from(saved);
   }
 
-  async delete(ownerId: string, id: string): Promise<void> {
+  async delete(ownerId: string, id: string, ifMatchMs?: number): Promise<void> {
     const note = await this.requireOwned(ownerId, id);
+    assertIfMatch(note.updatedAt, ifMatchMs, 'Note');
     await this.notes.softRemove(note);
   }
 
@@ -130,7 +142,17 @@ export class NoteService {
   }
 
   async deleteTag(ownerId: string, id: string): Promise<void> {
-    await this.tags.remove(await this.requireTag(ownerId, id));
+    const tag = await this.requireTag(ownerId, id);
+    await this.dataSource.transaction(async (em) => {
+      // Soft delete, not a hard delete: sync clients learn about it from the tombstone.
+      await em.getRepository(NoteTag).softRemove(tag);
+      // A note embeds its tags, so touch the carriers: the next sync re-sends them without it.
+      await em.query(
+        `UPDATE note SET updated_at = now()
+         WHERE owner_id = $1 AND id IN (SELECT note_id FROM note_tag_assignment WHERE tag_id = $2)`,
+        [ownerId, id],
+      );
+    });
   }
 
   private async requireTag(ownerId: string, id: string): Promise<NoteTag> {

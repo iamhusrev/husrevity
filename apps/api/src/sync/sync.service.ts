@@ -4,6 +4,9 @@ import { MoreThan, Not, IsNull, Repository, FindOptionsWhere } from 'typeorm';
 import { Item } from '../item/item.entity';
 import { Note } from '../note/note.entity';
 import { Project } from '../project/project.entity';
+import { Goal } from '../goal/goal.entity';
+import { ItemOccurrence } from '../item/item-occurrence.entity';
+import { NoteTag } from '../note/note-tag.entity';
 
 interface DeltaRow {
   id: string;
@@ -23,6 +26,9 @@ export class SyncService {
     @InjectRepository(Item) private readonly items: Repository<Item>,
     @InjectRepository(Note) private readonly notes: Repository<Note>,
     @InjectRepository(Project) private readonly projects: Repository<Project>,
+    @InjectRepository(Goal) private readonly goals: Repository<Goal>,
+    @InjectRepository(ItemOccurrence) private readonly occurrences: Repository<ItemOccurrence>,
+    @InjectRepository(NoteTag) private readonly noteTags: Repository<NoteTag>,
   ) {}
 
   async itemsDelta(ownerId: string, since: Date): Promise<Delta<Item>> {
@@ -37,6 +43,18 @@ export class SyncService {
     return this.deltaFor(this.projects, ownerId, since);
   }
 
+  async goalsDelta(ownerId: string, since: Date): Promise<Delta<Goal>> {
+    return this.deltaFor(this.goals, ownerId, since);
+  }
+
+  async itemOccurrencesDelta(ownerId: string, since: Date): Promise<Delta<ItemOccurrence>> {
+    return this.deltaFor(this.occurrences, ownerId, since);
+  }
+
+  async noteTagsDelta(ownerId: string, since: Date): Promise<Delta<NoteTag>> {
+    return this.deltaFor(this.noteTags, ownerId, since);
+  }
+
   /**
    * Full sync payload: the new cursor is `now()` at the START of the
    * query batch (not the max updatedAt seen), so a row written between
@@ -48,18 +66,24 @@ export class SyncService {
     since: Date | null,
   ): Promise<{
     items: Delta<Item>;
+    itemOccurrences: Delta<ItemOccurrence>;
     notes: Delta<Note>;
+    noteTags: Delta<NoteTag>;
     projects: Delta<Project>;
+    goals: Delta<Goal>;
     cursor: string;
   }> {
     const cursor = new Date().toISOString();
     const from = since ?? new Date(0);
-    const [items, notes, projects] = await Promise.all([
+    const [items, itemOccurrences, notes, noteTags, projects, goals] = await Promise.all([
       this.itemsDelta(ownerId, from),
+      this.itemOccurrencesDelta(ownerId, from),
       this.notesDelta(ownerId, from),
+      this.noteTagsDelta(ownerId, from),
       this.projectsDelta(ownerId, from),
+      this.goalsDelta(ownerId, from),
     ]);
-    return { items, notes, projects, cursor };
+    return { items, itemOccurrences, notes, noteTags, projects, goals, cursor };
   }
 
   /**

@@ -29,6 +29,7 @@ import {
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { NumericIdPipe } from '../common/numeric-id.pipe';
 import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
+import { parseIfMatch } from '../common/if-match';
 
 @ApiTags('items')
 @ApiBearerAuth()
@@ -104,25 +105,28 @@ export class ItemController {
     @Body() body: ItemUpdateRequestDto,
     @Headers('if-match') ifMatch?: string,
   ): Promise<ItemResponseDto> {
-    const ifMatchMs = ifMatch ? Number(ifMatch.replace(/"/g, '')) : undefined;
-    return this.items.update(u.userId, id, body, ifMatchMs);
+    return this.items.update(u.userId, id, body, parseIfMatch(ifMatch));
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseInterceptors(IdempotencyInterceptor)
   remove(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id', NumericIdPipe) id: string,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<void> {
-    return this.items.delete(u.userId, id);
+    return this.items.delete(u.userId, id, undefined, parseIfMatch(ifMatch));
   }
 
   @Post(':id/complete')
+  @UseInterceptors(IdempotencyInterceptor)
   complete(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id', NumericIdPipe) id: string,
     @Body() body: CompleteItemRequestDto,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<ItemResponseDto> {
-    return this.items.complete(u.userId, id, body);
+    return this.items.complete(u.userId, id, body, undefined, parseIfMatch(ifMatch));
   }
 }

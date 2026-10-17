@@ -3,13 +3,17 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
+import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
+import { parseIfMatch } from '../common/if-match';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GoalService } from './goal.service';
 import {
@@ -50,6 +54,7 @@ export class GoalController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(IdempotencyInterceptor)
   create(
     @CurrentUser() u: AuthenticatedUser,
     @Body() body: GoalRequestDto,
@@ -58,27 +63,31 @@ export class GoalController {
   }
 
   @Patch(':id')
+  @UseInterceptors(IdempotencyInterceptor)
   update(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id', NumericIdPipe) id: string,
     @Body() body: GoalUpdateRequestDto,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<GoalResponseDto> {
     if (!isValidNumericId(id)) {
       throw ApiException.badRequest('Invalid goal id: must be a numeric ID (1-19 digits)');
     }
-    return this.goals.update(u.userId, id, body);
+    return this.goals.update(u.userId, id, body, undefined, parseIfMatch(ifMatch));
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseInterceptors(IdempotencyInterceptor)
   remove(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id', NumericIdPipe) id: string,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<void> {
     if (!isValidNumericId(id)) {
       throw ApiException.badRequest('Invalid goal id: must be a numeric ID (1-19 digits)');
     }
-    return this.goals.delete(u.userId, id);
+    return this.goals.delete(u.userId, id, undefined, parseIfMatch(ifMatch));
   }
 
   @Patch(':id/restore')

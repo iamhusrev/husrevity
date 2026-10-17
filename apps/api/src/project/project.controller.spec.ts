@@ -15,7 +15,13 @@ describe('ProjectController (restore route)', () => {
 
     const module = await Test.createTestingModule({
       controllers: [ProjectController],
-      providers: [{ provide: ProjectService, useValue: service }],
+      providers: [
+        { provide: ProjectService, useValue: service },
+        {
+          provide: 'IdempotencyKeyRepository',
+          useValue: { findOne: jest.fn(), create: jest.fn(), save: jest.fn() },
+        },
+      ],
     }).compile();
 
     controller = module.get(ProjectController);

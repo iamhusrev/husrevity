@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "luxon": ["../../../packages/parser/node_modules/luxon"],
+      "rrule": ["../../api/node_modules/rrule"]
+    }
+  }
+}

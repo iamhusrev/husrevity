@@ -3,10 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Goal } from './goal.entity';
 import { GoalService } from './goal.service';
 import { GoalController } from './goal.controller';
+import { IdempotencyKey } from '../common/idempotency-key.entity';
+import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Goal])],
-  providers: [GoalService],
+  imports: [TypeOrmModule.forFeature([Goal, IdempotencyKey])],
+  providers: [GoalService, IdempotencyInterceptor],
   controllers: [GoalController],
   exports: [GoalService, TypeOrmModule],
 })

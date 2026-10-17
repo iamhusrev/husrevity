@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,10 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
+import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
+import { parseIfMatch } from '../common/if-match';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NoteService } from './note.service';
 import {
@@ -46,6 +50,7 @@ export class NoteController {
 
   @Post('notes')
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(IdempotencyInterceptor)
   create(
     @CurrentUser() u: AuthenticatedUser,
     @Body() body: NoteRequestDto,
@@ -54,18 +59,25 @@ export class NoteController {
   }
 
   @Put('notes/:id')
+  @UseInterceptors(IdempotencyInterceptor)
   update(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: NoteRequestDto,
+    @Headers('if-match') ifMatch?: string,
   ): Promise<NoteResponseDto> {
-    return this.notes.update(u.userId, id, body);
+    return this.notes.update(u.userId, id, body, parseIfMatch(ifMatch));
   }
 
   @Delete('notes/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
-    return this.notes.delete(u.userId, id);
+  @UseInterceptors(IdempotencyInterceptor)
+  remove(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Headers('if-match') ifMatch?: string,
+  ): Promise<void> {
+    return this.notes.delete(u.userId, id, parseIfMatch(ifMatch));
   }
 
   @Patch('notes/reorder')
@@ -81,12 +93,14 @@ export class NoteController {
 
   @Post('note-tags')
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(IdempotencyInterceptor)
   createTag(@CurrentUser() u: AuthenticatedUser, @Body() body: TagRequestDto): Promise<TagDto> {
     return this.notes.createTag(u.userId, body);
   }
 
   @Delete('note-tags/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseInterceptors(IdempotencyInterceptor)
   deleteTag(@CurrentUser() u: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     return this.notes.deleteTag(u.userId, id);
   }

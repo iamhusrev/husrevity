@@ -77,7 +77,13 @@ describe('ItemController (Contract)', () => {
 
       const result = await controller.complete(user, '10', { occursOn: '2026-01-05' });
 
-      expect(itemsService.complete).toHaveBeenCalledWith('1', '10', { occursOn: '2026-01-05' });
+      expect(itemsService.complete).toHaveBeenCalledWith(
+        '1',
+        '10',
+        { occursOn: '2026-01-05' },
+        undefined,
+        undefined,
+      );
       expect(result).toEqual(mockDto);
       expect((result as any).occurrenceId).toBeUndefined();
       expect(Object.keys(result)).not.toContain('occurrenceId');

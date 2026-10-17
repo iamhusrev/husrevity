@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "message": "OK",
+  "code": 200,
+  "data": {
+    "accessToken": "fixture-access-token",
+    "refreshToken": "fixture-refresh-token",
+    "user": {
+      "id": "1",
+      "email": "fixture@example.com",
+      "firstName": "Fixture",
+      "lastName": "User",
+      "enabled": true,
+      "emailNotificationsEnabled": false,
+      "role": "user",
+      "navPreferences": null
+    }
+  }
+}

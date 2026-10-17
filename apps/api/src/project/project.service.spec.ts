@@ -357,6 +357,50 @@ describe('ProjectService', () => {
     });
   });
 
+  describe('If-Match', () => {
+    const projectId = '10';
+    const UPDATED_AT = new Date('2026-01-01T00:00:00.000Z');
+    const row = () => ({ id: projectId, ownerId, updatedAt: UPDATED_AT }) as unknown as Project;
+
+    it('update throws 409 and saves nothing when ifMatchMs is stale', async () => {
+      access.requireAccess.mockResolvedValueOnce({ project: row(), role: 'OWNER' });
+
+      await expect(
+        service.update(ownerId, projectId, { name: 'X' }, UPDATED_AT.getTime() - 1),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(projects.save).not.toHaveBeenCalled();
+    });
+
+    it('update applies when ifMatchMs equals updatedAt', async () => {
+      access.requireAccess.mockResolvedValueOnce({ project: row(), role: 'OWNER' });
+      projects.save.mockImplementation((p) => Promise.resolve(p));
+      members.count.mockResolvedValueOnce(1);
+      dataSource.query.mockResolvedValueOnce([]);
+
+      await service.update(ownerId, projectId, { name: 'X' }, UPDATED_AT.getTime());
+
+      expect(projects.save).toHaveBeenCalled();
+    });
+
+    it('delete throws 409 and removes nothing when ifMatchMs is stale', async () => {
+      access.requireAccess.mockResolvedValueOnce({ project: row(), role: 'OWNER' });
+
+      await expect(
+        service.delete(ownerId, projectId, UPDATED_AT.getTime() - 1),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(projects.softRemove).not.toHaveBeenCalled();
+    });
+
+    it('delete proceeds when ifMatchMs equals updatedAt', async () => {
+      const project = row();
+      access.requireAccess.mockResolvedValueOnce({ project, role: 'OWNER' });
+
+      await service.delete(ownerId, projectId, UPDATED_AT.getTime());
+
+      expect(projects.softRemove).toHaveBeenCalledWith(project);
+    });
+  });
+
   describe('delete', () => {
     const projectId = '10';
 

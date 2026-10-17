@@ -1,0 +1,7013 @@
+{
+  "generatedBy": "apps/macos/scripts/gen-parity-cases.ts",
+  "parse": [
+    {
+      "input": "sadece bir not",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "sadece bir not"
+      }
+    },
+    {
+      "input": "bugün rapor teslim et",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "rapor teslim et",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pzt diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "sal diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çar diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "per diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cum diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cmt diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "paz diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazartesi diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çarşamba diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "perşembe diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi diş hekimi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 18de spor #saglik",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "context": "saglik",
+        "scheduledAt": "2026-10-23T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma günü toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü kahvaltı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar alışverişi yap",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "pazar alışverişi yap"
+      }
+    },
+    {
+      "input": "her cuma 18:00 spor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar kahvaltı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 14:30 doktor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "doktor",
+        "scheduledAt": "2026-10-18T11:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da HGS kontrol #alican",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "HGS kontrol",
+        "context": "alican",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "14:00 kahve",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kahve",
+        "scheduledAt": "2026-10-18T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "spor yap #saglik",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "rapor yaz @nakliya",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "rapor yaz",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "toplantı hazırlığı #is @nakliya",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "toplantı hazırlığı",
+        "context": "is",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "acil arama yap !yüksek",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "acil arama yap",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "bir şey !orta",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "orta"
+      }
+    },
+    {
+      "input": "bir şey !düşük",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her sal spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TU",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her çar spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=WE",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her per spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TH",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cum spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cmt spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SA",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her paz spor salonu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu !yüksek #saglik",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "context": "saglik",
+        "priority": "yüksek",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "3 saat kitap oku",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "3 saat kitap oku"
+      }
+    },
+    {
+      "input": "haftaya diş hekimine gitmem gerek",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "haftaya diş hekimine gitmem gerek"
+      }
+    },
+    {
+      "input": "her gün 7de koşu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün 7de koşu #saglik !orta",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "context": "saglik",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her hafta içi 8de yürüyüş",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "her hafta içi yürüyüş",
+        "scheduledAt": "2026-10-18T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "hafta içi her gün 8de yürüyüş",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "hafta içi yürüyüş",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9:30da toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "9:30da toplantı",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 9:30 toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-18T06:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 17te market",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "market",
+        "scheduledAt": "2026-10-19T14:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 23:59 yedek al",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "yedek al",
+        "scheduledAt": "2026-10-19T20:59:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 00:15 gece nöbeti",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "gece nöbeti",
+        "scheduledAt": "2026-10-17T21:15:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 06:00 sabah koşusu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-10-18T03:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün sabah koşusu 07:00",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-10-18T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "BUGÜN Rapor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "Rapor",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "Yarın TOPLANTI",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "TOPLANTI",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 25:00 saçma",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "25:00 saçma",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 9da",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "#saglik",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "@proje",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "projectRef": "proje"
+      }
+    },
+    {
+      "input": "!yüksek",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "#çalışma ödev yap",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "ödev yap",
+        "context": "çalışma"
+      }
+    },
+    {
+      "input": "#iş @şirket !düşük rapor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "context": "iş",
+        "projectRef": "şirket",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "   yarın    9da    boşluklu    metin   ",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "boşluklu metin",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "ş ğ ü ö ç ı İ karakter testi",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "ş ğ ü ö ç ı İ karakter testi"
+      }
+    },
+    {
+      "input": "yarın emoji 🎉 parti",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "emoji 🎉 parti",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü 10:00 kahvaltı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-10-18T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar 10:00 kahvaltı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "pazar kahvaltı",
+        "scheduledAt": "2026-10-18T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar günü 10:00 kahvaltı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-18T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı günü rapor",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi 14:00 maç",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "maç",
+        "scheduledAt": "2026-10-24T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cuma",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "   ",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din !orta @proje",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "projectRef": "proje",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-18T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "bugün bugün yarın",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "bugün yarın",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da 10da çift saat",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "10da çift saat",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "toplantı yarın 15:30 #is",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "context": "is",
+        "scheduledAt": "2026-10-19T12:30:00.000Z"
+      }
+    },
+    {
+      "input": "iki gün sonra toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "iki gün sonra toplantı"
+      }
+    },
+    {
+      "input": "spor yap 9da",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 14'te randevu",
+      "now": "2026-10-18T08:30:00.000Z",
+      "expected": {
+        "title": "randevu",
+        "scheduledAt": "2026-10-19T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "sadece bir not",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "sadece bir not"
+      }
+    },
+    {
+      "input": "bugün rapor teslim et",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "rapor teslim et",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın toplantı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pzt diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "sal diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çar diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "per diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cum diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cmt diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "paz diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-25T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazartesi diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çarşamba diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "perşembe diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi diş hekimi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 18de spor #saglik",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "context": "saglik",
+        "scheduledAt": "2026-10-23T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma günü toplantı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü kahvaltı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-10-25T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar alışverişi yap",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "pazar alışverişi yap"
+      }
+    },
+    {
+      "input": "her cuma 18:00 spor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar kahvaltı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-25T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 14:30 doktor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "doktor",
+        "scheduledAt": "2026-10-19T11:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da HGS kontrol #alican",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "HGS kontrol",
+        "context": "alican",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "14:00 kahve",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kahve",
+        "scheduledAt": "2026-10-19T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "spor yap #saglik",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "rapor yaz @nakliya",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "rapor yaz",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "toplantı hazırlığı #is @nakliya",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "toplantı hazırlığı",
+        "context": "is",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "acil arama yap !yüksek",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "acil arama yap",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "bir şey !orta",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "orta"
+      }
+    },
+    {
+      "input": "bir şey !düşük",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her sal spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TU",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her çar spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=WE",
+        "scheduledAt": "2026-10-21T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her per spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TH",
+        "scheduledAt": "2026-10-22T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cum spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cmt spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SA",
+        "scheduledAt": "2026-10-24T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her paz spor salonu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-25T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu !yüksek #saglik",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "context": "saglik",
+        "priority": "yüksek",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "3 saat kitap oku",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "3 saat kitap oku"
+      }
+    },
+    {
+      "input": "haftaya diş hekimine gitmem gerek",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "haftaya diş hekimine gitmem gerek"
+      }
+    },
+    {
+      "input": "her gün 7de koşu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün 7de koşu #saglik !orta",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "context": "saglik",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her hafta içi 8de yürüyüş",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "her hafta içi yürüyüş",
+        "scheduledAt": "2026-10-19T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "hafta içi her gün 8de yürüyüş",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "hafta içi yürüyüş",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9:30da toplantı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "9:30da toplantı",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 9:30 toplantı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-10-19T06:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 17te market",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "market",
+        "scheduledAt": "2026-10-20T14:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 23:59 yedek al",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "yedek al",
+        "scheduledAt": "2026-10-20T20:59:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 00:15 gece nöbeti",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "gece nöbeti",
+        "scheduledAt": "2026-10-18T21:15:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 06:00 sabah koşusu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-10-19T03:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün sabah koşusu 07:00",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-10-19T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "BUGÜN Rapor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "Rapor",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "Yarın TOPLANTI",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "TOPLANTI",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 25:00 saçma",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "25:00 saçma",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 9da",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "#saglik",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "@proje",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "projectRef": "proje"
+      }
+    },
+    {
+      "input": "!yüksek",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "#çalışma ödev yap",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "ödev yap",
+        "context": "çalışma"
+      }
+    },
+    {
+      "input": "#iş @şirket !düşük rapor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "context": "iş",
+        "projectRef": "şirket",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "   yarın    9da    boşluklu    metin   ",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "boşluklu metin",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "ş ğ ü ö ç ı İ karakter testi",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "ş ğ ü ö ç ı İ karakter testi"
+      }
+    },
+    {
+      "input": "yarın emoji 🎉 parti",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "emoji 🎉 parti",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü 10:00 kahvaltı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-10-25T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar 10:00 kahvaltı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "pazar kahvaltı",
+        "scheduledAt": "2026-10-19T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar günü 10:00 kahvaltı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-10-25T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı günü rapor",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi 14:00 maç",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "maç",
+        "scheduledAt": "2026-10-24T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cuma",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-10-23T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "   ",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din !orta @proje",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "projectRef": "proje",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-10-19T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "bugün bugün yarın",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "bugün yarın",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da 10da çift saat",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "10da çift saat",
+        "scheduledAt": "2026-10-20T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "toplantı yarın 15:30 #is",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "context": "is",
+        "scheduledAt": "2026-10-20T12:30:00.000Z"
+      }
+    },
+    {
+      "input": "iki gün sonra toplantı",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "iki gün sonra toplantı"
+      }
+    },
+    {
+      "input": "spor yap 9da",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "scheduledAt": "2026-10-19T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 14'te randevu",
+      "now": "2026-10-18T22:30:00.000Z",
+      "expected": {
+        "title": "randevu",
+        "scheduledAt": "2026-10-20T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "sadece bir not",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "sadece bir not"
+      }
+    },
+    {
+      "input": "bugün rapor teslim et",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "rapor teslim et",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın toplantı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pzt diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "sal diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çar diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-04T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "per diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-05T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cum diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cmt diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-07T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "paz diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-08T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazartesi diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "çarşamba diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-04T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "perşembe diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-05T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi diş hekimi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "diş hekimi",
+        "scheduledAt": "2026-03-07T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 18de spor #saglik",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor",
+        "context": "saglik",
+        "scheduledAt": "2026-03-06T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma günü toplantı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü kahvaltı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-03-08T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar alışverişi yap",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "pazar alışverişi yap"
+      }
+    },
+    {
+      "input": "her cuma 18:00 spor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-03-06T15:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar kahvaltı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-03-08T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 14:30 doktor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "doktor",
+        "scheduledAt": "2026-03-02T11:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da HGS kontrol #alican",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "HGS kontrol",
+        "context": "alican",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "14:00 kahve",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kahve",
+        "scheduledAt": "2026-03-02T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "spor yap #saglik",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "rapor yaz @nakliya",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "rapor yaz",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "toplantı hazırlığı #is @nakliya",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "toplantı hazırlığı",
+        "context": "is",
+        "projectRef": "nakliya"
+      }
+    },
+    {
+      "input": "acil arama yap !yüksek",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "acil arama yap",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "bir şey !orta",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "orta"
+      }
+    },
+    {
+      "input": "bir şey !düşük",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "bir şey",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her sal spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TU",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her çar spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=WE",
+        "scheduledAt": "2026-03-04T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her per spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=TH",
+        "scheduledAt": "2026-03-05T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cum spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cmt spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SA",
+        "scheduledAt": "2026-03-07T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her paz spor salonu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-03-08T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor salonu !yüksek #saglik",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor salonu",
+        "context": "saglik",
+        "priority": "yüksek",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pzt spor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor",
+        "rrule": "FREQ=WEEKLY;BYDAY=MO",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "3 saat kitap oku",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "3 saat kitap oku"
+      }
+    },
+    {
+      "input": "haftaya diş hekimine gitmem gerek",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "haftaya diş hekimine gitmem gerek"
+      }
+    },
+    {
+      "input": "her gün 7de koşu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün 7de koşu #saglik !orta",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "koşu",
+        "context": "saglik",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "her hafta içi 8de yürüyüş",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "her hafta içi yürüyüş",
+        "scheduledAt": "2026-03-02T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "hafta içi her gün 8de yürüyüş",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "hafta içi yürüyüş",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T05:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9:30da toplantı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "9:30da toplantı",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 9:30 toplantı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "scheduledAt": "2026-03-02T06:30:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 17te market",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "market",
+        "scheduledAt": "2026-03-03T14:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 23:59 yedek al",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "yedek al",
+        "scheduledAt": "2026-03-03T20:59:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 00:15 gece nöbeti",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "gece nöbeti",
+        "scheduledAt": "2026-03-01T21:15:00.000Z"
+      }
+    },
+    {
+      "input": "bugün 06:00 sabah koşusu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-03-02T03:00:00.000Z"
+      }
+    },
+    {
+      "input": "bugün sabah koşusu 07:00",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "sabah koşusu",
+        "scheduledAt": "2026-03-02T04:00:00.000Z"
+      }
+    },
+    {
+      "input": "BUGÜN Rapor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "Rapor",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "Yarın TOPLANTI",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "TOPLANTI",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 25:00 saçma",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "25:00 saçma",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cuma 9da",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "#saglik",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "context": "saglik"
+      }
+    },
+    {
+      "input": "@proje",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "projectRef": "proje"
+      }
+    },
+    {
+      "input": "!yüksek",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "priority": "yüksek"
+      }
+    },
+    {
+      "input": "#çalışma ödev yap",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "ödev yap",
+        "context": "çalışma"
+      }
+    },
+    {
+      "input": "#iş @şirket !düşük rapor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "context": "iş",
+        "projectRef": "şirket",
+        "priority": "düşük"
+      }
+    },
+    {
+      "input": "   yarın    9da    boşluklu    metin   ",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "boşluklu metin",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "ş ğ ü ö ç ı İ karakter testi",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "ş ğ ü ö ç ı İ karakter testi"
+      }
+    },
+    {
+      "input": "yarın emoji 🎉 parti",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "emoji 🎉 parti",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar günü 10:00 kahvaltı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "scheduledAt": "2026-03-08T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "pazar 10:00 kahvaltı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "pazar kahvaltı",
+        "scheduledAt": "2026-03-02T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "her pazar günü 10:00 kahvaltı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kahvaltı",
+        "rrule": "FREQ=WEEKLY;BYDAY=SU",
+        "scheduledAt": "2026-03-08T07:00:00.000Z"
+      }
+    },
+    {
+      "input": "salı günü rapor",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "rapor",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "cumartesi 14:00 maç",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "maç",
+        "scheduledAt": "2026-03-07T11:00:00.000Z"
+      }
+    },
+    {
+      "input": "her gün",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "her cuma",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "",
+        "rrule": "FREQ=WEEKLY;BYDAY=FR",
+        "scheduledAt": "2026-03-06T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "   ",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": ""
+      }
+    },
+    {
+      "input": "her gün 06:30 kuran 20 sayfa #din !orta @proje",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "kuran 20 sayfa",
+        "context": "din",
+        "projectRef": "proje",
+        "priority": "orta",
+        "rrule": "FREQ=DAILY",
+        "scheduledAt": "2026-03-02T03:30:00.000Z"
+      }
+    },
+    {
+      "input": "bugün bugün yarın",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "bugün yarın",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 9da 10da çift saat",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "10da çift saat",
+        "scheduledAt": "2026-03-03T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "toplantı yarın 15:30 #is",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "toplantı",
+        "context": "is",
+        "scheduledAt": "2026-03-03T12:30:00.000Z"
+      }
+    },
+    {
+      "input": "iki gün sonra toplantı",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "iki gün sonra toplantı"
+      }
+    },
+    {
+      "input": "spor yap 9da",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "spor yap",
+        "scheduledAt": "2026-03-02T06:00:00.000Z"
+      }
+    },
+    {
+      "input": "yarın 14'te randevu",
+      "now": "2026-03-02T00:00:00.000Z",
+      "expected": {
+        "title": "randevu",
+        "scheduledAt": "2026-03-03T11:00:00.000Z"
+      }
+    }
+  ],
+  "engineDependent": [
+    {
+      "input": "YARIN 9DA Toplantı",
+      "now": "2026-10-18T08:30:00.000Z",
+      "serverExpected": {
+        "title": "YARIN Toplantı",
+        "scheduledAt": "2026-10-18T06:00:00.000Z"
+      }
+    }
+  ],
+  "expand": [
+    {
+      "name": "daily 7 days",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-01-12T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "daily range starts after anchor",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-02-01T00:00:00.000Z",
+      "to": "2026-02-04T23:59:59.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "weekly BYDAY=MO",
+      "rrule": "FREQ=WEEKLY;BYDAY=MO",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-02-28T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-16",
+          "occursAt": "2026-02-16T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-23",
+          "occursAt": "2026-02-23T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "weekly BYDAY=MO,WE,FR",
+      "rrule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-01-26T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "weekdays MO-FR",
+      "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-01-19T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "every 2 weeks",
+      "rrule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-03-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-16",
+          "occursAt": "2026-02-16T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-02",
+          "occursAt": "2026-03-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-16",
+          "occursAt": "2026-03-16T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-30",
+          "occursAt": "2026-03-30T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "monthly on day 31 skips short months",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=31",
+      "start": "2026-01-31T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-31",
+          "occursAt": "2026-03-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-05-31",
+          "occursAt": "2026-05-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-07-31",
+          "occursAt": "2026-07-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-08-31",
+          "occursAt": "2026-08-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-31",
+          "occursAt": "2026-10-31T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "monthly last friday",
+      "rrule": "FREQ=MONTHLY;BYDAY=-1FR",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-06-30T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-27",
+          "occursAt": "2026-02-27T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-27",
+          "occursAt": "2026-03-27T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-04-24",
+          "occursAt": "2026-04-24T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-05-29",
+          "occursAt": "2026-05-29T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-06-26",
+          "occursAt": "2026-06-26T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "yearly",
+      "rrule": "FREQ=YEARLY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2030-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2027-01-05",
+          "occursAt": "2027-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2028-01-05",
+          "occursAt": "2028-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2029-01-05",
+          "occursAt": "2029-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2030-01-05",
+          "occursAt": "2030-01-05T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "COUNT=3",
+      "rrule": "FREQ=DAILY;COUNT=3",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "COUNT counted from anchor, not from range",
+      "rrule": "FREQ=DAILY;COUNT=5",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-08T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "UNTIL",
+      "rrule": "FREQ=DAILY;UNTIL=20260110T000000Z",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "UNTIL inclusive same wall time",
+      "rrule": "FREQ=DAILY;UNTIL=20260108T090000Z",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "range end equals an occurrence (inclusive)",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T06:00:00.000Z",
+      "to": "2026-01-07T06:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "range end one second before occurrence",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T06:00:00.000Z",
+      "to": "2026-01-07T05:59:59.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "range start one second after occurrence",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T06:00:01.000Z",
+      "to": "2026-01-08T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "empty range before anchor",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2025-01-01T00:00:00.000Z",
+      "to": "2025-02-01T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": []
+    },
+    {
+      "name": "from after to yields nothing",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-02-01T00:00:00.000Z",
+      "to": "2026-01-01T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": []
+    },
+    {
+      "name": "late evening anchor keeps local date (UTC day differs)",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-01-05T21:30:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-01-09T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-05T21:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-06T21:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-07T21:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-08T21:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "pre-2016 DST era anchor (Istanbul had DST)",
+      "rrule": "FREQ=WEEKLY;BYDAY=MO",
+      "start": "2015-06-01T06:00:00.000Z",
+      "from": "2015-03-01T00:00:00.000Z",
+      "to": "2015-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2015-06-01",
+          "occursAt": "2015-06-01T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-06-08",
+          "occursAt": "2015-06-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-06-15",
+          "occursAt": "2015-06-15T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-06-22",
+          "occursAt": "2015-06-22T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-06-29",
+          "occursAt": "2015-06-29T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-07-06",
+          "occursAt": "2015-07-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-07-13",
+          "occursAt": "2015-07-13T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-07-20",
+          "occursAt": "2015-07-20T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-07-27",
+          "occursAt": "2015-07-27T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-08-03",
+          "occursAt": "2015-08-03T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-08-10",
+          "occursAt": "2015-08-10T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-08-17",
+          "occursAt": "2015-08-17T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-08-24",
+          "occursAt": "2015-08-24T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-08-31",
+          "occursAt": "2015-08-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-09-07",
+          "occursAt": "2015-09-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-09-14",
+          "occursAt": "2015-09-14T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-09-21",
+          "occursAt": "2015-09-21T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-09-28",
+          "occursAt": "2015-09-28T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-10-05",
+          "occursAt": "2015-10-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-10-12",
+          "occursAt": "2015-10-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-10-19",
+          "occursAt": "2015-10-19T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-10-26",
+          "occursAt": "2015-10-26T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-11-02",
+          "occursAt": "2015-11-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-11-09",
+          "occursAt": "2015-11-09T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-11-16",
+          "occursAt": "2015-11-16T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-11-23",
+          "occursAt": "2015-11-23T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-11-30",
+          "occursAt": "2015-11-30T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-12-07",
+          "occursAt": "2015-12-07T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-12-14",
+          "occursAt": "2015-12-14T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-12-21",
+          "occursAt": "2015-12-21T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2015-12-28",
+          "occursAt": "2015-12-28T07:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "MAX_OCCURRENCES cap (1000)",
+      "rrule": "FREQ=HOURLY",
+      "start": "2026-01-05T06:00:00.000Z",
+      "from": "2026-01-05T00:00:00.000Z",
+      "to": "2026-12-31T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": [
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-05",
+          "occursAt": "2026-01-05T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-05T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-05T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-05T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-06",
+          "occursAt": "2026-01-06T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-06T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-06T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-06T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-07",
+          "occursAt": "2026-01-07T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-07T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-07T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-07T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-08",
+          "occursAt": "2026-01-08T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-08T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-08T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-08T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-09",
+          "occursAt": "2026-01-09T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-09T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-09T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-09T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-10",
+          "occursAt": "2026-01-10T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-10T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-10T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-10T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-11",
+          "occursAt": "2026-01-11T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-11T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-11T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-11T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-12",
+          "occursAt": "2026-01-12T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-12T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-12T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-12T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-13",
+          "occursAt": "2026-01-13T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-13T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-13T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-13T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-14",
+          "occursAt": "2026-01-14T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-14T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-14T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-14T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-15",
+          "occursAt": "2026-01-15T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-15T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-15T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-15T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-16",
+          "occursAt": "2026-01-16T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-16T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-16T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-16T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-17",
+          "occursAt": "2026-01-17T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-17T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-17T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-17T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-18",
+          "occursAt": "2026-01-18T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-18T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-18T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-18T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-19",
+          "occursAt": "2026-01-19T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-19T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-19T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-19T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-20",
+          "occursAt": "2026-01-20T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-20T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-20T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-20T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-21",
+          "occursAt": "2026-01-21T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-21T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-21T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-21T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-22",
+          "occursAt": "2026-01-22T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-22T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-22T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-22T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-23",
+          "occursAt": "2026-01-23T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-23T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-23T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-23T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-24",
+          "occursAt": "2026-01-24T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-24T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-24T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-24T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-25",
+          "occursAt": "2026-01-25T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-25T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-25T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-25T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-26",
+          "occursAt": "2026-01-26T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-26T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-26T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-26T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-27",
+          "occursAt": "2026-01-27T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-27T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-27T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-27T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-28",
+          "occursAt": "2026-01-28T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-28T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-28T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-28T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-29",
+          "occursAt": "2026-01-29T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-29T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-29T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-29T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-30",
+          "occursAt": "2026-01-30T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-30T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-30T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-30T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-01-31",
+          "occursAt": "2026-01-31T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-01-31T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-01-31T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-01-31T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-01",
+          "occursAt": "2026-02-01T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-01T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-01T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-01T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-02",
+          "occursAt": "2026-02-02T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-02T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-02T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-02T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-03",
+          "occursAt": "2026-02-03T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-03T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-03T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-03T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-04",
+          "occursAt": "2026-02-04T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-04T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-04T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-04T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-05",
+          "occursAt": "2026-02-05T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-05T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-05T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-05T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-06",
+          "occursAt": "2026-02-06T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-06T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-06T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-06T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-07",
+          "occursAt": "2026-02-07T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-07T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-07T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-07T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-08",
+          "occursAt": "2026-02-08T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-08T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-08T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-08T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-09",
+          "occursAt": "2026-02-09T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-09T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-09T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-09T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-10",
+          "occursAt": "2026-02-10T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-10T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-10T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-10T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-11",
+          "occursAt": "2026-02-11T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-11T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-11T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-11T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-12",
+          "occursAt": "2026-02-12T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-12T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-12T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-12T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-13",
+          "occursAt": "2026-02-13T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-13T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-13T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-13T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-14",
+          "occursAt": "2026-02-14T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-14T21:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-14T22:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-14T23:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T00:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T01:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T02:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T03:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T04:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T05:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T06:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T07:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T11:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T12:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T15:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T16:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T17:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T18:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T19:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-15",
+          "occursAt": "2026-02-15T20:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-02-16",
+          "occursAt": "2026-02-15T21:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "MAX_SCAN_ITERATIONS cap (far-past hourly anchor)",
+      "rrule": "FREQ=HOURLY",
+      "start": "2000-01-01T00:00:00.000Z",
+      "from": "2026-01-01T00:00:00.000Z",
+      "to": "2026-01-02T00:00:00.000Z",
+      "zone": "Europe/Istanbul",
+      "server": true,
+      "expected": []
+    },
+    {
+      "name": "Berlin daily across spring-forward keeps 10:00 local",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-03-20T09:00:00.000Z",
+      "from": "2026-03-20T00:00:00.000Z",
+      "to": "2026-04-05T00:00:00.000Z",
+      "zone": "Europe/Berlin",
+      "server": false,
+      "expected": [
+        {
+          "occursOn": "2026-03-20",
+          "occursAt": "2026-03-20T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-21",
+          "occursAt": "2026-03-21T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-22",
+          "occursAt": "2026-03-22T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-23",
+          "occursAt": "2026-03-23T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-24",
+          "occursAt": "2026-03-24T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-25",
+          "occursAt": "2026-03-25T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-26",
+          "occursAt": "2026-03-26T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-27",
+          "occursAt": "2026-03-27T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-28",
+          "occursAt": "2026-03-28T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-29",
+          "occursAt": "2026-03-29T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-30",
+          "occursAt": "2026-03-30T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-31",
+          "occursAt": "2026-03-31T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-04-01",
+          "occursAt": "2026-04-01T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-04-02",
+          "occursAt": "2026-04-02T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-04-03",
+          "occursAt": "2026-04-03T08:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-04-04",
+          "occursAt": "2026-04-04T08:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "Berlin daily across fall-back keeps 10:00 local",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-10-20T09:00:00.000Z",
+      "from": "2026-10-20T00:00:00.000Z",
+      "to": "2026-11-03T00:00:00.000Z",
+      "zone": "Europe/Berlin",
+      "server": false,
+      "expected": [
+        {
+          "occursOn": "2026-10-20",
+          "occursAt": "2026-10-20T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-21",
+          "occursAt": "2026-10-21T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-22",
+          "occursAt": "2026-10-22T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-23",
+          "occursAt": "2026-10-23T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-24",
+          "occursAt": "2026-10-24T09:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-25",
+          "occursAt": "2026-10-25T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-26",
+          "occursAt": "2026-10-26T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-27",
+          "occursAt": "2026-10-27T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-28",
+          "occursAt": "2026-10-28T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-29",
+          "occursAt": "2026-10-29T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-30",
+          "occursAt": "2026-10-30T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-10-31",
+          "occursAt": "2026-10-31T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-11-01",
+          "occursAt": "2026-11-01T10:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-11-02",
+          "occursAt": "2026-11-02T10:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "Berlin nonexistent local time 02:30 on spring-forward day",
+      "rrule": "FREQ=DAILY",
+      "start": "2026-03-27T01:30:00.000Z",
+      "from": "2026-03-27T00:00:00.000Z",
+      "to": "2026-04-01T00:00:00.000Z",
+      "zone": "Europe/Berlin",
+      "server": false,
+      "expected": [
+        {
+          "occursOn": "2026-03-27",
+          "occursAt": "2026-03-27T01:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-28",
+          "occursAt": "2026-03-28T01:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-29",
+          "occursAt": "2026-03-29T01:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-30",
+          "occursAt": "2026-03-30T00:30:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-31",
+          "occursAt": "2026-03-31T00:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "name": "New York weekly across spring-forward",
+      "rrule": "FREQ=WEEKLY;BYDAY=SU",
+      "start": "2026-03-01T14:00:00.000Z",
+      "from": "2026-03-01T00:00:00.000Z",
+      "to": "2026-04-01T00:00:00.000Z",
+      "zone": "America/New_York",
+      "server": false,
+      "expected": [
+        {
+          "occursOn": "2026-03-01",
+          "occursAt": "2026-03-01T14:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-08",
+          "occursAt": "2026-03-08T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-15",
+          "occursAt": "2026-03-15T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-22",
+          "occursAt": "2026-03-22T13:00:00.000Z"
+        },
+        {
+          "occursOn": "2026-03-29",
+          "occursAt": "2026-03-29T13:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "invalidExpand": [
+    {
+      "name": "garbage rrule",
+      "rrule": "NOT A RULE"
+    },
+    {
+      "name": "minutely forbidden",
+      "rrule": "FREQ=MINUTELY"
+    },
+    {
+      "name": "missing FREQ",
+      "rrule": "BYDAY=MO"
+    }
+  ]
+}
