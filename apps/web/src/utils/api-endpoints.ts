@@ -8,6 +8,7 @@ export const AUTH_ENDPOINTS = {
   ME: "/me",
   ME_PASSWORD: "/me/password",
   ME_NOTIFICATION_PREFERENCES: "/me/notification-preferences",
+  ME_NAV_PREFERENCES: "/me/nav-preferences",
 };
 
 // ─── Notes ────────────────────────────────────────────────────────────────────

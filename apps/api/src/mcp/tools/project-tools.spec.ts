@@ -46,6 +46,20 @@ describe('project-tools', () => {
       await expect(getHandler('update_project')({ id: 'p1' }, {})).rejects.toThrow('Unauthorized');
     });
 
+    it("resolves a project by name from list(..., 'all'), including shared ones", async () => {
+      projectService.list.mockResolvedValueOnce([
+        { id: 'p1', name: 'Mine' },
+        { id: 'p2', name: 'Shared with me' },
+      ]);
+      projectService.update.mockResolvedValueOnce({ id: 'p2' });
+      await getHandler('update_project')(
+        { id: 'shared with me', name: 'Renamed' },
+        { authInfo: { scopes: ['projects:write'], extra: { ownerId: 'u1' } } }
+      );
+      expect(projectService.list).toHaveBeenCalledWith('u1', 'all');
+      expect(projectService.update).toHaveBeenCalledWith('u1', 'p2', { name: 'Renamed' });
+    });
+
     it('should call service update and preserve omitted fields through Partial', async () => {
       projectService.list.mockResolvedValueOnce([{ id: 'p1', name: 'P' }]);
       projectService.update.mockResolvedValueOnce({ id: 'p1' });

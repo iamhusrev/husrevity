@@ -7,28 +7,24 @@ import { usePathname } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CiGrid41, CiSettings } from "react-icons/ci";
-import {
-  BiNote,
-  BiBell,
-  BiLockAlt,
-  BiFolder,
-  BiCalendar,
-  BiCalendarWeek,
-  BiArchiveIn,
-  BiTargetLock,
-  BiShield,
-  BiDumbbell,
-  BiBookOpen,
-} from "react-icons/bi";
+import { BiShield } from "react-icons/bi";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { useAuth } from "@/providers/AuthProvider";
-import { HiSparkles, HiOutlineClock } from "react-icons/hi2";
+import { HiSparkles } from "react-icons/hi2";
 import { FaChevronDown } from "react-icons/fa";
 import { useSidebar } from "@/providers/SidebarContext";
+import { useResetNavPreferences, useUpdateNavPreferences } from "@/hooks/useNavPreferences";
+import type { NavItemId, NavPreferences, NavSectionId } from "@/types/user/user";
+import { NAV_REGISTRY } from "@/utils/nav-items";
+import { resolveNavOrder, toNavPreferences } from "@/utils/nav-order";
 import { isNavItemActive } from "@/utils/navigation";
+import NavEditor from "./NavEditor";
 
 export { isNavItemActive };
 
 type NavItem = {
+  id?: NavItemId;
   name: string;
   icon: React.ReactNode;
   path?: string;
@@ -37,117 +33,81 @@ type NavItem = {
 };
 
 type NavSection = {
+  id?: NavSectionId;
   label: string | null;
   items: NavItem[];
 };
 
 type TFunc = (key: string) => string;
 
-export const getNavSections = (t: TFunc, isAdmin: boolean): NavSection[] => [
-  {
-    label: null,
-    items: [
-      {
-        icon: <CiGrid41 size={"1.5rem"} />,
-        name: t("nav.dashboard"),
-        path: "/dashboard",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.core"),
-    items: [
-      {
-        icon: <BiBell size={"1.5rem"} />,
-        name: t("nav.reminders"),
-        path: "/reminders",
-      },
-      {
-        icon: <BiNote size={"1.5rem"} />,
-        name: t("nav.notes"),
-        path: "/notes",
-      },
-      {
-        icon: <BiFolder size={"1.5rem"} />,
-        name: t("nav.projects"),
-        path: "/projects",
-      },
-      {
-        icon: <BiLockAlt size={"1.5rem"} />,
-        name: t("nav.vault"),
-        path: "/vault",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.daily"),
-    items: [
-      {
-        icon: <BiArchiveIn size={"1.5rem"} />,
-        name: t("nav.inbox"),
-        path: "/inbox",
-      },
-      {
-        icon: <BiCalendarWeek size={"1.5rem"} />,
-        name: t("nav.week"),
-        path: "/week",
-      },
-      {
-        icon: <BiCalendar size={"1.5rem"} />,
-        name: t("nav.calendar"),
-        path: "/month",
-      },
-      {
-        icon: <BiTargetLock size={"1.5rem"} />,
-        name: t("nav.goals"),
-        path: "/goals",
-      },
-      {
-        icon: <HiOutlineClock size={"1.5rem"} />,
-        name: t("nav.evkat"),
-        path: "/evkat",
-      },
-      {
-        icon: <BiBookOpen size={"1.5rem"} />,
-        name: t("nav.learning"),
-        path: "/learning",
-      },
-      {
-        icon: <BiDumbbell size={"1.5rem"} />,
-        name: t("nav.sport"),
-        path: "/sport",
-      },
-    ],
-  },
-  {
-    label: t("nav.section.system"),
-    items: [
-      ...(isAdmin
-        ? [
-            {
-              icon: <BiShield size={"1.5rem"} />,
-              name: t("nav.admin"),
-              subItems: [{ name: t("nav.adminUsers"), path: "/admin/users" }],
-            } as NavItem,
-          ]
-        : []),
-      {
-        icon: <CiSettings size={"1.5rem"} />,
-        name: t("nav.settings"),
-        subItems: [
-          { name: t("nav.profile"), path: "/settings/profile" },
-          { name: t("nav.integrations"), path: "/settings/integrations" },
-        ],
-      },
-    ],
-  },
-];
+const registryItems = (t: TFunc, ids: NavItemId[]): NavItem[] =>
+  ids.map((id) => {
+    const { key, path, icon: Icon } = NAV_REGISTRY[id];
+    return { id, icon: <Icon size={"1.5rem"} />, name: t(key), path };
+  });
+
+export const getNavSections = (
+  t: TFunc,
+  isAdmin: boolean,
+  navPreferences?: NavPreferences | null,
+): NavSection[] => {
+  const order = resolveNavOrder(navPreferences);
+  return [
+    {
+      label: null,
+      items: [
+        {
+          icon: <CiGrid41 size={"1.5rem"} />,
+          name: t("nav.dashboard"),
+          path: "/dashboard",
+        },
+      ],
+    },
+    { id: "core", label: t("nav.section.core"), items: registryItems(t, order.core) },
+    { id: "daily", label: t("nav.section.daily"), items: registryItems(t, order.daily) },
+    {
+      label: t("nav.section.system"),
+      items: [
+        ...(isAdmin
+          ? [
+              {
+                icon: <BiShield size={"1.5rem"} />,
+                name: t("nav.admin"),
+                subItems: [{ name: t("nav.adminUsers"), path: "/admin/users" }],
+              } as NavItem,
+            ]
+          : []),
+        {
+          icon: <CiSettings size={"1.5rem"} />,
+          name: t("nav.settings"),
+          subItems: [
+            { name: t("nav.profile"), path: "/settings/profile" },
+            { name: t("nav.integrations"), path: "/settings/integrations" },
+          ],
+        },
+      ],
+    },
+  ];
+};
 const AppSidebar: React.FC = () => {
   const { isExpanded, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
+  const navPreferences = user?.navPreferences ?? null;
+  const sections = getNavSections(t, isAdmin, navPreferences);
+
+  const [editRequested, setEditRequested] = useState(false);
+  // Edit only while pinned open: a hover-expanded sidebar collapses when the pointer leaves, which would drop the draft.
+  const editing = editRequested && isExpanded;
+  const updateNav = useUpdateNavPreferences();
+  const resetNav = useResetNavPreferences();
+  const closeEditor = () => {
+    updateNav.reset();
+    resetNav.reset();
+    setEditRequested(false);
+  };
 
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
@@ -159,7 +119,7 @@ const AppSidebar: React.FC = () => {
 
   useEffect(() => {
     let submenuMatched = false;
-    getNavSections(t, isAdmin).forEach((section, sectionIndex) => {
+    getNavSections(t, isAdmin, navPreferences).forEach((section, sectionIndex) => {
       section.items.forEach((nav, itemIndex) => {
         nav.subItems?.forEach((subItem) => {
           if (isActive(subItem.path)) {
@@ -170,7 +130,7 @@ const AppSidebar: React.FC = () => {
       });
     });
     if (!submenuMatched) setOpenSubmenu(null);
-  }, [pathname, isActive, t, isAdmin]);
+  }, [pathname, isActive, t, isAdmin, navPreferences]);
 
   useEffect(() => {
     if (openSubmenu !== null && subMenuRefs.current[openSubmenu]) {
@@ -190,7 +150,7 @@ const AppSidebar: React.FC = () => {
       {navItems.map((nav, itemIndex) => {
         const key = `${sectionIndex}-${itemIndex}`;
         return (
-          <li key={nav.name}>
+          <li key={nav.id ?? nav.name}>
             {nav.subItems
               ? (() => {
                   const isChildActive = nav.subItems?.some((sub) => isActive(sub.path)) ?? false;
@@ -292,24 +252,53 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col">
-            {getNavSections(t, isAdmin).map((section, sectionIndex) => (
-              <div key={section.label ?? "top"}>
-                {section.label &&
-                  (showText ? (
-                    <div className="px-3 pt-4 pb-1 text-[10px] font-mono uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-                      {section.label}
-                    </div>
-                  ) : (
-                    <div
-                      aria-hidden
-                      className="my-2 text-center text-xs leading-none tracking-widest text-gray-300 dark:text-gray-600 select-none"
-                    >
-                      ···
-                    </div>
-                  ))}
-                {renderMenuItems(section.items, sectionIndex)}
-              </div>
-            ))}
+            {sections.map((section, sectionIndex) => {
+              const isEditable = section.id === "core" || section.id === "daily";
+              if (editing && isEditable) return null;
+              return (
+                <React.Fragment key={section.label ?? "top"}>
+                  <div>
+                    {section.label &&
+                      (showText ? (
+                        <div className="px-3 pt-4 pb-1 text-[10px] font-mono uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                          {section.label}
+                        </div>
+                      ) : (
+                        <div
+                          aria-hidden
+                          className="my-2 text-center text-xs leading-none tracking-widest text-gray-300 dark:text-gray-600 select-none"
+                        >
+                          ···
+                        </div>
+                      ))}
+                    {renderMenuItems(section.items, sectionIndex)}
+                  </div>
+                  {editing && sectionIndex === 0 && (
+                    <DndProvider backend={HTML5Backend}>
+                      <NavEditor
+                        order={resolveNavOrder(navPreferences)}
+                        saving={updateNav.isPending || resetNav.isPending}
+                        error={updateNav.isError || resetNav.isError}
+                        onSave={(order) =>
+                          updateNav.mutate(toNavPreferences(order), { onSuccess: closeEditor })
+                        }
+                        onReset={() => resetNav.mutate(undefined, { onSuccess: closeEditor })}
+                        onCancel={closeEditor}
+                      />
+                    </DndProvider>
+                  )}
+                </React.Fragment>
+              );
+            })}
+            {isExpanded && !editing && (
+              <button
+                type="button"
+                onClick={() => setEditRequested(true)}
+                className="mx-3 mt-3 self-start text-xs text-gray-400 hover:text-husrev-ember"
+              >
+                {t("nav.edit.start")}
+              </button>
+            )}
           </div>
         </nav>
 

@@ -1,6 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { TimeBlockService } from './time-block.service';
+import { ApiException } from '../common/api.exception';
 import { TimeBlock } from './time-block.entity';
 import { NotificationService } from '../notification/notification.service';
 import { ItemMirrorService } from '../item-mirror/item-mirror.service';
@@ -62,6 +63,23 @@ describe('TimeBlockService', () => {
     }).compile();
 
     service = module.get(TimeBlockService);
+  });
+
+  describe('get', () => {
+    it('returns the owner-scoped time block as a DTO', async () => {
+      blocks.findOne.mockResolvedValueOnce(sampleBlock);
+
+      const result = await service.get(ownerId, '40');
+
+      expect(blocks.findOne).toHaveBeenCalledWith({ where: { id: '40', ownerId } });
+      expect(result).toMatchObject({ id: '40', title: 'Deep Work' });
+    });
+
+    it('throws notFound for a missing or foreign time block', async () => {
+      blocks.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.get(ownerId, '404')).rejects.toBeInstanceOf(ApiException);
+    });
   });
 
   describe('mirror hooks', () => {

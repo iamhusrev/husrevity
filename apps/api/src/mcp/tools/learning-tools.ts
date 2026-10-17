@@ -9,6 +9,42 @@ export interface LearningToolDeps {
 
 export function registerLearningTools(server: McpServer, deps: LearningToolDeps) {
   server.registerTool<any, any>(
+    'get_learning_topic',
+    {
+      description: 'Get a learning topic by ID, including its direct items and subtopics',
+      inputSchema: { id: z.string().describe('Learning topic ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'learning:read');
+      return textResult(await deps.learningService.getTopic(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_learning_subtopic',
+    {
+      description: 'Get a learning subtopic by ID, including its items',
+      inputSchema: { id: z.string().describe('Learning subtopic ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'learning:read');
+      return textResult(await deps.learningService.getSubtopic(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_learning_item',
+    {
+      description: 'Get a single learning item by ID',
+      inputSchema: { id: z.string().describe('Learning item ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'learning:read');
+      return textResult(await deps.learningService.getItem(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'list_learning',
     {
       description: 'List learning topics, with their nested subtopics and items.',

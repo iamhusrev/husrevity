@@ -65,6 +65,57 @@ describe('ReminderService', () => {
     service = module.get(ReminderService);
   });
 
+  describe('getReminder', () => {
+    it('returns the owner-scoped reminder as a DTO', async () => {
+      reminders.findOne.mockResolvedValueOnce({
+        id: '5',
+        ownerId,
+        title: 'Pay rent',
+        createdAt: new Date(),
+      });
+
+      const result = await service.getReminder(ownerId, '5');
+
+      expect(reminders.findOne).toHaveBeenCalledWith({ where: { id: '5', ownerId } });
+      expect(result).toMatchObject({ id: '5', title: 'Pay rent' });
+    });
+
+    it('throws notFound for a missing or foreign reminder', async () => {
+      reminders.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.getReminder(ownerId, '404')).rejects.toBeInstanceOf(ApiException);
+    });
+  });
+
+  describe('getList', () => {
+    it('returns the owner-scoped list with its open reminder count', async () => {
+      lists.findOne.mockResolvedValueOnce({
+        id: '9',
+        ownerId,
+        name: 'Groceries',
+        color: '#007AFF',
+        icon: null,
+        position: 0,
+        createdAt: new Date(),
+      });
+      reminders.count.mockResolvedValueOnce(4);
+
+      const result = await service.getList(ownerId, '9');
+
+      expect(lists.findOne).toHaveBeenCalledWith({ where: { id: '9', ownerId } });
+      expect(reminders.count).toHaveBeenCalledWith({
+        where: { listId: '9', completedAt: expect.anything() },
+      });
+      expect(result).toMatchObject({ id: '9', name: 'Groceries' });
+    });
+
+    it('throws notFound for a missing or foreign list', async () => {
+      lists.findOne.mockResolvedValueOnce(null);
+
+      await expect(service.getList(ownerId, '404')).rejects.toBeInstanceOf(ApiException);
+    });
+  });
+
   describe('restoreList', () => {
     const id = '10';
     const deletedRow = {

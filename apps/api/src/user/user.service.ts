@@ -4,7 +4,12 @@ import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { ApiException } from '../common/api.exception';
-import { ChangePasswordDto, NotificationPreferencesDto, UpdateProfileDto } from './user.dto';
+import {
+  ChangePasswordDto,
+  NavPreferencesDto,
+  NotificationPreferencesDto,
+  UpdateProfileDto,
+} from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -42,6 +47,23 @@ export class UserService {
   async updateNotificationPreferences(id: string, dto: NotificationPreferencesDto): Promise<User> {
     const u = await this.requireById(id);
     if (dto.email !== undefined) u.emailNotificationsEnabled = dto.email;
+    return this.users.save(u);
+  }
+
+  async updateNavPreferences(id: string, dto: NavPreferencesDto): Promise<User> {
+    const u = await this.requireById(id);
+    const { core, daily } = dto.sections;
+    const all = [...core, ...daily];
+    if (new Set(all).size !== all.length) {
+      throw ApiException.badRequest('Duplicate menu item in nav preferences');
+    }
+    u.navPreferences = { sections: { core: [...core], daily: [...daily] } };
+    return this.users.save(u);
+  }
+
+  async resetNavPreferences(id: string): Promise<User> {
+    const u = await this.requireById(id);
+    u.navPreferences = null;
     return this.users.save(u);
   }
 

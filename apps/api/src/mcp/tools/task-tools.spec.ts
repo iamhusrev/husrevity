@@ -28,6 +28,41 @@ describe('task-tools', () => {
 
   const getHandler = (name: string) => (server as any)._registeredTools[name]?.handler;
 
+  describe('project resolution (list_tasks / create_task)', () => {
+    const auth = { authInfo: { scopes: ['projects:read', 'projects:write'], extra: { ownerId: 'u1' } } };
+    const owned = { id: '7', name: 'Acme', code: 'ACME' };
+    const shared = { id: '8', name: 'Shared', code: 'SHR' };
+
+    beforeEach(() => {
+      projectService.list.mockResolvedValue([owned, shared]);
+    });
+
+    it("list_tasks resolves an owned or shared project by name from list(..., 'all')", async () => {
+      taskService.listForProject.mockResolvedValue([]);
+
+      await getHandler('list_tasks')({ project: 'shared' }, auth);
+
+      expect(projectService.list).toHaveBeenCalledWith('u1', 'all');
+      expect(taskService.listForProject).toHaveBeenCalledWith('u1', '8');
+    });
+
+    it('create_task resolves the project by code and creates the task in it', async () => {
+      taskService.createForProject.mockResolvedValue({ id: 't1' });
+
+      await getHandler('create_task')({ project: 'ACME', title: 'Do it' }, auth);
+
+      expect(projectService.list).toHaveBeenCalledWith('u1', 'all');
+      expect(taskService.createForProject).toHaveBeenCalledWith('u1', '7', expect.objectContaining({ title: 'Do it' }));
+    });
+
+    it('create_task reports the available projects when none matches', async () => {
+      await expect(
+        getHandler('create_task')({ project: 'nope', title: 'x' }, auth),
+      ).rejects.toThrow("Project not found: 'nope'. Available: Acme, Shared");
+      expect(taskService.createForProject).not.toHaveBeenCalled();
+    });
+  });
+
   describe('update_task', () => {
     it('should preserve omitted fields and assigneeId', async () => {
       taskService.get.mockResolvedValueOnce({

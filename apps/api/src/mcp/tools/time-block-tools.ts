@@ -9,6 +9,18 @@ export interface TimeBlockToolsDeps {
 
 export function registerTimeBlockTools(server: McpServer, deps: TimeBlockToolsDeps) {
   server.registerTool<any, any>(
+    'get_time_block',
+    {
+      description: 'Get a time block by ID',
+      inputSchema: { id: z.string().describe('Time block ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'timeblocks:read');
+      return textResult(await deps.timeBlockService.get(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'list_time_blocks',
     {
       description: 'List time blocks. Provide either date (YYYY-MM-DD) or both from and to (ISO 8601).',

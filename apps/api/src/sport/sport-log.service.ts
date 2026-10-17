@@ -160,6 +160,10 @@ export class SportLogService {
     }
   }
 
+  async getLog(ownerId: string, id: string): Promise<LogResponseDto> {
+    return LogResponseDto.from(await this.requireLog(ownerId, id));
+  }
+
   private async requireLog(ownerId: string, id: string): Promise<SportLog> {
     const log = await this.logs.findOne({ where: { id, ownerId } });
     if (!log) throw ApiException.notFound('Sport log not found');

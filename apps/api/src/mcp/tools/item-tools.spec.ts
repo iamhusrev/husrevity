@@ -58,6 +58,30 @@ describe('item-tools', () => {
 
   const getHandler = (name: string) => (server as any)._registeredTools[name]?.handler;
 
+  describe('search kinds input schema', () => {
+    const schema = () => (server as any)._registeredTools['search'].inputSchema;
+
+    it.each(['note', 'notes', 'item', 'items', 'task', 'event', 'log'])(
+      'accepts kind %s',
+      (kind) => {
+        expect(schema().safeParse({ query: 'x', kinds: [kind] }).success).toBe(true);
+      },
+    );
+
+    it('accepts no kinds at all', () => {
+      expect(schema().safeParse({ query: 'x' }).success).toBe(true);
+    });
+
+    // McpSearchService only matches the kinds above, so any other value used to switch both
+    // searches off and silently return an empty list.
+    it.each(['all', 'reminder', 'project', 'tasks'])(
+      'rejects unknown kind %s instead of silently returning nothing',
+      (kind) => {
+        expect(schema().safeParse({ query: 'x', kinds: [kind] }).success).toBe(false);
+      },
+    );
+  });
+
   const parseResult = (res: any) => JSON.parse(res.content[0].text);
 
   describe('create_item', () => {

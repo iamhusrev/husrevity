@@ -317,7 +317,7 @@ export function registerItemTools(server: McpServer, deps: ItemToolsDeps) {
       inputSchema: {
         query: z.string().describe('Search query string to match titles against'),
         kinds: z
-          .array(z.string())
+          .array(z.enum(['note', 'notes', 'item', 'items', 'task', 'event', 'log']))
           .optional()
           .describe(
             'Optional filter for result types (e.g. ["item", "note"] or ["task", "event", "log"])',
@@ -456,6 +456,34 @@ export function registerItemTools(server: McpServer, deps: ItemToolsDeps) {
           };
 
       return textResult(result);
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_change_set',
+    {
+      description: 'Get one mutation change set by ID, including its entries, for undo inspection',
+      inputSchema: {
+        id: z
+          .string()
+          .max(19)
+          .regex(/^\d{1,19}$/, 'Must be a numeric ID (1-19 digits)')
+          .describe('Change set ID'),
+      },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'items:read');
+      if (!isValidNumericId(params?.id)) {
+        return textResult({ error: 'Invalid id: must be a numeric ID (1-19 digits)' });
+      }
+      try {
+        return textResult(await deps.changeSetService.get(ownerId, params.id));
+      } catch (err: any) {
+        if (err instanceof ApiException) {
+          return textResult({ error: err.message });
+        }
+        throw err;
+      }
     },
   );
 

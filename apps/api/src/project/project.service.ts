@@ -6,11 +6,10 @@ import { ProjectMember, ProjectRole } from './project-member.entity';
 import { ProjectAccessService } from './project-access.service';
 import { ApiException } from '../common/api.exception';
 import { ProjectRequestDto, ProjectResponseDto, ProjectUpdateRequestDto } from './dto/project-dtos';
+import { ProjectListFilter } from './dto/project-list-query.dto';
 import { Goal } from '../goal/goal.entity';
 import { GoalService } from '../goal/goal.service';
 import { isValidNumericId } from '../common/numeric-id.pipe';
-
-type ProjectListFilter = 'all' | 'mine' | 'shared';
 
 interface ProjectListRow {
   id: string;
@@ -46,6 +45,8 @@ export class ProjectService {
   ) {}
 
   async list(userId: string, filter?: ProjectListFilter): Promise<ProjectResponseDto[]> {
+    // The SQL below has no 'all' branch, so 'all' must reach it as NULL (no scope restriction).
+    const scope = filter === 'all' ? null : (filter ?? null);
     const rows: ProjectListRow[] = await this.dataSource.query(
       `SELECT p.*, m.role AS my_role, mc.cnt AS member_count,
               o.first_name AS owner_first_name, o.last_name AS owner_last_name
@@ -57,7 +58,7 @@ export class ProjectService {
        WHERE p.deleted_at IS NULL
          AND ($2::text IS NULL OR ($2 = 'mine' AND p.owner_id = $1) OR ($2 = 'shared' AND p.owner_id <> $1))
        ORDER BY p.pinned DESC, p.updated_at DESC`,
-      [userId, filter ?? null],
+      [userId, scope],
     );
     return rows.map((row) => this.mapListRow(row));
   }

@@ -80,6 +80,30 @@ export function registerReminderTools(server: McpServer, deps: ReminderToolsDeps
   );
 
   server.registerTool<any, any>(
+    'get_reminder_list',
+    {
+      description: 'Get a reminder list by ID, including its open reminder count',
+      inputSchema: { id: z.string().describe('Reminder list ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckAnyScope(extra, ['reminders:read', 'items:read']);
+      return textResult(await deps.reminderService.getList(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_reminder',
+    {
+      description: 'Get a reminder by ID',
+      inputSchema: { id: z.string().describe('Reminder ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckAnyScope(extra, ['reminders:read', 'items:read']);
+      return textResult(await deps.reminderService.getReminder(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'update_reminder',
     {
       description: 'Update a reminder. Omitted fields are not changed.',

@@ -8,9 +8,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
+let navPreferences: unknown = null;
 vi.mock("@/providers/AuthProvider", () => ({
   useAuth: () => ({
-    user: { role: "user" },
+    user: { role: "user", navPreferences },
   }),
 }));
 
@@ -122,5 +123,27 @@ describe("MobileBottomNav", () => {
     expect(screen.getByRole("dialog", { name: "More" })).toBeInTheDocument();
     await user.click(dialog.parentElement as HTMLElement);
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("lists the More sheet in the saved order and keeps bottom-bar items out of it", async () => {
+    const user = userEvent.setup();
+    navPreferences = {
+      sections: {
+        core: ["vault", "notes", "reminders", "projects"],
+        daily: ["sport", "inbox", "week", "month", "goals", "evkat", "learning"],
+      },
+    };
+    renderNav();
+    await user.click(screen.getByRole("button", { name: /More/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    const hrefs = within(dialog)
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("href"));
+    expect(hrefs.slice(0, 3)).toEqual(["/vault", "/projects", "/sport"]);
+    expect(hrefs).not.toContain("/notes");
+    expect(hrefs).not.toContain("/reminders");
+    expect(hrefs).not.toContain("/month");
+    navPreferences = null;
   });
 });

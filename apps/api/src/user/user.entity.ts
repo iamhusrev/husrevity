@@ -1,5 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../common/base.entity';
+import { NavPreferences } from './nav-items';
 
 /**
  * `email` uniqueness is enforced only on live rows via the partial index
@@ -45,4 +46,8 @@ export class User extends BaseEntity {
    */
   @Column({ type: 'varchar', length: 16, default: 'user' })
   role!: string;
+
+  /** Per-user sidebar order; null means the built-in default order. */
+  @Column({ name: 'nav_preferences', type: 'jsonb', nullable: true })
+  navPreferences!: NavPreferences | null;
 }

@@ -903,11 +903,12 @@ describe('McpServerFactory', () => {
   });
 
   describe('goal tools registration', () => {
-    it('registers all 5 goal tools and routes calls with PAT scopes', async () => {
+    it('registers all 6 goal tools and routes calls with PAT scopes', async () => {
       const server = factory.createMcpServer();
       const tools = (server as any)._registeredTools || {};
 
       expect(tools['list_goals']).toBeDefined();
+      expect(tools['get_goal']).toBeDefined();
       expect(tools['create_goal']).toBeDefined();
       expect(tools['update_goal']).toBeDefined();
       expect(tools['link_to_goal']).toBeDefined();

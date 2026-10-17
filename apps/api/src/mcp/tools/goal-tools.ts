@@ -28,6 +28,30 @@ const MAX_LINK_ITEMS = 50;
 const MAX_LINK_PROJECTS = 20;
 
 export function registerGoalTools(server: McpServer, deps: GoalToolsDeps) {
+  // get_goal
+  server.registerTool(
+    'get_goal',
+    {
+      description: 'Get a single goal by numeric ID, including its progress',
+      inputSchema: {
+        id: z.string().describe('Numeric goal ID'),
+      },
+    },
+    async (params, extra) => {
+      const { ownerId } = getOwnerAndCheckScope(extra as unknown as McpExtra, 'goals:read');
+      const id = String((params as Record<string, unknown> | undefined)?.id ?? '');
+      if (!isValidNumericId(id)) {
+        return toolError('Invalid id: must be a numeric ID (1-19 digits)');
+      }
+      try {
+        return textResult(await deps.goalService.get(ownerId, id));
+      } catch (err: any) {
+        if (err instanceof ApiException) return toolError(err.message);
+        throw err;
+      }
+    },
+  );
+
   // 1. list_goals
   server.registerTool(
     'list_goals',

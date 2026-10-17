@@ -153,7 +153,17 @@
     },
     "more": "More",
     "integrations": "Integrations",
-    "goals": "Goals"
+    "goals": "Goals",
+    "edit": {
+      "start": "Edit menu",
+      "done": "Done",
+      "cancel": "Cancel",
+      "reset": "Reset to default",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "drag": "Drag to reorder",
+      "error": "Could not save the menu order"
+    }
   },
   "admin": {
     "kicker": "Admin",

@@ -14,6 +14,8 @@ describe('reminder-tools', () => {
       deleteList: jest.fn(),
       restoreList: jest.fn(),
       listReminders: jest.fn(),
+      getReminder: jest.fn(),
+      getList: jest.fn(),
       createReminder: jest.fn(),
       updateReminder: jest.fn(),
       toggleReminder: jest.fn(),
@@ -25,6 +27,36 @@ describe('reminder-tools', () => {
 
   const getHandler = (name: string) => (server as any)._registeredTools[name]?.handler;
 
+  describe.each([
+    ['get_reminder', 'getReminder', 'r1'],
+    ['get_reminder_list', 'getList', 'l1'],
+  ])('%s', (tool, method, id) => {
+    it('should throw Unauthorized when auth is missing', async () => {
+      await expect(getHandler(tool)({ id }, {})).rejects.toThrow('Unauthorized');
+    });
+
+    it('should throw Forbidden when scope is missing', async () => {
+      await expect(
+        getHandler(tool)({ id }, { authInfo: { scopes: ['wrong'], extra: { ownerId: 'u1' } } }),
+      ).rejects.toThrow(/Forbidden: missing required scope/);
+    });
+
+    it.each(['reminders:read', 'items:read'])(
+      'returns the entity scoped to the owner with %s',
+      async (scope) => {
+        reminderService[method].mockResolvedValueOnce({ id });
+
+        const res = await getHandler(tool)(
+          { id },
+          { authInfo: { scopes: [scope], extra: { ownerId: 'u1' } } },
+        );
+
+        expect(reminderService[method]).toHaveBeenCalledWith('u1', id);
+        expect(JSON.parse(res.content[0].text)).toEqual({ id });
+      },
+    );
+  });
+
   describe('create_reminder', () => {
     it('should throw Unauthorized when auth is missing', async () => {
       await expect(getHandler('create_reminder')({}, {})).rejects.toThrow('Unauthorized');
@@ -32,7 +64,10 @@ describe('reminder-tools', () => {
 
     it('should throw Forbidden when scope is missing', async () => {
       await expect(
-        getHandler('create_reminder')({}, { authInfo: { scopes: ['wrong'], extra: { ownerId: 'u1' } } })
+        getHandler('create_reminder')(
+          {},
+          { authInfo: { scopes: ['wrong'], extra: { ownerId: 'u1' } } },
+        ),
       ).rejects.toThrow(/Forbidden: missing required scope 'reminders:write'/);
     });
 
@@ -40,9 +75,12 @@ describe('reminder-tools', () => {
       reminderService.createReminder.mockResolvedValueOnce({ id: 'r1' });
       await getHandler('create_reminder')(
         { title: 'T' },
-        { authInfo: { scopes: ['items:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['items:write'], extra: { ownerId: 'u1' } } },
       );
-      expect(reminderService.createReminder).toHaveBeenCalledWith('u1', expect.objectContaining({ title: 'T' }));
+      expect(reminderService.createReminder).toHaveBeenCalledWith(
+        'u1',
+        expect.objectContaining({ title: 'T' }),
+      );
     });
   });
 
@@ -54,7 +92,7 @@ describe('reminder-tools', () => {
       reminderService.updateReminder.mockResolvedValueOnce({ id: 'r1' });
       await getHandler('update_reminder')(
         { id: 'r1', title: 'New' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.updateReminder).toHaveBeenCalledWith('u1', 'r1', {
         title: 'New',
@@ -75,19 +113,17 @@ describe('reminder-tools', () => {
       ]);
       await getHandler('complete_reminder')(
         { id: 'r1' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.toggleReminder).not.toHaveBeenCalled();
     });
 
     it('should toggle if not completed', async () => {
-      reminderService.listReminders.mockResolvedValueOnce([
-        { id: 'r1', completedAt: null },
-      ]);
+      reminderService.listReminders.mockResolvedValueOnce([{ id: 'r1', completedAt: null }]);
       reminderService.toggleReminder.mockResolvedValueOnce({ id: 'r1', completedAt: '2026-10-09' });
       await getHandler('complete_reminder')(
         { id: 'r1' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.toggleReminder).toHaveBeenCalledWith('u1', 'r1');
     });
@@ -95,12 +131,10 @@ describe('reminder-tools', () => {
 
   describe('reopen_reminder', () => {
     it('should not toggle if not completed', async () => {
-      reminderService.listReminders.mockResolvedValueOnce([
-        { id: 'r1', completedAt: null },
-      ]);
+      reminderService.listReminders.mockResolvedValueOnce([{ id: 'r1', completedAt: null }]);
       await getHandler('reopen_reminder')(
         { id: 'r1' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.toggleReminder).not.toHaveBeenCalled();
     });
@@ -112,7 +146,7 @@ describe('reminder-tools', () => {
       reminderService.toggleReminder.mockResolvedValueOnce({ id: 'r1', completedAt: null });
       await getHandler('reopen_reminder')(
         { id: 'r1' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.toggleReminder).toHaveBeenCalledWith('u1', 'r1');
     });
@@ -123,7 +157,7 @@ describe('reminder-tools', () => {
       reminderService.restoreReminder.mockResolvedValueOnce({ id: 'r1' });
       await getHandler('restore_reminder')(
         { id: 'r1' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.restoreReminder).toHaveBeenCalledWith('u1', 'r1');
     });
@@ -137,7 +171,7 @@ describe('reminder-tools', () => {
       reminderService.updateList.mockResolvedValueOnce({ id: 'l1' });
       await getHandler('update_reminder_list')(
         { id: 'l1', name: 'New' },
-        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } }
+        { authInfo: { scopes: ['reminders:write'], extra: { ownerId: 'u1' } } },
       );
       expect(reminderService.updateList).toHaveBeenCalledWith('u1', 'l1', {
         name: 'New',

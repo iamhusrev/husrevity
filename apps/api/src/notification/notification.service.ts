@@ -108,6 +108,15 @@ export class NotificationService {
     return rows.map(NotificationResponseDto.from);
   }
 
+  async get(ownerId: string, id: string): Promise<NotificationResponseDto> {
+    const n = await this.notifications.findOne({ where: { id, ownerId } });
+    // Same visibility rule as listForOwner: dispatched, or already due.
+    if (!n || (!n.dispatchedAt && n.scheduledAt.getTime() > Date.now())) {
+      throw ApiException.notFound('Notification not found');
+    }
+    return NotificationResponseDto.from(n);
+  }
+
   async unreadCount(ownerId: string): Promise<number> {
     return this.notifications
       .createQueryBuilder('n')

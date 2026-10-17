@@ -14,6 +14,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { ProjectRequestDto, ProjectResponseDto, ProjectUpdateRequestDto } from './dto/project-dtos';
+import { ProjectListQueryDto } from './dto/project-list-query.dto';
 import { CurrentUser, AuthenticatedUser } from '../common/current-user.decorator';
 import { NumericIdPipe } from '../common/numeric-id.pipe';
 
@@ -26,9 +27,9 @@ export class ProjectController {
   @Get()
   list(
     @CurrentUser() u: AuthenticatedUser,
-    @Query('filter') filter?: 'all' | 'mine' | 'shared',
+    @Query() query: ProjectListQueryDto,
   ): Promise<ProjectResponseDto[]> {
-    return this.projects.list(u.userId, filter);
+    return this.projects.list(u.userId, query.filter);
   }
 
   @Get(':projectId')

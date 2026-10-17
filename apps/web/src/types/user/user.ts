@@ -12,6 +12,27 @@ export interface UserResponse {
   emailNotificationsEnabled: boolean;
   /** 'user' | 'admin'. Admin-only sections of the app are gated by this. */
   role: string;
+  /** Saved sidebar order; null means the built-in default order. */
+  navPreferences: NavPreferences | null;
+}
+
+export type NavItemId =
+  | "reminders"
+  | "notes"
+  | "projects"
+  | "vault"
+  | "inbox"
+  | "week"
+  | "month"
+  | "goals"
+  | "evkat"
+  | "learning"
+  | "sport";
+
+export type NavSectionId = "core" | "daily";
+
+export interface NavPreferences {
+  sections: Record<NavSectionId, NavItemId[]>;
 }
 
 /** Lightweight profile for pickers/directories — not the full `UserResponse`. */

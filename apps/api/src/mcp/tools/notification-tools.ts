@@ -9,6 +9,18 @@ export interface NotificationToolDeps {
 
 export function registerNotificationTools(server: McpServer, deps: NotificationToolDeps) {
   server.registerTool<any, any>(
+    'get_notification',
+    {
+      description: 'Get a single notification by ID',
+      inputSchema: { id: z.string().describe('Notification ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'notifications:read');
+      return textResult(await deps.notificationService.get(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'list_notifications',
     {
       description: 'List notifications for the user.',

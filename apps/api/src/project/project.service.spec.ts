@@ -136,7 +136,8 @@ describe('ProjectService', () => {
 
       const result = await service.list(ownerId, 'all');
 
-      expect(dataSource.query).toHaveBeenCalledWith(expect.any(String), [ownerId, 'all']);
+      // 'all' is normalized to NULL: the SQL has no 'all' branch, so passing it through returned no rows.
+      expect(dataSource.query).toHaveBeenCalledWith(expect.any(String), [ownerId, null]);
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({
         id: '10',
@@ -154,6 +155,17 @@ describe('ProjectService', () => {
         ownerName: null,
         shared: false,
       });
+    });
+
+    it("treats the 'all' filter exactly like no filter (the SQL has no 'all' branch)", async () => {
+      dataSource.query.mockResolvedValue([]);
+
+      await service.list(ownerId, 'all');
+      await service.list(ownerId);
+
+      const [allCall, noFilterCall] = dataSource.query.mock.calls;
+      expect(allCall[1]).toEqual([ownerId, null]);
+      expect(allCall).toEqual(noFilterCall);
     });
 
     it('passes a null filter through to the query when none is provided', async () => {

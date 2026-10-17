@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Notification, NotificationKind } from '../notification.entity';
 
 const KINDS: NotificationKind[] = [
@@ -43,7 +43,7 @@ export class NotificationResponseDto {
 export class NotificationListQueryDto {
   @ApiPropertyOptional({ description: 'If true, returns only unread items' })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => (value === 'true' ? true : value === 'false' ? false : value))
   @IsBoolean()
   unread?: boolean;
 

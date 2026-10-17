@@ -15,6 +15,30 @@ export interface SportToolDeps {
 
 export function registerSportTools(server: McpServer, deps: SportToolDeps) {
   server.registerTool<any, any>(
+    'get_sport_session',
+    {
+      description: 'Get a sport session by ID',
+      inputSchema: { id: z.string().describe('Session ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'sport:read');
+      return textResult(await deps.sportSessionService.getSession(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_sport_log',
+    {
+      description: 'Get a single sport log entry by ID',
+      inputSchema: { id: z.string().describe('Sport log ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'sport:read');
+      return textResult(await deps.sportLogService.getLog(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'log_sport_session',
     {
       description: 'Log a sport session or workout. This idempotent upsert per day overrides the existing log for the given date and session.',

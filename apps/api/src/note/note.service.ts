@@ -125,10 +125,18 @@ export class NoteService {
     return TagDto.from(await this.tags.save(tag));
   }
 
+  async getTag(ownerId: string, id: string): Promise<TagDto> {
+    return TagDto.from(await this.requireTag(ownerId, id));
+  }
+
   async deleteTag(ownerId: string, id: string): Promise<void> {
+    await this.tags.remove(await this.requireTag(ownerId, id));
+  }
+
+  private async requireTag(ownerId: string, id: string): Promise<NoteTag> {
     const tag = await this.tags.findOne({ where: { id, ownerId } });
     if (!tag) throw ApiException.notFound('Tag not found');
-    await this.tags.remove(tag);
+    return tag;
   }
 
   private async requireOwned(ownerId: string, id: string): Promise<Note> {

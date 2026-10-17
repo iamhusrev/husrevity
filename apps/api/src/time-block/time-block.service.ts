@@ -49,6 +49,10 @@ export class TimeBlockService {
     return rows.map(TimeBlockResponseDto.from);
   }
 
+  async get(ownerId: string, id: string): Promise<TimeBlockResponseDto> {
+    return TimeBlockResponseDto.from(await this.requireOwned(ownerId, id));
+  }
+
   async create(ownerId: string, req: TimeBlockRequestDto): Promise<TimeBlockResponseDto> {
     this.assertRange(req.startAt, req.endAt);
     const b = this.blocks.create({

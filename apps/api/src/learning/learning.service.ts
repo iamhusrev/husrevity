@@ -78,13 +78,28 @@ export class LearningService {
     const topic = await this.requireTopic(ownerId, id);
     topic.title = req.title;
     if (req.description !== undefined) topic.description = req.description ?? null;
-    const saved = await this.topics.save(topic);
+    return this.toTopicDto(await this.topics.save(topic));
+  }
+
+  async getTopic(ownerId: string, id: string): Promise<TopicResponseDto> {
+    return this.toTopicDto(await this.requireTopic(ownerId, id));
+  }
+
+  async getSubtopic(ownerId: string, id: string): Promise<SubtopicResponseDto> {
+    return this.toSubtopicDto(await this.requireSubtopic(ownerId, id));
+  }
+
+  async getItem(ownerId: string, id: string): Promise<ItemResponseDto> {
+    return ItemResponseDto.from(await this.requireItem(ownerId, id));
+  }
+
+  private async toTopicDto(topic: LearningTopic): Promise<TopicResponseDto> {
     const items = await this.items.find({
-      where: { topicId: saved.id },
+      where: { topicId: topic.id },
       order: { position: 'ASC', id: 'ASC' },
     });
     const subtopics = await this.subtopics.find({
-      where: { topicId: saved.id },
+      where: { topicId: topic.id },
       order: { position: 'ASC', id: 'ASC' },
     });
     const itemsBySubtopicId = new Map<string, LearningItem[]>();
@@ -99,12 +114,20 @@ export class LearningService {
       itemsBySubtopicId.set(item.subtopicId, bucket);
     }
     return TopicResponseDto.from(
-      saved,
+      topic,
       directItems,
       subtopics.map((subtopic) =>
         SubtopicResponseDto.from(subtopic, itemsBySubtopicId.get(subtopic.id) ?? []),
       ),
     );
+  }
+
+  private async toSubtopicDto(subtopic: LearningSubtopic): Promise<SubtopicResponseDto> {
+    const items = await this.items.find({
+      where: { subtopicId: subtopic.id },
+      order: { position: 'ASC', id: 'ASC' },
+    });
+    return SubtopicResponseDto.from(subtopic, items);
   }
 
   async deleteTopic(ownerId: string, id: string): Promise<void> {
@@ -154,12 +177,7 @@ export class LearningService {
     const subtopic = await this.requireSubtopic(ownerId, id);
     subtopic.title = req.title;
     if (req.description !== undefined) subtopic.description = req.description ?? null;
-    const saved = await this.subtopics.save(subtopic);
-    const items = await this.items.find({
-      where: { subtopicId: saved.id },
-      order: { position: 'ASC', id: 'ASC' },
-    });
-    return SubtopicResponseDto.from(saved, items);
+    return this.toSubtopicDto(await this.subtopics.save(subtopic));
   }
 
   async deleteSubtopic(ownerId: string, id: string): Promise<void> {

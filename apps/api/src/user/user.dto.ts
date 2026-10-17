@@ -1,4 +1,18 @@
-import { IsBoolean, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  MaxLength,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
+import { NAV_ITEM_IDS, NavItemId, NavPreferences } from './nav-items';
 import { User } from './user.entity';
 
 export class UpdateProfileDto {
@@ -27,6 +41,26 @@ export class NotificationPreferencesDto {
   email?: boolean;
 }
 
+export class NavSectionsDto {
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsIn(NAV_ITEM_IDS, { each: true })
+  core!: NavItemId[];
+
+  @IsArray()
+  @ArrayMaxSize(20)
+  @IsIn(NAV_ITEM_IDS, { each: true })
+  daily!: NavItemId[];
+}
+
+export class NavPreferencesDto implements NavPreferences {
+  @IsDefined()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => NavSectionsDto)
+  sections!: NavSectionsDto;
+}
+
 export class UserDto {
   id!: string;
   email!: string;
@@ -35,6 +69,7 @@ export class UserDto {
   enabled!: boolean;
   emailNotificationsEnabled!: boolean;
   role!: string;
+  navPreferences!: NavPreferences | null;
 
   static from(u: User): UserDto {
     return {
@@ -45,6 +80,7 @@ export class UserDto {
       enabled: u.enabled,
       emailNotificationsEnabled: u.emailNotificationsEnabled,
       role: u.role,
+      navPreferences: u.navPreferences ?? null,
     };
   }
 }

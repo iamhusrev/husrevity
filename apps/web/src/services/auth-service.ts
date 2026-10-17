@@ -7,6 +7,7 @@ import { AuthResponse } from "@/types/auth/auth-response";
 import { ApiResponse } from "@/types/common/api-response";
 import {
   ChangePasswordRequest,
+  NavPreferences,
   NotificationPreferencesRequest,
   UpdateProfileRequest,
   UserResponse,
@@ -84,6 +85,25 @@ export const AuthService = {
     const response = await apiClient.patch<ApiResponse<UserResponse>>(
       AUTH_ENDPOINTS.ME_NOTIFICATION_PREFERENCES,
       body,
+    );
+    const user = response.data.data;
+    AuthService.setStoredUser(user);
+    return user;
+  },
+
+  async updateNavPreferences(body: NavPreferences): Promise<UserResponse> {
+    const response = await apiClient.put<ApiResponse<UserResponse>>(
+      AUTH_ENDPOINTS.ME_NAV_PREFERENCES,
+      body,
+    );
+    const user = response.data.data;
+    AuthService.setStoredUser(user);
+    return user;
+  },
+
+  async resetNavPreferences(): Promise<UserResponse> {
+    const response = await apiClient.delete<ApiResponse<UserResponse>>(
+      AUTH_ENDPOINTS.ME_NAV_PREFERENCES,
     );
     const user = response.data.data;
     AuthService.setStoredUser(user);

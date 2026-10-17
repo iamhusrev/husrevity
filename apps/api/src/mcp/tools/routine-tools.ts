@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v3';
 import { RoutineService } from '../../routine/routine.service';
+import { ROUTINE_COLOR_TOKENS } from '../../routine/dto/routine-dtos';
 import { getOwnerAndCheckAnyScope, resolveByIdOrName, textResult } from './mcp-tool-helpers';
 
 export interface RoutineToolsDeps {
@@ -8,6 +9,30 @@ export interface RoutineToolsDeps {
 }
 
 export function registerRoutineTools(server: McpServer, deps: RoutineToolsDeps) {
+  server.registerTool<any, any>(
+    'get_evkat_segment',
+    {
+      description: 'Get an Evkat routine segment by ID, including its activities',
+      inputSchema: { id: z.string().describe('Segment ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckAnyScope(extra, ['routine:read', 'items:read']);
+      return textResult(await deps.routineService.getSegment(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
+    'get_evkat_item',
+    {
+      description: 'Get a single Evkat routine activity (item) by ID',
+      inputSchema: { id: z.string().describe('Activity ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckAnyScope(extra, ['routine:read', 'items:read']);
+      return textResult(await deps.routineService.getActivity(ownerId, params.id));
+    },
+  );
+
   server.registerTool<any, any>(
     'list_evkat',
     {
@@ -54,7 +79,7 @@ export function registerRoutineTools(server: McpServer, deps: RoutineToolsDeps) 
         startMinute: z.number().int().min(0).max(1439).optional().describe('Start minute of day (0-1439)'),
         endMinute: z.number().int().min(0).max(1439).optional().describe('End minute of day (0-1439)'),
         theme: z.string().optional().describe('Theme'),
-        colorToken: z.enum(['husrev-amber', 'ember', 'moss', 'ink', 'sand']).optional().describe('Color token'),
+        colorToken: z.enum(ROUTINE_COLOR_TOKENS).optional().describe('Color token'),
         daysOfWeek: z.number().int().min(1).max(127).optional().describe('Days of week bitmask (1-127)'),
         notes: z.string().optional().describe('Notes'),
       },
@@ -84,7 +109,7 @@ export function registerRoutineTools(server: McpServer, deps: RoutineToolsDeps) 
         startMinute: z.number().int().min(0).max(1439).optional().describe('Start minute of day (0-1439)'),
         endMinute: z.number().int().min(0).max(1439).optional().describe('End minute of day (0-1439)'),
         theme: z.string().optional().describe('Theme'),
-        colorToken: z.enum(['husrev-amber', 'ember', 'moss', 'ink', 'sand']).optional().describe('Color token'),
+        colorToken: z.enum(ROUTINE_COLOR_TOKENS).optional().describe('Color token'),
         daysOfWeek: z.number().int().min(1).max(127).optional().describe('Days of week bitmask (1-127)'),
         notes: z.string().optional().describe('Notes'),
       },

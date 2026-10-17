@@ -74,12 +74,23 @@ export class RoutineService {
     if (req.colorToken !== undefined) s.colorToken = req.colorToken ?? null;
     if (req.daysOfWeek !== undefined) s.daysOfWeek = req.daysOfWeek;
     if (req.notes !== undefined) s.notes = req.notes ?? null;
-    const saved = await this.segments.save(s);
+    return this.toSegmentDto(await this.segments.save(s));
+  }
+
+  async getSegment(ownerId: string, id: string): Promise<SegmentResponseDto> {
+    return this.toSegmentDto(await this.requireSegment(ownerId, id));
+  }
+
+  async getActivity(ownerId: string, activityId: string): Promise<ActivityResponseDto> {
+    return ActivityResponseDto.from(await this.requireActivity(ownerId, activityId));
+  }
+
+  private async toSegmentDto(segment: RoutineSegment): Promise<SegmentResponseDto> {
     const activities = await this.activities.find({
-      where: { segmentId: saved.id },
+      where: { segmentId: segment.id },
       order: { position: 'ASC', id: 'ASC' },
     });
-    return SegmentResponseDto.from(saved, activities);
+    return SegmentResponseDto.from(segment, activities);
   }
 
   async deleteSegment(ownerId: string, id: string): Promise<void> {

@@ -11,36 +11,33 @@ import {
   BiBell,
   BiNote,
   BiCalendar,
-  BiCalendarWeek,
-  BiArchiveIn,
-  BiTargetLock,
   BiDotsHorizontalRounded,
-  BiFolder,
-  BiDumbbell,
-  BiLockAlt,
   BiShield,
-  BiBookOpen,
   BiLink,
   BiPlus,
 } from "react-icons/bi";
-import { HiOutlineClock } from "react-icons/hi2";
 import { useAuth } from "@/providers/AuthProvider";
 import { useQuickAdd } from "@/providers/QuickAddContext";
+import type { NavItemId, NavPreferences } from "@/types/user/user";
+import { NAV_REGISTRY } from "@/utils/nav-items";
+import { resolveNavOrder } from "@/utils/nav-order";
 import { isNavItemActive } from "@/utils/navigation";
 import Dialog from "@/components/ui/Dialog";
 
 type MoreItem = { key: string; path: string; icon: IconType };
 
-const MORE_ITEMS: MoreItem[] = [
-  { key: "nav.inbox", path: "/inbox", icon: BiArchiveIn },
-  { key: "nav.week", path: "/week", icon: BiCalendarWeek },
-  { key: "nav.goals", path: "/goals", icon: BiTargetLock },
-  { key: "nav.projects", path: "/projects", icon: BiFolder },
-  { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock },
-  { key: "nav.learning", path: "/learning", icon: BiBookOpen },
-  { key: "nav.sport", path: "/sport", icon: BiDumbbell },
-  { key: "nav.vault", path: "/vault", icon: BiLockAlt },
-];
+/** Items already pinned to the bottom bar; the More sheet lists the rest in the user's saved order. */
+const BOTTOM_BAR_IDS: NavItemId[] = ["reminders", "notes", "month"];
+
+function getMoreItems(prefs: NavPreferences | null | undefined): MoreItem[] {
+  const { core, daily } = resolveNavOrder(prefs);
+  return [...core, ...daily]
+    .filter((id) => !BOTTOM_BAR_IDS.includes(id))
+    .map((id) => {
+      const { key, path, icon } = NAV_REGISTRY[id];
+      return { key, path, icon };
+    });
+}
 
 const INTEGRATIONS_ITEM: MoreItem = {
   key: "nav.integrations",
@@ -61,7 +58,7 @@ function MoreSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   const [mounted, setMounted] = useState(false);
 
   const items = [
-    ...MORE_ITEMS,
+    ...getMoreItems(user?.navPreferences),
     ...(user?.role === "admin" ? [ADMIN_ITEM] : []),
     INTEGRATIONS_ITEM,
     SETTINGS_ITEM,

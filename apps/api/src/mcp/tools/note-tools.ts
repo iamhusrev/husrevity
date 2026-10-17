@@ -9,6 +9,18 @@ export interface NoteToolsDeps {
 
 export function registerNoteTools(server: McpServer, deps: NoteToolsDeps) {
   server.registerTool<any, any>(
+    'get_note_tag',
+    {
+      description: 'Get a note tag by ID',
+      inputSchema: { id: z.string().describe('Note tag ID') },
+    },
+    async (params: any, extra: any) => {
+      const { ownerId } = getOwnerAndCheckScope(extra, 'notes:read');
+      return textResult(await deps.noteService.getTag(ownerId, params.id));
+    },
+  );
+
+  server.registerTool<any, any>(
     'create_note',
     {
       description: 'Create a new note with optional markdown body and pinned flag',

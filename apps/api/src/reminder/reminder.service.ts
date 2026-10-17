@@ -44,6 +44,12 @@ export class ReminderService {
     return out;
   }
 
+  async getList(ownerId: string, id: string): Promise<ReminderListResponseDto> {
+    const l = await this.requireList(ownerId, id);
+    const count = await this.reminders.count({ where: { listId: l.id, completedAt: IsNull() } });
+    return ReminderListResponseDto.from(l, count);
+  }
+
   async createList(ownerId: string, req: ReminderListRequestDto): Promise<ReminderListResponseDto> {
     const l = this.lists.create({
       ownerId,
@@ -241,6 +247,10 @@ export class ReminderService {
       body: formatLeadTimeBody(r.dueAt, r.notifyMinutesBefore ?? 0, r.notes),
       deepLink: '/reminders',
     });
+  }
+
+  async getReminder(ownerId: string, id: string): Promise<ReminderResponseDto> {
+    return ReminderResponseDto.from(await this.requireReminder(ownerId, id));
   }
 
   private async requireList(ownerId: string, id: string): Promise<ReminderList> {
