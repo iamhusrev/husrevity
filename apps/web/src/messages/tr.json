@@ -372,6 +372,8 @@
     "confirmDeleteItem": "Bu maddeyi silmek istediğine emin misin?",
     "addItem": "Madde ekle…",
     "addSubtopicItem": "Madde ekle…",
+    "emptyTopic": "Henüz bir şey yok. İlk maddeyi aşağıdan ekle.",
+    "emptySubtopic": "Henüz madde yok.",
     "progress": "{{done}}/{{total}}"
   },
   "notifications": {

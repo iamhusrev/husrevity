@@ -372,6 +372,8 @@
     "confirmDeleteItem": "Are you sure you want to delete this item?",
     "addItem": "Add item…",
     "addSubtopicItem": "Add item…",
+    "emptyTopic": "Nothing here yet. Add the first item below.",
+    "emptySubtopic": "No items yet.",
     "progress": "{{done}}/{{total}}"
   },
   "notifications": {

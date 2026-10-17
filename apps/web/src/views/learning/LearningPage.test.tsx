@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import LearningPage from "./LearningPage";
 import { verifyBackdropCloseFromTrigger, verifyDialogFromTrigger } from "@/test/dialog-contract";
@@ -15,7 +15,8 @@ vi.mock("react-i18next", async (importOriginal) => {
   };
 });
 
-const { mutation, topicsResult } = vi.hoisted(() => ({
+const { mutation, topicsResult, createItem } = vi.hoisted(() => ({
+  createItem: vi.fn(),
   mutation: () => ({ mutateAsync: vi.fn(), mutate: vi.fn(), isPending: false }),
   topicsResult: {
     data: [
@@ -93,7 +94,7 @@ const { mutation, topicsResult } = vi.hoisted(() => ({
 
 vi.mock("@/hooks/useLearning", () => ({
   useLearningTopics: () => topicsResult,
-  useCreateLearningItem: () => mutation(),
+  useCreateLearningItem: () => ({ mutateAsync: createItem, mutate: vi.fn(), isPending: false }),
   useCreateLearningSubtopic: () => mutation(),
   useCreateLearningTopic: () => mutation(),
   useDeleteLearningItem: () => mutation(),
@@ -109,7 +110,11 @@ vi.mock("@/components/common/PageBreadcrumb", () => ({ default: () => <div>crumb
 vi.mock("@/components/ai/DictateQuickAddModal", () => ({ default: () => null }));
 vi.mock("@/components/notifications/LeadTimeSelect", () => ({ default: () => <div>lead</div> }));
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  createItem.mockReset();
+  createItem.mockResolvedValue(undefined);
+});
 afterEach(cleanup);
 
 const OPEN_KEY = "learning.openTopics";
@@ -192,6 +197,116 @@ describe("LearningPage collapsible topics", () => {
     fireEvent.click(screen.getByRole("button", { name: "Collapse all" }));
     expect(screen.queryByText("Read the book")).toBeNull();
     expect(screen.queryByText("Tour of Go")).toBeNull();
+  });
+});
+
+describe("LearningPage open topic body", () => {
+  it("shows a quiet hint instead of blank space when a topic has no items or subtopics", () => {
+    const original = topicsResult.data;
+    topicsResult.data = [
+      { ...original[1], id: "t3", title: "Zig", items: [], subtopics: [], itemCount: 0 },
+    ];
+    localStorage.setItem(OPEN_KEY, JSON.stringify(["t3"]));
+    try {
+      render(<LearningPage />);
+      expect(screen.getByText("Nothing here yet. Add the first item below.")).toBeTruthy();
+      // The add row is still there, so the hint never replaces the way in.
+      expect(screen.getByPlaceholderText("Add item…")).toBeTruthy();
+    } finally {
+      topicsResult.data = original;
+    }
+  });
+
+  it("shows a hint inside an empty subtopic and no topic-level hint when items exist", () => {
+    localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+    render(<LearningPage />);
+    expect(screen.getByText("Ownership")).toBeTruthy();
+    expect(screen.getByText("No items yet.")).toBeTruthy();
+    expect(screen.queryByText("Nothing here yet. Add the first item below.")).toBeNull();
+  });
+
+  it("does not hide edit and delete behind hover-only classes (class contract, not a browser check)", () => {
+    localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+    render(<LearningPage />);
+    // Unconditional `opacity-0` would hide the control on touch screens, where there is no hover.
+    // Hiding is only allowed behind the fine-pointer media variant.
+    const bareOpacityZero = /(^|\s)opacity-0(\s|$)/;
+    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    expect(deleteButtons.length).toBeGreaterThan(0);
+    for (const button of deleteButtons) {
+      expect(button.className).not.toMatch(bareOpacityZero);
+      expect(button.className).toContain("pointer-fine:opacity-0");
+    }
+    const editButtons = screen.getAllByRole("button", { name: "Edit" });
+    // One per topic header (Rust, Go) plus one per subtopic (Ownership).
+    expect(editButtons).toHaveLength(3);
+    for (const button of editButtons) {
+      expect(button.className).not.toMatch(bareOpacityZero);
+    }
+  });
+});
+
+describe("LearningPage add-item rows", () => {
+  const openRust = () => {
+    localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+    render(<LearningPage />);
+    // The topic-level row comes before the subtopic rows.
+    const [topicInput, subtopicInput] = screen.getAllByPlaceholderText(
+      "Add item…",
+    ) as HTMLInputElement[];
+    return { topicInput, subtopicInput };
+  };
+
+  it("submits trimmed text to the topic on Enter and clears the field", async () => {
+    const { topicInput } = openRust();
+
+    fireEvent.change(topicInput, { target: { value: "  Learn traits  " } });
+    fireEvent.keyDown(topicInput, { key: "Enter" });
+
+    await waitFor(() => expect(topicInput.value).toBe(""));
+    expect(createItem).toHaveBeenCalledTimes(1);
+    expect(createItem).toHaveBeenCalledWith({ topicId: "t1", body: { text: "Learn traits" } });
+  });
+
+  it("ignores Enter on blank text and keeps the add button disabled", () => {
+    const { topicInput } = openRust();
+
+    fireEvent.change(topicInput, { target: { value: "   " } });
+    fireEvent.keyDown(topicInput, { key: "Enter" });
+
+    expect(createItem).not.toHaveBeenCalled();
+    const addButton = screen.getByRole("button", { name: "Add item… (Rust)" }) as HTMLButtonElement;
+    expect(addButton.disabled).toBe(true);
+  });
+
+  it("keeps the topic and subtopic drafts separate and posts the subtopic id", async () => {
+    const { topicInput, subtopicInput } = openRust();
+
+    fireEvent.change(subtopicInput, { target: { value: "Borrow checker" } });
+    expect(topicInput.value).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: "Add item… (Ownership)" }));
+
+    await waitFor(() =>
+      expect(createItem).toHaveBeenCalledWith({
+        topicId: "t1",
+        body: { text: "Borrow checker", subtopicId: "s1" },
+      }),
+    );
+    await waitFor(() => expect(subtopicInput.value).toBe(""));
+  });
+
+  it("keeps the same input element while typing so focus is not lost", () => {
+    const { topicInput } = openRust();
+    topicInput.focus();
+
+    fireEvent.change(topicInput, { target: { value: "R" } });
+    fireEvent.change(topicInput, { target: { value: "Ru" } });
+
+    // A remounted input would be a different node and drop focus on every keystroke.
+    expect(screen.getAllByPlaceholderText("Add item…")[0]).toBe(topicInput);
+    expect(topicInput.isConnected).toBe(true);
+    expect(document.activeElement).toBe(topicInput);
   });
 });
 

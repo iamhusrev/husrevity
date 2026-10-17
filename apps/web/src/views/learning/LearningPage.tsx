@@ -141,17 +141,18 @@ export default function LearningPage() {
         kicker={t("learning.kicker", "Learning tracker")}
         flourish={t("learning.flourish", "curiosity")}
       />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-xl text-sm text-gray-600 dark:text-gray-300">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <p className="max-w-xl text-sm leading-6 text-gray-600 dark:text-gray-300">
           {t("learning.intro", "Track what you are learning, one item at a time.")}
         </p>
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Controls wrap onto as many lines as a narrow screen needs; the primary action stays last. */}
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           {years.length > 1 && (
             <select
               value={year}
               onChange={(e) => changeYear(e.target.value)}
               aria-label={t("learning.yearFilter", "Filter by year")}
-              className="husrev-input h-9 w-auto text-sm"
+              className="husrev-input h-10 w-auto min-w-0 max-w-full text-sm"
             >
               <option value="all">{t("learning.allYears", "All years")}</option>
               {years.map((y) => (
@@ -165,14 +166,18 @@ export default function LearningPage() {
             <button
               type="button"
               onClick={toggleAllVisible}
-              className="husrev-btn-ghost h-9 px-3 text-sm"
+              className="husrev-btn-ghost h-10 shrink-0 px-3 text-sm"
             >
               {allVisibleOpen
                 ? t("learning.collapseAll", "Collapse all")
                 : t("learning.expandAll", "Expand all")}
             </button>
           )}
-          <button type="button" onClick={() => setEditingTopic(null)} className="husrev-btn">
+          <button
+            type="button"
+            onClick={() => setEditingTopic(null)}
+            className="husrev-btn h-10 shrink-0"
+          >
             <BiPlus className="h-4 w-4" />
             {t("learning.newTopic", "New topic")}
           </button>
@@ -191,11 +196,11 @@ export default function LearningPage() {
         </div>
       )}
       {isLoading && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="h-28 rounded-2xl bg-husrev-sand/40 motion-safe:animate-pulse motion-reduce:opacity-50"
+              className="h-20 rounded-2xl bg-husrev-sand/40 motion-safe:animate-pulse motion-reduce:opacity-50"
             />
           ))}
         </div>
@@ -216,7 +221,7 @@ export default function LearningPage() {
           </button>
         </div>
       )}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {visibleTopics.map((topic, index) => (
           <TopicCard
             key={topic.id}
@@ -301,12 +306,14 @@ function TopicCard({
       await run(() => create.mutateAsync({ topicId: topic.id, body: { text: item } }));
     }
   };
+  // Hover-only affordances are unreachable on touch screens, so the delete control is hidden
+  // behind hover only on fine-pointer devices and stays (quietly) visible everywhere else.
   const ItemRow = ({ item }: { item: LearningItemResponse }) => (
-    <li className="group/item flex items-start gap-2 rounded-lg px-2 py-1 text-sm hover:bg-husrev-cream/60 dark:hover:bg-white/[0.04]">
+    <li className="group/item -mx-1.5 flex min-h-11 items-start gap-2 rounded-xl px-1.5 py-1 transition-colors hover:bg-husrev-cream/60 focus-within:bg-husrev-cream/60 dark:hover:bg-white/[0.04] dark:focus-within:bg-white/[0.04]">
       <button
         type="button"
         onClick={() => void run(() => toggle.mutateAsync(item.id))}
-        className="mt-0.5 shrink-0 text-gray-400 transition hover:text-brand-500"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:text-brand-500 dark:text-gray-400"
         aria-label={
           item.completedAt ? t("learning.toggle.incomplete") : t("learning.toggle.complete")
         }
@@ -320,11 +327,15 @@ function TopicCard({
       <button
         type="button"
         onClick={() => onEditItem({ item, subtopics: topic.subtopics })}
-        className={`min-w-0 flex-1 text-left ${item.completedAt ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-white/90"}`}
+        className={`min-w-0 flex-1 py-1.5 text-left text-sm leading-6 ${
+          item.completedAt
+            ? "text-gray-400 line-through decoration-gray-300 dark:text-gray-500 dark:decoration-gray-600"
+            : "text-gray-800 dark:text-white/90"
+        }`}
       >
         <span className="block truncate">{item.text}</span>
         {(item.url || item.estimatedMinutes !== null || item.reviewAt) && (
-          <span className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-gray-400 no-underline">
+          <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs leading-5 text-gray-500 no-underline dark:text-gray-400">
             {item.url && (
               <span className="inline-flex items-center gap-1">
                 <BiLinkExternal />
@@ -349,222 +360,275 @@ function TopicCard({
         type="button"
         onClick={() => void run(() => remove.mutateAsync(item.id))}
         aria-label={t("common.delete", "Delete")}
-        className="mt-0.5 shrink-0 rounded p-0.5 text-gray-400 opacity-0 transition hover:text-error-500 group-hover/item:opacity-100"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition dark:text-gray-400 hover:bg-error-50 hover:text-error-500 focus-visible:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover/item:opacity-100 pointer-fine:group-focus-within/item:opacity-100 dark:hover:bg-error-500/10"
       >
         <BiX className="h-4 w-4" />
       </button>
     </li>
   );
+  // A plain render helper, not a component: declaring it as a component inside the render would
+  // remount the input on every keystroke and drop focus.
+  const renderAddRow = ({
+    value,
+    onChange,
+    onSubmit,
+    placeholder,
+    addLabel,
+    trailing,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    onSubmit: () => void;
+    placeholder: string;
+    addLabel: string;
+    trailing?: React.ReactNode;
+  }) => {
+    const canSubmit = Boolean(value.trim()) && !create.isPending;
+    return (
+      <div className="-mx-1.5 flex items-center gap-2 rounded-xl px-1.5 transition-colors focus-within:bg-husrev-cream/60 focus-within:ring-2 focus-within:ring-husrev-amber/40 dark:focus-within:bg-white/[0.04]">
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          aria-label={addLabel}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition dark:text-gray-400 enabled:text-husrev-ember enabled:hover:bg-husrev-amber/10 disabled:opacity-60 dark:enabled:text-husrev-amber"
+        >
+          <BiPlus className="h-5 w-5" />
+        </button>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (canSubmit) onSubmit();
+            }
+          }}
+          maxLength={300}
+          placeholder={placeholder}
+          className="h-10 min-w-0 flex-1 bg-transparent text-sm text-husrev-ink outline-none placeholder:text-gray-500 dark:text-husrev-cream dark:placeholder:text-gray-400"
+        />
+        {trailing}
+      </div>
+    );
+  };
+  const submitTopicItem = () =>
+    void run(async () => {
+      await create.mutateAsync({ topicId: topic.id, body: { text: text.trim() } });
+      setText("");
+    });
+  const hasDirectItems = topic.items.length > 0;
+  const hasSubtopics = topic.subtopics.length > 0;
+  const iconButtonClass =
+    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition dark:text-gray-400 hover:bg-husrev-cream/70 hover:text-husrev-ember dark:hover:bg-white/[0.05] dark:hover:text-husrev-amber";
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white shadow-card-warm ring-1 ring-husrev-amber/30 dark:bg-husrev-shadow">
-      <span className="absolute inset-y-0 left-0 w-[4px] bg-husrev-amber" />
-      <div className="pl-5 pr-3 py-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-2">
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-expanded={isOpen}
-              aria-controls={`topic-body-${topic.id}`}
-              aria-label={topic.title}
-              className="mt-1 shrink-0 rounded p-0.5 text-gray-400 transition hover:text-husrev-ember"
-            >
-              <BiChevronDown
-                className={`h-5 w-5 transition-transform ${isOpen ? "" : "-rotate-90"}`}
-              />
-            </button>
-            <button type="button" onClick={onEdit} className="min-w-0 text-left">
-              <h3 className="text-lg font-semibold tracking-tight text-husrev-ink dark:text-husrev-cream">
-                <span className="mr-1.5 text-sm font-medium text-husrev-ink/60 dark:text-husrev-cream/60">
-                  {index + 1}.
-                </span>
-                {topic.title}
-              </h3>
-              {topic.description && (
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{topic.description}</p>
-              )}
-            </button>
-          </div>
+    <article className="relative overflow-hidden rounded-2xl bg-white shadow-card-warm ring-1 ring-husrev-sand/90 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+      <span className="absolute inset-y-0 left-0 w-[3px] bg-husrev-amber" aria-hidden="true" />
+      {/* Header: a compact, scannable row when collapsed (title, one-line description, progress). */}
+      <div className="px-3 pb-3.5 pt-2.5 sm:px-5 sm:pb-4 sm:pt-3">
+        <div className="flex items-start gap-1 sm:gap-2">
           <button
             type="button"
-            onClick={onEdit}
-            aria-label={t("common.edit", "Edit")}
-            className="rounded p-1 text-gray-400 opacity-0 transition hover:text-husrev-ember group-hover:opacity-100"
+            onClick={onToggle}
+            aria-expanded={isOpen}
+            aria-controls={`topic-body-${topic.id}`}
+            aria-label={topic.title}
+            className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-gray-500 transition dark:text-gray-400 hover:bg-husrev-cream/70 hover:text-husrev-ember dark:hover:bg-white/[0.05] dark:hover:text-husrev-amber"
           >
-            <BiPencil className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-husrev-sand/40">
-            <div
-              className="h-full rounded-full bg-husrev-amber transition-all"
-              style={{ width: `${pct}%` }}
+            <BiChevronDown
+              className={`h-5 w-5 transition-transform ${isOpen ? "" : "-rotate-90"}`}
             />
-          </div>
-          <span className="whitespace-nowrap text-xs text-gray-500">
-            {t("learning.progress", { done: topic.completedCount, total: topic.itemCount })}
-          </span>
-          {topic.subtopics.length > 0 && (
-            <span className="whitespace-nowrap text-xs text-gray-400">
-              {t("learning.subtopicCount", { count: topic.subtopics.length })}
+          </button>
+          <button type="button" onClick={onEdit} className="min-w-0 flex-1 py-2 text-left">
+            <h3 className="flex items-baseline gap-2 text-[17px] font-semibold leading-6 tracking-tight text-husrev-ink sm:text-lg dark:text-husrev-cream">
+              <span className="shrink-0 text-xs font-medium tabular-nums text-husrev-ink/50 dark:text-husrev-cream/50">
+                {index + 1}.
+              </span>
+              <span className="min-w-0">{topic.title}</span>
+            </h3>
+            {topic.description && (
+              <p
+                className={`mt-0.5 text-sm leading-6 text-gray-500 dark:text-gray-400 ${isOpen ? "" : "truncate"}`}
+              >
+                {topic.description}
+              </p>
+            )}
+          </button>
+          <div className="flex shrink-0 items-center gap-0.5 pt-1.5 sm:gap-1">
+            <span className="whitespace-nowrap px-1.5 text-xs tabular-nums text-gray-500 dark:text-gray-400">
+              {t("learning.progress", { done: topic.completedCount, total: topic.itemCount })}
+              {hasSubtopics && (
+                <span className="text-gray-500 dark:text-gray-400">
+                  {" · "}
+                  {t("learning.subtopicCount", { count: topic.subtopics.length })}
+                </span>
+              )}
             </span>
-          )}
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={t("common.edit", "Edit")}
+              className={iconButtonClass}
+            >
+              <BiPencil className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        {isOpen && (
-          <div id={`topic-body-${topic.id}`}>
-            <ul className="mt-3 space-y-1">
+        <div
+          className="ml-11 mt-1.5 h-1 overflow-hidden rounded-full bg-husrev-sand/50 sm:ml-12 dark:bg-white/[0.06]"
+          aria-hidden="true"
+        >
+          <div
+            className="h-full rounded-full bg-husrev-amber transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+      {isOpen && (
+        <div
+          id={`topic-body-${topic.id}`}
+          className="border-t border-husrev-sand/70 px-4 py-4 sm:px-5 sm:py-5 dark:border-white/[0.06]"
+        >
+          {/* Direct items first, with their own quiet add row, so they read as one group. */}
+          {!hasDirectItems && !hasSubtopics && (
+            <p className="mb-2 px-1.5 text-sm leading-6 text-gray-500 dark:text-gray-400">
+              {t("learning.emptyTopic", "Nothing here yet. Add the first item below.")}
+            </p>
+          )}
+          {hasDirectItems && (
+            <ul className="space-y-0.5">
               {topic.items.map((item) => (
                 <ItemRow key={item.id} item={item} />
               ))}
             </ul>
-            {topic.subtopics.map((subtopic, si) => {
-              const subtopicPct = subtopic.itemCount
-                ? Math.round((subtopic.completedCount / subtopic.itemCount) * 100)
-                : 0;
-              const subtopicText = subtopicTexts[subtopic.id] ?? "";
-              const submitSubtopicItem = () =>
-                void run(async () => {
-                  await create.mutateAsync({
-                    topicId: topic.id,
-                    body: { text: subtopicText.trim(), subtopicId: subtopic.id },
-                  });
-                  setSubtopicTexts((current) => ({ ...current, [subtopic.id]: "" }));
-                });
-              return (
-                <div
-                  key={subtopic.id}
-                  className="mt-3 border-l border-husrev-sand/70 pl-4 dark:border-white/[0.08]"
+          )}
+          <div className={hasDirectItems ? "mt-1" : ""}>
+            {renderAddRow({
+              value: text,
+              onChange: setText,
+              onSubmit: submitTopicItem,
+              placeholder: t("learning.addItem", "Add item…"),
+              addLabel: `${t("learning.addItem", "Add item…")} (${topic.title})`,
+              trailing: (
+                <button
+                  type="button"
+                  onClick={() => setShowDictateModal(true)}
+                  title={t("dictate.triggerTooltip")}
+                  aria-label={t("dictate.triggerTooltip")}
+                  className={iconButtonClass}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => onOpenSubtopicModal(subtopic)}
-                      className="min-w-0 text-left"
-                    >
-                      <h4 className="text-sm font-medium text-husrev-ink/80 dark:text-husrev-cream/80">
-                        <span className="mr-1.5 text-xs text-husrev-ink/55 dark:text-husrev-cream/55">
-                          {String.fromCharCode(97 + si)}.
-                        </span>
-                        {subtopic.title}
-                      </h4>
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <span className="whitespace-nowrap text-xs text-gray-500">
-                        {t("learning.progress", {
-                          done: subtopic.completedCount,
-                          total: subtopic.itemCount,
-                        })}
-                      </span>
+                  <BiMicrophone className="h-4 w-4" />
+                </button>
+              ),
+            })}
+          </div>
+          {hasSubtopics && (
+            <div className="mt-5 space-y-3">
+              {topic.subtopics.map((subtopic, si) => {
+                const subtopicPct = subtopic.itemCount
+                  ? Math.round((subtopic.completedCount / subtopic.itemCount) * 100)
+                  : 0;
+                const subtopicText = subtopicTexts[subtopic.id] ?? "";
+                const submitSubtopicItem = () =>
+                  void run(async () => {
+                    await create.mutateAsync({
+                      topicId: topic.id,
+                      body: { text: subtopicText.trim(), subtopicId: subtopic.id },
+                    });
+                    setSubtopicTexts((current) => ({ ...current, [subtopic.id]: "" }));
+                  });
+                return (
+                  <section
+                    key={subtopic.id}
+                    className="rounded-xl bg-husrev-cream/40 px-3 pb-2 pt-3 ring-1 ring-husrev-sand/60 sm:px-4 dark:bg-white/[0.03] dark:ring-white/[0.06]"
+                  >
+                    <div className="flex items-start gap-2">
                       <button
                         type="button"
                         onClick={() => onOpenSubtopicModal(subtopic)}
-                        aria-label={t("common.edit", "Edit")}
-                        className="rounded p-1 text-gray-400 opacity-0 transition hover:text-husrev-ember group-hover:opacity-100"
+                        className="min-w-0 flex-1 py-1.5 text-left"
                       >
-                        <BiPencil className="h-4 w-4" />
+                        <h4 className="flex items-baseline gap-2 text-sm font-semibold leading-6 text-husrev-ink/85 dark:text-husrev-cream/85">
+                          <span className="shrink-0 text-xs font-medium text-husrev-ink/50 dark:text-husrev-cream/50">
+                            {String.fromCharCode(97 + si)}.
+                          </span>
+                          <span className="min-w-0">{subtopic.title}</span>
+                        </h4>
+                        {subtopic.description && (
+                          <p className="mt-0.5 text-[13px] leading-5 text-gray-500 dark:text-gray-400">
+                            {subtopic.description}
+                          </p>
+                        )}
                       </button>
+                      <div className="flex shrink-0 items-center gap-0.5 pt-0.5">
+                        <span className="whitespace-nowrap px-1.5 text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                          {t("learning.progress", {
+                            done: subtopic.completedCount,
+                            total: subtopic.itemCount,
+                          })}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => onOpenSubtopicModal(subtopic)}
+                          aria-label={t("common.edit", "Edit")}
+                          className={iconButtonClass}
+                        >
+                          <BiPencil className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-husrev-sand/40">
                     <div
-                      className="h-full rounded-full bg-husrev-amber transition-all"
-                      style={{ width: `${subtopicPct}%` }}
-                    />
-                  </div>
-                  <ul className="mt-2 space-y-1">
-                    {subtopic.items.map((item) => (
-                      <ItemRow key={item.id} item={item} />
-                    ))}
-                  </ul>
-                  <div className="mt-2 flex items-center gap-2 pl-2">
-                    <input
-                      value={subtopicText}
-                      onChange={(e) =>
-                        setSubtopicTexts((current) => ({
-                          ...current,
-                          [subtopic.id]: e.target.value,
-                        }))
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          submitSubtopicItem();
-                        }
-                      }}
-                      maxLength={300}
-                      placeholder={t("learning.addSubtopicItem", "Add item...")}
-                      className="husrev-input h-9 flex-1 text-sm"
-                    />
-                    <button
-                      type="button"
-                      disabled={!subtopicText.trim() || create.isPending}
-                      onClick={submitSubtopicItem}
-                      className="husrev-btn-ghost h-9 px-3 text-sm"
+                      className="mt-1.5 h-1 overflow-hidden rounded-full bg-husrev-sand/60 dark:bg-white/[0.06]"
+                      aria-hidden="true"
                     >
-                      <BiPlus className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => onOpenSubtopicModal(null)}
-              className="husrev-btn-ghost mt-3 h-8 px-3 text-sm"
-            >
-              <BiPlus className="h-4 w-4" />
-              {t("learning.newSubtopic", "New subtopic")}
-            </button>
-            <div className="mt-2 flex items-center gap-2 pl-2">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    void run(async () => {
-                      await create.mutateAsync({ topicId: topic.id, body: { text: text.trim() } });
-                      setText("");
-                    });
-                  }
-                }}
-                maxLength={300}
-                placeholder={t("learning.addItem", "Add item…")}
-                className="husrev-input h-9 flex-1 text-sm"
-              />
-              <button
-                type="button"
-                disabled={!text.trim() || create.isPending}
-                onClick={() =>
-                  void run(async () => {
-                    await create.mutateAsync({ topicId: topic.id, body: { text: text.trim() } });
-                    setText("");
-                  })
-                }
-                className="husrev-btn-ghost h-9 px-3 text-sm"
-              >
-                <BiPlus className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowDictateModal(true)}
-                title={t("dictate.triggerTooltip")}
-                aria-label={t("dictate.triggerTooltip")}
-                className="husrev-btn-ghost h-9 px-3 text-sm"
-              >
-                <BiMicrophone className="h-4 w-4" />
-              </button>
+                      <div
+                        className="h-full rounded-full bg-husrev-amber transition-all"
+                        style={{ width: `${subtopicPct}%` }}
+                      />
+                    </div>
+                    {subtopic.items.length > 0 ? (
+                      <ul className="mt-2 space-y-0.5">
+                        {subtopic.items.map((item) => (
+                          <ItemRow key={item.id} item={item} />
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 px-1.5 text-[13px] leading-6 text-gray-500 dark:text-gray-400">
+                        {t("learning.emptySubtopic", "No items yet.")}
+                      </p>
+                    )}
+                    <div className="mt-1">
+                      {renderAddRow({
+                        value: subtopicText,
+                        onChange: (value) =>
+                          setSubtopicTexts((current) => ({ ...current, [subtopic.id]: value })),
+                        onSubmit: submitSubtopicItem,
+                        placeholder: t("learning.addSubtopicItem", "Add item…"),
+                        addLabel: `${t("learning.addSubtopicItem", "Add item…")} (${subtopic.title})`,
+                      })}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
-            <DictateQuickAddModal
-              isOpen={showDictateModal}
-              onClose={() => setShowDictateModal(false)}
-              title={t("dictate.title")}
-              onConfirm={handleDictateConfirm}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+          <button
+            type="button"
+            onClick={() => onOpenSubtopicModal(null)}
+            className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl px-2.5 text-[13px] font-medium text-gray-500 transition hover:bg-husrev-cream/70 hover:text-husrev-ember dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-husrev-amber"
+          >
+            <BiPlus className="h-4 w-4" />
+            {t("learning.newSubtopic", "New subtopic")}
+          </button>
+          <DictateQuickAddModal
+            isOpen={showDictateModal}
+            onClose={() => setShowDictateModal(false)}
+            title={t("dictate.title")}
+            onConfirm={handleDictateConfirm}
+          />
+        </div>
+      )}
+    </article>
   );
 }
 
