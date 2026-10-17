@@ -223,3 +223,12 @@ Kod tarafı bitti. Ölçüm: API 103 suite / 1221 test (başlangıç 74 / 574), 
 - **Ölçüm:** API 104 suite / 1223 test, tsc temiz.
 - **Geçici konteyner:** durduruldu, SİLİNMEDİ (`docker rm` için ürün sahibinin onayı gerekir).
 - **Üretim:** değişmedi. Eski sürüm çalışıyor, 036–039 uygulanmadı, veritabanı boş (hesaplar duruyor).
+
+## Yayın doğrulaması (2026-10-14, `master` `b51d84b` push sonrası)
+- **GitHub Actions:** `CI` ve `Deploy to prod (master)` başarılı (aynı commit, "redesign the app").
+- **Üretim konteynerleri:** `husrevity-prod-api` ve `-web` yeniden oluşturuldu, `restarts=0`, durum `running`.
+- **Migration:** API girişi `Applied 4 migration(s)` yazdı. `migrations` tablosu 35 → **39**; `change_set`, `change_entry`, `goal`, `note_link` tabloları ve `items.goal_id`, `project.goal_id` sütunları mevcut. Derlenmiş yol (`bun dist/db/migrate.js run`) üretimde çalıştı, provada denenmeyen tek nokta buydu.
+- **Sağlık:** loopback `/api/health` ve herkese açık `https://api.iamhusrev.com/api/health` 200 (`db: UP`); web `/` 307 (giriş sayfasına yönlendirme).
+- **Günlük:** başlangıçtan beri hata/istisna satırı yok; pg-boss, bildirim dağıtıcısı ve Google Takvim periyodik eşitleme normal çalışıyor (bağlı hesap olmadığından 0 eşitlendi).
+- **Veri:** `app_user` 4, diğer tüm tablolar boş (sıfırlamadan beri), `refresh_token` 2 (sıfırlamadan sonra iki oturum açılmış).
+- **Kalan (sahip):** MCP token'ını yeniden üret, Google/Telegram/Slack bağlantılarını yeniden kur, tarayıcıda görsel kontrol. D-1…D-8 hâlâ ertelenmiş.

@@ -312,6 +312,13 @@
     "error": "Topics could not be loaded.",
     "newTopic": "New topic",
     "newSubtopic": "New subtopic",
+    "allYears": "All years",
+    "yearFilter": "Filter by year",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "subtopicCount": "{{count}} subtopics",
+    "subtopicCount_one": "{{count}} subtopic",
+    "subtopicCount_other": "{{count}} subtopics",
     "empty": {
       "kicker": "Your learning list is empty",
       "body": "Create a topic and begin collecting the things you want to master."

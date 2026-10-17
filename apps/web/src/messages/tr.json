@@ -312,6 +312,13 @@
     "error": "Konular yüklenemedi.",
     "newTopic": "Yeni konu",
     "newSubtopic": "Yeni alt konu",
+    "allYears": "Tüm yıllar",
+    "yearFilter": "Yıla göre filtrele",
+    "expandAll": "Tümünü aç",
+    "collapseAll": "Tümünü kapat",
+    "subtopicCount": "{{count}} alt konu",
+    "subtopicCount_one": "{{count}} alt konu",
+    "subtopicCount_other": "{{count}} alt konu",
     "empty": {
       "kicker": "Öğrenme listen boş",
       "body": "Bir konu oluşturarak ustalaşmak istediğin şeyleri toplamaya başla."
