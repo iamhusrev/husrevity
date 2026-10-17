@@ -32,12 +32,16 @@ export interface LearningTopicResponse {
   subtopics: LearningSubtopicResponse[];
   itemCount: number;
   completedCount: number;
+  /** The year the topic is filed under, always resolved by the API (stored year, else creation year). */
+  year: number;
   createdAt: string;
   updatedAt: string;
 }
 export interface LearningTopicRequest {
   title: string;
   description?: string | null;
+  /** Omit to leave the year untouched on update; null resets it to the creation year. 2000-2100. */
+  year?: number | null;
 }
 export interface LearningSubtopicRequest {
   title: string;

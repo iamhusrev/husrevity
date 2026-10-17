@@ -41,6 +41,84 @@ describe('learning-tools', () => {
     expect(learningService.updateTopic).toHaveBeenCalledWith('u1', 't1', { title: 'newA', description: 'B' });
   });
 
+  it('create_learning_topic passes year through to the service', async () => {
+    learningService.createTopic.mockResolvedValueOnce({ id: 't1', title: 'A', year: 2025 });
+    await getHandler('create_learning_topic')(
+      { title: 'A', year: 2025 },
+      { authInfo: { scopes: ['learning:write'], extra: { ownerId: 'u1' } } }
+    );
+    expect(learningService.createTopic).toHaveBeenCalledWith(
+      'u1',
+      expect.objectContaining({ title: 'A', year: 2025 }),
+    );
+  });
+
+  it('create_learning_topic leaves year undefined when omitted', async () => {
+    learningService.createTopic.mockResolvedValueOnce({ id: 't1', title: 'A', year: 2026 });
+    await getHandler('create_learning_topic')(
+      { title: 'A' },
+      { authInfo: { scopes: ['learning:write'], extra: { ownerId: 'u1' } } }
+    );
+    const [, req] = learningService.createTopic.mock.calls[0];
+    expect(req.year).toBeUndefined();
+  });
+
+  // The listed year is always resolved (column ?? created year). Sending it back would pin a
+  // derived year into the column on an unrelated title edit, so an omitted year is not sent at all.
+  it('update_learning_topic does not send a year when the call omits it', async () => {
+    learningService.listTopics.mockResolvedValueOnce([
+      { id: 't1', title: 'A', description: 'B', year: 2024 },
+    ]);
+    learningService.updateTopic.mockResolvedValueOnce({ id: 't1', title: 'newA', year: 2024 });
+    await getHandler('update_learning_topic')(
+      { id: 't1', title: 'newA' },
+      { authInfo: { scopes: ['learning:write'], extra: { ownerId: 'u1' } } }
+    );
+    const req = learningService.updateTopic.mock.calls[0][2];
+    expect(req).toEqual({ title: 'newA', description: 'B' });
+    expect('year' in req).toBe(false);
+  });
+
+  it('update_learning_topic clears the year back to derived when the call gives null', async () => {
+    learningService.listTopics.mockResolvedValueOnce([
+      { id: 't1', title: 'A', description: 'B', year: 2024 },
+    ]);
+    learningService.updateTopic.mockResolvedValueOnce({ id: 't1', title: 'A', year: 2026 });
+    await getHandler('update_learning_topic')(
+      { id: 't1', year: null },
+      { authInfo: { scopes: ['learning:write'], extra: { ownerId: 'u1' } } }
+    );
+    expect(learningService.updateTopic).toHaveBeenCalledWith('u1', 't1', {
+      title: 'A',
+      description: 'B',
+      year: null,
+    });
+  });
+
+  it('update_learning_topic input schema accepts null and rejects out-of-range years', () => {
+    const schema = (server as any)._registeredTools['update_learning_topic'].inputSchema;
+    expect(schema.safeParse({ id: 't1', year: null }).success).toBe(true);
+    expect(schema.safeParse({ id: 't1', year: 2025 }).success).toBe(true);
+    expect(schema.safeParse({ id: 't1', year: 1999 }).success).toBe(false);
+    expect(schema.safeParse({ id: 't1', year: 2025.5 }).success).toBe(false);
+  });
+
+  it('update_learning_topic overrides the year when the call gives one', async () => {
+    learningService.listTopics.mockResolvedValueOnce([
+      { id: 't1', title: 'A', description: 'B', year: 2024 },
+    ]);
+    learningService.updateTopic.mockResolvedValueOnce({ id: 't1', title: 'A', year: 2023 });
+    await getHandler('update_learning_topic')(
+      { id: 't1', year: 2023 },
+      { authInfo: { scopes: ['learning:write'], extra: { ownerId: 'u1' } } }
+    );
+    expect(learningService.updateTopic).toHaveBeenCalledWith('u1', 't1', {
+      title: 'A',
+      description: 'B',
+      year: 2023,
+    });
+  });
+
   it('update_learning_item merges with existing item', async () => {
     learningService.listTopics.mockResolvedValueOnce([{
       id: 't1',

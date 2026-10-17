@@ -7,6 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsUrl,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
@@ -16,9 +17,26 @@ import { LearningItem } from '../learning-item.entity';
 import { LearningSubtopic } from '../learning-subtopic.entity';
 import { LearningTopic } from '../learning-topic.entity';
 
+const istanbulYear = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Istanbul',
+  year: 'numeric',
+});
+
+/** Calendar year of `date` in Europe/Istanbul (the owner's wall clock). */
+export function yearInIstanbul(date: Date | string): number {
+  return Number(istanbulYear.format(date instanceof Date ? date : new Date(date)));
+}
+
 export class TopicRequestDto {
   @ApiProperty() @IsNotEmpty() @MaxLength(160) title!: string;
   @ApiPropertyOptional() @IsOptional() description?: string | null;
+  /** Omit to leave untouched on update; send null to fall back to the createdAt year. */
+  @ApiPropertyOptional({ type: Number, nullable: true, minimum: 2000, maximum: 2100 })
+  @IsOptional()
+  @IsInt()
+  @Min(2000)
+  @Max(2100)
+  year?: number | null;
 }
 
 export class SubtopicRequestDto {
@@ -104,6 +122,8 @@ export class TopicResponseDto {
   @ApiProperty() title!: string;
   @ApiPropertyOptional() description!: string | null;
   @ApiProperty() position!: number;
+  /** Always resolved: the stored year, else the year of createdAt in Europe/Istanbul. */
+  @ApiProperty() year!: number;
   @ApiProperty({ type: [ItemResponseDto] }) items!: ItemResponseDto[];
   @ApiProperty({ type: [SubtopicResponseDto] }) subtopics!: SubtopicResponseDto[];
   @ApiProperty() itemCount!: number;
@@ -121,6 +141,7 @@ export class TopicResponseDto {
       title: t.title,
       description: t.description,
       position: t.position,
+      year: t.year ?? yearInIstanbul(t.createdAt),
       items: directItems.map(ItemResponseDto.from),
       subtopics,
       itemCount:

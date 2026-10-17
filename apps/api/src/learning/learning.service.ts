@@ -69,6 +69,7 @@ export class LearningService {
       ownerId,
       title: req.title,
       description: req.description ?? null,
+      year: req.year ?? null,
       position: await this.nextTopicPosition(ownerId),
     });
     return TopicResponseDto.from(await this.topics.save(topic), [], []);
@@ -78,6 +79,7 @@ export class LearningService {
     const topic = await this.requireTopic(ownerId, id);
     topic.title = req.title;
     if (req.description !== undefined) topic.description = req.description ?? null;
+    if (req.year !== undefined) topic.year = req.year ?? null;
     return this.toTopicDto(await this.topics.save(topic));
   }
 

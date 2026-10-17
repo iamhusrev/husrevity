@@ -63,6 +63,13 @@ export function registerLearningTools(server: McpServer, deps: LearningToolDeps)
       inputSchema: {
         title: z.string().describe('Title of the topic'),
         description: z.string().optional().describe('Optional description'),
+        year: z
+          .number()
+          .int()
+          .min(2000)
+          .max(2100)
+          .optional()
+          .describe('Calendar year the topic belongs to (defaults to the creation year)'),
       },
     },
     async (params: any, extra: any) => {
@@ -70,6 +77,7 @@ export function registerLearningTools(server: McpServer, deps: LearningToolDeps)
       const topic = await deps.learningService.createTopic(ownerId, {
         title: params.title,
         description: params.description,
+        year: params.year,
       });
       return textResult(topic);
     },
@@ -83,6 +91,16 @@ export function registerLearningTools(server: McpServer, deps: LearningToolDeps)
         id: z.string().describe('Topic ID'),
         title: z.string().optional().describe('Title of the topic'),
         description: z.string().optional().describe('Optional description'),
+        year: z
+          .number()
+          .int()
+          .min(2000)
+          .max(2100)
+          .nullable()
+          .optional()
+          .describe(
+            'Calendar year the topic belongs to. Omit to keep it; null resets it to the creation year',
+          ),
       },
     },
     async (params: any, extra: any) => {
@@ -94,6 +112,9 @@ export function registerLearningTools(server: McpServer, deps: LearningToolDeps)
       const result = await deps.learningService.updateTopic(ownerId, params.id, {
         title: params.title !== undefined ? params.title : current.title,
         description: params.description !== undefined ? params.description : current.description,
+        // current.year is the resolved year (column ?? created year); echoing it back would pin a
+        // derived value into the column, so year is only sent when the caller provides it.
+        ...(params.year !== undefined ? { year: params.year } : {}),
       });
       return textResult(result);
     },

@@ -15,4 +15,8 @@ export class LearningTopic extends BaseEntity {
 
   @Column({ type: 'integer', default: 0 })
   position!: number;
+
+  /** Explicit year; null means "derive from createdAt" (see TopicResponseDto). */
+  @Column({ type: 'smallint', nullable: true })
+  year!: number | null;
 }

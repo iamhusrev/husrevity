@@ -322,8 +322,15 @@
     "error": "Konular yüklenemedi.",
     "newTopic": "Yeni konu",
     "newSubtopic": "Yeni alt konu",
-    "allYears": "Tüm yıllar",
     "yearFilter": "Yıla göre filtrele",
+    "yearTabs": {
+      "all": "Tümü"
+    },
+    "emptyYear": {
+      "kicker": "{{year}} altında henüz konu yok",
+      "body": "Bu yıl için bir konu oluştur ya da her şeyi görmek için tüm yıllara dön."
+    },
+    "showAllYears": "Tüm yılları göster",
     "expandAll": "Tümünü aç",
     "collapseAll": "Tümünü kapat",
     "subtopicCount": "{{count}} alt konu",
@@ -342,7 +349,8 @@
       "estimatedMinutes": "Tahmini dakika",
       "reviewAt": "Tekrar zamanı",
       "subtopicSelect": "Alt konu",
-      "subtopicNone": "Alt konu yok (doğrudan konu altında)"
+      "subtopicNone": "Alt konu yok (doğrudan konu altında)",
+      "year": "Yıl"
     },
     "placeholders": {
       "title": "Kubernetes",

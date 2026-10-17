@@ -322,8 +322,15 @@
     "error": "Topics could not be loaded.",
     "newTopic": "New topic",
     "newSubtopic": "New subtopic",
-    "allYears": "All years",
     "yearFilter": "Filter by year",
+    "yearTabs": {
+      "all": "All"
+    },
+    "emptyYear": {
+      "kicker": "Nothing filed under {{year}} yet",
+      "body": "Create a topic for this year, or switch back to all years to see everything."
+    },
+    "showAllYears": "Show all years",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
     "subtopicCount": "{{count}} subtopics",
@@ -342,7 +349,8 @@
       "estimatedMinutes": "Estimated minutes",
       "reviewAt": "Review at",
       "subtopicSelect": "Subtopic",
-      "subtopicNone": "No subtopic (directly under topic)"
+      "subtopicNone": "No subtopic (directly under topic)",
+      "year": "Year"
     },
     "placeholders": {
       "title": "Kubernetes",
