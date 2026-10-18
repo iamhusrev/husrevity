@@ -41,6 +41,27 @@ export function slotToIso(dateYmd: string, minutesFromMidnight: number): string 
   return `${dateYmd}T${hh}:${mm}:00${ISTANBUL_TIMEZONE_OFFSET}`;
 }
 
+/**
+ * Formats a minute-of-day range ("06:00 – 08:00") for an Evkat segment. A null start or end is an
+ * open bound ("→ 08:00", "06:00 →"); both null means the whole day and returns `allDayLabel`.
+ */
+export function formatMinuteRange(
+  start: number | null,
+  end: number | null,
+  allDayLabel: string,
+): string {
+  if (start === null) return end === null ? allDayLabel : `→ ${formatMinuteOfDay(end)}`;
+  if (end === null) return `${formatMinuteOfDay(start)} →`;
+  return `${formatMinuteOfDay(start)} – ${formatMinuteOfDay(end)}`;
+}
+
+/** Formats minutes from midnight as "HH:mm". */
+function formatMinuteOfDay(minutes: number): string {
+  const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const m = String(minutes % 60).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
 const istanbulTimeFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/Istanbul",
   hour: "2-digit",

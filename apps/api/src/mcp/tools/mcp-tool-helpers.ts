@@ -37,7 +37,7 @@ export function getOwnerAndCheckScope(
 export function getOwnerAndCheckAnyScope(
   extra: McpExtra | undefined,
   anyOf: PatScope[],
-): { ownerId: string } {
+): { ownerId: string; scopes: string[] } {
   const { ownerId, scopes } = requireOwner(extra);
   if (!anyOf.some((s) => scopes.includes(s))) {
     const [first, ...rest] = anyOf;
@@ -46,7 +46,7 @@ export function getOwnerAndCheckAnyScope(
         (rest.length ? ` (or ${rest.map((s) => `'${s}'`).join(', ')})` : ''),
     );
   }
-  return { ownerId };
+  return { ownerId, scopes };
 }
 
 export function textResult(data: unknown) {

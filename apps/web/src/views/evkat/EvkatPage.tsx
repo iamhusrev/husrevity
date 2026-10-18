@@ -23,6 +23,7 @@ import {
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import { cn } from "@/utils/utils";
+import { formatMinuteRange } from "@/utils/today-board";
 import { BiPlus, BiTrash, BiPencil, BiChevronUp, BiChevronDown, BiX } from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 import Dialog from "@/components/ui/Dialog";
@@ -57,14 +58,6 @@ function timeInputToMinutes(v: string): number | null {
   const [h, m] = v.split(":").map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return null;
   return h * 60 + m;
-}
-
-function rangeLabel(start: number | null, end: number | null): string {
-  const fmt = minutesToTimeInput;
-  if (start === null && end === null) return "Tüm gün";
-  if (start === null) return `→ ${fmt(end)}`;
-  if (end === null) return `${fmt(start)} →`;
-  return `${fmt(start)} – ${fmt(end)}`;
 }
 
 function resolveColor(s: RoutineSegmentResponse): RoutineColorToken {
@@ -295,7 +288,11 @@ function SegmentCard({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium tabular-nums text-husrev-ember dark:text-husrev-amber">
-                {rangeLabel(segment.startMinute, segment.endMinute)}
+                {formatMinuteRange(
+                  segment.startMinute,
+                  segment.endMinute,
+                  t("today.board.allDay", "Tüm gün"),
+                )}
               </span>
               {segment.theme && (
                 <span className="rounded-full bg-husrev-sand/50 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">

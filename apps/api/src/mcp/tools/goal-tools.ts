@@ -539,7 +539,33 @@ export function registerGoalTools(server: McpServer, deps: GoalToolsDeps) {
     },
   );
 
-  // 5. link_note
+  // 5. restore_goal
+  server.registerTool(
+    'restore_goal',
+    {
+      description:
+        'Restore a deleted goal by numeric ID (owner only). Use list_deleted to find the ID.',
+      inputSchema: {
+        id: z.string().describe('Numeric goal ID to restore'),
+      },
+    },
+    async (params, extra) => {
+      const { ownerId } = getOwnerAndCheckScope(extra as unknown as McpExtra, 'goals:write');
+      const id = String((params as Record<string, unknown> | undefined)?.id ?? '');
+      if (!isValidNumericId(id)) {
+        return toolError('Invalid id: must be a numeric ID (1-19 digits)');
+      }
+      try {
+        const goal = await deps.goalService.restore(ownerId, id);
+        return textResult({ goal });
+      } catch (err: any) {
+        if (err instanceof ApiException) return toolError(err.message);
+        throw err;
+      }
+    },
+  );
+
+  // 6. link_note
   server.registerTool(
     'link_note',
     {

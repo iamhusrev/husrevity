@@ -35,6 +35,15 @@ vi.mock("react-i18next", async (importOriginal) => {
           "today.board.recurringTaskTooltip": "Recurring tasks cannot be scheduled directly",
           "today.board.minutesSuffix": "min",
           "today.board.minuteOption": `${opts?.count ?? 30} min`,
+          "today.board.allDay": "All day",
+          "today.board.activityCount": `${opts?.count ?? 0} activities`,
+          "today.board.evkatDetails": "Evkat segment details",
+          "today.board.evkatActivities": "Activities",
+          "today.board.evkatNotes": "Notes",
+          "today.board.evkatTheme": "Theme",
+          "today.board.evkatEmptyActivities": "No activities in this segment.",
+          "today.board.openEvkat": "Open in Evkat",
+          "common.close": "Close",
           "common.done": "Done",
           "common.error": "Error",
         };
@@ -43,6 +52,14 @@ vi.mock("react-i18next", async (importOriginal) => {
     }),
   };
 });
+
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...rest }: React.PropsWithChildren<{ href: string }>) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 type UseTodayResult = ReturnType<typeof useTodayModule.useToday>;
 type UseScheduleResult = ReturnType<typeof useItemsModule.useScheduleItem>;
@@ -104,6 +121,48 @@ const mockRoutineSegments: RoutineSegmentResponse[] = [
     updatedAt: "2026-01-01T00:00:00Z",
   },
 ];
+
+function makeSegment(overrides: Partial<RoutineSegmentResponse> = {}): RoutineSegmentResponse {
+  return { ...mockRoutineSegments[0], ...overrides };
+}
+
+// Richer Evkat fixtures for the band header and detail dialog.
+const morningSegment = makeSegment({
+  id: "seg-morning",
+  name: "Morning Routine",
+  startMinute: 360, // 06:00
+  endMinute: 480, // 08:00
+  theme: "Spiritual",
+  colorToken: "husrev-moss",
+  notes: "Wake up early.\nNo phone before prayer.",
+  daysOfWeek: 1, // Monday only
+  // Deliberately out of order: the dialog lists activities by position.
+  activities: [
+    { id: "act-2", segmentId: "seg-morning", text: "Read Quran", position: 1 },
+    { id: "act-3", segmentId: "seg-morning", text: "Walk", position: 2 },
+    { id: "act-1", segmentId: "seg-morning", text: "Fajr prayer", position: 0 },
+  ],
+});
+
+const allDaySegment = makeSegment({
+  id: "seg-allday",
+  name: "Fasting Day",
+  startMinute: null,
+  endMinute: null,
+  theme: null,
+  notes: null,
+  daysOfWeek: 1,
+  activities: [],
+});
+
+const tuesdayOnlySegment = makeSegment({
+  id: "seg-tue-rich",
+  name: "Tuesday Gym",
+  startMinute: 1080,
+  endMinute: 1140,
+  daysOfWeek: 2, // Tuesday only
+  activities: [{ id: "act-t", segmentId: "seg-tue-rich", text: "Squats", position: 0 }],
+});
 
 function makeToday(overrides: Partial<TodayResponse> = {}): TodayResponse {
   return { ...mockTodayData, ...overrides };
@@ -228,6 +287,125 @@ describe("TodayBoard", () => {
     expect(screen.getByText("Focus Work")).toBeInTheDocument();
     // Tuesday Routine is for Tuesday (inactive on Monday 2026-10-12)
     expect(screen.queryByText("Tuesday Routine")).not.toBeInTheDocument();
+  });
+
+  describe("Evkat band header and detail dialog", () => {
+    beforeEach(() => {
+      vi.spyOn(useRoutineModule, "useRoutineSegments").mockReturnValue({
+        data: [morningSegment, allDaySegment, tuesdayOnlySegment],
+        isLoading: false,
+        isError: false,
+      } as unknown as UseRoutineResult);
+    });
+
+    const bandButton = (name: string) =>
+      screen.getByRole("button", { name: new RegExp(name, "i") });
+
+    it("shows name, time range, theme and activity count on the collapsed band header", () => {
+      renderBoard();
+
+      const header = bandButton("Morning Routine");
+      expect(header).toHaveAttribute("aria-haspopup", "dialog");
+      expect(within(header).getByText("Morning Routine")).toBeInTheDocument();
+      expect(within(header).getByText("06:00 – 08:00")).toBeInTheDocument();
+      expect(within(header).getByText("Spiritual")).toBeInTheDocument();
+      expect(within(header).getByText("3 activities")).toBeInTheDocument();
+    });
+
+    it("shows the translated all-day label for null bounds and no count without activities", () => {
+      renderBoard();
+
+      const header = bandButton("Fasting Day");
+      expect(within(header).getByText("All day")).toBeInTheDocument();
+      expect(within(header).queryByText(/activities/)).not.toBeInTheDocument();
+    });
+
+    it("keeps the band body click-through so drops on the grid are not blocked", () => {
+      renderBoard();
+
+      const header = bandButton("Morning Routine");
+      const band = screen.getByTestId("evkat-band-seg-morning");
+      expect(band).toHaveClass("pointer-events-none");
+      expect(band).toContainElement(header);
+      expect(header).toHaveClass("pointer-events-auto");
+    });
+
+    it("still does not render a Tuesday-only segment on Monday", () => {
+      renderBoard();
+
+      expect(screen.queryByText("Tuesday Gym")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("evkat-band-seg-tue-rich")).not.toBeInTheDocument();
+    });
+
+    it("opens a labelled dialog with range, theme, notes and activities in position order", async () => {
+      const user = userEvent.setup();
+      renderBoard();
+
+      await user.click(bandButton("Morning Routine"));
+
+      const dialog = screen.getByRole("dialog", { name: "Morning Routine" });
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+      expect(within(dialog).getByText("06:00 – 08:00")).toBeInTheDocument();
+      expect(within(dialog).getByText("Spiritual")).toBeInTheDocument();
+
+      const notes = within(dialog).getByText(/Wake up early\./);
+      expect(notes).toHaveTextContent("Wake up early. No phone before prayer.");
+      expect(notes).toHaveClass("whitespace-pre-line");
+
+      const items = within(within(dialog).getByRole("list")).getAllByRole("listitem");
+      expect(items.map((li) => li.textContent)).toEqual(["Fajr prayer", "Read Quran", "Walk"]);
+    });
+
+    it("shows the empty-activities text when the segment has no activities", async () => {
+      const user = userEvent.setup();
+      renderBoard();
+
+      await user.click(bandButton("Fasting Day"));
+
+      const dialog = screen.getByRole("dialog", { name: "Fasting Day" });
+      expect(within(dialog).getByText("No activities in this segment.")).toBeInTheDocument();
+      expect(within(dialog).getByText("All day")).toBeInTheDocument();
+      expect(within(dialog).queryByRole("list")).not.toBeInTheDocument();
+    });
+
+    it("links to the Evkat page from the dialog", async () => {
+      const user = userEvent.setup();
+      renderBoard();
+
+      await user.click(bandButton("Morning Routine"));
+
+      const dialog = screen.getByRole("dialog");
+      expect(within(dialog).getByRole("link", { name: /Open in Evkat/ })).toHaveAttribute(
+        "href",
+        "/evkat",
+      );
+    });
+
+    it("closes on Escape and returns focus to the band header button", async () => {
+      const user = userEvent.setup();
+      renderBoard();
+
+      const header = bandButton("Morning Routine");
+      await user.click(header);
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      await user.keyboard("{Escape}");
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(header).toHaveFocus();
+    });
+
+    it("closes with the close button and returns focus to the band header button", async () => {
+      const user = userEvent.setup();
+      renderBoard();
+
+      const header = bandButton("Morning Routine");
+      await user.click(header);
+      await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Close" }));
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(header).toHaveFocus();
+    });
   });
 
   it("pending rows keep the complete button and send today's date as occursOn", async () => {
@@ -635,10 +813,7 @@ describe("TodayBoard", () => {
     } as unknown as UseScheduleResult);
     mockToday(
       makeToday({
-        dueToday: [
-          makePending(),
-          makePending({ itemId: "task-2", title: "Other task" }),
-        ],
+        dueToday: [makePending(), makePending({ itemId: "task-2", title: "Other task" })],
       }),
     );
 
@@ -746,12 +921,7 @@ describe("TodayBoard ScheduleModal wrapper", () => {
     const queryClient = new QueryClient();
     return render(
       <QueryClientProvider client={queryClient}>
-        <ScheduleModal
-          item={item}
-          todayDate="2026-10-12"
-          onClose={vi.fn()}
-          onScheduled={vi.fn()}
-        />
+        <ScheduleModal item={item} todayDate="2026-10-12" onClose={vi.fn()} onScheduled={vi.fn()} />
       </QueryClientProvider>,
     );
   }

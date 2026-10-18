@@ -6,11 +6,34 @@ import {
   slotToIso,
   layoutOverlaps,
   segmentsForWeekday,
+  formatMinuteRange,
   ISTANBUL_TIMEZONE_OFFSET,
 } from "./today-board";
 import { RoutineSegmentResponse } from "@/types/routine/routine";
 
 describe("today-board pure scheduling helpers", () => {
+  describe("formatMinuteRange", () => {
+    it("formats both bounds as HH:mm – HH:mm", () => {
+      expect(formatMinuteRange(360, 480, "All day")).toBe("06:00 – 08:00");
+    });
+
+    it("pads 00:00 and 23:59 correctly", () => {
+      expect(formatMinuteRange(0, 1439, "All day")).toBe("00:00 – 23:59");
+    });
+
+    it("renders an open start as an arrow up to the end", () => {
+      expect(formatMinuteRange(null, 480, "All day")).toBe("→ 08:00");
+    });
+
+    it("renders an open end as the start followed by an arrow", () => {
+      expect(formatMinuteRange(1290, null, "All day")).toBe("21:30 →");
+    });
+
+    it("returns the given all-day label when both bounds are null", () => {
+      expect(formatMinuteRange(null, null, "Tüm gün")).toBe("Tüm gün");
+    });
+  });
+
   describe("minutesToTop", () => {
     it("calculates top pixel offset based on minutes and pxPerMinute", () => {
       expect(minutesToTop(0, 1.5)).toBe(0);

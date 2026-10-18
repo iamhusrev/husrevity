@@ -22,6 +22,7 @@ import { McpSearchService } from './mcp-search.service';
 import { ChangeSetService } from '../change-set/change-set.service';
 import { GoalService } from '../goal/goal.service';
 import { NoteLinkService } from '../note-link/note-link.service';
+import { TrashService } from '../trash/trash.service';
 import { PAT_SCOPES } from '../auth/dto/pat-dtos';
 
 describe('McpServerFactory', () => {
@@ -45,6 +46,7 @@ describe('McpServerFactory', () => {
   let notificationService: any;
   let goalService: any;
   let noteLinkService: any;
+  let trashService: any;
 
   beforeEach(async () => {
     todayService = { dueToday: jest.fn(), timeline: jest.fn(), currentBlock: jest.fn() };
@@ -98,6 +100,9 @@ describe('McpServerFactory', () => {
         .fn()
         .mockResolvedValue({ id: 'nl-1', noteId: 'n1', targetType: 'goal', targetId: 'g1' }),
     };
+    trashService = {
+      list: jest.fn().mockResolvedValue({ items: [], nextCursor: null }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -133,6 +138,7 @@ describe('McpServerFactory', () => {
         },
         { provide: GoalService, useValue: goalService },
         { provide: NoteLinkService, useValue: noteLinkService },
+        { provide: TrashService, useValue: trashService },
       ],
     }).compile();
 
@@ -903,7 +909,7 @@ describe('McpServerFactory', () => {
   });
 
   describe('goal tools registration', () => {
-    it('registers all 6 goal tools and routes calls with PAT scopes', async () => {
+    it('registers all 7 goal tools and routes calls with PAT scopes', async () => {
       const server = factory.createMcpServer();
       const tools = (server as any)._registeredTools || {};
 
@@ -913,6 +919,15 @@ describe('McpServerFactory', () => {
       expect(tools['update_goal']).toBeDefined();
       expect(tools['link_to_goal']).toBeDefined();
       expect(tools['link_note']).toBeDefined();
+      expect(tools['restore_goal']).toBeDefined();
+
+      goalService.restore = jest.fn().mockResolvedValue({ id: 'g1' });
+      const restoreRes = await tools['restore_goal'].handler(
+        { id: '7' },
+        { authInfo: { scopes: ['goals:write'], extra: { ownerId: 'user1' } } },
+      );
+      expect(restoreRes.isError).toBeFalsy();
+      expect(goalService.restore).toHaveBeenCalledWith('user1', '7');
 
       const listGoalsHandler = tools['list_goals'].handler;
       const res = await listGoalsHandler(

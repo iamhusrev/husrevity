@@ -570,7 +570,17 @@
       "minuteOption": "{{count}} min",
       "taskBadge": "Task",
       "recurringTask": "Recurring",
-      "recurringTaskTooltip": "Recurring task schedule is determined by its recurrence rule"
+      "recurringTaskTooltip": "Recurring task schedule is determined by its recurrence rule",
+      "allDay": "All day",
+      "activityCount": "{{count}} activities",
+      "activityCount_one": "{{count}} activity",
+      "activityCount_other": "{{count}} activities",
+      "evkatDetails": "Evkat segment",
+      "evkatActivities": "Activities",
+      "evkatNotes": "Notes",
+      "evkatTheme": "Theme",
+      "evkatEmptyActivities": "No activities in this segment yet.",
+      "openEvkat": "Open in Evkat"
     }
   },
   "month": {
@@ -1788,6 +1798,42 @@
       "noTargets": "There is nothing of this type to link.",
       "submit": "Add",
       "cancel": "Cancel"
+    }
+  },
+  "trash": {
+    "loading": "Loading deleted items…",
+    "restoreItem": "Restore {{title}}",
+    "restoringItem": "Restoring {{title}}…",
+    "title": "Recently deleted",
+    "kicker": "Settings",
+    "intro": "Deleted tasks, projects, reminders, events and goals are kept here until you restore them.",
+    "filterLabel": "Filter by kind",
+    "kind": {
+      "all": "All",
+      "task": "Task",
+      "project": "Project",
+      "reminder": "Reminder",
+      "reminder_list": "Reminder list",
+      "calendar_event": "Calendar event",
+      "goal": "Goal"
+    },
+    "deletedAgo": "Deleted {{when}}",
+    "restore": "Restore",
+    "restoring": "Restoring…",
+    "restored": "Restored",
+    "restoreFailed": "Could not restore",
+    "empty": {
+      "kicker": "Nothing deleted",
+      "body": "Anything you delete will show up here, ready to bring back.",
+      "filtered": "Nothing of this kind has been deleted."
+    },
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "error": "Deleted items could not be loaded.",
+    "settingsLink": {
+      "kicker": "Data",
+      "title": "Recently deleted",
+      "description": "Bring back deleted tasks, projects, reminders, events and goals."
     }
   },
   "themeToggle": {

@@ -217,6 +217,12 @@ export const TODAY_ENDPOINTS = {
   TODAY: "/today",
 };
 
+// ─── Trash (recently deleted) ─────────────────────────────────────────────────
+
+export const TRASH_ENDPOINTS = {
+  LIST: "/trash",
+};
+
 // ─── Change sets ─────────────────────────────────────────────────────────────
 
 export const CHANGE_SET_ENDPOINTS = {

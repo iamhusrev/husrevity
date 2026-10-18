@@ -22,6 +22,7 @@ import { McpSearchService } from '../mcp-search.service';
 import { ChangeSetService } from '../../change-set/change-set.service';
 import { GoalService } from '../../goal/goal.service';
 import { NoteLinkService } from '../../note-link/note-link.service';
+import { TrashService } from '../../trash/trash.service';
 
 describe('mcp-tools-safety', () => {
   let factory: McpServerFactory;
@@ -50,6 +51,7 @@ describe('mcp-tools-safety', () => {
         { provide: ChangeSetService, useValue: {} },
         { provide: GoalService, useValue: {} },
         { provide: NoteLinkService, useValue: {} },
+        { provide: TrashService, useValue: {} },
       ],
     }).compile();
 

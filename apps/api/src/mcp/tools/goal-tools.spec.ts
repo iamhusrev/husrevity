@@ -11,6 +11,7 @@ describe('GoalTools', () => {
       get: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
+      restore: jest.Mock;
     };
     itemService: {
       get: jest.Mock;
@@ -70,6 +71,7 @@ describe('GoalTools', () => {
         get: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        restore: jest.fn(),
       },
       itemService: {
         get: jest.fn(),
@@ -733,5 +735,54 @@ describe('GoalTools', () => {
         targetId: '30',
       });
     });
+  });
+});
+
+describe('GoalTools: restore_goal', () => {
+  let server: McpServer;
+  let goalService: { restore: jest.Mock };
+  const ownerId = 'usr_100';
+  const auth = (scopes: string[]) => ({ authInfo: { scopes, extra: { ownerId } } });
+  const handler = () => (server as any)._registeredTools['restore_goal'].handler;
+  const parseResult = (res: any) => JSON.parse(res.content[0].text);
+
+  beforeEach(() => {
+    server = new McpServer({ name: 'test', version: '1.0.0' });
+    goalService = { restore: jest.fn() };
+    registerGoalTools(server, { goalService } as unknown as GoalToolsDeps);
+  });
+
+  it('rejects without auth or goals:write scope, before looking at the id', async () => {
+    await expect(handler()({ id: 'nope' }, {})).rejects.toThrow(
+      'Unauthorized: missing owner context',
+    );
+    await expect(handler()({ id: 'nope' }, auth(['goals:read']))).rejects.toThrow(
+      "Forbidden: missing required scope 'goals:write'",
+    );
+    expect(goalService.restore).not.toHaveBeenCalled();
+  });
+
+  it('returns a tool error for a non-numeric id without calling the service', async () => {
+    const res = await handler()({ id: 'abc' }, auth(['goals:write']));
+    expect(res.isError).toBe(true);
+    expect(parseResult(res).error).toMatch(/numeric ID/);
+    expect(goalService.restore).not.toHaveBeenCalled();
+  });
+
+  it('restores the owner-scoped goal and returns it', async () => {
+    goalService.restore.mockResolvedValueOnce({ id: '10', title: 'Back', status: 'active' });
+
+    const res = await handler()({ id: '10' }, auth(['goals:write']));
+
+    expect(goalService.restore).toHaveBeenCalledWith(ownerId, '10');
+    expect(res.isError).toBeFalsy();
+    expect(parseResult(res)).toEqual({ goal: { id: '10', title: 'Back', status: 'active' } });
+  });
+
+  it('surfaces a not-found ApiException as a tool error', async () => {
+    goalService.restore.mockRejectedValueOnce(ApiException.notFound('Goal not found'));
+    const res = await handler()({ id: '10' }, auth(['goals:write']));
+    expect(res.isError).toBe(true);
+    expect(parseResult(res).error).toBe('Goal not found');
   });
 });

@@ -25,6 +25,7 @@ import { NotificationService } from '../notification/notification.service';
 import { ChangeSetService } from '../change-set/change-set.service';
 import { GoalService } from '../goal/goal.service';
 import { NoteLinkService } from '../note-link/note-link.service';
+import { TrashService } from '../trash/trash.service';
 
 describe('McpController', () => {
   let app: INestApplication;
@@ -91,6 +92,7 @@ describe('McpController', () => {
           useValue: { list: jest.fn(), get: jest.fn(), create: jest.fn(), update: jest.fn() },
         },
         { provide: NoteLinkService, useValue: { createLink: jest.fn() } },
+        { provide: TrashService, useValue: { list: jest.fn() } },
         PatAuthGuard,
       ],
     }).compile();

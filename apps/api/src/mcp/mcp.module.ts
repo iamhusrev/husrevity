@@ -17,6 +17,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { ChangeSetModule } from '../change-set/change-set.module';
 import { GoalModule } from '../goal/goal.module';
 import { NoteLinkModule } from '../note-link/note-link.module';
+import { TrashModule } from '../trash/trash.module';
 import { Item } from '../item/item.entity';
 import { Note } from '../note/note.entity';
 import { McpController } from './mcp.controller';
@@ -43,6 +44,7 @@ import { PatAuthGuard } from './pat-auth.guard';
     ChangeSetModule,
     GoalModule,
     NoteLinkModule,
+    TrashModule,
     TypeOrmModule.forFeature([Item, Note]),
   ],
   controllers: [McpController],

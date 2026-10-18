@@ -21,6 +21,7 @@ import { McpSearchService } from './mcp-search.service';
 import { ChangeSetService } from '../change-set/change-set.service';
 import { GoalService } from '../goal/goal.service';
 import { NoteLinkService } from '../note-link/note-link.service';
+import { TrashService } from '../trash/trash.service';
 
 import { registerNoteTools } from './tools/note-tools';
 import { registerProjectTools } from './tools/project-tools';
@@ -38,6 +39,7 @@ import { registerLifeContextTool } from './tools/life-context-tool';
 import { registerPlanTool } from './tools/plan-tool';
 import { registerPlanningPrompts } from './tools/planning-prompts';
 import { registerGoalTools } from './tools/goal-tools';
+import { registerTrashTools } from './tools/trash-tools';
 
 @Injectable()
 export class McpServerFactory {
@@ -62,6 +64,7 @@ export class McpServerFactory {
     private readonly changeSetService: ChangeSetService,
     private readonly goalService: GoalService,
     private readonly noteLinkService: NoteLinkService,
+    private readonly trashService: TrashService,
     @Optional() private readonly projectAccessService?: ProjectAccessService,
   ) {}
 
@@ -121,6 +124,7 @@ export class McpServerFactory {
       changeSetService: this.changeSetService,
       noteLinkService: this.noteLinkService,
     });
+    registerTrashTools(server, { trashService: this.trashService });
     registerPlanningPrompts(server);
 
     return server;

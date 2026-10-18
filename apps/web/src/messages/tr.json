@@ -570,7 +570,17 @@
       "minuteOption": "{{count}} dk",
       "taskBadge": "Görev",
       "recurringTask": "Tekrarlayan",
-      "recurringTaskTooltip": "Tekrarlayan görevlerin zamanı kuralından belirlenir"
+      "recurringTaskTooltip": "Tekrarlayan görevlerin zamanı kuralından belirlenir",
+      "allDay": "Tüm gün",
+      "activityCount": "{{count}} iş",
+      "activityCount_one": "{{count}} iş",
+      "activityCount_other": "{{count}} iş",
+      "evkatDetails": "Evkat vakti",
+      "evkatActivities": "İşler",
+      "evkatNotes": "Notlar",
+      "evkatTheme": "Tema",
+      "evkatEmptyActivities": "Bu vakte henüz iş eklenmemiş.",
+      "openEvkat": "Evkat'ta aç"
     }
   },
   "month": {
@@ -1788,6 +1798,42 @@
       "noTargets": "Bu türde bağlanabilecek kayıt yok.",
       "submit": "Ekle",
       "cancel": "Vazgeç"
+    }
+  },
+  "trash": {
+    "loading": "Silinenler yükleniyor…",
+    "restoreItem": "{{title}} öğesini geri yükle",
+    "restoringItem": "{{title}} geri yükleniyor…",
+    "title": "Son silinenler",
+    "kicker": "Ayarlar",
+    "intro": "Silinen görevler, projeler, hatırlatıcılar, etkinlikler ve hedefler sen geri alana kadar burada tutulur.",
+    "filterLabel": "Türe göre filtrele",
+    "kind": {
+      "all": "Tümü",
+      "task": "Görev",
+      "project": "Proje",
+      "reminder": "Hatırlatıcı",
+      "reminder_list": "Hatırlatıcı listesi",
+      "calendar_event": "Takvim etkinliği",
+      "goal": "Hedef"
+    },
+    "deletedAgo": "{{when}} silindi",
+    "restore": "Geri al",
+    "restoring": "Geri alınıyor…",
+    "restored": "Geri alındı",
+    "restoreFailed": "Geri alınamadı",
+    "empty": {
+      "kicker": "Silinen bir şey yok",
+      "body": "Sildiğin her şey burada görünür ve geri alınabilir.",
+      "filtered": "Bu türde silinmiş bir kayıt yok."
+    },
+    "loadMore": "Daha fazla göster",
+    "loadingMore": "Yükleniyor…",
+    "error": "Silinenler yüklenemedi.",
+    "settingsLink": {
+      "kicker": "Veriler",
+      "title": "Son silinenler",
+      "description": "Silinen görevleri, projeleri, hatırlatıcıları, etkinlikleri ve hedefleri geri al."
     }
   },
   "themeToggle": {

@@ -20,9 +20,9 @@ import {
   TimelineLayoutEntry,
 } from "@/utils/today-board";
 import { ItemSummary, TimelineEntry } from "@/types/today/today";
-import { RoutineColorToken, RoutineSegmentResponse } from "@/types/routine/routine";
 import { BiCheckCircle, BiTimeFive, BiCalendarPlus } from "react-icons/bi";
 import SharedScheduleModal from "@/components/items/ScheduleModal";
+import EvkatBand from "./EvkatBand";
 
 const PX_PER_MINUTE = 1;
 const TOTAL_MINUTES = 1440; // 24 hours * 60 minutes
@@ -75,35 +75,6 @@ export function handleTimelineSchedule({
 
   mutate(payload, { onError, onSuccess });
 }
-
-const COLOR_BAND_CLASSES: Record<RoutineColorToken, { bg: string; border: string; text: string }> =
-  {
-    "husrev-amber": {
-      bg: "bg-husrev-amber/10 dark:bg-husrev-amber/15",
-      border: "border-l-4 border-husrev-amber/60",
-      text: "text-husrev-amber-dark dark:text-husrev-amber",
-    },
-    "husrev-ember": {
-      bg: "bg-husrev-ember/10 dark:bg-husrev-ember/15",
-      border: "border-l-4 border-husrev-ember/60",
-      text: "text-husrev-ember dark:text-husrev-ember-light",
-    },
-    "husrev-moss": {
-      bg: "bg-husrev-moss/10 dark:bg-husrev-moss/15",
-      border: "border-l-4 border-husrev-moss/60",
-      text: "text-husrev-moss dark:text-husrev-moss-light",
-    },
-    "husrev-sand": {
-      bg: "bg-husrev-sand/20 dark:bg-husrev-sand/10",
-      border: "border-l-4 border-husrev-sand/60",
-      text: "text-husrev-sand-dark dark:text-husrev-sand",
-    },
-    "husrev-ink": {
-      bg: "bg-husrev-ink/10 dark:bg-white/[0.04]",
-      border: "border-l-4 border-husrev-ink/50 dark:border-white/20",
-      text: "text-husrev-ink dark:text-husrev-cream",
-    },
-  };
 
 export interface DragPayload {
   id: string;
@@ -187,8 +158,7 @@ function PendingRow({
   const { t } = useTranslation();
   const completeItem = useCompleteItem();
 
-  const isCompletePending =
-    completeItem.isPending && completeItem.variables?.id === item.itemId;
+  const isCompletePending = completeItem.isPending && completeItem.variables?.id === item.itemId;
   const isBusy = isCompletePending || isSchedulePending;
 
   const [{ isDragging }, dragRef] = useDrag<DragPayload, void, { isDragging: boolean }>(
@@ -463,31 +433,9 @@ export function TodayBoardView() {
             })}
 
             {/* Evkat routine background bands */}
-            {activeBands.map((band) => {
-              const token = (band.colorToken ?? "husrev-amber") as RoutineColorToken;
-              const styles = COLOR_BAND_CLASSES[token] ?? COLOR_BAND_CLASSES["husrev-amber"];
-
-              const start = band.startMinute ?? 0;
-              const end = band.endMinute ?? TOTAL_MINUTES;
-
-              const bandTop = minutesToTop(start, PX_PER_MINUTE);
-              const bandHeight = minutesToTop(Math.max(0, end - start), PX_PER_MINUTE);
-
-              return (
-                <div
-                  key={band.id}
-                  className={`absolute left-14 right-2 rounded-lg p-2.5 pointer-events-none transition ${styles.bg} ${styles.border}`}
-                  style={{
-                    top: `${bandTop}px`,
-                    height: `${bandHeight}px`,
-                  }}
-                >
-                  <span className={`text-xs font-semibold uppercase tracking-wider ${styles.text}`}>
-                    {band.name}
-                  </span>
-                </div>
-              );
-            })}
+            {activeBands.map((band) => (
+              <EvkatBand key={band.id} segment={band} pxPerMinute={PX_PER_MINUTE} />
+            ))}
 
             {/* Timeline Entries (H1 task badge, H2 calc formula, H4 Istanbul time) */}
             {laidOutTimeline.map((entry) => {
@@ -568,9 +516,7 @@ export function TodayBoardView() {
               {t("today.board.pendingTitle")}
             </h3>
           </div>
-          <span className="text-xs text-gray-400">
-            {pendingItems.length}
-          </span>
+          <span className="text-xs text-gray-400">{pendingItems.length}</span>
         </div>
 
         {pendingItems.length === 0 ? (

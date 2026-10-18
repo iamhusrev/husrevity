@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import NotificationDiagnosticsPanel from "@/components/notifications/NotificationDiagnosticsPanel";
@@ -18,6 +19,8 @@ import {
   BiLockAlt,
   BiSave,
   BiBell,
+  BiChevronRight,
+  BiTrash,
 } from "react-icons/bi";
 
 function getInitials(
@@ -200,7 +203,46 @@ export default function ProfilePage() {
 
       <NotificationPreferences />
       <NotificationDiagnosticsPanel />
+      <RecentlyDeletedCard />
     </div>
+  );
+}
+
+/** Entry point to the trash screen; it has no sidebar item on purpose, settings is its home. */
+function RecentlyDeletedCard() {
+  const { t } = useTranslation();
+  return (
+    <section className="rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm p-6 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+      <header className="mb-4 flex items-center justify-between">
+        <span className="husrev-kicker text-gray-400 dark:text-gray-500">
+          {t("trash.settingsLink.kicker", "Data")}
+        </span>
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-husrev-amber/15 text-husrev-ember dark:bg-husrev-amber/25 dark:text-husrev-amber">
+          <BiTrash size={18} />
+        </div>
+      </header>
+      <Link
+        href="/settings/trash"
+        className="flex min-h-12 items-center justify-between gap-4 rounded-xl border border-husrev-sand/70 bg-husrev-cream/40 p-4 transition-colors hover:bg-husrev-cream/70 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:border-white/[0.06] dark:bg-white/[0.02] dark:hover:bg-white/[0.05]"
+      >
+        <span className="min-w-0 flex-1 space-y-1">
+          <span className="block text-sm font-medium text-husrev-ink dark:text-husrev-cream">
+            {t("trash.settingsLink.title", "Recently deleted")}
+          </span>
+          <span className="block text-xs text-gray-500 dark:text-gray-400">
+            {t(
+              "trash.settingsLink.description",
+              "Bring back deleted tasks, projects, reminders, events and goals.",
+            )}
+          </span>
+        </span>
+        <BiChevronRight
+          size={20}
+          aria-hidden="true"
+          className="shrink-0 text-husrev-ember dark:text-husrev-amber"
+        />
+      </Link>
+    </section>
   );
 }
 
