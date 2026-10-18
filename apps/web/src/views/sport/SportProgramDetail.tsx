@@ -31,6 +31,8 @@ import {
 } from "@/types/sport/sport";
 import {
   BiArrowBack,
+  BiChevronDown,
+  BiChevronUp,
   BiDotsVerticalRounded,
   BiEditAlt,
   BiPlus,
@@ -38,6 +40,15 @@ import {
   BiTrash,
 } from "react-icons/bi";
 import Dialog from "@/components/ui/Dialog";
+import SessionSections from "./SessionSections";
+
+/** Display order: planned weekday (Monday first), then the manual position. */
+function bySchedule(a: SportSessionResponse, b: SportSessionResponse): number {
+  return a.plannedDayOfWeek - b.plannedDayOfWeek || a.position - b.position;
+}
+
+const ICON_BUTTON =
+  "inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber disabled:cursor-not-allowed disabled:opacity-30 dark:text-gray-500";
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6] as const;
 
@@ -306,6 +317,10 @@ function SessionRow({
   moveItem,
   onDrop,
   onEdit,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
 }: {
   session: SportSessionResponse;
   index: number;
@@ -313,6 +328,10 @@ function SessionRow({
   moveItem: (drag: number, hover: number) => void;
   onDrop: () => void;
   onEdit: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
   const { t } = useTranslation();
   const showAlert = alertStore((s) => s.show);
@@ -355,9 +374,13 @@ function SessionRow({
     <div
       ref={ref}
       style={{ opacity: isDragging ? 0.4 : 1 }}
-      className="group flex items-center gap-3 rounded-xl px-3 py-3 ring-1 ring-husrev-sand/70 bg-white transition hover:bg-husrev-cream/40 dark:bg-husrev-shadow dark:ring-white/[0.06] dark:hover:bg-white/[0.03]"
+      className="group flex items-start gap-3 rounded-xl px-3 py-3 ring-1 ring-husrev-sand/70 bg-white transition hover:bg-husrev-cream/40 dark:bg-husrev-shadow dark:ring-white/[0.06] dark:hover:bg-white/[0.03]"
     >
-      <span className="cursor-grab text-gray-300 dark:text-gray-600">
+      {/* Drag handle: HTML5 drag-and-drop ignores touch, so phones use the move buttons instead. */}
+      <span
+        aria-hidden
+        className="mt-2.5 cursor-grab text-gray-300 pointer-coarse:hidden dark:text-gray-600"
+      >
         <BiDotsVerticalRounded size={16} />
       </span>
 
@@ -381,29 +404,53 @@ function SessionRow({
           </span>
           <span>{t(`sport.location.${session.location}`)}</span>
         </div>
-        {session.description && (
-          <p className="mt-1 line-clamp-1 text-xs text-gray-400 dark:text-gray-500">
-            {session.description}
-          </p>
-        )}
+        {session.description && <SessionSections text={session.description} className="mt-2" />}
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      {/* Always visible (no hover-only reveal): a phone has no hover. 2x2 on narrow screens. */}
+      <div className="grid shrink-0 grid-cols-2 gap-0.5 sm:flex sm:items-center">
+        <button
+          type="button"
+          onClick={onMoveUp}
+          disabled={!canMoveUp}
+          aria-label={t("sport.programDetail.moveUp", "Move up")}
+          className={cn(
+            ICON_BUTTON,
+            "hover:bg-husrev-sand/40 hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-husrev-cream",
+          )}
+        >
+          <BiChevronUp size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={onMoveDown}
+          disabled={!canMoveDown}
+          aria-label={t("sport.programDetail.moveDown", "Move down")}
+          className={cn(
+            ICON_BUTTON,
+            "hover:bg-husrev-sand/40 hover:text-husrev-ink dark:hover:bg-white/[0.06] dark:hover:text-husrev-cream",
+          )}
+        >
+          <BiChevronDown size={18} />
+        </button>
         <button
           type="button"
           onClick={onEdit}
           aria-label={t("common.edit")}
-          className="rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-husrev-amber/10 hover:text-husrev-ember"
+          className={cn(
+            ICON_BUTTON,
+            "hover:bg-husrev-amber/10 hover:text-husrev-ember dark:hover:text-husrev-amber",
+          )}
         >
-          <BiEditAlt size={14} />
+          <BiEditAlt size={16} />
         </button>
         <button
           type="button"
           onClick={() => setConfirmingDelete(true)}
-          aria-label={t("common.delete")}
-          className="rounded-full p-2 text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+          aria-label={t("sport.programDetail.deleteSession", "Delete session")}
+          className={cn(ICON_BUTTON, "hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10")}
         >
-          <BiTrash size={14} />
+          <BiTrash size={16} />
         </button>
       </div>
 
@@ -446,7 +493,7 @@ export default function SportProgramDetail({
 
   useEffect(() => {
     if (!dragging.current && program) {
-      const sorted = [...program.sessions].sort((a, b) => a.position - b.position);
+      const sorted = [...program.sessions].sort(bySchedule);
       setOrdered(sorted);
       orderedRef.current = sorted;
     }
@@ -468,6 +515,23 @@ export default function SportProgramDetail({
     const items = orderedRef.current.map((s, i) => ({ id: s.id, position: i }));
     reorderSessions.mutate({ items, programId });
   }, [reorderSessions, programId]);
+
+  /** Button-driven reorder (touch screens have no HTML5 drag): swap with the neighbour. */
+  const moveBy = useCallback(
+    (index: number, delta: number) => {
+      const target = index + delta;
+      const next = [...orderedRef.current];
+      if (target < 0 || target >= next.length) return;
+      [next[index], next[target]] = [next[target], next[index]];
+      orderedRef.current = next;
+      setOrdered(next);
+      reorderSessions.mutate({
+        items: next.map((s, i) => ({ id: s.id, position: i })),
+        programId,
+      });
+    },
+    [reorderSessions, programId],
+  );
 
   const handleToggleActive = async () => {
     if (!program) return;
@@ -584,6 +648,10 @@ export default function SportProgramDetail({
                   setEditingSession(session);
                   setShowSessionModal(true);
                 }}
+                canMoveUp={index > 0}
+                canMoveDown={index < ordered.length - 1}
+                onMoveUp={() => moveBy(index, -1)}
+                onMoveDown={() => moveBy(index, 1)}
               />
             ))}
           </div>

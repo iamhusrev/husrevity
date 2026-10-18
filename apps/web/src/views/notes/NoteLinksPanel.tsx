@@ -172,7 +172,7 @@ function AddLinkDialog({ noteId, onClose }: { noteId: string; onClose: () => voi
     <Dialog
       open={true}
       onClose={onClose}
-      overlayClassName="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs"
+      overlayClassName="fixed inset-0 z-[100001] flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs"
       panelClassName="w-full max-w-sm space-y-4 rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-gray-200 dark:bg-husrev-shadow dark:ring-white/10"
       labelledBy="note-link-dialog-title"
       portal

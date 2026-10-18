@@ -993,7 +993,10 @@
       "updatedLabel": "Updated"
     },
     "dictateFocusTooltip": "Focus to dictate",
-    "emptyMessage": "Enter a title or content."
+    "emptyMessage": "Enter a title or content.",
+    "invalidTitle": "Note not saved",
+    "invalidMessage": "Check the form fields and try again.",
+    "titleTooLong": "Title can be at most 255 characters."
   },
   "calendar": {
     "title": "Calendar",
@@ -1359,7 +1362,8 @@
       "GYM": "Gym",
       "CYCLING": "Cycling",
       "FOOTBALL": "Football",
-      "CUSTOM": "Custom"
+      "CUSTOM": "Custom",
+      "UNKNOWN": "Free"
     },
     "location": {
       "EV": "Home",
@@ -1397,7 +1401,8 @@
       "activities": "Preferred activities",
       "goals": "Goals",
       "goalsPlaceholder": "e.g. 10km run, flexibility…",
-      "notes": "Notes"
+      "notes": "Notes",
+      "error": "Profile could not be loaded."
     },
     "programs": {
       "intro": "Create and manage training programs, or let AI generate one.",
@@ -1436,7 +1441,10 @@
       "sessions": "Sessions",
       "newSession": "New session",
       "noSessions": "No sessions in this program yet.",
-      "notFound": "Program not found."
+      "notFound": "Program not found.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "deleteSession": "Delete session"
     },
     "sessionModal": {
       "newKicker": "New session",
@@ -1466,11 +1474,89 @@
       "close": "Close",
       "viewProgram": "View program"
     },
+    "home": {
+      "history": "History",
+      "addFree": "Add free workout",
+      "programsError": "Programs could not be loaded.",
+      "programRange": "{{from}} – {{to}}",
+      "openPrograms": "Programs",
+      "noProgram": {
+        "title": "No active program",
+        "body": "Create a new program or let AI generate one.",
+        "cta": "Create a program"
+      }
+    },
+    "today": {
+      "kicker": "Week {{week}} / {{total}} · {{day}}",
+      "start": "Start workout",
+      "hide": "Hide workout",
+      "details": "Details",
+      "done": "Done ✓",
+      "completed": "Completed · {{minutes}} min",
+      "howWasIt": "How was it?",
+      "undo": "Undo",
+      "rest": "Rest day today",
+      "restDay": "Rest day",
+      "nextUp": "Next up: {{name}} · {{day}}",
+      "upcoming": "The program starts on {{date}}",
+      "ended": "Program finished: {{done}}/{{planned}}",
+      "endedShort": "Program finished",
+      "viewPrograms": "View programs",
+      "missed": "Missed",
+      "skipped": "Skipped",
+      "planned": "Planned",
+      "didAnyway": "Did it anyway",
+      "skip": "Skip",
+      "freeWorkout": "Free workout · {{minutes}} min",
+      "minutes": "{{minutes}} min"
+    },
+    "week": {
+      "label": "This week",
+      "today": "today",
+      "short": {
+        "0": "Mon",
+        "1": "Tue",
+        "2": "Wed",
+        "3": "Thu",
+        "4": "Fri",
+        "5": "Sat",
+        "6": "Sun"
+      },
+      "state": {
+        "done": "completed",
+        "skipped": "skipped",
+        "missed": "missed",
+        "planned": "planned",
+        "rest": "rest"
+      }
+    },
+    "glance": {
+      "thisWeek": "This week",
+      "streak": "Streak",
+      "program": "Program",
+      "percent": "{{value}}%"
+    },
+    "quickLog": {
+      "kicker": "How was it?",
+      "title": "Rate the workout",
+      "intensity": "Intensity",
+      "intensityValue": "{{value}}/10",
+      "duration": "Duration (min)",
+      "less": "5 minutes less",
+      "more": "5 minutes more",
+      "notes": "Notes",
+      "notesPlaceholder": "How did it go?"
+    },
+    "history": {
+      "title": "History",
+      "backToToday": "Back to today"
+    },
     "logs": {
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "newLog": "Log workout",
-      "empty": "No workouts logged this month yet."
+      "empty": "No workouts logged this month yet.",
+      "error": "Workouts could not be loaded."
     },
     "logModal": {
       "newKicker": "Workout log",
@@ -1484,7 +1570,9 @@
       "intensity": "Intensity",
       "completed": "Completed",
       "calories": "Calories burned (optional)",
-      "notes": "Notes"
+      "notes": "Notes",
+      "confirmDeleteTitle": "Delete log",
+      "confirmDeleteMessage": "Delete this workout log? This cannot be undone."
     },
     "stats": {
       "period": {
@@ -1498,7 +1586,8 @@
       "activityBreakdown": "Activity breakdown",
       "intensityDistribution": "Intensity distribution",
       "weeklyTrend": "Weekly trend",
-      "empty": "No data yet."
+      "empty": "No data yet.",
+      "error": "Stats could not be loaded."
     }
   },
   "dictate": {
@@ -1700,5 +1789,10 @@
       "submit": "Add",
       "cancel": "Cancel"
     }
+  },
+  "themeToggle": {
+    "system": "Theme: automatic (follows system)",
+    "light": "Theme: light",
+    "dark": "Theme: dark"
   }
 }

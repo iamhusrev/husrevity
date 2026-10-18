@@ -166,6 +166,17 @@ describe("NoteLinksPanel", () => {
       expect(document.body.contains(dialog)).toBe(true);
     });
 
+    it("stacks its overlay above the notes editor modal (z-[100000])", async () => {
+      // jsdom does no layout or hit-testing, so this asserts the class contract:
+      // the overlay's arbitrary z-index must exceed the base modal's z-[100000].
+      const user = userEvent.setup();
+      render(<NoteLinksPanel noteId="5" />);
+      const overlay = (await openDialog(user)).parentElement!;
+      const match = overlay.className.match(/(?:^|\s)z-\[(\d+)\]/);
+      expect(match).not.toBeNull();
+      expect(Number(match![1])).toBeGreaterThan(100000);
+    });
+
     it("offers only goals and projects and lists non-archived projects", async () => {
       const user = userEvent.setup();
       render(<NoteLinksPanel noteId="5" />);

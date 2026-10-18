@@ -2,7 +2,7 @@
 
 import { type RefObject, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { type FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -31,6 +31,9 @@ interface Props {
   flushRef?: RefObject<(() => Promise<void>) | null>;
 }
 
+/** persist() result meaning "a save is already in flight", distinct from "nothing to save". */
+const BUSY = "busy" as const;
+
 const NOTE_COLORS = ["#FFFFFF", "#FFF8B8", "#FBE2D5", "#D9F2D0", "#D4E8F2", "#E7DCF5", "#FADADD"];
 
 export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushRef }: Props) {
@@ -51,14 +54,16 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
         // Title is optional here — Keep-style, we derive one from the body when
         // left blank (see persist()). This lets the Save button work with a
         // body-only note the same way closing the modal does.
-        title: z.string().max(255).optional(),
+        title: z.string().max(255, t("notes.titleTooLong")).optional(),
         bodyMarkdown: z.string().optional(),
         pinned: z.boolean().optional(),
         archived: z.boolean().optional(),
-        tagIds: z.array(z.number()).optional(),
+        // The API returns bigint ids as strings ("7"); accept both so a note with
+        // tags never fails validation silently.
+        tagIds: z.array(z.union([z.string(), z.number()])).optional(),
         colorHex: z.string().nullable().optional(),
       }),
-    [],
+    [t],
   );
 
   type FormValues = z.infer<typeof schema>;
@@ -101,7 +106,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
 
   const selectedTagIds = watch("tagIds") ?? [];
 
-  const toggleTag = (tagId: number) => {
+  const toggleTag = (tagId: string | number) => {
     const next = selectedTagIds.includes(tagId)
       ? selectedTagIds.filter((x) => x !== tagId)
       : [...selectedTagIds, tagId];
@@ -111,9 +116,10 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
   // Single source of truth for writing the note. Derives a title from the first
   // body line when the title field is blank (Keep-style), so both the explicit
   // Save button and the auto-save-on-close path behave identically. Returns the
-  // note id on success, or null when there was nothing worth saving.
-  const persist = useCallback(async (): Promise<number | null> => {
-    if (createNote.isPending || updateNote.isPending) return null;
+  // note id on success, BUSY while a save is already in flight, or null when
+  // there was nothing worth saving.
+  const persist = useCallback(async (): Promise<number | typeof BUSY | null> => {
+    if (createNote.isPending || updateNote.isPending) return BUSY;
     const data = getValues();
     const titleTrimmed = (data.title ?? "").trim();
     const bodyTrimmed = (data.bodyMarkdown ?? "").trim();
@@ -134,6 +140,8 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
   const handleSave = async () => {
     try {
       const savedId = await persist();
+      // A save is already running; its own result will be reported.
+      if (savedId === BUSY) return;
       if (savedId == null) {
         // Only reachable for a brand-new, completely empty note.
         showAlert({
@@ -158,6 +166,18 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
     }
   };
 
+  // Validation failed: say so instead of doing nothing (a silent no-op Save
+  // button is what hid the string-id tag bug).
+  const handleInvalid = (errors: FieldErrors<FormValues>) => {
+    const first = Object.values(errors).find((e) => e?.message);
+    showAlert({
+      title: t("notes.invalidTitle"),
+      message: (first?.message as string | undefined) || t("notes.invalidMessage"),
+      type: "error",
+      position: "top-center",
+    });
+  };
+
   // Keep-style auto-save on modal close: persist whatever is typed so an
   // accidental dismiss (backdrop / Esc / X) never loses the note. Silent about
   // "nothing to save" cases since the user is just leaving.
@@ -166,7 +186,7 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
     if (!isNew && !isDirty) return;
     try {
       const savedId = await persist();
-      if (savedId == null) return;
+      if (savedId == null || savedId === BUSY) return;
       showAlert({
         title: t("notes.savedTitle"),
         message: isNew ? t("notes.createdMessage") : t("notes.updatedMessage"),
@@ -203,8 +223,11 @@ export default function NoteEditorPage({ id, onSaved, onCancel, embedded, flushR
 
       {/* Links sit below the form on small screens and in a side column from xl up. */}
       <div className="space-y-6 xl:flex xl:items-start xl:gap-8 xl:space-y-0">
-        <form onSubmit={handleSubmit(handleSave)} className="min-w-0 space-y-5 xl:flex-1">
-          <FormFieldText control={control} name="title" label={t("notes.field.title")} required />
+        <form
+          onSubmit={handleSubmit(handleSave, handleInvalid)}
+          className="min-w-0 space-y-5 xl:flex-1"
+        >
+          <FormFieldText control={control} name="title" label={t("notes.field.title")} />
 
           <div className="relative">
             <FormFieldTextarea

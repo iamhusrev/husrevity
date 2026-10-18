@@ -36,6 +36,19 @@ describe('sport-tools', () => {
     }));
   });
 
+  // The DB and the web count 0 = Monday ... 6 = Sunday (sport-session.entity.ts, `sport.day`
+  // i18n keys). A bare "0-6" in the tool description let callers assume 0 = Sunday and shifted
+  // every planned day by one.
+  it.each(['create_sport_session', 'update_sport_session'])(
+    '%s documents plannedDayOfWeek as 0=Monday ... 6=Sunday',
+    (toolName) => {
+      const schema = (server as any)._registeredTools[toolName].inputSchema;
+      const description: string = schema.shape.plannedDayOfWeek.description;
+      expect(description).toContain('0=Monday');
+      expect(description).toContain('6=Sunday');
+    },
+  );
+
   it('update_sport_session merges with current session', async () => {
     deps.sportSessionService.getSession.mockResolvedValueOnce({
       id: 's1', name: 'S', activityType: 'RUNNING', location: 'DIS', plannedDayOfWeek: 1, plannedDuration: 30, difficulty: 'EASY'

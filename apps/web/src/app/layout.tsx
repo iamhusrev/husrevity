@@ -3,6 +3,7 @@ import { Outfit, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { Providers } from "./providers";
+import { THEME_INIT_SCRIPT } from "@/providers/theme-storage";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -51,6 +52,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // attribute swap from logging a mismatch.
   return (
     <html lang="tr" suppressHydrationWarning>
+      <head>
+        {/* Static string (no user input): sets the dark class before first paint to avoid a flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body
         className={`${outfit.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-sans`}
       >

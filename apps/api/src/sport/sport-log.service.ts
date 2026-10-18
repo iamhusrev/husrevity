@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, IsNull, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { SportLog } from './entities/sport-log.entity';
 import { SportSession } from './entities/sport-session.entity';
 import { ApiException } from '../common/api.exception';
@@ -17,18 +17,23 @@ export class SportLogService {
     private readonly logs: Repository<SportLog>,
   ) {}
 
-  /** Create or update the single log row for (owner, sessionId, executedDate). */
+  /**
+   * Records a workout. A planned session has at most one log per day, so with a
+   * `sessionId` the existing (owner, sessionId, executedDate) row is updated in
+   * place. A free workout (no `sessionId`) always inserts a new row: several
+   * free workouts on the same day are distinct entries and must not overwrite
+   * each other.
+   */
   async logWorkout(ownerId: string, req: LogRequestDto): Promise<LogResponseDto> {
     this.assertDate(req.executedDate, 'executedDate');
     const sessionId = req.sessionId ?? null;
 
-    let log = await this.logs.findOne({
-      where: {
-        ownerId,
-        executedDate: req.executedDate,
-        sessionId: sessionId ?? IsNull(),
-      },
-    });
+    let log: SportLog | null = null;
+    if (sessionId) {
+      log = await this.logs.findOne({
+        where: { ownerId, executedDate: req.executedDate, sessionId },
+      });
+    }
     if (!log) {
       log = this.logs.create({ ownerId, sessionId, executedDate: req.executedDate });
     }

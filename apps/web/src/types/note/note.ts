@@ -22,7 +22,8 @@ export interface NoteRequest {
   bodyMarkdown?: string | null;
   pinned?: boolean;
   archived?: boolean;
-  tagIds?: number[];
+  /** The API sends and accepts ids as strings; numbers are still accepted. */
+  tagIds?: Array<string | number>;
   colorHex?: string | null;
 }
 

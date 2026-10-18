@@ -5,22 +5,17 @@ import { useTranslation } from "react-i18next";
 import { useSportStats } from "@/hooks/useSport";
 import { cn } from "@/utils/utils";
 import { BiCalendarCheck, BiTimeFive, BiTrendingUp } from "react-icons/bi";
+import SportErrorRow from "./SportErrorRow";
+import { localISO } from "./sport-schedule";
 
 type Period = "30d" | "90d" | "all";
-
-function toISO(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
 
 function rangeFor(period: Period): { from?: string; to?: string } {
   if (period === "all") return {};
   const to = new Date();
   const from = new Date();
   from.setDate(from.getDate() - (period === "30d" ? 30 : 90));
-  return { from: toISO(from), to: toISO(to) };
+  return { from: localISO(from), to: localISO(to) };
 }
 
 function HeroStat({
@@ -83,7 +78,7 @@ export default function SportStatsView() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<Period>("30d");
   const { from, to } = rangeFor(period);
-  const { data: stats, isLoading } = useSportStats(from, to);
+  const { data: stats, isLoading, isError, refetch } = useSportStats(from, to);
 
   const activityEntries = useMemo(
     () => Object.entries(stats?.activityBreakdown ?? {}).sort((a, b) => b[1] - a[1]),
@@ -109,25 +104,41 @@ export default function SportStatsView() {
     );
   }
 
+  const periodTabs = (
+    <div className="flex items-center justify-end gap-1.5">
+      {(["30d", "90d", "all"] as Period[]).map((p) => (
+        <button
+          key={p}
+          type="button"
+          onClick={() => setPeriod(p)}
+          className={cn(
+            "min-h-9 rounded-full px-3 py-1.5 text-xs font-medium transition",
+            period === p
+              ? "bg-husrev-ember text-husrev-cream"
+              : "text-gray-600 hover:bg-husrev-sand/40 dark:text-gray-300 dark:hover:bg-white/[0.04]",
+          )}
+        >
+          {t(`sport.stats.period.${p}`, p)}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        {periodTabs}
+        <SportErrorRow
+          message={t("sport.stats.error", "Stats could not be loaded.")}
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-1.5">
-        {(["30d", "90d", "all"] as Period[]).map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => setPeriod(p)}
-            className={cn(
-              "rounded-full px-3 py-1.5 text-xs font-medium transition",
-              period === p
-                ? "bg-husrev-ember text-husrev-cream"
-                : "text-gray-600 hover:bg-husrev-sand/40 dark:text-gray-300 dark:hover:bg-white/[0.04]",
-            )}
-          >
-            {t(`sport.stats.period.${p}`, p)}
-          </button>
-        ))}
-      </div>
+      {periodTabs}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <HeroStat

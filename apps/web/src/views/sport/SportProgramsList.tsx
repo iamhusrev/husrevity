@@ -21,6 +21,7 @@ import { BiCalendarCheck, BiPlus, BiSolidMagicWand, BiTargetLock, BiTrash } from
 import { HiSparkles } from "react-icons/hi2";
 import SportAiGeneratorModal from "./SportAiGeneratorModal";
 import Dialog from "@/components/ui/Dialog";
+import { localISO } from "./sport-schedule";
 
 const programSchema = z.object({
   name: z.string().min(1).max(120),
@@ -45,7 +46,7 @@ function NewProgramModal({ onClose }: { onClose: () => void }) {
       description: "",
       weekCount: 8,
       programType: "WEEKLY",
-      startDate: new Date().toISOString().slice(0, 10),
+      startDate: localISO(new Date()),
       endDate: "",
     },
   });

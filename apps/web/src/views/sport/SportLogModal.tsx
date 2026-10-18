@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 import { useCreateSportLog, useDeleteSportLog, useUpdateSportLog } from "@/hooks/useSport";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
@@ -11,11 +13,16 @@ import { cn } from "@/utils/utils";
 import { SportLogResponse } from "@/types/sport/sport";
 import { BiTrash } from "react-icons/bi";
 import Dialog from "@/components/ui/Dialog";
+import { localISO } from "./sport-schedule";
 
 export interface SessionOption {
   id: string;
   label: string;
+  /** Planned minutes of the session; pre-fills the duration when the session is chosen. */
+  plannedDuration?: number;
 }
+
+const LABEL = "husrev-kicker text-gray-500 dark:text-gray-400";
 
 const logSchema = z.object({
   sessionId: z.string().optional(),
@@ -45,12 +52,13 @@ export default function SportLogModal({
   const create = useCreateSportLog();
   const update = useUpdateSportLog();
   const remove = useDeleteSportLog();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  const { control, handleSubmit } = useForm<LogFormValues>({
+  const { control, handleSubmit, setValue } = useForm<LogFormValues>({
     resolver: zodResolver(logSchema),
     defaultValues: {
       sessionId: initial?.sessionId ?? "",
-      executedDate: initial?.executedDate ?? defaultDate ?? new Date().toISOString().slice(0, 10),
+      executedDate: initial?.executedDate ?? defaultDate ?? localISO(new Date()),
       actualDuration: initial?.actualDuration ?? 30,
       completed: initial?.completed ?? true,
       intensity: initial?.intensity ?? 5,
@@ -88,10 +96,18 @@ export default function SportLogModal({
     if (!initial) return;
     try {
       await remove.mutateAsync(initial.id);
+      setConfirmingDelete(false);
       onClose();
     } catch (err) {
       const { title, message } = parseAxiosError(err);
       showAlert({ title, message, type: "error", position: "top-center" });
+    }
+  };
+
+  const handleSessionChange = (sessionId: string) => {
+    const option = sessionOptions.find((s) => s.id === sessionId);
+    if (option?.plannedDuration) {
+      setValue("actualDuration", option.plannedDuration, { shouldDirty: true });
     }
   };
 
@@ -124,7 +140,7 @@ export default function SportLogModal({
         {initial && (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setConfirmingDelete(true)}
             disabled={isPending}
             aria-label={t("common.delete")}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-error-50 hover:text-error-500 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-error-500 disabled:opacity-50"
@@ -138,14 +154,22 @@ export default function SportLogModal({
       <div className="mt-5 space-y-4">
         {sessionOptions.length > 0 && (
           <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            <label htmlFor="sport-log-session" className={LABEL}>
               {t("sport.logModal.session", "Seans")}
             </label>
             <Controller
               control={control}
               name="sessionId"
               render={({ field }) => (
-                <select {...field} className="husrev-input">
+                <select
+                  {...field}
+                  id="sport-log-session"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleSessionChange(e.target.value);
+                  }}
+                  className="husrev-input"
+                >
                   <option value="">{t("sport.logModal.none", "Serbest antrenman")}</option>
                   {sessionOptions.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -160,17 +184,19 @@ export default function SportLogModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            <label htmlFor="sport-log-date" className={LABEL}>
               {t("sport.logModal.date", "Tarih")}
             </label>
             <Controller
               control={control}
               name="executedDate"
-              render={({ field }) => <input type="date" {...field} className="husrev-input" />}
+              render={({ field }) => (
+                <input type="date" {...field} id="sport-log-date" className="husrev-input" />
+              )}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+            <label htmlFor="sport-log-duration" className={LABEL}>
               {t("sport.logModal.duration", "Süre (dk)")}
             </label>
             <Controller
@@ -178,6 +204,7 @@ export default function SportLogModal({
               name="actualDuration"
               render={({ field }) => (
                 <input
+                  id="sport-log-duration"
                   type="number"
                   min={0}
                   value={field.value}
@@ -194,13 +221,15 @@ export default function SportLogModal({
           name="intensity"
           render={({ field }) => (
             <div className="space-y-1.5">
-              <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+              <label htmlFor="sport-log-intensity" className={LABEL}>
                 {t("sport.logModal.intensity", "Yoğunluk")} — {field.value}/10
               </label>
               <input
+                id="sport-log-intensity"
                 type="range"
                 min={1}
                 max={10}
+                aria-valuetext={`${field.value}/10`}
                 value={field.value}
                 onChange={(e) => field.onChange(Number(e.target.value))}
                 className="w-full accent-husrev-ember"
@@ -245,7 +274,7 @@ export default function SportLogModal({
         />
 
         <div className="space-y-1.5">
-          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+          <label htmlFor="sport-log-calories" className={LABEL}>
             {t("sport.logModal.calories", "Yakılan kalori (opsiyonel)")}
           </label>
           <Controller
@@ -253,6 +282,7 @@ export default function SportLogModal({
             name="caloriesBurned"
             render={({ field }) => (
               <input
+                id="sport-log-calories"
                 type="number"
                 min={0}
                 value={field.value ?? ""}
@@ -266,18 +296,37 @@ export default function SportLogModal({
         </div>
 
         <div className="space-y-1.5">
-          <label className="husrev-kicker text-gray-500 dark:text-gray-400">
+          <label htmlFor="sport-log-notes" className={LABEL}>
             {t("sport.logModal.notes", "Not")}
           </label>
           <Controller
             control={control}
             name="notes"
             render={({ field }) => (
-              <textarea {...field} rows={2} className="husrev-input resize-none" />
+              <textarea
+                {...field}
+                id="sport-log-notes"
+                rows={2}
+                className="husrev-input resize-none"
+              />
             )}
           />
         </div>
       </div>
+
+      {initial && (
+        <DeleteConfirmModal
+          isOpen={confirmingDelete}
+          onClose={() => setConfirmingDelete(false)}
+          onConfirm={handleDelete}
+          isPending={remove.isPending}
+          title={t("sport.logModal.confirmDeleteTitle", "Delete log")}
+          message={t(
+            "sport.logModal.confirmDeleteMessage",
+            "Delete this workout log? This cannot be undone.",
+          )}
+        />
+      )}
 
       <div className="mt-6 flex justify-end gap-2">
         <button type="button" onClick={onClose} disabled={isPending} className="husrev-btn-ghost">

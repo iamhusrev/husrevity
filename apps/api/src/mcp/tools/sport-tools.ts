@@ -41,7 +41,8 @@ export function registerSportTools(server: McpServer, deps: SportToolDeps) {
   server.registerTool<any, any>(
     'log_sport_session',
     {
-      description: 'Log a sport session or workout. This idempotent upsert per day overrides the existing log for the given date and session.',
+      description:
+        'Log a sport session or workout. With sessionId this is an idempotent upsert: it overrides the existing log for that session on the given date. Without sessionId it always adds a new free-workout log (several per day are kept).',
       inputSchema: {
         executedDate: z.string().describe('YYYY-MM-DD execution date'),
         actualDuration: z.number().int().min(0).describe('Actual duration in minutes'),
@@ -233,7 +234,12 @@ export function registerSportTools(server: McpServer, deps: SportToolDeps) {
         name: z.string().describe('Session name'),
         activityType: z.enum(['RUNNING', 'YOGA', 'SWIMMING', 'STRENGTH', 'GYM', 'CYCLING', 'FOOTBALL', 'CUSTOM']).describe('Activity type'),
         location: z.enum(['EV', 'SALON', 'YÜZME', 'DIS']).describe('Location'),
-        plannedDayOfWeek: z.number().int().min(0).max(6).describe('Planned day of week (0-6)'),
+        plannedDayOfWeek: z
+          .number()
+          .int()
+          .min(0)
+          .max(6)
+          .describe('Planned day of week: 0=Monday, 1=Tuesday ... 6=Sunday'),
         plannedDuration: z.number().int().min(1).describe('Planned duration in minutes'),
         difficulty: z.enum(['EASY', 'MODERATE', 'HARD']).describe('Difficulty level'),
         description: z.string().optional().describe('Description'),
@@ -263,7 +269,13 @@ export function registerSportTools(server: McpServer, deps: SportToolDeps) {
         name: z.string().optional().describe('Session name'),
         activityType: z.enum(['RUNNING', 'YOGA', 'SWIMMING', 'STRENGTH', 'GYM', 'CYCLING', 'FOOTBALL', 'CUSTOM']).optional().describe('Activity type'),
         location: z.enum(['EV', 'SALON', 'YÜZME', 'DIS']).optional().describe('Location'),
-        plannedDayOfWeek: z.number().int().min(0).max(6).optional().describe('Planned day of week (0-6)'),
+        plannedDayOfWeek: z
+          .number()
+          .int()
+          .min(0)
+          .max(6)
+          .optional()
+          .describe('Planned day of week: 0=Monday, 1=Tuesday ... 6=Sunday'),
         plannedDuration: z.number().int().min(1).optional().describe('Planned duration in minutes'),
         difficulty: z.enum(['EASY', 'MODERATE', 'HARD']).optional().describe('Difficulty level'),
         description: z.string().optional().describe('Description'),

@@ -993,7 +993,10 @@
       "updatedLabel": "Güncelleme"
     },
     "dictateFocusTooltip": "Dikte için odaklan",
-    "emptyMessage": "Bir başlık ya da içerik gir."
+    "emptyMessage": "Bir başlık ya da içerik gir.",
+    "invalidTitle": "Not kaydedilmedi",
+    "invalidMessage": "Form alanlarını kontrol edip tekrar dene.",
+    "titleTooLong": "Başlık en fazla 255 karakter olabilir."
   },
   "calendar": {
     "title": "Takvim",
@@ -1359,7 +1362,8 @@
       "GYM": "Spor salonu",
       "CYCLING": "Bisiklet",
       "FOOTBALL": "Futbol",
-      "CUSTOM": "Diğer"
+      "CUSTOM": "Diğer",
+      "UNKNOWN": "Serbest"
     },
     "location": {
       "EV": "Ev",
@@ -1397,7 +1401,8 @@
       "activities": "Tercih edilen aktiviteler",
       "goals": "Hedefler",
       "goalsPlaceholder": "Örn. 10km koşu, esneklik…",
-      "notes": "Notlar"
+      "notes": "Notlar",
+      "error": "Profil yüklenemedi."
     },
     "programs": {
       "intro": "Antrenman programlarını oluştur, yönet ya da AI ile üret.",
@@ -1436,7 +1441,10 @@
       "sessions": "Seanslar",
       "newSession": "Yeni seans",
       "noSessions": "Bu programda henüz seans yok.",
-      "notFound": "Program bulunamadı."
+      "notFound": "Program bulunamadı.",
+      "moveUp": "Yukarı taşı",
+      "moveDown": "Aşağı taşı",
+      "deleteSession": "Seansı sil"
     },
     "sessionModal": {
       "newKicker": "Yeni seans",
@@ -1466,11 +1474,89 @@
       "close": "Kapat",
       "viewProgram": "Programı gör"
     },
+    "home": {
+      "history": "Geçmiş",
+      "addFree": "Serbest antrenman ekle",
+      "programsError": "Programlar yüklenemedi.",
+      "programRange": "{{from}} – {{to}}",
+      "openPrograms": "Programlar",
+      "noProgram": {
+        "title": "Aktif bir programın yok",
+        "body": "Yeni bir program oluştur ya da yapay zekâya bıraktır.",
+        "cta": "Program oluştur"
+      }
+    },
+    "today": {
+      "kicker": "Hafta {{week}} / {{total}} · {{day}}",
+      "start": "Antrenmanı başlat",
+      "hide": "Antrenmanı gizle",
+      "details": "Detaylar",
+      "done": "Yaptım ✓",
+      "completed": "Tamamlandı · {{minutes}} dk",
+      "howWasIt": "Nasıldı?",
+      "undo": "Geri al",
+      "rest": "Bugün dinlenme günü",
+      "restDay": "Dinlenme günü",
+      "nextUp": "Sırada: {{name}} · {{day}}",
+      "upcoming": "Program {{date}} tarihinde başlıyor",
+      "ended": "Program bitti: {{done}}/{{planned}}",
+      "endedShort": "Program bitti",
+      "viewPrograms": "Programlara git",
+      "missed": "Kaçırıldı",
+      "skipped": "Atlandı",
+      "planned": "Planlandı",
+      "didAnyway": "Yine de yaptım",
+      "skip": "Atla",
+      "freeWorkout": "Serbest antrenman · {{minutes}} dk",
+      "minutes": "{{minutes}} dk"
+    },
+    "week": {
+      "label": "Bu hafta",
+      "today": "bugün",
+      "short": {
+        "0": "Pzt",
+        "1": "Sal",
+        "2": "Çar",
+        "3": "Per",
+        "4": "Cum",
+        "5": "Cmt",
+        "6": "Paz"
+      },
+      "state": {
+        "done": "tamamlandı",
+        "skipped": "atlandı",
+        "missed": "kaçırıldı",
+        "planned": "planlı",
+        "rest": "dinlenme"
+      }
+    },
+    "glance": {
+      "thisWeek": "Bu hafta",
+      "streak": "Seri",
+      "program": "Program",
+      "percent": "%{{value}}"
+    },
+    "quickLog": {
+      "kicker": "Nasıldı?",
+      "title": "Antrenmanı değerlendir",
+      "intensity": "Yoğunluk",
+      "intensityValue": "{{value}}/10",
+      "duration": "Süre (dk)",
+      "less": "5 dakika azalt",
+      "more": "5 dakika artır",
+      "notes": "Not",
+      "notesPlaceholder": "Nasıl geçti?"
+    },
+    "history": {
+      "title": "Geçmiş",
+      "backToToday": "Bugüne dön"
+    },
     "logs": {
       "prevMonth": "Önceki ay",
       "nextMonth": "Sonraki ay",
       "newLog": "Antrenman ekle",
-      "empty": "Bu ay için henüz antrenman kaydın yok."
+      "empty": "Bu ay için henüz antrenman kaydın yok.",
+      "error": "Antrenmanlar yüklenemedi."
     },
     "logModal": {
       "newKicker": "Antrenman kaydı",
@@ -1484,7 +1570,9 @@
       "intensity": "Yoğunluk",
       "completed": "Tamamlandı",
       "calories": "Yakılan kalori (opsiyonel)",
-      "notes": "Not"
+      "notes": "Not",
+      "confirmDeleteTitle": "Kaydı sil",
+      "confirmDeleteMessage": "Bu antrenman kaydını silmek istediğine emin misin? Geri alınamaz."
     },
     "stats": {
       "period": {
@@ -1498,7 +1586,8 @@
       "activityBreakdown": "Aktivite dağılımı",
       "intensityDistribution": "Yoğunluk dağılımı",
       "weeklyTrend": "Haftalık trend",
-      "empty": "Henüz veri yok."
+      "empty": "Henüz veri yok.",
+      "error": "İstatistikler yüklenemedi."
     }
   },
   "dictate": {
@@ -1700,5 +1789,10 @@
       "submit": "Ekle",
       "cancel": "Vazgeç"
     }
+  },
+  "themeToggle": {
+    "system": "Tema: otomatik (sistemi izler)",
+    "light": "Tema: açık",
+    "dark": "Tema: koyu"
   }
 }

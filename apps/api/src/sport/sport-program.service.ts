@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Not, Repository } from 'typeorm';
 import { SportProgram } from './entities/sport-program.entity';
 import { SportSession } from './entities/sport-session.entity';
 import { ApiException } from '../common/api.exception';
@@ -18,6 +18,7 @@ export class SportProgramService {
     private readonly programs: Repository<SportProgram>,
     @InjectRepository(SportSession)
     private readonly sessions: Repository<SportSession>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async listPrograms(ownerId: string, activeOnly?: boolean): Promise<ProgramResponseDto[]> {
@@ -49,7 +50,14 @@ export class SportProgramService {
     return ProgramResponseDto.from(program, sessionRows.map(SessionResponseDto.from));
   }
 
+  /**
+   * Creates a program. An owner has at most one active program, so the new one
+   * starts active only when none is active yet; otherwise it starts inactive and
+   * can be switched on with {@link activateProgram}. The AI generator and the
+   * MCP tool go through here too.
+   */
   async createProgram(ownerId: string, req: ProgramRequestDto): Promise<ProgramResponseDto> {
+    const activeCount = await this.programs.count({ where: { ownerId, isActive: true } });
     const program = this.programs.create({
       ownerId,
       name: req.name,
@@ -59,7 +67,7 @@ export class SportProgramService {
       aiGenerated: req.aiGenerated ?? false,
       startDate: req.startDate,
       endDate: req.endDate ?? null,
-      isActive: true,
+      isActive: activeCount === 0,
     });
     const saved = await this.programs.save(program);
     return ProgramResponseDto.from(saved, []);
@@ -93,14 +101,24 @@ export class SportProgramService {
     await this.programs.softRemove(program);
   }
 
+  /**
+   * Activating a program deactivates the owner's other programs in the same
+   * transaction (single active program). Deactivating only flips this one.
+   */
   async activateProgram(
     ownerId: string,
     id: string,
     isActive: boolean,
   ): Promise<ProgramResponseDto> {
     const program = await this.requireProgram(ownerId, id);
-    program.isActive = isActive;
-    const saved = await this.programs.save(program);
+    const saved = await this.dataSource.transaction(async (em) => {
+      const repo = em.getRepository(SportProgram);
+      if (isActive) {
+        await repo.update({ ownerId, isActive: true, id: Not(program.id) }, { isActive: false });
+      }
+      program.isActive = isActive;
+      return repo.save(program);
+    });
     const sessionRows = await this.sessions.find({
       where: { programId: saved.id },
       order: { position: 'ASC' },

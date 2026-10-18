@@ -12,6 +12,7 @@ import { cn } from "@/utils/utils";
 import { ACTIVITY_TYPES, ActivityType, FITNESS_LEVELS, FitnessLevel } from "@/types/sport/sport";
 import { BiEditAlt, BiRun, BiTargetLock } from "react-icons/bi";
 import Dialog from "@/components/ui/Dialog";
+import SportErrorRow from "./SportErrorRow";
 
 const profileSchema = z.object({
   fitnessLevel: z.enum(FITNESS_LEVELS),
@@ -220,7 +221,7 @@ function EditProfileModal({
 
 export default function SportProfileCard() {
   const { t } = useTranslation();
-  const { data: profile, isLoading } = useSportProfile();
+  const { data: profile, isLoading, isError, refetch } = useSportProfile();
   const [editing, setEditing] = useState(false);
 
   if (isLoading) {
@@ -229,7 +230,15 @@ export default function SportProfileCard() {
     );
   }
 
-  if (!profile) return null;
+  // A failed or empty query must not look like a blank page.
+  if (isError || !profile) {
+    return (
+      <SportErrorRow
+        message={t("sport.profile.error", "Profile could not be loaded.")}
+        onRetry={() => refetch()}
+      />
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-2xl ring-1 ring-husrev-sand/90 bg-white shadow-card-warm dark:bg-husrev-shadow dark:ring-white/[0.06]">
