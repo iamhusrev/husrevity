@@ -1,120 +1,108 @@
 # husrevity
 
+[![CI](https://github.com/iamhusrev/husrevity/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/iamhusrev/husrevity/actions/workflows/ci.yml)
 [![Deploy](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml/badge.svg?branch=master)](https://github.com/iamhusrev/husrevity/actions/workflows/deploy.yml)
 
-Self-hosted personal productivity platform — **NestJS** API + **Next.js** web, Bun workspaces. One `bun run dev` boots both. It's a single-owner-plus-collaborators system (notes, tasks, projects, calendar, reminders, an encrypted-at-rest secrets vault) that has been in the author's own daily use since 2024.
+**A self-hosted productivity platform built to be driven by an AI agent.** Tasks, notes, calendar, goals, projects, an encrypted vault and a daily time-block planner — exposed to Claude through a **Model Context Protocol (MCP) server with 100+ tools**, so the agent can capture, plan and update real data while every write it makes stays reviewable and undoable.
 
-`apps/api` was originally implemented as a Spring Boot service and was later fully ported to NestJS; the **NestJS API is now the source of truth** and `apps/web` is synced to its contract, with no ongoing Spring Boot version maintained.
+NestJS API · Next.js web app · Expo mobile app · one Bun monorepo · in the author's daily use since 2025 (started as a Spring Boot service, later ported to NestJS).
 
-> Status: **Phase 1 + Phase 2 shipped + cross-cutting Notifications + Evkat module.** All original modules (auth, user, note, list, project, task, plan, calendar, reminder, vault, gmail, crypto) have NestJS implementations; on top of that a central `notification` module (web-push via VAPID + per-minute cron + bell dropdown) wires every scheduled entity into one queue, and the new `time-block` module backs the **Evkat** daily hour-stack planner at `/evkat`.
+---
 
-> Deployment, hosting, and secrets management live in a separate private infrastructure repository. This README covers local development, architecture, and the deployment mechanism only — not the infra repo's contents.
+## Built for agents: the MCP server
 
-## Why it exists
+The API ships an MCP server at `POST /api/mcp` (`apps/api/src/mcp`). Point Claude (or any MCP client) at it and the agent works on the same data as the web and mobile apps.
 
-Most task/note/calendar apps force a choice between several single-purpose SaaS tools or one bloated all-in-one platform with someone else's data-retention policy. husrevity consolidates notes, tasks, projects, a calendar, reminders, and a secrets vault into one API and one UI that the author fully owns and operates, with project-level collaboration (owner/editor/viewer roles) layered on top of what started as a single-user tool.
+| Concern | How it is handled |
+| --- | --- |
+| **Tool surface** | 105 tools across tasks, items, notes, calendar, goals, learning, time blocks (Evkat), sport, notifications and trash — plus higher-level tools such as `capture`, `quick_add`, `plan_week` / `apply_plan` and `get_life_context` that let the agent work in intents, not CRUD calls. |
+| **Auth & least privilege** | Personal access tokens (32 random bytes, only the SHA-256 is stored, raw token shown once). `PatAuthGuard` authenticates the route; **scopes are checked per tool**, not per route. |
+| **Undoable agent writes** | Every agent write is recorded as a **change set**. `undo_change_set` reverts it inside a transaction with a pessimistic lock and returns a per-record conflict list instead of overwriting anything the user edited afterwards. |
+| **Input safety** | A secret guard rejects credential-like text in tool input, so an agent can't quietly copy passwords or API keys into notes. |
+| **Planning prompts** | MCP prompts guide the agent through weekly and daily planning on top of the tools. |
+| **Tested contract** | Tool registration, input schemas and safety rules are covered by specs (`mcp-tools-safety.spec.ts`, `mcp-server-factory.spec.ts`, one spec per tool file). |
+
+The app also uses LLMs directly: **Gemini**-powered "today's suggestions" and voice dictation that parses speech into structured items. Shared projects are never sent to the model — suggestions read only the user's own projects.
+
+---
 
 ## Stack
 
-| Layer             | Tooling                                                     |
-| ----------------- | ----------------------------------------------------------- |
-| Runtime / pkg mgr | Bun 1.3+ (workspaces)                                       |
-| API               | NestJS 10 + TypeORM 0.3                                     |
-| Web               | Next.js 15 + React 19 + Tailwind 4 + TanStack Query         |
-| DB                | Postgres 16 (external instance, port `5432`)                |
-| Auth              | JWT 15-min access + opaque 30-day refresh (SHA-256 at rest) |
-| Push              | Web Push (VAPID) + `/sw.js`; `@nestjs/schedule` cron        |
-| Orchestration     | `concurrently`                                              |
+| Layer | Tooling |
+| --- | --- |
+| Monorepo | Bun 1.3+ workspaces — `apps/api`, `apps/web`, `apps/mobile`, `packages/parser`, `packages/api-client` |
+| API | NestJS 10, TypeORM 0.3, PostgreSQL 16, zod, pg-boss (jobs), `@nestjs/schedule` |
+| Agent / AI | `@modelcontextprotocol/sdk` (MCP server), Gemini API |
+| Web | Next.js 15, React 19, Tailwind 4, TanStack Query, react-i18next |
+| Mobile | Expo 52, React Native 0.76, expo-router, delta sync via `/api/sync` |
+| Integrations | Google Calendar (two-way), Web Push (VAPID), email, Telegram, Slack, Expo push |
+| Quality | Jest (API), Vitest + Testing Library (web), GitHub Actions CI |
+
+## Architecture highlights
+
+- **Feature modules.** 32 self-contained NestJS modules under `apps/api/src`. A global chain applies rate limiting → JWT auth → roles, a whitelisting `ValidationPipe`, a response envelope and a global exception filter.
+- **Isolation model.** Every domain query is scoped at the application layer: services take the current user's id explicitly and filter on it. Projects and tasks add collaboration through `ProjectAccessService.requireAccess(userId, projectId, minRole)` with `OWNER` / `EDITOR` / `VIEWER` roles.
+- **Token security.** Refresh tokens are random, stored only as SHA-256 hashes and rotated on every use; reusing a rotated token revokes the whole token family. Passwords use bcrypt; auth endpoints have their own throttle.
+- **Vault encryption.** AES-256-GCM with a random 12-byte IV per value; the 32-byte key lives only on the server and the API refuses to boot in production without it. Stored Google OAuth tokens use the same service.
+- **Google Calendar sync.** Incremental sync tokens with a full-resync fallback on `410 Gone`, push webhooks verified by channel id, resource id and a per-channel secret, and a pg-boss poll as a backstop.
+- **Notifications.** A per-minute dispatcher fans scheduled items out to Web Push, email, Telegram, Slack and Expo.
+- **Audit & soft delete.** A shared base entity provides soft delete; an audit subscriber records who changed what, fed by an `AsyncLocalStorage` request context. Deleted records can be listed and restored from the trash.
+
+## Testing & CI
+
+- **API:** 100+ Jest spec files (~1,200 tests), including module-graph and entity-relation checks and the MCP safety specs.
+- **Web / mobile / parser:** Vitest and Jest suites.
+- **CI** (`.github/workflows/ci.yml`) runs on every push and PR: frozen-lockfile install, API build, web build, web lint and API tests.
+
+## Deployment
+
+`master` auto-deploys through a self-hosted GitHub Actions runner (`.github/workflows/deploy.yml`): it builds the `docker-compose.yml` stack (`api` + `web`, both bound to loopback only), restarts it, health-checks the API and smoke-tests the public URL. TLS terminates at a Cloudflare Tunnel, so no inbound port is open. Database migrations run when the API container starts. Secrets never pass through GitHub — the workflow reads a single env file that already lives on the deploy host.
 
 ---
 
-## Dev — local setup
+## Local development
 
-Prereq: a Postgres instance must be reachable (any local Postgres 16 works; the author runs a shared instance managed in a separate infrastructure repo).
+Prerequisite: a reachable PostgreSQL 16 instance.
 
 ```bash
-# 1. Install everything (workspaces)
-bun install
-
-# 2. Per-app env files (both gitignored)
+bun install                                   # all workspaces
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 
-# 3. Baseline migration + seed admin
-bun run migration:run
-
-# 4. Boot api + web in parallel
-bun run dev
-#   api → http://localhost:4090/api   (swagger: /api/docs)
-#   web → http://localhost:3090
-```
-
-Default seed login: **admin@admin.com / admin** (created by migration `1715000001000-SeedAdmin`).
-
-Generate the secrets in `apps/api/.env` before first run:
-
-```bash
 openssl rand -base64 48   # → HUSREVITY_JWT_SECRET (>= 32 bytes)
 openssl rand -base64 32   # → HUSREVITY_CRYPTO_KEY  (32 bytes, AES-GCM)
+cd apps/api && bunx web-push generate-vapid-keys && cd ../..   # optional: OS-level push
 
-# Web Push (VAPID) — required for OS-level notifications. The in-app bell
-# still works without it, but the dispatcher cron just logs a warning.
-cd apps/api && bunx web-push generate-vapid-keys
-#   → set VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY in apps/api/.env
-#   → VAPID_SUBJECT=mailto:<your-email>
+bun run migration:run     # schema + local seed data
+bun run dev               # api → http://localhost:4090/api (Swagger: /api/docs)
+                          # web → http://localhost:3090
 ```
 
-### Common commands (from repo root)
+Local migrations seed a development admin account (see `apps/api/src/db/migrations`). Never run a public deployment with it.
 
 ```bash
-bun run dev                 # api + web (kill-others-on-fail)
-bun run dev:api             # api only
-bun run dev:web             # web only
-bun run build               # build:api && build:web
-bun run test                # api unit tests (jest)
-bun run test:e2e            # api e2e (smoke)
-bun run migration:run       # apply TypeORM migrations
-bun run migration:generate  # generate migration from entity diff
+bun run dev:api | dev:web     # one app only
+bun run build                 # build:api && build:web
+bun run test                  # API unit tests
+bun run test:e2e              # API smoke e2e
+bun run migration:generate    # migration from entity diff
 ```
-
-API-only (from `apps/api/`): `bun run migration:revert`, `bun run migration:show`.
-Web lint (from `apps/web/`): `bun run lint`.
-
----
 
 ## Layout
 
 ```
 husrevity/
 ├── apps/
-│   ├── api/                        # NestJS port (self-contained feature modules)
-│   │   ├── src/<feature>/          # module + controller + service + entity + dto
-│   │   │                           # auth, user, note, list, project, task, plan,
-│   │   │                           # calendar, reminder, vault, gmail, ai, crypto,
-│   │   │                           # notification (cron + web-push), time-block (Evkat)
-│   │   ├── src/db/migrations/      # TypeORM migrations (Baseline … NotificationsAndTimeBlock)
-│   │   └── scripts/hash-password.ts
-│   └── web/                        # Next.js (forked from husrevity-web)
-│       ├── public/sw.js            # minimal Web Push service worker
-│       └── src/app/(app)/evkat/    # Evkat daily hour-stack page (/evkat)
-├── packages/                       # reserved for shared-types (empty)
-└── docs/
-    └── PROJECT-STRUCTURE.md        # end-to-end architecture walkthrough (start here)
+│   ├── api/       # NestJS — feature modules, MCP server (src/mcp), migrations
+│   ├── web/       # Next.js 15 web app
+│   └── mobile/    # Expo / React Native app
+├── packages/
+│   ├── parser/      # Turkish natural-language quick-add parser
+│   └── api-client/  # shared typed API client
+└── docs/redesign/   # design notes, decisions and roadmap
 ```
 
-See [`docs/PROJECT-STRUCTURE.md`](./docs/PROJECT-STRUCTURE.md) for the end-to-end architecture walkthrough (request lifecycle, module-by-module catalogue, frontend mirror). [`CLAUDE.md`](./CLAUDE.md) is the short-form conventions reference (response envelope, soft-delete, audit, multi-tenancy).
-
----
-
-## Architecture
-
-- **Bun workspaces.** `apps/api` and `apps/web` are separate `package.json`s under one `workspaces: ["apps/*", "packages/*"]` root. This gets a single `bun install` and a single lockfile across both apps, one shared TypeScript/Prettier config, and a `packages/` slot reserved for cross-app types (`shared-types/`) once the API and web DTOs need to share a definition instead of being kept in sync by hand.
-- **Isolation model.** Every domain query is scoped at the application layer, not via database-level row security: service methods take the current user's id as an explicit first parameter and filter on it (e.g. `WHERE owner_id = :ownerId`), enforced consistently by convention across every feature module. The one exception is `project`/`task`, where multi-user collaboration is needed — those two modules gate access through a dedicated `ProjectAccessService.requireAccess(userId, projectId, minRole)` check against `project_member` rows (`OWNER` / `EDITOR` / `VIEWER`) instead of a plain owner filter. A personal task with no project attached stays strictly owner-scoped.
-- **Vault encryption.** The `vault` module stores arbitrary secrets (credentials, notes, imported `.env` files) encrypted at rest with AES-256-GCM (`crypto/crypto.service.ts`): a random 12-byte IV per value, ciphertext, and a 16-byte auth tag are concatenated and stored base64-encoded, keyed by a single server-side 32-byte key (`HUSREVITY_CRYPTO_KEY`, never stored in the database). The key is intentionally treated as immutable in production — rotating it makes existing vault entries permanently undecryptable.
-
-## Deployment
-
-The `master` branch auto-deploys via a self-hosted GitHub Actions runner (`.github/workflows/deploy.yml`): every push builds the `docker-compose.yml` stack (`api` + `web`, both bound to loopback only, fronted by a tunnel that terminates TLS at the edge) and restarts it in place, then runs a health check and a public smoke test before finishing. Secrets never pass through GitHub Actions secrets or the repo itself — the workflow points a gitignored env-file symlink at a single file that already lives on the deploy host, and both the API container's `env_file` and Compose's own `${VAR}` interpolation read from that one file. Anyone self-hosting this needs to provide their own equivalent secrets file and adjust the workflow's path to it.
+[`CLAUDE.md`](./CLAUDE.md) holds the conventions an AI coding agent follows in this repo.
 
 ## License
 
