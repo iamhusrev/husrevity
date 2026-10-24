@@ -18,6 +18,9 @@ import {
   RegisterRequestDto,
 } from './dto/auth-dtos';
 
+const ACCESS_TOKEN_TTL_MIN = 7 * 24 * 60; // 7 days
+const REFRESH_TOKEN_TTL_DAYS = 30;
+
 /**
  * Port of com.husrevity.auth.AuthService.
  * - register: creates User, issues access+refresh.
@@ -138,8 +141,9 @@ export class AuthService {
     user: User,
     familyId?: string,
   ): Promise<AuthResponseDto> {
-    const accessTtlMin = Number(this.config.get('HUSREVITY_JWT_ACCESS_TTL_MIN') ?? 10080); // 7 days
-    const refreshTtlDays = Number(this.config.get('HUSREVITY_JWT_REFRESH_TTL_DAYS') ?? 30); // 1 month
+    // Fixed on purpose (not env-driven): a stale .env must not shorten sessions.
+    const accessTtlMin = ACCESS_TOKEN_TTL_MIN;
+    const refreshTtlDays = REFRESH_TOKEN_TTL_DAYS;
     const issuer = this.config.get<string>('HUSREVITY_JWT_ISSUER') ?? 'husrevity-nest';
 
     const accessToken = await this.jwt.signAsync(
