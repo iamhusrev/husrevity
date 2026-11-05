@@ -1,14 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
-import {
-  ChangeSetSource,
-  ChangeSetStatus,
-} from '../entities/change-set.entity';
-import {
-  ChangeEntryOp,
-  ChangeEntryTargetType,
-} from '../entities/change-entry.entity';
+import { ChangeSetSource, ChangeSetStatus } from '../entities/change-set.entity';
+import { ChangeEntryOp, ChangeEntryTargetType } from '../entities/change-entry.entity';
 
 export class ChangeSetListQueryDto {
   @ApiPropertyOptional({ default: 20, minimum: 1, maximum: 100 })
@@ -19,7 +13,9 @@ export class ChangeSetListQueryDto {
   @Max(100)
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Pagination cursor: change set ID to fetch older records before' })
+  @ApiPropertyOptional({
+    description: 'Pagination cursor: change set ID to fetch older records before',
+  })
   @IsOptional()
   @IsString()
   @Matches(/^\d+$/, { message: 'before must be a numeric string' })

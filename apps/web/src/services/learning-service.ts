@@ -3,7 +3,8 @@ import { ApiResponse } from "@/types/common/api-response";
 import {
   LearningItemRequest,
   LearningItemResponse,
-  LearningReorderItem,
+  LearningItemMoveRequest,
+  LearningTopicReorderRequest,
   LearningSubtopicRequest,
   LearningSubtopicResponse,
   LearningTopicRequest,
@@ -27,8 +28,8 @@ export const learningService = {
   async deleteTopic(id: string): Promise<ApiResponse<void>> {
     return (await apiClient.delete(LEARNING_ENDPOINTS.TOPIC_BY_ID(id))).data;
   },
-  async reorderTopics(items: LearningReorderItem[]): Promise<ApiResponse<void>> {
-    return (await apiClient.patch(LEARNING_ENDPOINTS.TOPICS_REORDER, { items })).data;
+  async reorderTopics(body: LearningTopicReorderRequest): Promise<ApiResponse<void>> {
+    return (await apiClient.patch(LEARNING_ENDPOINTS.TOPICS_REORDER, body)).data;
   },
   async createSubtopic(
     topicId: string,
@@ -45,12 +46,10 @@ export const learningService = {
   async deleteSubtopic(id: string): Promise<ApiResponse<void>> {
     return (await apiClient.delete(LEARNING_ENDPOINTS.SUBTOPIC_BY_ID(id))).data;
   },
-  async reorderSubtopics(
-    topicId: string,
-    items: LearningReorderItem[],
-  ): Promise<ApiResponse<void>> {
-    return (await apiClient.patch(LEARNING_ENDPOINTS.TOPIC_SUBTOPICS_REORDER(topicId), { items }))
-      .data;
+  async reorderSubtopics(topicId: string, orderedIds: string[]): Promise<ApiResponse<void>> {
+    return (
+      await apiClient.patch(LEARNING_ENDPOINTS.TOPIC_SUBTOPICS_REORDER(topicId), { orderedIds })
+    ).data;
   },
   async createItem(
     topicId: string,
@@ -67,8 +66,18 @@ export const learningService = {
   async deleteItem(id: string): Promise<ApiResponse<void>> {
     return (await apiClient.delete(LEARNING_ENDPOINTS.ITEM_BY_ID(id))).data;
   },
-  async reorderItems(topicId: string, items: LearningReorderItem[]): Promise<ApiResponse<void>> {
-    return (await apiClient.patch(LEARNING_ENDPOINTS.TOPIC_ITEMS_REORDER(topicId), { items })).data;
+  /** Reorders the direct items of a topic (those without a subtopic). */
+  async reorderItems(topicId: string, orderedIds: string[]): Promise<ApiResponse<void>> {
+    return (await apiClient.patch(LEARNING_ENDPOINTS.TOPIC_ITEMS_REORDER(topicId), { orderedIds }))
+      .data;
+  },
+  async reorderSubtopicItems(subtopicId: string, orderedIds: string[]): Promise<ApiResponse<void>> {
+    return (
+      await apiClient.patch(LEARNING_ENDPOINTS.SUBTOPIC_ITEMS_REORDER(subtopicId), { orderedIds })
+    ).data;
+  },
+  async moveItem(id: string, body: LearningItemMoveRequest): Promise<ApiResponse<void>> {
+    return (await apiClient.patch(LEARNING_ENDPOINTS.ITEM_MOVE(id), body)).data;
   },
   async toggleItem(id: string): Promise<ApiResponse<LearningItemResponse>> {
     return (await apiClient.post(LEARNING_ENDPOINTS.ITEM_TOGGLE(id))).data;

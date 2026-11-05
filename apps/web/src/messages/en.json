@@ -382,7 +382,16 @@
     "addSubtopicItem": "Add item…",
     "emptyTopic": "Nothing here yet. Add the first item below.",
     "emptySubtopic": "No items yet.",
-    "progress": "{{done}}/{{total}}"
+    "progress": "{{done}}/{{total}}",
+    "moreActions": "More actions",
+    "moveToTop": "Move to top",
+    "moveToBottom": "Move to bottom",
+    "dnd": {
+      "dragTopic": "Drag to reorder topic",
+      "dragSubtopic": "Drag to reorder subtopic",
+      "dragItem": "Drag to reorder item",
+      "instructions": "To pick up an item, press space or enter. Use the arrow keys to move it, space or enter to drop it, escape to cancel."
+    }
   },
   "notifications": {
     "title": "Notifications",

@@ -137,7 +137,9 @@ export const LEARNING_ENDPOINTS = {
   SUBTOPIC_BY_ID: (id: string) => `/learning/subtopics/${id}`,
   TOPIC_ITEMS: (id: string) => `/learning/topics/${id}/items`,
   TOPIC_ITEMS_REORDER: (id: string) => `/learning/topics/${id}/items/reorder`,
+  SUBTOPIC_ITEMS_REORDER: (id: string) => `/learning/subtopics/${id}/items/reorder`,
   ITEM_BY_ID: (id: string) => `/learning/items/${id}`,
+  ITEM_MOVE: (id: string) => `/learning/items/${id}/move`,
   ITEM_TOGGLE: (id: string) => `/learning/items/${id}/toggle`,
 };
 

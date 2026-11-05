@@ -1,16 +1,16 @@
-import { Type } from 'class-transformer';
 import {
-  ArrayNotEmpty,
+  ArrayUnique,
   IsArray,
   IsDateString,
   IsInt,
   IsNotEmpty,
   IsOptional,
+  IsString,
   IsUrl,
   Max,
   MaxLength,
   Min,
-  ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LearningItem } from '../learning-item.entity';
@@ -71,6 +71,7 @@ export class ItemResponseDto {
   @ApiPropertyOptional() notifyMinutesBefore!: number | null;
   @ApiPropertyOptional() completedAt!: string | null;
   @ApiProperty() position!: number;
+  @ApiProperty() updatedAt!: string;
 
   static from(i: LearningItem): ItemResponseDto {
     return {
@@ -85,6 +86,7 @@ export class ItemResponseDto {
       notifyMinutesBefore: i.notifyMinutesBefore,
       completedAt: i.completedAt?.toISOString() ?? null,
       position: i.position,
+      updatedAt: i.updatedAt?.toISOString(),
     };
   }
 }
@@ -155,14 +157,33 @@ export class TopicResponseDto {
   }
 }
 
-export class LearningReorderItemDto {
-  @IsNotEmpty() id!: string;
-  @IsInt() position!: number;
-}
+/** Full ordered id list of one parent's children (topic, subtopic or item list). */
 export class LearningReorderRequestDto {
+  @ApiProperty({ type: [String] })
   @IsArray()
-  @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  @Type(() => LearningReorderItemDto)
-  items!: LearningReorderItemDto[];
+  @ArrayUnique()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  orderedIds!: string[];
+}
+
+export class TopicReorderRequestDto extends LearningReorderRequestDto {
+  /** When set, `orderedIds` is the full list of that year only; other years keep their slots. */
+  @ApiPropertyOptional({ minimum: 2000, maximum: 2100 })
+  @IsOptional()
+  @IsInt()
+  @Min(2000)
+  @Max(2100)
+  year?: number;
+}
+
+export class MoveItemRequestDto {
+  /** Target subtopic of the same topic, or null for the topic's direct item list. */
+  @ApiProperty({ type: String, nullable: true })
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  @IsNotEmpty()
+  subtopicId!: string | null;
+  /** Zero-based index in the target list; values past the end append. */
+  @ApiProperty({ minimum: 0 }) @IsInt() @Min(0) index!: number;
 }

@@ -57,7 +57,17 @@ export interface LearningItemRequest {
   position?: number;
   subtopicId?: string | null;
 }
-export interface LearningReorderItem {
-  id: string;
-  position: number;
+/** Body of every learning reorder call: the complete id list of one parent, first = top priority. */
+export interface LearningReorderRequest {
+  orderedIds: string[];
+}
+export interface LearningTopicReorderRequest extends LearningReorderRequest {
+  /** When set, `orderedIds` covers that year's topics only. */
+  year?: number;
+}
+export interface LearningItemMoveRequest {
+  /** Target subtopic of the same topic, or null for the topic's direct item list. */
+  subtopicId: string | null;
+  /** Zero-based index in the target list. */
+  index: number;
 }

@@ -14,6 +14,7 @@ import {
   useDeleteLearningSubtopic,
   useDeleteLearningTopic,
   useLearningTopics,
+  useReorderLearningTopics,
   useUpdateLearningItem,
   useUpdateLearningSubtopic,
   useUpdateLearningTopic,
@@ -36,6 +37,8 @@ import {
   yearOptions,
   YearTabId,
 } from "./learning-year";
+import { Edge, moveToEdge } from "./learning-order";
+import SortableTopicGrid from "./SortableTopicGrid";
 import TopicCard from "./TopicCard";
 import YearTabs, { TOPICS_PANEL_ID, yearTabDomId } from "./YearTabs";
 
@@ -71,6 +74,12 @@ export default function LearningPage() {
     { topicId: string; subtopic: LearningSubtopicResponse | null } | undefined
   >();
   const topics = data ?? [];
+  const reorderTopics = useReorderLearningTopics({
+    onError: (err) => {
+      const { title, message } = parseAxiosError(err);
+      showAlert({ title, message, type: "error", position: "top-center" });
+    },
+  });
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
   const [selectedYear, setSelectedYear] = useState<YearTabId>("all");
   useEffect(() => {
@@ -106,6 +115,18 @@ export default function LearningPage() {
     setSelectedYear(next);
     writeStoredYear(next);
   };
+  // The request lists exactly the visible topics: one year's topics on a year tab (the API keeps
+  // other years where they are), or every topic on All.
+  const reorderVisible = (orderedIds: string[]) =>
+    reorderTopics.mutate({ year: year === "all" ? undefined : year, orderedIds });
+  const moveTopicToEdge = (id: string, edge: Edge) =>
+    reorderVisible(
+      moveToEdge(
+        visibleTopics.map((topic) => topic.id),
+        id,
+        edge,
+      ),
+    );
   return (
     <div className="space-y-6">
       <PageBreadcrumb
@@ -180,49 +201,62 @@ export default function LearningPage() {
         </div>
       )}
       {/* No dense flow: an open card spans the row and the numbering must keep reading in order. */}
-      <div
-        id={TOPICS_PANEL_ID}
-        role="tabpanel"
-        aria-labelledby={yearTabDomId(year)}
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      <SortableTopicGrid
+        topicIds={visibleTopics.map((topic) => topic.id)}
+        titleOf={(id) => visibleTopics.find((topic) => topic.id === id)?.title ?? ""}
+        onReorder={reorderVisible}
       >
-        {topics.length > 0 && visibleTopics.length === 0 && typeof year === "number" && (
-          <div className="rounded-2xl ring-1 ring-husrev-sand bg-white px-6 py-10 text-center shadow-card-warm sm:col-span-2 xl:col-span-3 dark:bg-husrev-shadow dark:ring-white/[0.06]">
-            <div className="husrev-kicker text-husrev-amber">
-              {t("learning.emptyYear.kicker", "Nothing filed under {{year}} yet", { year })}
+        <div
+          id={TOPICS_PANEL_ID}
+          role="tabpanel"
+          aria-labelledby={yearTabDomId(year)}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          {topics.length > 0 && visibleTopics.length === 0 && typeof year === "number" && (
+            <div className="rounded-2xl ring-1 ring-husrev-sand bg-white px-6 py-10 text-center shadow-card-warm sm:col-span-2 xl:col-span-3 dark:bg-husrev-shadow dark:ring-white/[0.06]">
+              <div className="husrev-kicker text-husrev-amber">
+                {t("learning.emptyYear.kicker", "Nothing filed under {{year}} yet", { year })}
+              </div>
+              <p className="mx-auto mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
+                {t(
+                  "learning.emptyYear.body",
+                  "Create a topic for this year, or switch back to all years to see everything.",
+                )}
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <button type="button" onClick={() => setEditingTopic(null)} className="husrev-btn">
+                  <BiPlus className="h-4 w-4" />
+                  {t("learning.newTopic", "New topic")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeYear("all")}
+                  className="husrev-btn-ghost"
+                >
+                  {t("learning.showAllYears", "Show all years")}
+                </button>
+              </div>
             </div>
-            <p className="mx-auto mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
-              {t(
-                "learning.emptyYear.body",
-                "Create a topic for this year, or switch back to all years to see everything.",
-              )}
-            </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              <button type="button" onClick={() => setEditingTopic(null)} className="husrev-btn">
-                <BiPlus className="h-4 w-4" />
-                {t("learning.newTopic", "New topic")}
-              </button>
-              <button type="button" onClick={() => changeYear("all")} className="husrev-btn-ghost">
-                {t("learning.showAllYears", "Show all years")}
-              </button>
-            </div>
-          </div>
-        )}
-        {visibleTopics.map((topic, index) => (
-          <TopicCard
-            key={topic.id}
-            topic={topic}
-            index={index}
-            isOpen={openIds.has(topic.id)}
-            yearBadge={year === "all" ? topicYear(topic) : null}
-            onToggle={() => toggleTopic(topic.id)}
-            onEdit={() => setEditingTopic(topic)}
-            onEditItem={setEditingItem}
-            onOpenSubtopicModal={(subtopic) => setEditingSubtopic({ topicId: topic.id, subtopic })}
-            showAlert={showAlert}
-          />
-        ))}
-      </div>
+          )}
+          {visibleTopics.map((topic, index) => (
+            <TopicCard
+              key={topic.id}
+              topic={topic}
+              index={index}
+              isOpen={openIds.has(topic.id)}
+              yearBadge={year === "all" ? topicYear(topic) : null}
+              onToggle={() => toggleTopic(topic.id)}
+              onEdit={() => setEditingTopic(topic)}
+              onEditItem={setEditingItem}
+              onOpenSubtopicModal={(subtopic) =>
+                setEditingSubtopic({ topicId: topic.id, subtopic })
+              }
+              onMoveToEdge={(edge) => moveTopicToEdge(topic.id, edge)}
+              showAlert={showAlert}
+            />
+          ))}
+        </div>
+      </SortableTopicGrid>
       {editingTopic !== undefined && (
         <TopicModal
           initial={editingTopic}

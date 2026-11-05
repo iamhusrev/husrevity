@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
+import { act } from "@testing-library/react";
+import { closestCenter, KeyboardSensor, MouseSensor, TouchSensor } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import LearningPage from "./LearningPage";
+import { alertStore } from "@/stores/alert-store";
 import { verifyBackdropCloseFromTrigger, verifyDialogFromTrigger } from "@/test/dialog-contract";
 
 vi.mock("react-i18next", async (importOriginal) => {
@@ -14,6 +18,21 @@ vi.mock("react-i18next", async (importOriginal) => {
     }),
   };
 });
+
+type DndProps = {
+  onDragEnd: (event: { active: { id: string }; over: { id: string } | null }) => void;
+  collisionDetection: unknown;
+  sensors: Array<{ sensor: unknown; options?: Record<string, unknown> }>;
+};
+
+const dnd = vi.hoisted(() => ({
+  contexts: [] as DndProps[],
+  reorderTopics: vi.fn(),
+  reorderSubtopics: vi.fn(),
+  reorderItems: vi.fn(),
+  moveItem: vi.fn(),
+  options: {} as Record<string, { onError?: (error: unknown) => void } | undefined>,
+}));
 
 const { mutation, topicsResult, createItem, createTopic, updateTopic } = vi.hoisted(() => ({
   createItem: vi.fn(),
@@ -96,7 +115,36 @@ const { mutation, topicsResult, createItem, createTopic, updateTopic } = vi.hois
   },
 }));
 
+vi.mock("@dnd-kit/core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@dnd-kit/core")>();
+  return {
+    ...actual,
+    // Same component, but its props are recorded so tests can fire the drag handlers directly:
+    // jsdom has no layout, so a real pointer or keyboard drag cannot be simulated.
+    DndContext: (props: React.ComponentProps<typeof actual.DndContext>) => {
+      dnd.contexts.push(props as unknown as DndProps);
+      return <actual.DndContext {...props} />;
+    },
+  };
+});
+
 vi.mock("@/hooks/useLearning", () => ({
+  useReorderLearningTopics: (options?: { onError?: (error: unknown) => void }) => {
+    dnd.options.topics = options;
+    return { mutate: dnd.reorderTopics, isPending: false };
+  },
+  useReorderLearningSubtopics: (options?: { onError?: (error: unknown) => void }) => {
+    dnd.options.subtopics = options;
+    return { mutate: dnd.reorderSubtopics, isPending: false };
+  },
+  useReorderLearningItems: (options?: { onError?: (error: unknown) => void }) => {
+    dnd.options.items = options;
+    return { mutate: dnd.reorderItems, isPending: false };
+  },
+  useMoveLearningItem: (options?: { onError?: (error: unknown) => void }) => {
+    dnd.options.move = options;
+    return { mutate: dnd.moveItem, isPending: false };
+  },
   useLearningTopics: () => topicsResult,
   useCreateLearningItem: () => ({ mutateAsync: createItem, mutate: vi.fn(), isPending: false }),
   useCreateLearningSubtopic: () => mutation(),
@@ -116,6 +164,11 @@ vi.mock("@/components/notifications/LeadTimeSelect", () => ({ default: () => <di
 
 beforeEach(() => {
   localStorage.clear();
+  dnd.contexts.length = 0;
+  dnd.options = {};
+  for (const spy of [dnd.reorderTopics, dnd.reorderSubtopics, dnd.reorderItems, dnd.moveItem])
+    spy.mockReset();
+  alertStore.setState({ open: false });
   createItem.mockReset();
   createItem.mockResolvedValue(undefined);
   createTopic.mockReset();
@@ -758,5 +811,180 @@ describe("LearningPage topic year field", () => {
     expect(id).toBe("t2");
     expect(body).toEqual({ title: "Go 1.25", description: null });
     expect(Object.keys(body)).not.toContain("year");
+  });
+});
+
+describe("LearningPage drag and drop ordering", () => {
+  /** The grid-level context is the one using plain closestCenter; card bodies use their own. */
+  const gridContext = () =>
+    [...dnd.contexts].reverse().find((c) => c.collisionDetection === closestCenter)!;
+  const bodyContext = () =>
+    [...dnd.contexts].reverse().find((c) => c.collisionDetection !== closestCenter)!;
+  const drop = (context: DndProps, active: string, over: string | null) =>
+    act(() => context.onDragEnd({ active: { id: active }, over: over ? { id: over } : null }));
+  const openMenu = (title: string) => {
+    fireEvent.click(screen.getByRole("button", { name: `More actions: ${title}` }));
+  };
+
+  it("gives every topic a drag handle that is separate from the card toggle", () => {
+    render(<LearningPage />);
+
+    const handle = screen.getByRole("button", { name: "Drag to reorder topic: Rust" });
+    expect(handle.className).toContain("touch-none");
+    // Clicking the handle must not be the toggle: that one is the title button.
+    expect(handle.getAttribute("aria-expanded")).toBeNull();
+  });
+
+  it("configures mouse distance, a 200 ms touch hold and keyboard sortable coordinates", () => {
+    render(<LearningPage />);
+
+    const sensors = gridContext().sensors;
+    const mouse = sensors.find((s) => s.sensor === MouseSensor);
+    const touch = sensors.find((s) => s.sensor === TouchSensor);
+    const keyboard = sensors.find((s) => s.sensor === KeyboardSensor);
+    expect(mouse?.options).toMatchObject({ activationConstraint: { distance: 5 } });
+    expect(touch?.options).toMatchObject({ activationConstraint: { delay: 200 } });
+    expect(keyboard?.options).toMatchObject({ coordinateGetter: sortableKeyboardCoordinates });
+  });
+
+  describe("topics", () => {
+    it("sends the full visible list in its new order when a topic is dropped on another", () => {
+      render(<LearningPage />);
+
+      drop(gridContext(), "topic:t1", "topic:t2");
+
+      expect(dnd.reorderTopics).toHaveBeenCalledWith({ year: undefined, orderedIds: ["t2", "t1"] });
+    });
+
+    it("sends nothing when the card is dropped outside, on itself or on something else", () => {
+      render(<LearningPage />);
+
+      drop(gridContext(), "topic:t1", null);
+      drop(gridContext(), "topic:t1", "topic:t1");
+      drop(gridContext(), "topic:t1", "item:i1");
+
+      expect(dnd.reorderTopics).not.toHaveBeenCalled();
+    });
+
+    it("Move to top puts the topic first in one click", () => {
+      render(<LearningPage />);
+
+      openMenu("Go");
+      fireEvent.click(screen.getByRole("button", { name: "Move to top" }));
+
+      expect(dnd.reorderTopics).toHaveBeenCalledWith({ year: undefined, orderedIds: ["t2", "t1"] });
+    });
+
+    it("Move to bottom puts the topic last", () => {
+      render(<LearningPage />);
+
+      openMenu("Rust");
+      fireEvent.click(screen.getByRole("button", { name: "Move to bottom" }));
+
+      expect(dnd.reorderTopics).toHaveBeenCalledWith({ year: undefined, orderedIds: ["t2", "t1"] });
+    });
+
+    it("on a year tab it orders that year only and says which year", () => {
+      render(<LearningPage />);
+      fireEvent.click(screen.getByRole("tab", { name: /2025/ }));
+
+      openMenu("Go");
+      fireEvent.click(screen.getByRole("button", { name: "Move to top" }));
+
+      expect(dnd.reorderTopics).toHaveBeenCalledWith({ year: 2025, orderedIds: ["t2"] });
+    });
+
+    it("shows an error toast when the hook reports a failed reorder", () => {
+      render(<LearningPage />);
+
+      act(() => dnd.options.topics?.onError?.(new Error("boom")));
+
+      expect(alertStore.getState()).toMatchObject({ open: true, type: "error" });
+    });
+  });
+
+  describe("subtopics and items", () => {
+    const withExtraItem = () => {
+      const original = topicsResult.data;
+      const t1 = original[0];
+      topicsResult.data = [
+        {
+          ...t1,
+          items: [t1.items[0], { ...t1.items[0], id: "i4", text: "Rustlings", position: 1 }],
+          subtopics: [
+            t1.subtopics[0],
+            { ...t1.subtopics[0], id: "s2", title: "Lifetimes", position: 1 },
+          ],
+        },
+        original[1],
+      ];
+      return () => {
+        topicsResult.data = original;
+      };
+    };
+
+    it("reorders subtopics when one is dropped on another", () => {
+      const restore = withExtraItem();
+      try {
+        localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+        render(<LearningPage />);
+
+        drop(bodyContext(), "subtopic:s1", "subtopic:s2");
+
+        expect(dnd.reorderSubtopics).toHaveBeenCalledWith({
+          topicId: "t1",
+          orderedIds: ["s2", "s1"],
+        });
+      } finally {
+        restore();
+      }
+    });
+
+    it("reorders direct items of a topic with no subtopicId", () => {
+      const restore = withExtraItem();
+      try {
+        localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+        render(<LearningPage />);
+
+        drop(bodyContext(), "item:i1", "item:i4");
+
+        expect(dnd.reorderItems).toHaveBeenCalledWith({
+          topicId: "t1",
+          subtopicId: undefined,
+          orderedIds: ["i4", "i1"],
+        });
+      } finally {
+        restore();
+      }
+    });
+
+    it("moves an item into another subtopic, changing subtopicId and index together", () => {
+      localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+      render(<LearningPage />);
+
+      drop(bodyContext(), "item:i1", "sub:s1");
+
+      expect(dnd.moveItem).toHaveBeenCalledWith({ itemId: "i1", subtopicId: "s1", index: 0 });
+      expect(dnd.reorderItems).not.toHaveBeenCalled();
+    });
+
+    it("reports a failed item move as an error toast", () => {
+      localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+      render(<LearningPage />);
+
+      act(() => dnd.options.move?.onError?.(new Error("nope")));
+
+      expect(alertStore.getState()).toMatchObject({ open: true, type: "error" });
+    });
+
+    it("gives subtopics and items their own handles", () => {
+      localStorage.setItem(OPEN_KEY, JSON.stringify(["t1"]));
+      render(<LearningPage />);
+
+      expect(
+        screen.getByRole("button", { name: "Drag to reorder subtopic: Ownership" }),
+      ).toBeTruthy();
+      expect(screen.getByRole("button", { name: "Drag to reorder item" })).toBeTruthy();
+    });
   });
 });

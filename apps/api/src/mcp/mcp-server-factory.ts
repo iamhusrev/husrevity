@@ -92,7 +92,10 @@ export class McpServerFactory {
     registerReminderTools(server, { reminderService: this.reminderService });
     registerRoutineTools(server, { routineService: this.routineService });
     registerTimeBlockTools(server, { timeBlockService: this.timeBlockService });
-    registerLearningTools(server, { learningService: this.learningService });
+    registerLearningTools(server, {
+      learningService: this.learningService,
+      changeSetService: this.changeSetService,
+    });
     registerSportTools(server, {
       sportLogService: this.sportLogService,
       sportProgramService: this.sportProgramService,

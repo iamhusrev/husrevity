@@ -382,7 +382,16 @@
     "addSubtopicItem": "Madde ekle…",
     "emptyTopic": "Henüz bir şey yok. İlk maddeyi aşağıdan ekle.",
     "emptySubtopic": "Henüz madde yok.",
-    "progress": "{{done}}/{{total}}"
+    "progress": "{{done}}/{{total}}",
+    "moreActions": "Diğer işlemler",
+    "moveToTop": "En üste taşı",
+    "moveToBottom": "En alta taşı",
+    "dnd": {
+      "dragTopic": "Konuyu sürükleyerek sırala",
+      "dragSubtopic": "Alt başlığı sürükleyerek sırala",
+      "dragItem": "Maddeyi sürükleyerek sırala",
+      "instructions": "Bir öğeyi almak için boşluk veya enter tuşuna bas. Taşımak için ok tuşlarını, bırakmak için boşluk veya enter tuşunu, iptal için escape tuşunu kullan."
+    }
   },
   "notifications": {
     "title": "Bildirimler",

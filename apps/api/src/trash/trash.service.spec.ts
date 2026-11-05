@@ -7,6 +7,9 @@ import { Reminder } from '../reminder/reminder.entity';
 import { ReminderList } from '../reminder/reminder-list.entity';
 import { CalendarEvent } from '../calendar/calendar-event.entity';
 import { Goal } from '../goal/goal.entity';
+import { LearningTopic } from '../learning/learning-topic.entity';
+import { LearningSubtopic } from '../learning/learning-subtopic.entity';
+import { LearningItem } from '../learning/learning-item.entity';
 import { TrashService, decodeTrashCursor, encodeTrashCursor } from './trash.service';
 import { TRASH_KINDS, TrashKind } from './dto/trash-dtos';
 
@@ -67,6 +70,9 @@ describe('TrashService', () => {
       reminder_list: makeRepo(),
       calendar_event: makeRepo(),
       goal: makeRepo(),
+      learning_topic: makeRepo(),
+      learning_subtopic: makeRepo(),
+      learning_item: makeRepo(),
     };
     const module = await Test.createTestingModule({
       providers: [
@@ -77,6 +83,9 @@ describe('TrashService', () => {
         { provide: getRepositoryToken(ReminderList), useValue: repos.reminder_list },
         { provide: getRepositoryToken(CalendarEvent), useValue: repos.calendar_event },
         { provide: getRepositoryToken(Goal), useValue: repos.goal },
+        { provide: getRepositoryToken(LearningTopic), useValue: repos.learning_topic },
+        { provide: getRepositoryToken(LearningSubtopic), useValue: repos.learning_subtopic },
+        { provide: getRepositoryToken(LearningItem), useValue: repos.learning_item },
       ],
     }).compile();
     service = module.get(TrashService);
@@ -97,6 +106,65 @@ describe('TrashService', () => {
         }
       },
     );
+
+    it('learning_topic: owner scoped like any owned kind', async () => {
+      await service.list(userId, { kinds: ['learning_topic'] });
+
+      const { sql, params } = whereOf(repos.learning_topic.qb);
+      expect(sql).toContain('t.ownerId = :userId');
+      expect(params.userId).toBe(userId);
+    });
+
+    it('learning_subtopic: ownership via a LIVE topic, so children deleted with a topic stay hidden', async () => {
+      await service.list(userId, { kinds: ['learning_subtopic'] });
+
+      const { sql, params } = whereOf(repos.learning_subtopic.qb);
+      expect(sql).toContain('t.topicId IN (SELECT lt.id FROM learning_topic lt');
+      expect(sql).toContain('lt.deleted_at IS NULL');
+      expect(sql).toContain('lt.owner_id = :userId');
+      expect(sql).not.toContain('t.ownerId');
+      expect(params.userId).toBe(userId);
+    });
+
+    it('learning_item: needs a LIVE owned topic and a LIVE subtopic (or none)', async () => {
+      await service.list(userId, { kinds: ['learning_item'] });
+
+      const { sql, params } = whereOf(repos.learning_item.qb);
+      expect(sql).toContain('lt.deleted_at IS NULL');
+      expect(sql).toContain('lt.owner_id = :userId');
+      expect(sql).toContain('t.subtopicId IS NULL OR t.subtopicId IN (SELECT ls.id');
+      expect(sql).toContain('ls.deleted_at IS NULL');
+      expect(params.userId).toBe(userId);
+    });
+
+    it('learning kinds: selects the right title column and points at the restore route', async () => {
+      repos.learning_item.qb.getMany.mockResolvedValue([
+        { id: '7', text: 'Read ch. 1', deletedAt: t1 },
+      ]);
+      repos.learning_topic.qb.getMany.mockResolvedValue([
+        { id: '3', title: 'Rust', deletedAt: t2 },
+      ]);
+
+      const { items } = await service.list(userId, {
+        kinds: ['learning_item', 'learning_topic'],
+      });
+
+      expect(repos.learning_item.qb.select).toHaveBeenCalledWith(['t.id', 't.text', 't.deletedAt']);
+      expect(items).toEqual([
+        expect.objectContaining({
+          kind: 'learning_topic',
+          title: 'Rust',
+          restoreTool: 'restore_learning_topic',
+          restorePath: '/learning/topics/3/restore',
+        }),
+        expect.objectContaining({
+          kind: 'learning_item',
+          title: 'Read ch. 1',
+          restoreTool: 'restore_learning_item',
+          restorePath: '/learning/items/7/restore',
+        }),
+      ]);
+    });
 
     it.each(['project', 'reminder', 'reminder_list', 'calendar_event', 'goal'] as TrashKind[])(
       '%s: is scoped to the caller as owner and never via project membership',

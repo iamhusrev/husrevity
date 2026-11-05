@@ -24,6 +24,9 @@ export const TRASH_KINDS = [
   'reminder_list',
   'calendar_event',
   'goal',
+  'learning_topic',
+  'learning_subtopic',
+  'learning_item',
 ] as const;
 export type TrashKind = (typeof TRASH_KINDS)[number];
 

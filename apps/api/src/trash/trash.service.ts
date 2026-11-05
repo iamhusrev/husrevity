@@ -9,6 +9,9 @@ import { Reminder } from '../reminder/reminder.entity';
 import { ReminderList } from '../reminder/reminder-list.entity';
 import { CalendarEvent } from '../calendar/calendar-event.entity';
 import { Goal } from '../goal/goal.entity';
+import { LearningTopic } from '../learning/learning-topic.entity';
+import { LearningSubtopic } from '../learning/learning-subtopic.entity';
+import { LearningItem } from '../learning/learning-item.entity';
 import {
   DeletedEntryDto,
   TRASH_DEFAULT_LIMIT,
@@ -39,11 +42,12 @@ interface DeletedRow {
   deletedAt: Date;
   title?: string;
   name?: string;
+  text?: string;
   projectId?: string | null;
 }
 
 interface KindSpec {
-  titleColumn: 'title' | 'name';
+  titleColumn: 'title' | 'name' | 'text';
   restoreTool: string;
   restorePath: (id: string) => string;
 }
@@ -79,7 +83,32 @@ const KIND_SPECS: Record<TrashKind, KindSpec> = {
     restoreTool: 'restore_goal',
     restorePath: (id) => `/goals/${id}/restore`,
   },
+  learning_topic: {
+    titleColumn: 'title',
+    restoreTool: 'restore_learning_topic',
+    restorePath: (id) => `/learning/topics/${id}/restore`,
+  },
+  learning_subtopic: {
+    titleColumn: 'title',
+    restoreTool: 'restore_learning_subtopic',
+    restorePath: (id) => `/learning/subtopics/${id}/restore`,
+  },
+  learning_item: {
+    titleColumn: 'text',
+    restoreTool: 'restore_learning_item',
+    restorePath: (id) => `/learning/items/${id}/restore`,
+  },
 };
+
+/**
+ * Learning subtopics and items carry no owner column, so ownership goes through a LIVE
+ * parent topic. Requiring the parent to be alive also hides children that were deleted
+ * together with their topic or subtopic: they come back with it, not on their own.
+ */
+const LIVE_OWNED_TOPIC_SQL =
+  't.topicId IN (SELECT lt.id FROM learning_topic lt WHERE lt.deleted_at IS NULL AND lt.owner_id = :userId)';
+const LIVE_SUBTOPIC_OR_NONE_SQL =
+  '(t.subtopicId IS NULL OR t.subtopicId IN (SELECT ls.id FROM learning_subtopic ls WHERE ls.deleted_at IS NULL))';
 
 /**
  * Mirrors TaskService.restore: a personal task (no project) is visible to its
@@ -147,6 +176,9 @@ export class TrashService {
     @InjectRepository(ReminderList) reminderLists: Repository<ReminderList>,
     @InjectRepository(CalendarEvent) calendarEvents: Repository<CalendarEvent>,
     @InjectRepository(Goal) goals: Repository<Goal>,
+    @InjectRepository(LearningTopic) learningTopics: Repository<LearningTopic>,
+    @InjectRepository(LearningSubtopic) learningSubtopics: Repository<LearningSubtopic>,
+    @InjectRepository(LearningItem) learningItems: Repository<LearningItem>,
   ) {
     this.repos = {
       task: tasks as unknown as Repository<DeletedRow>,
@@ -155,6 +187,9 @@ export class TrashService {
       reminder_list: reminderLists as unknown as Repository<DeletedRow>,
       calendar_event: calendarEvents as unknown as Repository<DeletedRow>,
       goal: goals as unknown as Repository<DeletedRow>,
+      learning_topic: learningTopics as unknown as Repository<DeletedRow>,
+      learning_subtopic: learningSubtopics as unknown as Repository<DeletedRow>,
+      learning_item: learningItems as unknown as Repository<DeletedRow>,
     };
   }
 
@@ -229,10 +264,11 @@ export class TrashService {
       .withDeleted()
       .select(columns)
       .where('t.deletedAt IS NOT NULL');
-    qb =
-      kind === 'task'
-        ? qb.andWhere(VISIBLE_TASK_SQL, { userId })
-        : qb.andWhere('t.ownerId = :userId', { userId });
+    if (kind === 'task') qb = qb.andWhere(VISIBLE_TASK_SQL, { userId });
+    else if (kind === 'learning_subtopic') qb = qb.andWhere(LIVE_OWNED_TOPIC_SQL, { userId });
+    else if (kind === 'learning_item')
+      qb = qb.andWhere(LIVE_OWNED_TOPIC_SQL, { userId }).andWhere(LIVE_SUBTOPIC_OR_NONE_SQL);
+    else qb = qb.andWhere('t.ownerId = :userId', { userId });
     if (q.since) qb = qb.andWhere('t.deletedAt >= :since', { since: q.since });
     if (q.cursor) {
       // Full order is (deletedAt DESC, id DESC, kind index ASC): a kind that
@@ -265,7 +301,7 @@ export class TrashService {
     return {
       kind,
       id: row.id,
-      title: (spec.titleColumn === 'name' ? row.name : row.title) ?? '',
+      title: (row[spec.titleColumn] as string | undefined) ?? '',
       deletedAt: row.deletedAt.toISOString(),
       projectId,
       projectName: projectId ? (projectNames.get(projectId) ?? null) : null,

@@ -10,7 +10,12 @@ import {
 import type { Relation } from 'typeorm';
 import { ChangeSet } from './change-set.entity';
 
-export type ChangeEntryTargetType = 'item' | 'item_occurrence';
+export type ChangeEntryTargetType =
+  | 'item'
+  | 'item_occurrence'
+  | 'learning_topic'
+  | 'learning_subtopic'
+  | 'learning_item';
 export type ChangeEntryOp = 'create' | 'update' | 'delete' | 'complete';
 
 @Entity('change_entry')

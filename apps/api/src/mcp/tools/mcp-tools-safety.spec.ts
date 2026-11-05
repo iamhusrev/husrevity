@@ -116,6 +116,12 @@ describe('mcp-tools-safety', () => {
         'restore_reminder',
         'delete_reminder_list',
         'restore_reminder_list',
+        'delete_learning_topic',
+        'restore_learning_topic',
+        'delete_learning_subtopic',
+        'restore_learning_subtopic',
+        'delete_learning_item',
+        'restore_learning_item',
       ];
 
       for (const name of Object.keys(tools)) {

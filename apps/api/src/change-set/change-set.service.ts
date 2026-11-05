@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { ChangeSet, ChangeSetSource, ChangeSetStatus } from './entities/change-set.entity';
@@ -7,7 +7,9 @@ import { Item, ItemStatus } from '../item/item.entity';
 import { ItemOccurrence, ItemOccurrenceStatus } from '../item/item-occurrence.entity';
 import { Goal } from '../goal/goal.entity';
 import { ItemService } from '../item/item.service';
+import { LearningService } from '../learning/learning.service';
 import { ApiException } from '../common/api.exception';
+import { applyLearningUndo, isLearningTarget, UndoContext } from './learning-undo';
 
 export interface UndoConflict {
   targetType: ChangeEntryTargetType;
@@ -66,6 +68,7 @@ export class ChangeSetService {
     private readonly occurrences: Repository<ItemOccurrence>,
     private readonly itemService: ItemService,
     private readonly dataSource: DataSource,
+    @Optional() private readonly learning?: LearningService,
   ) {}
 
   async begin(
@@ -296,6 +299,13 @@ export class ChangeSetService {
       const itemCache = new Map<string, { item: Item | null; initialUpdatedAtMs: number | null }>();
 
       const conflicts: UndoConflict[] = [];
+      const learningCtx: UndoContext = {
+        manager,
+        ownerId,
+        latestAfterMs: latestAfterUpdatedAtMsMap,
+        initialUpdatedMs: new Map(),
+        restoredTopicIds: new Set(),
+      };
 
       for (const entry of entries) {
         // Skip entries already undone in a previous run
@@ -303,7 +313,19 @@ export class ChangeSetService {
           continue;
         }
 
-        if (entry.targetType === 'item') {
+        if (isLearningTarget(entry.targetType)) {
+          const reason = await applyLearningUndo(learningCtx, entry);
+          if (reason) {
+            conflicts.push({
+              targetType: entry.targetType,
+              targetId: entry.targetId,
+              reason,
+            });
+            continue;
+          }
+          entry.undoneAt = new Date();
+          await entryRepo.save(entry);
+        } else if (entry.targetType === 'item') {
           let cached = itemCache.get(entry.targetId);
           if (!cached) {
             const item = await itemRepo.findOne({
@@ -487,6 +509,14 @@ export class ChangeSetService {
           await entryRepo.save(entry);
         }
       }
+
+      // Deleting cancelled the review notifications; bring them back for what the undo restored.
+      const restoredTopics = [...(learningCtx.restoredTopicIds ?? [])];
+      if (this.learning && restoredTopics.length)
+        postCommitActions.push(async () => {
+          for (const topicId of restoredTopics)
+            await this.learning?.resyncTopicNotifications(ownerId, topicId);
+        });
 
       const allUndone = entries.length > 0 && entries.every((e) => e.undoneAt != null);
 

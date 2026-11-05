@@ -19,6 +19,9 @@ const KIND_SCOPES: Record<TrashKind, PatScope[]> = {
   reminder_list: ['reminders:read', 'items:read'],
   calendar_event: ['calendar:read'],
   goal: ['goals:read'],
+  learning_topic: ['learning:read'],
+  learning_subtopic: ['learning:read'],
+  learning_item: ['learning:read'],
 };
 
 const ANY_TRASH_SCOPE: PatScope[] = [
@@ -27,6 +30,7 @@ const ANY_TRASH_SCOPE: PatScope[] = [
   'reminders:read',
   'items:read',
   'goals:read',
+  'learning:read',
 ];
 
 const REDACTED_TITLE = '[redacted]';

@@ -16,7 +16,7 @@ describe('learning-tools', () => {
       updateItem: jest.fn(),
       toggleItem: jest.fn(),
     };
-    registerLearningTools(server, { learningService });
+    registerLearningTools(server, { learningService, changeSetService: {} as any });
   });
 
   const getHandler = (name: string) => (server as any)._registeredTools[name]?.handler;

@@ -16,8 +16,10 @@ import {
   ItemRequestDto,
   ItemResponseDto,
   LearningReorderRequestDto,
+  MoveItemRequestDto,
   SubtopicRequestDto,
   SubtopicResponseDto,
+  TopicReorderRequestDto,
   TopicRequestDto,
   TopicResponseDto,
 } from './dto/learning-dtos';
@@ -40,9 +42,9 @@ export class LearningController {
   }
   @Patch('topics/reorder') @HttpCode(HttpStatus.NO_CONTENT) reorderTopics(
     @CurrentUser() u: AuthenticatedUser,
-    @Body() body: LearningReorderRequestDto,
+    @Body() body: TopicReorderRequestDto,
   ): Promise<void> {
-    return this.learning.reorderTopics(u.userId, body.items);
+    return this.learning.reorderTopics(u.userId, body);
   }
   @Put('topics/:id') updateTopic(
     @CurrentUser() u: AuthenticatedUser,
@@ -57,6 +59,24 @@ export class LearningController {
   ): Promise<void> {
     return this.learning.deleteTopic(u.userId, id);
   }
+  @Post('topics/:id/restore') @HttpCode(HttpStatus.OK) restoreTopic(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<TopicResponseDto> {
+    return this.learning.restoreTopic(u.userId, id);
+  }
+  @Post('subtopics/:id/restore') @HttpCode(HttpStatus.OK) restoreSubtopic(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<SubtopicResponseDto> {
+    return this.learning.restoreSubtopic(u.userId, id);
+  }
+  @Post('items/:id/restore') @HttpCode(HttpStatus.OK) restoreItem(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+  ): Promise<ItemResponseDto> {
+    return this.learning.restoreItem(u.userId, id);
+  }
   @Post('topics/:id/subtopics') @HttpCode(HttpStatus.CREATED) createSubtopic(
     @CurrentUser() u: AuthenticatedUser,
     @Param('id') id: string,
@@ -69,7 +89,7 @@ export class LearningController {
     @Param('id') id: string,
     @Body() body: LearningReorderRequestDto,
   ): Promise<void> {
-    return this.learning.reorderSubtopics(u.userId, id, body.items);
+    return this.learning.reorderSubtopics(u.userId, id, body);
   }
   @Put('subtopics/:id') updateSubtopic(
     @CurrentUser() u: AuthenticatedUser,
@@ -96,7 +116,21 @@ export class LearningController {
     @Param('id') topicId: string,
     @Body() body: LearningReorderRequestDto,
   ): Promise<void> {
-    return this.learning.reorderItems(u.userId, topicId, body.items);
+    return this.learning.reorderItems(u.userId, topicId, body);
+  }
+  @Patch('subtopics/:id/items/reorder') @HttpCode(HttpStatus.NO_CONTENT) reorderSubtopicItems(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: LearningReorderRequestDto,
+  ): Promise<void> {
+    return this.learning.reorderSubtopicItems(u.userId, id, body);
+  }
+  @Patch('items/:id/move') @HttpCode(HttpStatus.NO_CONTENT) moveItem(
+    @CurrentUser() u: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() body: MoveItemRequestDto,
+  ): Promise<void> {
+    return this.learning.moveItem(u.userId, id, body);
   }
   @Put('items/:id') updateItem(
     @CurrentUser() u: AuthenticatedUser,
