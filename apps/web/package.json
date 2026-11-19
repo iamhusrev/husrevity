@@ -35,7 +35,7 @@
     "i18next-http-backend": "^3.0.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "next": "^15.4.3",
+    "next": "^15.5.29",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
