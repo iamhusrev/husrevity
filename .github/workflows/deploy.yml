@@ -132,6 +132,7 @@ jobs:
           image-ref: ${{ steps.ecr.outputs.registry }}/husrevity-api:${{ steps.plan.outputs.tag }}
           severity: CRITICAL
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: '1'
 
       - name: Push api image to ECR
@@ -159,6 +160,7 @@ jobs:
           image-ref: ${{ steps.ecr.outputs.registry }}/husrevity-web:${{ steps.plan.outputs.tag }}
           severity: CRITICAL
           ignore-unfixed: true
+          trivyignores: .trivyignore
           exit-code: '1'
 
       - name: Push web image to ECR

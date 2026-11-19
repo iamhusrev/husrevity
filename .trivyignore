@@ -1,0 +1,8 @@
+# Accepted Trivy findings for the deploy image scan. Every entry carries an expiry
+# (exp:) so the scan starts failing again on that date and forces a re-check.
+#
+# tar 6.2.1 (node-tar DoS on a crafted archive): pulled in by @mapbox/node-pre-gyp for
+# bcrypt, which only uses it at install time to unpack its prebuilt binary; the api never
+# extracts archives at runtime. The fix is tar 7, a major that node-pre-gyp 1.x does not
+# support. Remove when bcrypt moves off node-pre-gyp 1.x (or the api switches to bcryptjs).
+CVE-2026-59873 exp:2026-12-19

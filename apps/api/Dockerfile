@@ -32,6 +32,11 @@ RUN cd apps/api && bun run build
 
 # ---- Runner ----
 FROM oven/bun:1.3-slim AS runner
+# Pull Debian security fixes the base image does not carry yet (perl-base had CRITICAL CVEs
+# fixed in deb13u1 when this was added); the deploy scan fails on fixable CRITICALs.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production
 
