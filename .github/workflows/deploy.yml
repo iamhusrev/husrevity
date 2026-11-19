@@ -1,78 +1,224 @@
-name: Deploy to prod (master)
+name: Deploy to prod
 
-# Triggers on every push to master.
-# Deploys the husrevity-prod stack on the self-hosted Mac runner.
-# Manual rerun: gh workflow run deploy.yml --ref master
+# Deploys husrevity to the AWS app host after every green CI run on master.
+#
+# Flow (one job, so the "production" environment approval is asked once):
+#   OIDC role -> build linux/arm64 images (skipped when the tag is already in ECR)
+#   -> Trivy scan (fails on CRITICAL) -> push to ECR (tag = git SHA)
+#   -> SSM Run Command "app-deploy-husrevity" (deploy.sh on the host, auto-rollback on a failed health check)
+#   -> public smoke test.
+#
+# The job is skipped until the repository variable AWS_DEPLOY_ENABLED is "true", so nothing deploys to AWS
+# before the cutover is set up. The api runs a Telegram long-poller and Slack Socket Mode: it must
+# never run on two hosts at once.
+#
+# Manual redeploy / rollback: run this workflow with `sha` set to a commit whose images are
+# already in ECR (the last 10 are kept). Nothing is rebuilt.
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
   workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Full git SHA of images already in ECR to (re)deploy. Empty builds and deploys the selected ref.'
+        required: false
+        type: string
 
-# Serializes deploys — a push mid-deploy waits for the current one to finish.
+permissions:
+  contents: read
+  id-token: write
+
+# One deploy per app at a time; a newer run waits instead of cancelling a deploy in flight.
 concurrency:
-  group: prod-deploy
+  group: prod-deploy-husrevity
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Build + restart prod stack
-    runs-on: [self-hosted, linux, iamhusrev-prod]
-    timeout-minutes: 20
+    name: Build, push and deploy husrevity
+    if: >-
+      vars.AWS_DEPLOY_ENABLED == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'master'))
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    environment: production
     env:
-      STACK_NAME: husrevity-prod
-      HUSREVITY_API_HOST_PORT: 4090
-      HUSREVITY_WEB_HOST_PORT: 3090
-      HUSREVITY_DB_HOST_PORT: 5490
-      NEXT_PUBLIC_API_URL: https://api.iamhusrev.com/api
-      # Compose reads its env_file from this handle (docker-compose.yml).
-      HUSREVITY_ENV_FILE: apps/api/.env.prod
+      APP: husrevity
+      PUBLIC_API_URL: https://api.iamhusrev.com
+      PUBLIC_WEB_URL: https://app.iamhusrev.com
+      DEPLOY_DOCUMENT: app-deploy-husrevity
+      INPUT_SHA: ${{ inputs.sha }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Point env symlinks at prod secrets
+      - name: Validate the redeploy input
+        if: env.INPUT_SHA != ''
         run: |
-          # Canonical PROD secrets file (chmod 600) in the central store.
-          # actions/checkout's default `clean: true` runs `git clean -ffdx`
-          # which deletes our gitignored symlinks — so we recreate them
-          # every deploy. Same file feeds compose env_file (api) and
-          # ${VAR} interpolation (root .env).
-          SECRETS="$HOME/iamhusrev/server/secrets/husrevity.env"
-          if [[ ! -f "$SECRETS" ]]; then
-            echo "::error::$SECRETS missing on this host. Provision prod secrets first (see ~/iamhusrev/server/docs/RUNBOOK.md §3)."
+          if [[ ! "$INPUT_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::sha must be a full 40 character lowercase hex git SHA"
             exit 1
           fi
-          ln -sfn "$SECRETS" "$HUSREVITY_ENV_FILE"   # apps/api/.env.prod
-          ln -sfn "$SECRETS" .env
-          ls -la "$HUSREVITY_ENV_FILE" .env
 
-      - name: Build images
-        run: docker compose build
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Apply stack (postgres → api → web)
-        run: docker compose up -d
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Wait for api health (loopback)
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: Decide what to build
+        id: plan
         run: |
-          for i in {1..15}; do
-            if curl -fsS -m 3 http://localhost:${HUSREVITY_API_HOST_PORT}/api/health > /dev/null; then
-              echo "api healthy ✓"
-              exit 0
+          if [[ -n "$INPUT_SHA" ]]; then
+            tag="$INPUT_SHA"; mode=redeploy
+          else
+            tag="$HEAD_SHA"; mode=build
+          fi
+          missing=0
+          for svc in api web; do
+            if out="$(aws ecr describe-images --repository-name "$APP-$svc" --image-ids "imageTag=$tag" 2>&1)"; then
+              echo "${svc}_exists=true" >> "$GITHUB_OUTPUT"
+            elif grep -q 'ImageNotFoundException' <<<"$out"; then
+              echo "${svc}_exists=false" >> "$GITHUB_OUTPUT"
+              missing=1
+            else
+              echo "::error::could not check ECR for $APP-$svc: $out"
+              exit 1
             fi
-            echo "attempt $i/15 — api not ready, sleep 4s"
+          done
+          if [[ "$mode" == "redeploy" && "$missing" -eq 1 ]]; then
+            echo "::error::redeploy requested but some images for $tag are not in ECR (only the last 10 are kept)"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "Deploying $APP at $tag ($mode)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up Docker Buildx
+        if: steps.plan.outputs.mode == 'build'
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      # Both images build from the monorepo root (the Dockerfiles copy every workspace manifest).
+      - name: Build api image (linux/arm64)
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.api_exists != 'true'
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: ./apps/api/Dockerfile
+          platforms: linux/arm64
+          load: true
+          tags: ${{ steps.ecr.outputs.registry }}/husrevity-api:${{ steps.plan.outputs.tag }}
+          cache-from: type=gha,scope=husrevity-api
+          cache-to: type=gha,scope=husrevity-api,mode=max
+
+      - name: Scan api image with Trivy (fail on CRITICAL)
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.api_exists != 'true'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/husrevity-api:${{ steps.plan.outputs.tag }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push api image to ECR
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.api_exists != 'true'
+        run: docker push "${{ steps.ecr.outputs.registry }}/husrevity-api:${{ steps.plan.outputs.tag }}"
+
+      - name: Build web image (linux/arm64)
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.web_exists != 'true'
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: ./apps/web/dockerfile
+          platforms: linux/arm64
+          load: true
+          tags: ${{ steps.ecr.outputs.registry }}/husrevity-web:${{ steps.plan.outputs.tag }}
+          cache-from: type=gha,scope=husrevity-web
+          cache-to: type=gha,scope=husrevity-web,mode=max
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ env.PUBLIC_API_URL }}/api
+
+      - name: Scan web image with Trivy (fail on CRITICAL)
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.web_exists != 'true'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ${{ steps.ecr.outputs.registry }}/husrevity-web:${{ steps.plan.outputs.tag }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Push web image to ECR
+        if: steps.plan.outputs.mode == 'build' && steps.plan.outputs.web_exists != 'true'
+        run: docker push "${{ steps.ecr.outputs.registry }}/husrevity-web:${{ steps.plan.outputs.tag }}"
+
+      - name: Deploy through SSM Run Command
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          command_id="$(aws ssm send-command \
+            --document-name "$DEPLOY_DOCUMENT" \
+            --targets "Key=tag:Role,Values=app-host" \
+            --parameters "tag=$TAG" \
+            --comment "deploy $APP $TAG" \
+            --timeout-seconds 900 \
+            --query Command.CommandId --output text)"
+          echo "SSM command: $command_id"
+
+          instance=""
+          for _ in $(seq 1 30); do
+            instance="$(aws ssm list-command-invocations --command-id "$command_id" \
+              --query 'CommandInvocations[0].InstanceId' --output text 2>/dev/null || true)"
+            if [[ -n "$instance" && "$instance" != "None" ]]; then break; fi
             sleep 4
           done
-          echo "::error::api never became healthy"
-          docker compose logs api --tail=100
-          exit 1
+          if [[ -z "$instance" || "$instance" == "None" ]]; then
+            echo "::error::no instance picked up the command (is the host tagged Role=app-host and online in SSM?)"
+            exit 1
+          fi
 
-      - name: Public smoke test (through Cloudflare Tunnel)
+          status="Pending"
+          for _ in $(seq 1 100); do
+            status="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance" \
+              --query Status --output text)"
+            case "$status" in Pending | InProgress | Delayed) sleep 10 ;; *) break ;; esac
+          done
+
+          output="$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$instance" \
+            --query '[StandardOutputContent, StandardErrorContent]' --output text)"
+          echo "$output"
+          if [[ "$status" != "Success" ]]; then
+            echo "::error::deploy finished with status $status (the host rolls back to the previous tag on a failed health check)"
+            exit 1
+          fi
+          grep -q "deploy ok $TAG" <<<"$output" || { echo "::error::host did not report 'deploy ok $TAG'"; exit 1; }
+
+      # Enable with the repository variable PUBLIC_SMOKE=true once the DNS records point at AWS;
+      # before that the public hostnames still reach the old host.
+      - name: Public smoke test
+        if: vars.PUBLIC_SMOKE == 'true'
         run: |
-          curl -fsS -m 8 --retry 5 --retry-delay 4 --retry-connrefused \
-            https://api.iamhusrev.com/api/health || {
-            echo "::warning::public smoke (HTTPS) failed — check cloudflared LaunchAgent status."
-            exit 0
-          }
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS -m 10 "$PUBLIC_API_URL/api/health" >/dev/null &&
+               curl -fsS -m 10 -o /dev/null "$PUBLIC_WEB_URL/"; then
+              echo "public smoke ok"
+              exit 0
+            fi
+            echo "smoke attempt $attempt/6 failed, retrying in 10s"
+            sleep 10
+          done
+          echo "::error::public smoke test failed"
+          exit 1

@@ -25,6 +25,12 @@ RUN cd apps/web && bun run build
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
+# The standalone server needs only `node`. Drop the package managers the base image
+# ships (npm, npx, yarn, corepack): they are never used at runtime and their bundled
+# dependencies (for example npm's tar) carry CVEs into the image scan.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+      /opt/yarn-* /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3090
