@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GoogleCalendarService } from './google-calendar.service';
@@ -6,6 +6,21 @@ import { IntegrationAccountService } from './integration-account.service';
 import { ExternalLink } from './external-link.entity';
 import { Item } from '../item/item.entity';
 import { ApiException } from '../common/api.exception';
+import { linkedItemOwnedBy } from './owner-scope';
+import { redactSecrets } from './log-redaction';
+import { GoogleCalendarEngineService } from './google-calendar-engine.service';
+
+/** Matches the `items.title` column (VARCHAR(255)). */
+const MAX_TITLE_LENGTH = 255;
+
+function truncateTitle(title: string): string {
+  if (title.length <= MAX_TITLE_LENGTH) return title;
+  let cut = title.slice(0, MAX_TITLE_LENGTH);
+  // Do not leave half of a surrogate pair at the end.
+  const last = cut.charCodeAt(cut.length - 1);
+  if (last >= 0xd800 && last <= 0xdbff) cut = cut.slice(0, -1);
+  return cut;
+}
 
 export interface SyncIncrementalResult {
   syncedCount: number;
@@ -36,7 +51,14 @@ export class GoogleCalendarSyncService {
     private readonly externalLinkRepo: Repository<ExternalLink>,
     @InjectRepository(Item)
     private readonly itemRepo: Repository<Item>,
+    /** Absent in minimal wiring: then every owner stays on the legacy engine, as before. */
+    @Optional() private readonly engine?: GoogleCalendarEngineService,
   ) {}
+
+  /** False when the new engine owns this owner or the grant was narrowed: the legacy pull must stay silent. */
+  private async legacyAllowed(ownerId: string): Promise<boolean> {
+    return (await this.engine?.legacyEngineAllowed(ownerId)) !== false;
+  }
 
   /**
    * Performs an incremental pull sync from Google Calendar to Husrevity items for a user.
@@ -44,6 +66,10 @@ export class GoogleCalendarSyncService {
    * (kind='event', source='gcal'), updates `external_link` records, and saves the new `syncToken`.
    */
   async syncIncremental(ownerId: string): Promise<SyncIncrementalResult> {
+    // Webhook and periodic paths both land here: an owner on the v2 engine (or with a narrowed grant) is never pulled by the legacy engine.
+    if (!(await this.legacyAllowed(ownerId))) {
+      return { syncedCount: 0, deletedCount: 0, syncToken: null };
+    }
     const decryptedAccount = await this.integrationAccountService.get(ownerId, 'google_calendar');
 
     if (!decryptedAccount) {
@@ -78,6 +104,16 @@ export class GoogleCalendarSyncService {
     }
   }
 
+  /**
+   * A full pull (no sync token) must not overwrite a Husrevity-origin item the user edited
+   * after Google last changed the event. Incremental pulls keep applying Google's change.
+   */
+  private localEditWins(item: Item, gcalEvent: { updated?: string | null }, syncToken: string | null): boolean {
+    if (syncToken || (item.source ?? 'gcal') === 'gcal' || !gcalEvent.updated || !item.updatedAt) return false;
+    const eventUpdated = new Date(gcalEvent.updated).getTime();
+    return !Number.isNaN(eventUpdated) && new Date(item.updatedAt).getTime() > eventUpdated;
+  }
+
   private async fetchAndProcessEvents(
     calendar: any,
     calendarId: string,
@@ -108,12 +144,16 @@ export class GoogleCalendarSyncService {
 
         if (gcalEvent.status === 'cancelled') {
           const link = await this.externalLinkRepo.findOne({
-            where: { provider: 'google_calendar', externalId: gcalEvent.id },
+            where: {
+              provider: 'google_calendar',
+              externalId: gcalEvent.id,
+              itemId: linkedItemOwnedBy(ownerId),
+            },
           });
 
           if (link) {
             const item = await this.itemRepo.findOne({
-              where: { id: link.itemId },
+              where: { id: link.itemId, ownerId },
             });
             if (item) {
               await this.itemRepo.softRemove(item);
@@ -122,7 +162,7 @@ export class GoogleCalendarSyncService {
             deletedCount++;
           }
         } else {
-          const title = gcalEvent.summary || '(No title)';
+          const title = truncateTitle(gcalEvent.summary || '(No title)');
           const notes = gcalEvent.description ?? null;
           let scheduledAt: Date | null = null;
 
@@ -143,13 +183,27 @@ export class GoogleCalendarSyncService {
           const husrevityId = this.googleCalendarService.getHusrevityIdFromEvent(gcalEvent);
 
           let link = await this.externalLinkRepo.findOne({
-            where: { provider: 'google_calendar', externalId: gcalEvent.id },
+            where: {
+              provider: 'google_calendar',
+              externalId: gcalEvent.id,
+              itemId: linkedItemOwnedBy(ownerId),
+            },
           });
 
           if (link) {
+            // Soft-deleted rows are loaded on purpose: a locally deleted item must stay deleted.
             let item = await this.itemRepo.findOne({
-              where: { id: link.itemId },
+              where: { id: link.itemId, ownerId },
+              withDeleted: true,
             });
+            if (item?.deletedAt) continue;
+
+            if (item && this.localEditWins(item, gcalEvent, syncToken)) {
+              link.etag = etag;
+              link.lastSyncedAt = new Date();
+              await this.externalLinkRepo.save(link);
+              continue;
+            }
 
             if (item) {
               item.title = title;
@@ -184,17 +238,22 @@ export class GoogleCalendarSyncService {
             if (husrevityId) {
               item = await this.itemRepo.findOne({
                 where: { id: husrevityId, ownerId },
+                withDeleted: true,
               });
             }
+            // Deleted locally: no resurrection and no new copy for this Google event.
+            if (item?.deletedAt) continue;
 
             if (item) {
-              item.title = title;
-              item.notes = notes;
-              item.scheduledAt = scheduledAt;
-              item.durationMin = durationMin;
-              item.kind = 'event';
-              item.source = item.source || 'gcal';
-              await this.itemRepo.save(item);
+              if (!this.localEditWins(item, gcalEvent, syncToken)) {
+                item.title = title;
+                item.notes = notes;
+                item.scheduledAt = scheduledAt;
+                item.durationMin = durationMin;
+                item.kind = 'event';
+                item.source = item.source || 'gcal';
+                await this.itemRepo.save(item);
+              }
             } else {
               item = this.itemRepo.create({
                 ownerId,
@@ -238,7 +297,7 @@ export class GoogleCalendarSyncService {
     }
 
     this.logger.log(
-      `Incremental sync complete for owner ${ownerId}: synced ${syncedCount}, deleted ${deletedCount}, next syncToken: ${newSyncToken}`,
+      `Incremental sync complete for owner ${ownerId}: synced ${syncedCount}, deleted ${deletedCount}`,
     );
 
     return {
@@ -252,8 +311,12 @@ export class GoogleCalendarSyncService {
    * Performs incremental pull sync for all connected Google Calendar accounts.
    */
   async syncAllConnectedAccounts(): Promise<{ total: number; successful: number; failed: number }> {
-    const connectedAccounts =
+    const allConnected =
       await this.integrationAccountService.findConnectedAccounts('google_calendar');
+    const connectedAccounts: typeof allConnected = [];
+    for (const account of allConnected) {
+      if (await this.legacyAllowed(account.ownerId)) connectedAccounts.push(account);
+    }
     let successful = 0;
     let failed = 0;
 
@@ -264,7 +327,7 @@ export class GoogleCalendarSyncService {
       } catch (err: any) {
         failed++;
         this.logger.error(
-          `Failed periodic sync for owner ${account.ownerId}: ${err?.message || err}`,
+          `Failed periodic sync for owner ${account.ownerId}: ${redactSecrets(err?.message || err)}`,
         );
       }
     }

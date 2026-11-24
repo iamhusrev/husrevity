@@ -21,3 +21,23 @@ export class GeminiConfig {
     return !!this.apiKey;
   }
 }
+
+const GEMINI_MODELS_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+/**
+ * generateContent request target for a model. The API key travels in the
+ * `x-goog-api-key` header, never in the URL, so it cannot leak into proxy,
+ * error or access logs.
+ */
+export function geminiGenerateContentRequest(
+  model: string,
+  apiKey: string | undefined,
+): { url: string; headers: Record<string, string> } {
+  return {
+    url: `${GEMINI_MODELS_URL}/${model}:generateContent`,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey ?? '',
+    },
+  };
+}

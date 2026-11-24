@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SportSession } from './entities/sport-session.entity';
-import { GeminiConfig } from '../ai/gemini.config';
+import { GeminiConfig, geminiGenerateContentRequest } from '../ai/gemini.config';
 import { ApiException } from '../common/api.exception';
 import { SportProfileService } from './sport-profile.service';
 import { SportProgramService } from './sport-program.service';
@@ -10,8 +10,6 @@ import { GenerateAiProgramDto } from './dto/sport-shared.dto';
 import { ProgramResponseDto } from './dto/sport-program.dto';
 import { SessionResponseDto } from './dto/sport-session.dto';
 import { parseAiProgram } from './sport-ai-parser';
-
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 @Injectable()
 export class SportAiService {
@@ -144,11 +142,11 @@ export class SportAiService {
   }
 
   private async callGeminiJson(system: string, user: string): Promise<string> {
-    const url = `${GEMINI_URL}/${this.gemini.model}:generateContent?key=${this.gemini.apiKey}`;
+    const { url, headers } = geminiGenerateContentRequest(this.gemini.model, this.gemini.apiKey);
     try {
       const r = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: 'user', parts: [{ text: user }] }],

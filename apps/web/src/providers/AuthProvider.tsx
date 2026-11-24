@@ -10,6 +10,7 @@ import { LOCAL_STORAGE_KEYS } from "@/utils/constants-common";
 import { UserResponse } from "@/types/user/user";
 import { LoginRequest } from "@/types/auth/login-request";
 import { RegisterRequest } from "@/types/auth/register-request";
+import { AuthResponse } from "@/types/auth/auth-response";
 
 interface AuthContextValue {
   token: string | null;
@@ -18,6 +19,8 @@ interface AuthContextValue {
   loading: boolean;
   login: (req: LoginRequest) => Promise<void>;
   register: (req: RegisterRequest) => Promise<void>;
+  /** Adopts a session issued outside the password form (Google sign-in). */
+  acceptSession: (auth: AuthResponse) => void;
   logout: () => Promise<void>;
   applyUser: (user: UserResponse) => void;
   refreshUser: () => Promise<void>;
@@ -64,6 +67,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(auth.accessToken);
     setUser(auth.user);
     router.push(HOME_PAGE);
+  };
+
+  const acceptSession = (auth: AuthResponse) => {
+    AuthService.persistAuth(auth);
+    setToken(auth.accessToken);
+    setUser(auth.user);
+    router.replace(HOME_PAGE);
   };
 
   const logout = async () => {
@@ -120,6 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loading,
         login,
         register,
+        acceptSession,
         logout,
         applyUser,
         refreshUser,

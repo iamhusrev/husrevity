@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { CryptoService } from '../crypto/crypto.service';
 import { IntegrationAccount, IntegrationProvider } from './integration-account.entity';
 import { ApiException } from '../common/api.exception';
@@ -89,6 +89,32 @@ export class IntegrationAccountService {
       accessToken,
       refreshToken,
     };
+  }
+
+  /**
+   * Stores the tokens of a refresh done by the Google client (encrypted). The write is conditioned on
+   * the account still being `connected`, so a refresh that finishes after a disconnect can never restore
+   * a token. A refresh token is replaced only when `refreshToken` is given (Google returned a new one).
+   * Returns whether a row was updated.
+   */
+  async updateRefreshedTokens(
+    ownerId: string,
+    provider: IntegrationProvider,
+    tokens: { accessToken: string; refreshToken?: string | null },
+  ): Promise<boolean> {
+    const encryptedAccess = this.cryptoService.encrypt(tokens.accessToken);
+    if (!encryptedAccess) {
+      throw ApiException.badRequest('Failed to encrypt access token');
+    }
+    const set: { encryptedAccessToken: string; encryptedRefreshToken?: string } = {
+      encryptedAccessToken: encryptedAccess,
+    };
+    if (tokens.refreshToken) {
+      const encryptedRefresh = this.cryptoService.encrypt(tokens.refreshToken);
+      if (encryptedRefresh) set.encryptedRefreshToken = encryptedRefresh;
+    }
+    const res = await this.repo.update({ ownerId, provider, status: 'connected', deletedAt: IsNull() }, set);
+    return (res.affected ?? 0) > 0;
   }
 
   async disconnect(ownerId: string, provider: IntegrationProvider): Promise<void> {

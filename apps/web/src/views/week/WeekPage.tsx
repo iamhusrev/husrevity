@@ -26,6 +26,9 @@ import {
 } from "@/utils/week-grid";
 import { ItemKind, ItemResponse } from "@/types/item/item";
 import ScheduleModal, { ScheduleModalItem } from "@/components/items/ScheduleModal";
+import { GoogleEventChip, GoogleFeedNotice } from "@/views/month/GoogleEventChip";
+import { GoogleDayEvent, hideLegacyGcalItems } from "@/views/month/merge-google-events";
+import { useGoogleDayFeed } from "@/views/month/useGoogleDayFeed";
 
 const DND_TYPE = "WEEK_ITEM";
 
@@ -64,7 +67,18 @@ export function WeekPageView({ initialYmd }: WeekPageProps) {
   const days = useMemo(() => buildWeek(anchorYmd), [anchorYmd, todayYmd]);
   const { fromYmd, toYmd } = useMemo(() => weekRange(anchorYmd), [anchorYmd]);
 
-  const { data: items, isLoading, isFetching, isError, refetch } = useItemsInRange(fromYmd, toYmd);
+  const {
+    data: rawItems,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useItemsInRange(fromYmd, toYmd);
+  const { googleByDay, hiddenLegacyItemIds, feedError } = useGoogleDayFeed(fromYmd, toYmd);
+  const items = useMemo(
+    () => (rawItems ? hideLegacyGcalItems(rawItems, hiddenLegacyItemIds) : rawItems),
+    [rawItems, hiddenLegacyItemIds],
+  );
   const grouped = useMemo(() => groupItemsByDay(items ?? []), [items]);
   const summary = useMemo(
     () =>
@@ -134,7 +148,9 @@ export function WeekPageView({ initialYmd }: WeekPageProps) {
   }, [fromYmd, toYmd, lang, formatDay]);
 
   const isThisWeek = days.some((d) => d.ymd === todayYmd);
-  const hasAnyItems = days.some((d) => (grouped[d.ymd] ?? []).length > 0);
+  const hasAnyItems = days.some(
+    (d) => (grouped[d.ymd] ?? []).length > 0 || (googleByDay[d.ymd] ?? []).length > 0,
+  );
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-5rem)] p-4 sm:p-6 lg:p-8 space-y-6">
@@ -204,6 +220,7 @@ export function WeekPageView({ initialYmd }: WeekPageProps) {
         </div>
       ) : (
         <>
+          {feedError && <GoogleFeedNotice />}
           <section
             aria-label={t("week.summary.label")}
             data-testid="week-summary"
@@ -254,6 +271,7 @@ export function WeekPageView({ initialYmd }: WeekPageProps) {
                   weekdayName={t(`week.weekdays.${WEEKDAY_KEYS[day.weekdayIndex]}`)}
                   dateLabel={formatDay(day.ymd)}
                   items={dayItems}
+                  googleEvents={googleByDay[day.ymd] ?? []}
                   formatDuration={formatDuration}
                   isAdding={addingYmd === day.ymd}
                   onToggleAdd={() => setAddingYmd((cur) => (cur === day.ymd ? null : day.ymd))}
@@ -296,6 +314,7 @@ interface WeekColumnProps {
   weekdayName: string;
   dateLabel: string;
   items: ItemResponse[];
+  googleEvents: GoogleDayEvent[];
   formatDuration: (minutes: number) => string;
   isAdding: boolean;
   onToggleAdd: () => void;
@@ -310,6 +329,7 @@ function WeekColumn({
   weekdayName,
   dateLabel,
   items,
+  googleEvents,
   formatDuration,
   isAdding,
   onToggleAdd,
@@ -339,7 +359,7 @@ function WeekColumn({
   const headingId = `week-day-${day.ymd}`;
   const ariaLabel = t("week.dayAriaLabel", {
     date: `${weekdayName} ${dateLabel}`,
-    count: items.length,
+    count: items.length + googleEvents.length,
     duration: formatDuration(minutes),
   });
 
@@ -396,10 +416,15 @@ function WeekColumn({
         />
       </div>
 
-      {items.length === 0 ? (
+      {items.length === 0 && googleEvents.length === 0 ? (
         <p className="text-xs text-gray-400 dark:text-gray-500">{t("week.noItemsDay")}</p>
       ) : (
         <ul className="flex flex-col gap-1.5 list-none p-0 m-0">
+          {googleEvents.map((entry) => (
+            <li key={`google-${entry.event.id}-${day.ymd}`}>
+              <GoogleEventChip entry={entry} />
+            </li>
+          ))}
           {items.map((item) => (
             <WeekItemChip
               key={`${item.id}-${item.occursOn ?? ""}-${item.scheduledAt ?? item.dueAt ?? ""}`}

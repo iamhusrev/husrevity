@@ -58,6 +58,28 @@ export class TodayService {
     const to = dayStart.endOf('day').toUTC().toJSDate();
 
     const rows = await this.items.find({ where: { ownerId } });
+    return this.buildTimeline(rows, from, to);
+  }
+
+  /**
+   * The block that is active right now, computed on the server from the
+   * caller's own items and with Google-mirrored events (`source = 'gcal'`)
+   * left out. This is the ONLY block title the AI suggestion path may use:
+   * Google Calendar data must not reach Gemini (Google API Limited Use).
+   */
+  async currentBlockForAi(ownerId: string): Promise<BlockSummaryDto | null> {
+    const { from, to } = this.todayBounds();
+    const rows = await this.items.find({ where: { ownerId } });
+    const nonGoogle = rows.filter((r) => r.source !== 'gcal');
+    return this.currentBlock(this.buildTimeline(nonGoogle, from, to));
+  }
+
+  private todayBounds(): { from: Date; to: Date } {
+    const dayStart = DateTime.now().setZone(ISTANBUL).startOf('day');
+    return { from: dayStart.toUTC().toJSDate(), to: dayStart.endOf('day').toUTC().toJSDate() };
+  }
+
+  private buildTimeline(rows: Item[], from: Date, to: Date): TimelineEntryDto[] {
     const recurringEventIds = new Set(
       rows.filter((i) => i.kind === 'event' && i.rrule).map((i) => i.id),
     );

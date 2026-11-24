@@ -13,7 +13,10 @@ export class SuggestionsRequestDto {
   @IsIn([1, 3])
   count?: 1 | 3;
 
-  /** Title of the currently-active Evkat block (from GET /today), if any — nudges task-mode suggestions toward that context. */
+  /**
+   * Deprecated and ignored by the server (kept so existing clients still
+   * validate). The active block is computed server-side from non-Google items.
+   */
   @IsOptional()
   @IsString()
   @MaxLength(200)

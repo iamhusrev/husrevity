@@ -28,6 +28,15 @@ export class User extends BaseEntity {
   enabled!: boolean;
 
   /**
+   * False for accounts created through Google sign-in (their `passwordHash`
+   * is a random, unusable hash). Drives the UI and the rule that the only
+   * remaining sign-in method cannot be unlinked; password login itself is
+   * unchanged.
+   */
+  @Column({ name: 'password_login_enabled', type: 'boolean', default: true })
+  passwordLoginEnabled!: boolean;
+
+  /**
    * When true (and the API has SMTP configured), the notification dispatcher
    * sends an email for every notification it fans out via web-push. Default
    * false — opt-in to avoid existing users getting unexpected mail.

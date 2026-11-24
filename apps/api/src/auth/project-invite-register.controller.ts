@@ -16,9 +16,9 @@ import { Public } from '../common/public.decorator';
  *
  * This endpoint needs both ProjectInviteService (to validate the token and
  * create the User + ProjectMember rows) and AuthService.issueTokensFor() (to
- * mint JWTs for the brand-new user). AuthModule already imports ProjectModule
- * (so AuthService.register() can activate pending project invites for a
- * newly-registered email) — that dependency only ever points one way,
+ * mint JWTs for the brand-new user). AuthModule imports ProjectModule only
+ * for this controller's use of ProjectInviteService (open registration never
+ * grants project membership) — that dependency only ever points one way,
  * AuthModule → ProjectModule. If this controller instead lived inside
  * ProjectModule, ProjectModule would need AuthService, creating a circular
  * module dependency. Splitting by controller (not by service) keeps the

@@ -10,7 +10,6 @@ import { User } from '../user/user.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { ApiException } from '../common/api.exception';
 import { UserDto } from '../user/user.dto';
-import { ProjectInviteService } from '../project/project-invite.service';
 import {
   AuthResponseDto,
   LoginRequestDto,
@@ -38,7 +37,6 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
-    private readonly projectInvites: ProjectInviteService,
   ) {}
 
   async register(req: RegisterRequestDto): Promise<AuthResponseDto> {
@@ -54,13 +52,6 @@ export class AuthService {
       enabled: true,
     });
     const saved = await this.users.save(user);
-    try {
-      await this.projectInvites.activatePendingForUser(saved.id, email);
-    } catch (e) {
-      this.logger.warn(
-        `Failed to activate pending project invites for ${email}: ${(e as Error).message}`,
-      );
-    }
     return this.issueTokens(saved);
   }
 

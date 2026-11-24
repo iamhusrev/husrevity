@@ -10,6 +10,10 @@ vi.mock("react-dnd", () => ({
   useDrag: () => [{ isDragging: false }, () => undefined],
 }));
 vi.mock("react-dnd-html5-backend", () => ({ HTML5Backend: {} }));
+// These tests render without a QueryClient: the Google feed is out of scope here.
+vi.mock("@/views/month/useGoogleDayFeed", () => ({
+  useGoogleDayFeed: () => ({ googleByDay: {}, hiddenLegacyItemIds: [], feedError: false }),
+}));
 vi.mock("react-i18next", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-i18next")>();
   return {

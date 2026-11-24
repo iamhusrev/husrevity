@@ -12,7 +12,7 @@ import type { ProjectRole } from '../project/project-member.entity';
  *   MAIL_PORT       465                 (default; implicit TLS)
  *   MAIL_USER       <gmail address>
  *   MAIL_PASS       <16-char app password — NOT the account password>
- *   MAIL_FROM       "Husrevity <iamhusrev@gmail.com>"  (defaults to MAIL_USER)
+ *   MAIL_FROM       "Husrevity <you@example.com>"  (defaults to MAIL_USER)
  *   MAIL_REPLY_TO   optional reply-to address
  *
  * Generate an app password at: https://myaccount.google.com/apppasswords

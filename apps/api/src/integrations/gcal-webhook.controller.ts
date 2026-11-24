@@ -1,9 +1,19 @@
 import { Controller, Post, Headers, Logger } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { redactSecrets } from './log-redaction';
 import { Public } from '../common/public.decorator';
 import { ApiException } from '../common/api.exception';
 import { IntegrationAccountService } from './integration-account.service';
 import { GoogleCalendarSyncService } from './google-calendar-sync.service';
+import { GoogleCalendarReadSyncService } from './google-calendar-read-sync.service';
+import { isChannelUuid } from './channel-token';
 
+/**
+ * Google delivers push notifications from its own shared IP ranges and may
+ * burst many calls for one calendar, so the global per-IP throttle would drop
+ * genuine notifications. Authenticity is enforced by the channel token instead.
+ */
+@SkipThrottle()
 @Controller('hooks/gcal')
 export class GcalWebhookController {
   private readonly logger = new Logger(GcalWebhookController.name);
@@ -11,12 +21,21 @@ export class GcalWebhookController {
   constructor(
     private readonly integrationAccountService: IntegrationAccountService,
     private readonly syncService: GoogleCalendarSyncService,
+    private readonly readSync: GoogleCalendarReadSyncService,
   ) {}
 
   /**
    * Receives Google Calendar push notifications (`events.watch` webhooks).
    * Validates `x-goog-channel-id` and `x-goog-resource-id` headers, resolves the owner account,
    * and triggers incremental pull sync (`syncIncremental`).
+   *
+   * Coexistence with the new engine (no Google-side change needed, the
+   * registered address stays `/hooks/gcal`): a UUID channel id is first routed
+   * through `google_calendar_channel` (hashed token, only flags `needs_sync_at`).
+   * Anything the new path does not accept, including every rejection, falls
+   * through to the legacy lookup, which answers a generic failure for ids it
+   * does not know. Legacy channel ids are never UUIDs. The channel token is
+   * never logged.
    */
   @Public()
   @Post()
@@ -36,6 +55,18 @@ export class GcalWebhookController {
     this.logger.log(
       `Received Google Calendar webhook for channel ${channelId} (resourceState: ${resourceState})`,
     );
+
+    if (isChannelUuid(channelId)) {
+      const accepted = await this.readSync
+        .markSyncNeededByChannel(channelId, resourceId, channelToken, resourceState !== 'sync')
+        .catch((error: unknown) => {
+          this.logger.error(`Webhook routing failed for channel ${channelId}: ${redactSecrets((error as Error)?.message)}`);
+          return false;
+        });
+      if (accepted) {
+        return { success: true, message: 'Sync scheduled' };
+      }
+    }
 
     const account = await this.integrationAccountService.findByChannelId(channelId);
     if (!account) {
@@ -77,10 +108,10 @@ export class GcalWebhookController {
       return { success: true, message: 'Incremental sync triggered' };
     } catch (error: any) {
       this.logger.error(
-        `Error executing incremental sync triggered by webhook for owner ${account.ownerId}: ${error?.message}`,
-        error?.stack,
+        `Error executing incremental sync triggered by webhook for owner ${account.ownerId}: ${redactSecrets(error?.message)}`,
+        redactSecrets(error?.stack),
       );
-      return { success: false, message: `Sync failed: ${error?.message}` };
+      return { success: false, message: `Sync failed: ${redactSecrets(error?.message)}` };
     }
   }
 }

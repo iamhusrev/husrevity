@@ -53,8 +53,21 @@ describe('DictateService', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       const [url, init] = fetchSpy.mock.calls[0];
       expect(String(url)).toContain('gemini-2.5-flash');
-      expect(String(url)).toContain('key=test-key');
       expect(init?.method).toBe('POST');
+    });
+
+    it('dictate_request_sends_key_in_header', async () => {
+      mockGeminiResponse(['Su iç']);
+
+      await service.splitIntoItems('su ic');
+
+      const [url, init] = fetchSpy.mock.calls[0];
+      expect(String(url)).not.toContain('key=');
+      expect(String(url)).not.toContain('test-key');
+      expect(init?.headers).toEqual({
+        'Content-Type': 'application/json',
+        'x-goog-api-key': 'test-key',
+      });
     });
 
     it('throws ApiException when Gemini responds with a non-OK status', async () => {

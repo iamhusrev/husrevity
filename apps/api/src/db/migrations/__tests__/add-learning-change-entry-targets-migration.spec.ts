@@ -23,7 +23,13 @@ describe('AddLearningChangeEntryTargets migration', () => {
     expect(fs.existsSync(migrationPath)).toBe(true);
     const later = fs
       .readdirSync(path.join(__dirname, '..'))
-      .filter((f) => f.endsWith('.ts') && f > '1715000042000-AddLearningChangeEntryTargets.ts');
+      // Newer migrations (043+) may exist; nothing may slot in between 042 and 043.
+      .filter(
+        (f) =>
+          f.endsWith('.ts') &&
+          f > '1715000042000-AddLearningChangeEntryTargets.ts' &&
+          f < '1715000043000',
+      );
     expect(later).toEqual([]);
   });
 

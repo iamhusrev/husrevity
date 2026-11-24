@@ -11,6 +11,8 @@ import { formatLeadTimeBody, leadTimeFireAt } from '../notification/notification
 import { ProjectAccessService } from '../project/project-access.service';
 import { ProjectRole } from '../project/project-member.entity';
 import { GoogleCalendarService } from '../integrations/google-calendar.service';
+import { GoogleCalendarPublishService } from '../integrations/google-calendar-publish.service';
+import { GoogleCalendarEngineService } from '../integrations/google-calendar-engine.service';
 import { Goal } from '../goal/goal.entity';
 import { GoalService } from '../goal/goal.service';
 import { isValidNumericId } from '../common/numeric-id.pipe';
@@ -90,6 +92,18 @@ const LEGACY_TABLE_NOTIFICATION_KINDS: Record<string, string> = {
   learning_item: 'learning',
 };
 
+/**
+ * Rows mirrored from Google Calendar by the legacy pull sync (`source = 'gcal'`)
+ * are owned by that sync. Any user mutation, including an undo replay, would be
+ * overwritten by the next pull or fight with it, so the whole ItemService
+ * mutation surface rejects them.
+ */
+function assertNotGoogleMirrored(item: Pick<Item, 'source'> | null | undefined): void {
+  if (item?.source === 'gcal') {
+    throw ApiException.forbidden('Google Calendar events are read-only in Husrevity');
+  }
+}
+
 @Injectable()
 export class ItemService {
   private readonly logger = new Logger(ItemService.name);
@@ -102,6 +116,8 @@ export class ItemService {
     private readonly recurrence: ItemRecurrenceService,
     @Optional() private readonly googleCalendarService?: GoogleCalendarService,
     @Optional() private readonly goalService?: GoalService,
+    @Optional() private readonly googlePublisher?: GoogleCalendarPublishService,
+    @Optional() private readonly engine?: GoogleCalendarEngineService,
   ) {}
 
   /**
@@ -355,11 +371,37 @@ export class ItemService {
     }
   }
 
+  /**
+   * Mirrors a saved item to Google. With GOOGLE_CALENDAR_V2_ENABLED and the
+   * user's write opt-in the new publisher owns the write (and the legacy path
+   * stays silent, so nothing is published twice); otherwise the legacy path
+   * runs exactly as before. A Google failure never fails the item mutation.
+   */
+  private async pushToGoogle(saved: Item): Promise<void> {
+    if (this.googlePublisher && (await this.googlePublisher.isHandling(saved.ownerId))) {
+      try {
+        await this.googlePublisher.publishItem(saved);
+      } catch (err) {
+        this.logger.warn(`Google Calendar publish failed for item ${saved.id}: ${(err as Error)?.name ?? 'Error'}`);
+      }
+      return;
+    }
+    // An owner with a v2 connection never falls back to the legacy write, even with write off.
+    if (await this.engine?.ownerUsesV2Engine(saved.ownerId)) return;
+    if (this.googleCalendarService) {
+      await this.googleCalendarService.syncItemToGoogleCalendar(saved);
+    }
+  }
+
   async create(
     userId: string,
     req: ItemRequestDto,
     manager?: EntityManager,
   ): Promise<ItemResponseDto> {
+    // Only the sync engine may produce `gcal` rows; a client can never claim it.
+    if (req.source === 'gcal') {
+      throw ApiException.badRequest("source 'gcal' cannot be set by clients");
+    }
     let ownerId = userId;
     let projectId: string | null = null;
     if (req.projectId) {
@@ -392,9 +434,7 @@ export class ItemService {
     const saved = await itemRepo.save(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
       await this.syncNotification(saved);
-      if (this.googleCalendarService) {
-        await this.googleCalendarService.syncItemToGoogleCalendar(saved);
-      }
+      await this.pushToGoogle(saved);
     });
     return ItemResponseDto.from(saved);
   }
@@ -414,6 +454,7 @@ export class ItemService {
     manager?: EntityManager,
   ): Promise<ItemResponseDto> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertNotGoogleMirrored(item);
     if (ifMatchMs !== undefined && item.updatedAt.getTime() !== ifMatchMs) {
       throw ApiException.conflict(
         `Item has been modified since you last fetched it (current updatedAt: ${item.updatedAt.toISOString()})`,
@@ -444,7 +485,8 @@ export class ItemService {
     }
     if (req.status !== undefined) item.status = req.status;
     if (req.payload !== undefined) item.payload = req.payload;
-    if (req.source !== undefined) item.source = req.source;
+    // `source` is immutable after creation: a client value (including an undo
+    // snapshot replay) is accepted but never applied.
 
     if (req.goalId !== undefined && req.goalId !== item.goalId) {
       if (req.goalId) {
@@ -471,20 +513,30 @@ export class ItemService {
     const saved = await itemRepo.save(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
       await this.syncNotification(saved);
-      if (this.googleCalendarService) {
-        await this.googleCalendarService.syncItemToGoogleCalendar(saved);
-      }
+      await this.pushToGoogle(saved);
     });
     return ItemResponseDto.from(saved);
   }
 
   async delete(userId: string, id: string, manager?: EntityManager): Promise<void> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertNotGoogleMirrored(item);
     const itemRepo = this.getItemRepo(manager);
     await itemRepo.softRemove(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
       await this.notifications.cancelForSource(item.ownerId, 'item', item.id);
+      await this.unpublishFromGoogle(item);
     });
+  }
+
+  /** Removes the Google copy of a deleted item when (and only when) the new publisher owns writes. */
+  private async unpublishFromGoogle(item: Item): Promise<void> {
+    if (!this.googlePublisher || !(await this.googlePublisher.isHandling(item.ownerId))) return;
+    try {
+      await this.googlePublisher.unpublishItem(item.ownerId, item.id);
+    } catch (err) {
+      this.logger.warn(`Google Calendar unpublish failed for item ${item.id}: ${(err as Error)?.name ?? 'Error'}`);
+    }
   }
 
   /**
@@ -497,6 +549,7 @@ export class ItemService {
     manager?: EntityManager,
   ): Promise<{ item: ItemResponseDto; occurrenceId?: string }> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertNotGoogleMirrored(item);
     const itemRepo = this.getItemRepo(manager);
     const occRepo = this.getOccurrenceRepo(manager);
 
@@ -565,15 +618,14 @@ export class ItemService {
     manager?: EntityManager,
   ): Promise<ItemResponseDto> {
     const item = await this.requireItemAccess(userId, id, 'EDITOR', manager);
+    assertNotGoogleMirrored(item);
     item.status = options?.status ?? 'open';
     item.completedAt = options?.completedAt !== undefined ? options.completedAt : null;
     const itemRepo = this.getItemRepo(manager);
     const saved = await itemRepo.save(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
       await this.syncNotification(saved);
-      if (this.googleCalendarService) {
-        await this.googleCalendarService.syncItemToGoogleCalendar(saved);
-      }
+      await this.pushToGoogle(saved);
     });
     return ItemResponseDto.from(saved);
   }
@@ -587,13 +639,12 @@ export class ItemService {
     } else {
       await this.access.requireAccess(userId, item.projectId, 'EDITOR');
     }
+    assertNotGoogleMirrored(item);
     item.deletedAt = null;
     const saved = await itemRepo.save(item);
     await this.triggerOrDeferSideEffects(manager, async () => {
       await this.syncNotification(saved);
-      if (this.googleCalendarService) {
-        await this.googleCalendarService.syncItemToGoogleCalendar(saved);
-      }
+      await this.pushToGoogle(saved);
     });
     return ItemResponseDto.from(saved);
   }
@@ -603,6 +654,7 @@ export class ItemService {
     const occ = await occRepo.findOne({ where: { id } });
     if (!occ) return;
     if (occ.ownerId !== userId) throw ApiException.notFound('Occurrence not found');
+    await this.assertParentNotGoogleMirrored(occ.itemId, manager);
     await occRepo.delete({ id });
   }
 
@@ -628,9 +680,21 @@ export class ItemService {
     const occ = await occRepo.findOne({ where: { id } });
     if (!occ) throw ApiException.notFound('Occurrence not found');
     if (occ.ownerId !== userId) throw ApiException.notFound('Occurrence not found');
+    await this.assertParentNotGoogleMirrored(occ.itemId, manager);
     if (fields.status !== undefined) occ.status = fields.status;
     if (fields.completedAt !== undefined) occ.completedAt = fields.completedAt;
     return occRepo.save(occ);
+  }
+
+  private async assertParentNotGoogleMirrored(
+    itemId: string,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const parent = await this.getItemRepo(manager).findOne({
+      where: { id: itemId },
+      withDeleted: true,
+    });
+    assertNotGoogleMirrored(parent);
   }
 
   private matchesRange(

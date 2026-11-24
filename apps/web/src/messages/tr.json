@@ -93,6 +93,33 @@
     "welcomeText": "Husrevity'e hoş geldin.",
     "emailPlaceholder": "siz@ornek.com"
   },
+  "googleLogin": {
+    "continue": "Google ile devam et",
+    "or": "veya",
+    "signingIn": "Google ile giriş yapılıyor…",
+    "backToSignIn": "Girişe dön",
+    "errors": {
+      "denied": "Google ile giriş iptal edildi. Tekrar deneyebilir veya şifrenle giriş yapabilirsin.",
+      "existingEmail": "Bu e-posta ile zaten bir hesap var. Şifrenle giriş yap, ardından Ayarlar'dan Google'ı bağla.",
+      "liveInvite": "Bu e-posta için bekleyen bir davet var. Hesabını oluşturmak için davet bağlantısını kullan.",
+      "conflict": "Bu Google hesabı başka bir hesaba bağlı olduğu için burada kullanılamıyor.",
+      "disabled": "Bu hesap devre dışı.",
+      "failed": "Google ile giriş başarısız oldu. Lütfen tekrar dene.",
+      "badCode": "Bu giriş isteği geçersiz veya süresi dolmuş. Lütfen giriş sayfasından yeniden başla.",
+      "missingCode": "Bu giriş bağlantısı artık geçerli değil. Lütfen giriş sayfasından yeniden başla.",
+      "generic": "Google ile giriş sırasında bir şeyler ters gitti. Lütfen tekrar dene."
+    },
+    "settings": {
+      "title": "Google ile giriş",
+      "linkedAs": "{{email}} hesabına bağlı.",
+      "notLinked": "Google hesabını bağlayarak tek tıkla giriş yapabilirsin.",
+      "link": "Google hesabını bağla",
+      "unlink": "Google bağlantısını kaldır",
+      "unlinkDisabled": "Google tek giriş yöntemin olduğu için bağlantı kaldırılamıyor.",
+      "linkedSuccess": "Google hesabın bağlandı.",
+      "unlinkedSuccess": "Google hesabının bağlantısı kaldırıldı."
+    }
+  },
   "errors": {
     "common": {
       "backHome": "Ana Sayfaya Dön",
@@ -1019,6 +1046,10 @@
   },
   "calendar": {
     "title": "Takvim",
+    "googleBadge": "Google",
+    "googleEventLabel": "Google Takvim etkinliği, salt okunur: {{title}}",
+    "googleAllDay": "Tüm gün",
+    "googleFeedError": "Google Takvim etkinlikleri şu an yüklenemedi. Kendi kayıtların gösteriliyor.",
     "refresh": "Yenile",
     "newEvent": "Yeni Olay",
     "editEvent": "Olayı Düzenle",
@@ -1648,10 +1679,33 @@
     },
     "google": {
       "title": "Google Takvim",
-      "desc": "Husrevity takvimi Google Takvim ile iki yönlü senkron olur.",
+      "descLegacy": "Bu eski bağlantı, Husrevity takvimini Google Takvim ile iki yönlü senkronlar.",
+      "descReadOnly": "Seçtiğin Google takvimlerindeki etkinlikler Husrevity'de görünür. Bu salt okunurdur; Husrevity etkinliklerini ayrı bir Husrevity Planner takvimine yazmak isteğe bağlıdır ve yalnızca sen açarsan çalışır.",
+      "descDisconnected": "Google etkinliklerini Husrevity'de görmek için Google Takvim'i bağla.",
       "connect": "Google ile bağlan",
       "connectedToast": "Google Takvim bağlandı",
       "errorToast": "Google Takvim bağlanamadı"
+    },
+    "googleCalendars": {
+      "title": "Gösterilecek takvimler",
+      "note": "Seçtiğin takvimlerdeki etkinlikler Husrevity takviminde görünür. Bu salt okunurdur: Husrevity Google etkinliklerini asla değiştirmez, taşımaz veya silmez. Yazabileceği tek şey, yalnızca sen açarsan kullanılan, ayrı ve isteğe bağlı bir Husrevity Planner takvimidir.",
+      "loading": "Google takvimlerin yükleniyor…",
+      "loadError": "Google takvimlerin yüklenemedi.",
+      "retry": "Tekrar dene",
+      "empty": "Hiç Google takvimi bulunamadı.",
+      "primary": "Birincil",
+      "managed": "Husrevity tarafından yönetiliyor",
+      "freeBusy": "Yalnızca müsait/meşgul",
+      "selectedCount": "{{count}} seçili",
+      "lastSync": "Son senkron: {{time}}",
+      "neverSynced": "Henüz senkronlanmadı",
+      "lastError": "Son senkron sorunu: {{error}}",
+      "needsReconnect": "Google erişiminin yenilenmesi gerekiyor. Takvimlerin güncel kalması için yeniden bağlan.",
+      "reconnect": "Google'ı yeniden bağla",
+      "save": "Seçimi kaydet",
+      "saving": "Kaydediliyor…",
+      "saved": "Takvim seçimi kaydedildi",
+      "saveError": "Takvim seçimi kaydedilemedi"
     },
     "mcp": {
       "title": "Claude / MCP erişimi",
@@ -1680,6 +1734,63 @@
         "tooLong": "Aralık en fazla 366 gün olabilir."
       },
       "note": "Tekrarlayan işlerin tamamlanan oluşumları harici takvimde yine de görünür; yalnızca atlananlar çıkarılır."
+    },
+    "googleCallback": {
+      "working": "Google bağlantısı tamamlanıyor…"
+    },
+    "googleNarrow": {
+      "title": "İzinleri daralt",
+      "explain": "Husrevity'yi salt okunur erişime geçirir. Mevcut Google izniniz iptal edilir, senkron durur ve Husrevity'nin yalnızca takvim listenizi ve etkinliklerinizi okuyabileceği yeni bir onay verirsiniz. Daha önce senkronlanan etkinlikler görünür kalır.",
+      "action": "İzinleri daralt",
+      "confirm": "İptal et ve devam et",
+      "cancel": "Vazgeç",
+      "working": "İşleniyor…",
+      "error": "İzin değişikliği başlatılamadı. Tekrar deneyin."
+    },
+    "googleWrite": {
+      "title": "Google'a yaz (isteğe bağlı)",
+      "explain": "Varsayılan olarak kapalıdır. Açıldığında Husrevity'de oluşturduğunuz kişisel etkinlikler, Google hesabınızda \"Husrevity Planner\" adlı ayrı bir takvime yalnızca başlık ve saat bilgisiyle kopyalanır. Notlar, proje öğeleri ve başkalarıyla paylaşılan hiçbir şey gönderilmez. Google, yalnızca Husrevity'nin kendi oluşturduğu takvimleri kapsayan bir ek izin ister. Kapatmak, yönetilen bu kopyaları Husrevity Planner takviminden kısa süre sonra siler; Google'daki başka hiçbir şeye dokunulmaz. Husrevity'nin Google'a daha önce yazdığı etkinlikler bağlantıyı kestikten sonra da Google hesabınızda kalır; kaldırmak için Husrevity Planner takvimini veya etkinlikleri Google Takvim'den silin.",
+      "toggle": "Husrevity etkinliklerimi Google'a yaz",
+      "needsNarrow": "Etkinliklerinizi isteğe bağlı olarak Google'a yazabilmek için önce salt okunur izinlere geçin.",
+      "enabledToast": "Google'a yazma açıldı",
+      "disabledToast": "Google'a yazma kapatıldı",
+      "migrateExplain": "Mevcut Husrevity etkinlikleriniz otomatik kopyalanmaz. Yeni takvimde de görünmesini istiyorsanız şimdi kopyalayın.",
+      "migrateAction": "Yeni takvime taşı",
+      "migrating": "Kopyalanıyor…",
+      "migrated": "{{published}} etkinlik yeni takvime kopyalandı",
+      "migratedPartial": "{{published}} etkinlik kopyalandı, {{pending}} etkinlik bekliyor. Devam etmek için tekrar çalıştırın."
+    },
+    "googleRevokeFailed": {
+      "title": "Google erişimi hâlâ etkin olabilir",
+      "body": "Husrevity kayıtlı Google kimlik bilgilerini sildi, ancak Google'dan izni iptal etmesi istenemedi. İzin Google Hesabınızda hâlâ listelenebilir. Kaldırmak için Google Hesabınızı açın, üçüncü taraf erişimi listesine gidin ve Husrevity'yi kaldırın.",
+      "link": "Google Hesap izinlerini aç"
+    },
+    "googlePaused": {
+      "title": "Google senkronu duraklatıldı",
+      "body": "Eski Google senkronu, daraltılmış iznin artık onunla uyuşmaması nedeniyle duraklatıldı. Daha önce senkronlanan etkinlikler görünür kalır. Devam etmek için Google'ı yeniden bağlayın veya yeni takvim özelliğini açın."
+    },
+    "googleLegacyCopies": {
+      "title": "Senkronlanan Google kopyalarını sil",
+      "explain": "Eski senkronun Husrevity'ye kopyaladığı Google etkinliklerini kaldırır. Husrevity'de oluşturduğunuz etkinliklere dokunulmaz ve Google hesabınızda hiçbir şey silinmez. Bu işlem geri alınamaz.",
+      "count": "{{count}} senkronlanmış Google kopyası bulundu",
+      "none": "Silinecek senkronlanmış Google kopyası yok.",
+      "action": "Senkronlanan Google kopyalarını sil",
+      "confirmText": "{{count}} senkronlanmış Google kopyası Husrevity'den kalıcı olarak silinsin mi?",
+      "confirmNote": "Sayıya Husrevity'de zaten sildiğin kopyalar da dahildir. Bunlar kalıcı olarak kaldırılır ve geri alınamaz.",
+      "confirm": "Evet, sil",
+      "cancel": "Vazgeç",
+      "deleted": "{{count}} senkronlanmış Google kopyası silindi",
+      "disconnectFirst": "Önce Google Takvim bağlantısını kes. Bağlıyken bir sonraki senkron kopyaları yeniden içe aktarır."
+    },
+    "googleDisconnect": {
+      "title": "Google Calendar bağlantısı kesilsin mi?",
+      "explain": "Senkronlanan Google etkinlikleri ve seçiminiz silinir, Husrevity'nin Google erişimi iptal edilir. Husrevity'de oluşturduğunuz kayıtlar korunur; aşağıda silinmesini onaylamadıkça eski senkronize kopyalar da korunur ve bunları daha sonra Ayarlar > Entegrasyonlar'dan silebilirsiniz. Husrevity'nin Google'a yazdığı etkinlikler Google hesabınızda kalır.",
+      "loading": "Eski Google kopyaları kontrol ediliyor…",
+      "previewError": "Eski Google kopyaları kontrol edilemedi. Eski kopyalar korunacak.",
+      "deleteCopies": "Husrevity öğesi olarak saklanan {{count}} eski Google etkinlik kopyasını da kalıcı olarak sil (Husrevity'de zaten sildiğin kopyalar da dahildir)",
+      "noCopies": "Silinecek eski Google kopyası yok.",
+      "confirm": "Bağlantıyı kes",
+      "cancel": "Vazgeç"
     }
   },
   "goals": {

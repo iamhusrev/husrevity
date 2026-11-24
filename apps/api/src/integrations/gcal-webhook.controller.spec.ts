@@ -2,7 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GcalWebhookController } from './gcal-webhook.controller';
 import { IntegrationAccountService } from './integration-account.service';
 import { GoogleCalendarSyncService } from './google-calendar-sync.service';
+import { GoogleCalendarReadSyncService } from './google-calendar-read-sync.service';
 import { ApiException } from '../common/api.exception';
+import { Reflector } from '@nestjs/core';
 
 describe('GcalWebhookController', () => {
   let controller: GcalWebhookController;
@@ -33,10 +35,21 @@ describe('GcalWebhookController', () => {
       providers: [
         { provide: IntegrationAccountService, useValue: mockIntegrationAccountService },
         { provide: GoogleCalendarSyncService, useValue: mockSyncService },
+        {
+          provide: GoogleCalendarReadSyncService,
+          useValue: { markSyncNeededByChannel: jest.fn().mockResolvedValue(false) },
+        },
       ],
     }).compile();
 
     controller = module.get<GcalWebhookController>(GcalWebhookController);
+  });
+
+  describe('throttling', () => {
+    it('is exempt from the global per-IP throttle (Google bursts notifications)', () => {
+      // @SkipThrottle() stores THROTTLER:SKIPdefault on the class.
+      expect(new Reflector().get('THROTTLER:SKIPdefault', GcalWebhookController)).toBe(true);
+    });
   });
 
   describe('handleWebhook', () => {

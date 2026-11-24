@@ -8,9 +8,10 @@ import { ProjectModule } from '../project/project.module';
 import { NoteModule } from '../note/note.module';
 import { ReminderModule } from '../reminder/reminder.module';
 import { TaskModule } from '../task/task.module';
+import { TodayModule } from '../today/today.module';
 
 @Module({
-  imports: [ProjectModule, NoteModule, ReminderModule, TaskModule],
+  imports: [ProjectModule, NoteModule, ReminderModule, TaskModule, TodayModule],
   providers: [GeminiConfig, AiSuggestionService, DictateService],
   controllers: [AiSuggestionController, DictateController],
 })

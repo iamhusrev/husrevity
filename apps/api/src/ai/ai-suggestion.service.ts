@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ApiException } from '../common/api.exception';
-import { GeminiConfig } from './gemini.config';
+import { GeminiConfig, geminiGenerateContentRequest } from './gemini.config';
 import { NoteService } from '../note/note.service';
 import { ReminderService } from '../reminder/reminder.service';
 import { ProjectService } from '../project/project.service';
 import { TaskService } from '../task/task.service';
+import { TodayService } from '../today/today.service';
 import { SuggestionItemDto, SuggestionMode, SuggestionsRequestDto } from './dto/suggestion-dtos';
 import { parseSuggestions, ParseContext } from './suggestion-parser';
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const CACHE_TTL_MS = 5 * 60_000;
 // Soft caps so the prompt stays well under the model's context budget.
 const CTX_NOTES = 20;
@@ -44,6 +44,7 @@ export class AiSuggestionService {
     private readonly reminders: ReminderService,
     private readonly projects: ProjectService,
     private readonly tasks: TaskService,
+    private readonly today: TodayService,
   ) {}
 
   async suggest(ownerId: string, req: SuggestionsRequestDto): Promise<SuggestionItemDto[]> {
@@ -55,7 +56,11 @@ export class AiSuggestionService {
 
     const mode = req.mode;
     const count = (req.count ?? 3) as 1 | 3;
-    const activeBlockTitle = req.activeBlockTitle;
+    // The client-supplied `req.activeBlockTitle` is deliberately ignored: it
+    // could carry the title of a Google Calendar event, and Google Calendar
+    // data must never reach Gemini (Google API Limited Use). Only a block the
+    // server computed from non-Google items is used.
+    const activeBlockTitle = (await this.today.currentBlockForAi(ownerId))?.title;
 
     const context = await this.gatherContext(ownerId);
     const ctxHash = this.contextHash(context);
@@ -265,11 +270,11 @@ export class AiSuggestionService {
   // ─── gemini call (JSON mime) ───────────────────────────────────────────────
 
   private async callGeminiJson(system: string, user: string): Promise<string> {
-    const url = `${GEMINI_URL}/${this.gemini.model}:generateContent?key=${this.gemini.apiKey}`;
+    const { url, headers } = geminiGenerateContentRequest(this.gemini.model, this.gemini.apiKey);
     try {
       const r = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: 'user', parts: [{ text: user }] }],

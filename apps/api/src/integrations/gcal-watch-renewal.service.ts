@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { IntegrationAccountService } from './integration-account.service';
 import { GoogleCalendarService } from './google-calendar.service';
+import { GoogleCalendarEngineService } from './google-calendar-engine.service';
 
 @Injectable()
 export class GcalWatchRenewalService {
@@ -10,6 +11,7 @@ export class GcalWatchRenewalService {
   constructor(
     private readonly integrationAccountService: IntegrationAccountService,
     private readonly googleCalendarService: GoogleCalendarService,
+    @Optional() private readonly engine?: GoogleCalendarEngineService,
   ) {}
 
   /**
@@ -20,10 +22,15 @@ export class GcalWatchRenewalService {
   async renewWatchChannels(): Promise<number> {
     this.logger.debug('Running scheduled Google Calendar watch channel renewal check...');
 
-    const accounts = await this.integrationAccountService.findAccountsNeedingWatchRenewal(
+    const due = await this.integrationAccountService.findAccountsNeedingWatchRenewal(
       'google_calendar',
       24,
     );
+    // The legacy watch channel is never renewed for an owner on the v2 engine or with a narrowed grant.
+    const accounts: typeof due = [];
+    for (const account of due) {
+      if ((await this.engine?.legacyEngineAllowed(account.ownerId)) !== false) accounts.push(account);
+    }
 
     if (accounts.length === 0) {
       this.logger.debug('No Google Calendar watch channels require renewal');

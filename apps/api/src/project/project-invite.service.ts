@@ -214,45 +214,6 @@ export class ProjectInviteService {
     });
   }
 
-  /**
-   * Called from AuthService.register() right after a new user is saved.
-   * Activates every live invite for that email across ALL projects —
-   * inserts/restores a ProjectMember row per invite and marks each accepted.
-   * Must never throw in a way that blocks registration — the caller wraps
-   * this in try/catch, but we still keep going across invites so one bad
-   * row doesn't stop the rest.
-   */
-  async activatePendingForUser(userId: string, email: string): Promise<void> {
-    const liveInvites = await this.invites.find({
-      where: { email, acceptedAt: IsNull(), expiresAt: MoreThan(new Date()) },
-    });
-    for (const invite of liveInvites) {
-      try {
-        await this.dataSource.transaction(async (em) => {
-          const existingMember = await em
-            .getRepository(ProjectMember)
-            .findOne({ where: { projectId: invite.projectId, userId } });
-          if (!existingMember) {
-            await this.upsertMemberRow(
-              em,
-              invite.projectId,
-              userId,
-              invite.role,
-              invite.invitedById,
-            );
-          }
-          invite.acceptedAt = new Date();
-          invite.acceptedUserId = userId;
-          await em.save(invite);
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Failed to activate project invite ${invite.id} for user ${userId}: ${(e as Error).message}`,
-        );
-      }
-    }
-  }
-
   /** Daily cleanup of expired, unaccepted project invites. */
   @Cron(CronExpression.EVERY_DAY_AT_4AM, { name: 'project-invite-cleanup' })
   async cleanupExpiredInvites(): Promise<void> {
@@ -288,7 +249,7 @@ export class ProjectInviteService {
     return invite;
   }
 
-  /** Shared insert-or-restore-soft-deleted logic, used by acceptForExistingUser/registerAndCreateMember/activatePendingForUser. */
+  /** Shared insert-or-restore-soft-deleted logic, used by acceptForExistingUser/registerAndCreateMember. */
   private async upsertMemberRow(
     em: EntityManager,
     projectId: string,

@@ -64,11 +64,29 @@ export class ItemMirrorService {
       });
       if (existing) {
         await this.items.softRemove(existing);
+        await this.queueGoogleCopyRemoval(existing.id, ownerId);
       }
     } catch (err) {
       this.logger.error(
         `Failed to soft-delete mirror for ${legacyTable} #${legacyId} (owner: ${ownerId}): ${(err as Error).message}`,
       );
+    }
+  }
+
+  /**
+   * Marks a published Google copy of the deleted mirror pending-delete so the
+   * publisher job removes it. Best effort: the job's reconcile sweep also finds
+   * every soft-deleted item, so a failure here only delays the removal.
+   */
+  private async queueGoogleCopyRemoval(itemId: string, ownerId: string): Promise<void> {
+    try {
+      await this.items.manager?.query(
+        `UPDATE google_calendar_publication SET delete_pending_at = COALESCE(delete_pending_at, now())
+          WHERE item_id = $1 AND owner_id = $2`,
+        [itemId, ownerId],
+      );
+    } catch (err) {
+      this.logger.warn(`Could not queue the Google copy removal for item ${itemId}: ${(err as Error).name}`);
     }
   }
 

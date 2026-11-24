@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ApiException } from '../common/api.exception';
 import { parseDictatedItems } from './dictate-parser';
-import { GeminiConfig } from './gemini.config';
-
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+import { GeminiConfig, geminiGenerateContentRequest } from './gemini.config';
 
 @Injectable()
 export class DictateService {
@@ -30,11 +28,11 @@ export class DictateService {
   }
 
   private async callGeminiJson(system: string, user: string): Promise<string> {
-    const url = `${GEMINI_URL}/${this.gemini.model}:generateContent?key=${this.gemini.apiKey}`;
+    const { url, headers } = geminiGenerateContentRequest(this.gemini.model, this.gemini.apiKey);
     try {
       const r = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: 'user', parts: [{ text: user }] }],

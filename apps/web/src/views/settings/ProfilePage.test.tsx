@@ -39,6 +39,7 @@ vi.mock("@/providers/AuthProvider", () => ({
 vi.mock("@/services/auth-service", () => ({
   AuthService: { updateProfile: vi.fn(), changePassword: vi.fn() },
 }));
+vi.mock("@/components/settings/GoogleSignInCard", () => ({ default: () => null }));
 vi.mock("@/components/common/PageBreadcrumb", () => ({ default: () => <div>crumb</div> }));
 vi.mock("@/components/notifications/NotificationDiagnosticsPanel", () => ({
   default: () => null,

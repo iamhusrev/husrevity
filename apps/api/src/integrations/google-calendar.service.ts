@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'node:crypto';
@@ -8,6 +8,9 @@ import { IntegrationAccountService } from './integration-account.service';
 import { ExternalLink } from './external-link.entity';
 import { GoogleCalendarSyncService } from './google-calendar-sync.service';
 import { ApiException } from '../common/api.exception';
+import { redactSecrets } from './log-redaction';
+import { GOOGLE_NOT_CONFIGURED_MESSAGE, googleErrorStatus } from './google-error';
+import { GoogleCalendarEngineService } from './google-calendar-engine.service';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -26,7 +29,14 @@ export class GoogleCalendarService {
     // trace and how this was verified empirically with a real Nest DI
     // resolution test, not just unit tests with mocked providers).
     private readonly syncService: GoogleCalendarSyncService,
+    /** Absent in minimal wiring: then the legacy engine is always allowed, as before. */
+    @Optional() private readonly engine?: GoogleCalendarEngineService,
   ) {}
+
+  /** False when the v2 engine owns the owner or the grant was narrowed: no legacy Google call may be made. */
+  private async legacyAllowed(ownerId: string): Promise<boolean> {
+    return (await this.engine?.legacyEngineAllowed(ownerId)) !== false;
+  }
 
   /**
    * Gets an authenticated Google Calendar API client for a given owner.
@@ -36,7 +46,7 @@ export class GoogleCalendarService {
     calendarId: string | null;
   }> {
     if (!this.googleCalendarConfig.isConfigured()) {
-      throw ApiException.badRequest('Google Calendar integration is not configured');
+      throw ApiException.badRequest(GOOGLE_NOT_CONFIGURED_MESSAGE);
     }
 
     const decrypted = await this.integrationAccountService.get(ownerId, 'google_calendar');
@@ -50,11 +60,37 @@ export class GoogleCalendarService {
       refresh_token: decrypted.refreshToken ?? undefined,
     });
 
+    // googleapis refreshes the access token on its own and announces it here. Persist it so the next
+    // client does not start from a stale token. Fire-and-forget: a storage problem must not break the Google call.
+    oauth2Client.on('tokens', (tokens) => {
+      void this.persistRefreshedTokens(ownerId, tokens);
+    });
+
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     return {
       calendar,
       calendarId: decrypted.account.calendarId,
     };
+  }
+
+  /**
+   * Stores a refresh announced by the OAuth2 client. The refresh token is replaced only when Google sent a
+   * new one; the write only happens while the account is still `connected` (a late refresh after a
+   * disconnect is dropped). Never throws and never logs a token or the provider message.
+   */
+  private async persistRefreshedTokens(
+    ownerId: string,
+    tokens: { access_token?: string | null; refresh_token?: string | null },
+  ): Promise<void> {
+    if (!tokens.access_token) return;
+    try {
+      await this.integrationAccountService.updateRefreshedTokens(ownerId, 'google_calendar', {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token ?? undefined,
+      });
+    } catch (err) {
+      this.logger.warn(`Could not store a refreshed Google token: ${(err as Error)?.name ?? 'Error'}`);
+    }
   }
 
   /**
@@ -64,6 +100,9 @@ export class GoogleCalendarService {
    * updates `integration_account.calendar_id`, and returns the new calendar ID.
    */
   async ensureHusrevityCalendar(ownerId: string): Promise<string> {
+    if (!(await this.legacyAllowed(ownerId))) {
+      throw ApiException.conflict('Legacy Google Calendar sync is paused for this account');
+    }
     const { calendar, calendarId } = await this.getCalendarClient(ownerId);
 
     if (calendarId) {
@@ -100,8 +139,8 @@ export class GoogleCalendarService {
         throw error;
       }
       this.logger.error(
-        `Error creating Husrevity calendar for owner ${ownerId}: ${(error as Error).message}`,
-        (error as Error).stack,
+        `Error creating Husrevity calendar for owner ${ownerId}: ${redactSecrets((error as Error).message)}`,
+        redactSecrets((error as Error).stack),
       );
       throw ApiException.badRequest(
         `Failed to create Husrevity calendar: ${(error as Error).message}`,
@@ -156,7 +195,10 @@ export class GoogleCalendarService {
 
   /**
    * Syncs a Husrevity event Item to Google Calendar (insert or update).
-   * Only processes items with `kind === 'event'` and `source !== 'gcal'`.
+   * Only processes personal records: `kind === 'event'`, `source !== 'gcal'` and
+   * `projectId` empty. A project item belongs to the PROJECT owner's calendar
+   * scope (its owner_id is the project owner) and must never be published there
+   * on behalf of a collaborator.
    * Updates or creates the corresponding `external_link` record.
    * Performs conflict resolution ("last updated wins") by checking etags before update.
    */
@@ -165,13 +207,14 @@ export class GoogleCalendarService {
     ownerId: string;
     kind: string;
     source?: string | null;
+    projectId?: string | null;
     title: string;
     notes?: string | null;
     scheduledAt?: Date | string | null;
     durationMin?: number | null;
     updatedAt?: Date | string | null;
   }): Promise<ExternalLink | null> {
-    if (item.kind !== 'event' || item.source === 'gcal') {
+    if (item.kind !== 'event' || item.source === 'gcal' || item.projectId) {
       return null;
     }
 
@@ -183,6 +226,7 @@ export class GoogleCalendarService {
     if (!decrypted || decrypted.account.status !== 'connected') {
       return null;
     }
+    if (!(await this.legacyAllowed(item.ownerId))) return null;
 
     try {
       const { calendar, calendarId: existingCalId } = await this.getCalendarClient(item.ownerId);
@@ -205,7 +249,7 @@ export class GoogleCalendarService {
           remoteEvent = getRes.data;
         } catch (getErr: any) {
           this.logger.warn(
-            `Failed to fetch remote event ${link.externalId} for conflict check: ${getErr?.message}`,
+            `Failed to fetch remote event ${link.externalId} for conflict check: ${redactSecrets(getErr?.message)}`,
           );
         }
 
@@ -231,7 +275,7 @@ export class GoogleCalendarService {
                   await this.syncService.syncIncremental(item.ownerId);
                 } catch (syncErr: any) {
                   this.logger.error(
-                    `Failed to trigger incremental sync after conflict resolution: ${syncErr?.message}`,
+                    `Failed to trigger incremental sync after conflict resolution: ${redactSecrets(syncErr?.message)}`,
                   );
                 }
               }
@@ -240,11 +284,29 @@ export class GoogleCalendarService {
           }
         }
 
-        const res = await calendar.events.update({
-          calendarId,
-          eventId: link.externalId,
-          requestBody: eventPayload,
-        });
+        let res: { data: calendar_v3.Schema$Event };
+        try {
+          res = await calendar.events.update({
+            calendarId,
+            eventId: link.externalId,
+            requestBody: eventPayload,
+          });
+        } catch (updateErr) {
+          const status = googleErrorStatus(updateErr);
+          if (status !== 404 && status !== 410) throw updateErr;
+          // The event is gone (or lives in another calendar, e.g. after a reconnect): publish it
+          // again and point the SAME link at the new event id, so no duplicate link is created.
+          this.logger.warn(`Google event ${link.externalId} is gone (${status}); inserting it again`);
+          const inserted = await calendar.events.insert({ calendarId, requestBody: eventPayload });
+          if (!inserted.data.id) {
+            this.logger.warn(`Google Calendar insert returned no event ID for item ${item.id}`);
+            return null;
+          }
+          link.externalId = inserted.data.id;
+          link.etag = inserted.data.etag ?? null;
+          link.lastSyncedAt = new Date();
+          return await this.externalLinkRepo.save(link);
+        }
 
         link.etag = res.data.etag ?? link.etag;
         link.lastSyncedAt = new Date();
@@ -279,8 +341,8 @@ export class GoogleCalendarService {
       }
     } catch (error) {
       this.logger.error(
-        `Failed to sync item ${item.id} to Google Calendar for owner ${item.ownerId}: ${(error as Error).message}`,
-        (error as Error).stack,
+        `Failed to sync item ${item.id} to Google Calendar for owner ${item.ownerId}: ${redactSecrets((error as Error).message)}`,
+        redactSecrets((error as Error).stack),
       );
       return null;
     }
@@ -313,6 +375,7 @@ export class GoogleCalendarService {
     if (!decrypted || decrypted.account.status !== 'connected') {
       return null;
     }
+    if (!(await this.legacyAllowed(ownerId))) return null;
 
     const { calendar, calendarId: existingCalId } = await this.getCalendarClient(ownerId);
     const calendarId = existingCalId ?? (await this.ensureHusrevityCalendar(ownerId));
@@ -328,7 +391,7 @@ export class GoogleCalendarService {
         });
       } catch (stopErr: any) {
         this.logger.warn(
-          `Failed to stop existing watch channel ${decrypted.account.channelId} for owner ${ownerId}: ${stopErr?.message}`,
+          `Failed to stop existing watch channel ${decrypted.account.channelId} for owner ${ownerId}: ${redactSecrets(stopErr?.message)}`,
         );
       }
     }
@@ -381,8 +444,8 @@ export class GoogleCalendarService {
       return { channelId, resourceId, expiration };
     } catch (error: any) {
       this.logger.error(
-        `Failed to register watch channel for owner ${ownerId}: ${error?.message}`,
-        error?.stack,
+        `Failed to register watch channel for owner ${ownerId}: ${redactSecrets(error?.message)}`,
+        redactSecrets(error?.stack),
       );
       return null;
     }
@@ -422,8 +485,8 @@ export class GoogleCalendarService {
       return true;
     } catch (error: any) {
       this.logger.error(
-        `Failed to stop watch channel for owner ${ownerId}: ${error?.message}`,
-        error?.stack,
+        `Failed to stop watch channel for owner ${ownerId}: ${redactSecrets(error?.message)}`,
+        redactSecrets(error?.stack),
       );
       return false;
     }

@@ -349,4 +349,46 @@ describe('TodayService', () => {
       expect(service.currentBlock([instant])).toBeNull();
     });
   });
+
+  describe('currentBlockForAi', () => {
+    const activeRow = (over: Record<string, unknown>) =>
+      ({
+        id: 'a',
+        ownerId,
+        kind: 'event',
+        title: 'Evkat block',
+        source: 'web',
+        status: 'open',
+        rrule: null,
+        blockId: null,
+        scheduledAt: new Date(Date.now() - 5 * 60_000),
+        durationMin: 30,
+        ...over,
+      }) as unknown as Item;
+
+    it('skips an active Google-sourced event and returns null when nothing else is active', async () => {
+      items.find.mockResolvedValueOnce([activeRow({ id: 'g', title: 'Private Google meeting', source: 'gcal' })]);
+
+      expect(await service.currentBlockForAi(ownerId)).toBeNull();
+    });
+
+    it('returns the active non-Google block even when a Google event overlaps it', async () => {
+      items.find.mockResolvedValueOnce([
+        activeRow({ id: 'g', title: 'Private Google meeting', source: 'gcal' }),
+        activeRow({ id: 'b', title: 'Deep work', source: 'ios' }),
+      ]);
+
+      const block = await service.currentBlockForAi(ownerId);
+
+      expect(block?.title).toBe('Deep work');
+    });
+
+    it('does not change timeline(): Google rows still appear in the public timeline', async () => {
+      items.find.mockResolvedValueOnce([activeRow({ id: 'g', title: 'Google', source: 'gcal' })]);
+
+      const timeline = await service.timeline(ownerId);
+
+      expect(timeline.map((e) => e.itemId)).toEqual(['g']);
+    });
+  });
 });

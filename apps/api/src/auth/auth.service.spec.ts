@@ -8,7 +8,6 @@ import { AuthService } from './auth.service';
 import { RefreshToken } from './refresh-token.entity';
 import { User } from '../user/user.entity';
 import { ApiException } from '../common/api.exception';
-import { ProjectInviteService } from '../project/project-invite.service';
 
 type MockRefreshTokenRepo = { findOne: jest.Mock; createQueryBuilder: jest.Mock };
 type MockUserRepo = { findOne: jest.Mock };
@@ -56,7 +55,6 @@ describe('AuthService', () => {
         },
         { provide: ConfigService, useValue: { get: jest.fn().mockReturnValue(undefined) } },
         { provide: DataSource, useValue: dataSource },
-        { provide: ProjectInviteService, useValue: { activatePendingForUser: jest.fn() } },
       ],
     }).compile();
 

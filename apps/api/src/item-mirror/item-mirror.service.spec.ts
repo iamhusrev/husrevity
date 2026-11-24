@@ -17,6 +17,7 @@ describe('ItemMirrorService', () => {
     save: jest.Mock;
     softRemove: jest.Mock;
     restore: jest.Mock;
+    manager: { query: jest.Mock };
   };
   let configService: {
     get: jest.Mock;
@@ -29,6 +30,7 @@ describe('ItemMirrorService', () => {
       save: jest.fn((entity) => Promise.resolve({ id: '99', ...entity })),
       softRemove: jest.fn((entity) => Promise.resolve(entity)),
       restore: jest.fn().mockResolvedValue(undefined),
+      manager: { query: jest.fn().mockResolvedValue([]) },
     };
 
     configService = {
@@ -309,12 +311,33 @@ describe('ItemMirrorService', () => {
       expect(itemRepo.softRemove).toHaveBeenCalledWith(existing);
     });
 
+    it('queues the removal of a published Google copy of the soft-deleted mirror', async () => {
+      itemRepo.findOne.mockResolvedValueOnce({ id: '50', legacyTable: 'task', legacyId: '10', ownerId: '1' } as Item);
+
+      await service.softDeleteMirror('task', '10', '1');
+
+      const [sql, params] = itemRepo.manager.query.mock.calls[0];
+      expect(sql).toContain('UPDATE google_calendar_publication');
+      expect(sql).toContain('delete_pending_at');
+      expect(params).toEqual(['50', '1']);
+    });
+
+    it('still soft-deletes (the sweep covers it) when queueing the Google removal fails', async () => {
+      itemRepo.findOne.mockResolvedValueOnce({ id: '50', legacyTable: 'task', legacyId: '10', ownerId: '1' } as Item);
+      itemRepo.manager.query.mockRejectedValueOnce(new Error('relation does not exist'));
+
+      await expect(service.softDeleteMirror('task', '10', '1')).resolves.toBeUndefined();
+
+      expect(itemRepo.softRemove).toHaveBeenCalled();
+    });
+
     it('is a no-op if item is not found', async () => {
       itemRepo.findOne.mockResolvedValueOnce(null);
 
       await service.softDeleteMirror('task', '999', '1');
 
       expect(itemRepo.softRemove).not.toHaveBeenCalled();
+      expect(itemRepo.manager.query).not.toHaveBeenCalled();
     });
   });
 

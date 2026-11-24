@@ -398,64 +398,6 @@ describe('ProjectInviteService', () => {
     });
   });
 
-  describe('activatePendingForUser', () => {
-    const email = 'user@example.com';
-    const userId = '5';
-    function makeInvite(id: string, projectId: string): ProjectInvite {
-      return {
-        id,
-        projectId,
-        email,
-        role: 'EDITOR',
-        tokenHash: `hash-${id}`,
-        invitedById: '2',
-        acceptedAt: null,
-        acceptedUserId: null,
-        expiresAt: new Date(Date.now() + 60_000),
-      } as unknown as ProjectInvite;
-    }
-
-    it('activates every live invite for the email across multiple projects', async () => {
-      const inviteA = makeInvite('iA', '10');
-      const inviteB = makeInvite('iB', '11');
-      invites.find.mockResolvedValueOnce([inviteA, inviteB]);
-      emMemberRepo.findOne.mockResolvedValue(null);
-
-      await service.activatePendingForUser(userId, email);
-
-      expect(invites.find).toHaveBeenCalledWith({
-        where: expect.objectContaining({ email }),
-      });
-      expect(emMemberRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ projectId: '10', userId, role: 'EDITOR' }),
-      );
-      expect(emMemberRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ projectId: '11', userId, role: 'EDITOR' }),
-      );
-      expect(inviteA.acceptedAt).not.toBeNull();
-      expect(inviteB.acceptedAt).not.toBeNull();
-    });
-
-    it('keeps processing subsequent invites when an earlier one fails internally, and never rejects itself', async () => {
-      const inviteA = makeInvite('iA', '10');
-      const inviteB = makeInvite('iB', '11');
-      invites.find.mockResolvedValueOnce([inviteA, inviteB]);
-      dataSource.transaction
-        .mockImplementationOnce(() => Promise.reject(new Error('boom')))
-        .mockImplementationOnce((cb: (em: unknown) => Promise<unknown>) => cb(em));
-      emMemberRepo.findOne.mockResolvedValue(null);
-
-      await expect(service.activatePendingForUser(userId, email)).resolves.toBeUndefined();
-
-      expect(emMemberRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ projectId: '11', userId, role: 'EDITOR' }),
-      );
-      expect(inviteB.acceptedAt).not.toBeNull();
-      // inviteA's transaction rejected before any mutation happened on it.
-      expect(inviteA.acceptedAt).toBeNull();
-    });
-  });
-
   describe('revoke', () => {
     it('throws not-found when no invite matches (projectId, inviteId)', async () => {
       invites.findOne.mockResolvedValueOnce(null);

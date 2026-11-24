@@ -5,20 +5,18 @@ describe("downloadBlob", () => {
   const createObjectURL = vi.fn(() => "blob:mock-url");
   const revokeObjectURL = vi.fn();
   let clickSpy: ReturnType<typeof vi.spyOn>;
-  let clicked: HTMLAnchorElement | null;
+
+  // The anchor the code clicked is the `this` recorded by the spy.
+  const lastClicked = (): HTMLAnchorElement | null =>
+    (clickSpy.mock.contexts.at(-1) as HTMLAnchorElement | undefined) ?? null;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    clicked = null;
     Object.defineProperty(URL, "createObjectURL", { value: createObjectURL, configurable: true });
     Object.defineProperty(URL, "revokeObjectURL", { value: revokeObjectURL, configurable: true });
     createObjectURL.mockClear();
     revokeObjectURL.mockClear();
-    clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
-      this: HTMLAnchorElement,
-    ) {
-      clicked = this;
-    });
+    clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -28,7 +26,7 @@ describe("downloadBlob", () => {
 
   it("defers revoking the URL until after the click", () => {
     downloadBlob("cal.ics", new Blob(["x"]));
-    expect(clicked).not.toBeNull();
+    expect(lastClicked()).not.toBeNull();
     expect(revokeObjectURL).not.toHaveBeenCalled();
     vi.runAllTimers();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
@@ -39,9 +37,9 @@ describe("downloadBlob", () => {
     const blob = new Blob(["x"], { type: "text/calendar" });
     downloadBlob("cal.ics", blob);
     expect(createObjectURL).toHaveBeenCalledWith(blob);
-    expect(clicked).not.toBeNull();
-    expect(clicked?.download).toBe("cal.ics");
-    expect(clicked?.href).toBe("blob:mock-url");
+    expect(lastClicked()).not.toBeNull();
+    expect(lastClicked()?.download).toBe("cal.ics");
+    expect(lastClicked()?.href).toBe("blob:mock-url");
     vi.runAllTimers();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
   });

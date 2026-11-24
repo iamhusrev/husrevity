@@ -8,6 +8,8 @@ import { ApiException } from '../common/api.exception';
 import { ProjectAccessService } from '../project/project-access.service';
 import { NotificationService } from '../notification/notification.service';
 import { GoogleCalendarService } from '../integrations/google-calendar.service';
+import { GoogleCalendarPublishService } from '../integrations/google-calendar-publish.service';
+import { GoogleCalendarEngineService } from '../integrations/google-calendar-engine.service';
 import { GoalService } from '../goal/goal.service';
 
 type MockItemRepo = {
@@ -49,6 +51,8 @@ describe('ItemService', () => {
   let notifications: { cancelForSource: jest.Mock; enqueue: jest.Mock };
   let recurrence: { expand: jest.Mock };
   let googleCalendarService: { syncItemToGoogleCalendar: jest.Mock };
+  let engine: { ownerUsesV2Engine: jest.Mock };
+  let googlePublisher: { isHandling: jest.Mock; publishItem: jest.Mock; unpublishItem: jest.Mock };
   let goalService: { validateLiveGoal: jest.Mock; liveSubtreeIds: jest.Mock };
 
   beforeEach(async () => {
@@ -76,6 +80,12 @@ describe('ItemService', () => {
     notifications = { cancelForSource: jest.fn(), enqueue: jest.fn() };
     recurrence = { expand: jest.fn().mockReturnValue([]) };
     googleCalendarService = { syncItemToGoogleCalendar: jest.fn().mockResolvedValue(null) };
+    engine = { ownerUsesV2Engine: jest.fn().mockResolvedValue(false) };
+    googlePublisher = {
+      isHandling: jest.fn().mockResolvedValue(false),
+      publishItem: jest.fn().mockResolvedValue('created'),
+      unpublishItem: jest.fn().mockResolvedValue('removed'),
+    };
     goalService = {
       validateLiveGoal: jest.fn().mockResolvedValue({ id: '5', ownerId: '1' }),
       liveSubtreeIds: jest.fn(async (_owner: string, id: string) => [id]),
@@ -91,6 +101,8 @@ describe('ItemService', () => {
         { provide: ItemRecurrenceService, useValue: recurrence },
         { provide: GoogleCalendarService, useValue: googleCalendarService },
         { provide: GoalService, useValue: goalService },
+        { provide: GoogleCalendarPublishService, useValue: googlePublisher },
+        { provide: GoogleCalendarEngineService, useValue: engine },
       ],
     }).compile();
 
@@ -191,6 +203,93 @@ describe('ItemService', () => {
         expect.objectContaining({ ownerId: '2', projectId: '5' }),
       );
       expect(googleCalendarService.syncItemToGoogleCalendar).toHaveBeenCalled();
+    });
+  });
+
+  describe('optional Google write-back routing', () => {
+    const personalEvent = { kind: 'event' as const, title: 'Dentist', scheduledAt: '2026-07-01T09:00:00Z' };
+
+    it('uses only the legacy path while the new publisher does not own the owner', async () => {
+      await service.create(ownerId, personalEvent);
+
+      expect(googlePublisher.isHandling).toHaveBeenCalledWith(ownerId);
+      expect(googleCalendarService.syncItemToGoogleCalendar).toHaveBeenCalledTimes(1);
+      expect(googlePublisher.publishItem).not.toHaveBeenCalled();
+    });
+
+    it('keeps the legacy write for an owner without a v2 connection (write off)', async () => {
+      engine.ownerUsesV2Engine.mockResolvedValue(false);
+
+      await service.create(ownerId, personalEvent);
+
+      expect(googleCalendarService.syncItemToGoogleCalendar).toHaveBeenCalledTimes(1);
+    });
+
+    it('never falls through to the legacy write for an owner on the v2 engine when write is off', async () => {
+      engine.ownerUsesV2Engine.mockResolvedValue(true);
+      googlePublisher.isHandling.mockResolvedValue(false);
+
+      await service.create(ownerId, personalEvent);
+
+      expect(engine.ownerUsesV2Engine).toHaveBeenCalledWith(ownerId);
+      expect(googleCalendarService.syncItemToGoogleCalendar).not.toHaveBeenCalled();
+      expect(googlePublisher.publishItem).not.toHaveBeenCalled();
+    });
+
+    it('also keeps the legacy write silent on updates for an owner on the v2 engine', async () => {
+      engine.ownerUsesV2Engine.mockResolvedValue(true);
+      items.findOne.mockResolvedValueOnce({ id: '10', ownerId, projectId: null, kind: 'event', title: 'Old', payload: {}, status: 'open', source: 'web', createdAt: NOW, updatedAt: NOW });
+
+      await service.update(ownerId, '10', { title: 'New' });
+
+      expect(googleCalendarService.syncItemToGoogleCalendar).not.toHaveBeenCalled();
+    });
+
+    it('uses only the new publisher when it owns the owner, so nothing is published twice', async () => {
+      googlePublisher.isHandling.mockResolvedValue(true);
+
+      await service.create(ownerId, personalEvent);
+
+      expect(googlePublisher.publishItem).toHaveBeenCalledWith(expect.objectContaining({ ownerId, title: 'Dentist' }));
+      expect(googleCalendarService.syncItemToGoogleCalendar).not.toHaveBeenCalled();
+    });
+
+    it('routes updates through the new publisher as well', async () => {
+      googlePublisher.isHandling.mockResolvedValue(true);
+      items.findOne.mockResolvedValueOnce({ id: '10', ownerId, projectId: null, kind: 'event', title: 'Old', payload: {}, status: 'open', source: 'web', createdAt: NOW, updatedAt: NOW });
+
+      await service.update(ownerId, '10', { title: 'New' });
+
+      expect(googlePublisher.publishItem).toHaveBeenCalledWith(expect.objectContaining({ id: '10', title: 'New' }));
+      expect(googleCalendarService.syncItemToGoogleCalendar).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the mutation when the publisher throws', async () => {
+      googlePublisher.isHandling.mockResolvedValue(true);
+      googlePublisher.publishItem.mockRejectedValue(Object.assign(new Error('boom ya29.secret'), { status: 503 }));
+
+      await expect(service.create(ownerId, personalEvent)).resolves.toMatchObject({ title: 'Dentist' });
+      expect(items.save).toHaveBeenCalled();
+    });
+
+    it('removes the Google copy on delete only when the new publisher owns the owner', async () => {
+      const row = { id: '10', ownerId, projectId: null, kind: 'event', title: 'T', source: 'web', payload: {}, status: 'open', createdAt: NOW, updatedAt: NOW };
+      items.findOne.mockResolvedValueOnce(row);
+      await service.delete(ownerId, '10');
+      expect(googlePublisher.unpublishItem).not.toHaveBeenCalled();
+
+      googlePublisher.isHandling.mockResolvedValue(true);
+      items.findOne.mockResolvedValueOnce(row);
+      await service.delete(ownerId, '10');
+      expect(googlePublisher.unpublishItem).toHaveBeenCalledWith(ownerId, '10');
+    });
+
+    it('does not fail a delete when the Google removal throws', async () => {
+      googlePublisher.isHandling.mockResolvedValue(true);
+      googlePublisher.unpublishItem.mockRejectedValue(new Error('down'));
+      items.findOne.mockResolvedValueOnce({ id: '10', ownerId, projectId: null, kind: 'event', title: 'T', source: 'web', payload: {}, status: 'open', createdAt: NOW, updatedAt: NOW });
+
+      await expect(service.delete(ownerId, '10')).resolves.toBeUndefined();
     });
   });
 
@@ -1479,6 +1578,143 @@ describe('ItemService', () => {
         const valErrors = await validate(validDto);
         expect(valErrors.some((e: any) => e.property === 'goalId')).toBe(false);
       }
+    });
+  });
+
+  describe('source_is_immutable', () => {
+    const row = (over: Partial<Item> = {}) =>
+      ({
+        id: '10',
+        ownerId,
+        projectId: null,
+        title: 'T',
+        source: 'web',
+        payload: {},
+        status: 'open',
+        updatedAt: NOW,
+        createdAt: NOW,
+        ...over,
+      }) as Item;
+
+    it('never changes source on update, even when the client sends another value', async () => {
+      items.findOne.mockResolvedValueOnce(row({ source: 'web' }));
+
+      const result = await service.update(ownerId, '10', { title: 'New', source: 'gcal' });
+
+      expect(items.save).toHaveBeenCalledWith(expect.objectContaining({ source: 'web' }));
+      expect(result.source).toBe('web');
+      expect(result.title).toBe('New');
+    });
+
+    it.each(['ios', 'mcp', 'web'] as const)(
+      'accepts an update that carries source=%s without failing and keeps the stored source',
+      async (sent) => {
+        items.findOne.mockResolvedValueOnce(row({ source: 'ios' }));
+
+        const result = await service.update(ownerId, '10', { notes: 'n', source: sent });
+
+        expect(result.source).toBe('ios');
+      },
+    );
+
+    it('lets an undo replay of a snapshot (no source field) keep working', async () => {
+      items.findOne.mockResolvedValueOnce(row({ source: 'mcp' }));
+      const result = await service.update(ownerId, '10', { title: 'Back' });
+      expect(result.source).toBe('mcp');
+    });
+
+    it.each(['ios', 'mcp'] as const)('still creates items with source=%s', async (source) => {
+      const result = await service.create(ownerId, { kind: 'event', title: 'E', source });
+      expect(items.create).toHaveBeenCalledWith(expect.objectContaining({ source }));
+      expect(result.source).toBe(source);
+    });
+
+    it('rejects a client that tries to create an item with source=gcal', async () => {
+      await expect(
+        service.create(ownerId, { kind: 'event', title: 'E', source: 'gcal' }),
+      ).rejects.toMatchObject({ status: 400 });
+      expect(items.save).not.toHaveBeenCalled();
+    });
+
+    it('defaults to web when no source is sent', async () => {
+      await service.create(ownerId, { kind: 'task', title: 'E' });
+      expect(items.create).toHaveBeenCalledWith(expect.objectContaining({ source: 'web' }));
+    });
+  });
+
+  describe('gcal rows stay protected from every mutation', () => {
+    const gcalRow = () =>
+      ({
+        id: '77',
+        ownerId,
+        projectId: null,
+        kind: 'event',
+        title: 'From Google',
+        source: 'gcal',
+        status: 'open',
+        deletedAt: null,
+        payload: {},
+        updatedAt: NOW,
+        createdAt: NOW,
+      }) as Item;
+
+    it.each([
+      ['update', () => service.update(ownerId, '77', { title: 'x' })],
+      ['delete', () => service.delete(ownerId, '77')],
+      ['complete', () => service.complete(ownerId, '77', {})],
+      ['reopen', () => service.reopen(ownerId, '77')],
+      ['restore', () => service.restore(ownerId, '77')],
+    ])('%s is rejected with 403 and writes nothing', async (_name, act) => {
+      items.findOne.mockResolvedValue(gcalRow());
+
+      await expect(act()).rejects.toMatchObject({ status: 403 });
+
+      expect(items.save).not.toHaveBeenCalled();
+      expect(items.softRemove).not.toHaveBeenCalled();
+      expect(googleCalendarService.syncItemToGoogleCalendar).not.toHaveBeenCalled();
+    });
+
+    it('rejects occurrence mutations whose parent item is a gcal row', async () => {
+      occurrences.findOne.mockResolvedValue({
+        id: 'occ-1',
+        ownerId,
+        itemId: '77',
+        occursOn: '2026-01-05',
+        status: 'done',
+      });
+      items.findOne.mockResolvedValue(gcalRow());
+
+      await expect(service.updateOccurrence(ownerId, 'occ-1', { status: 'skipped' })).rejects.toMatchObject({
+        status: 403,
+      });
+      await expect(service.removeOccurrence(ownerId, 'occ-1')).rejects.toMatchObject({ status: 403 });
+      expect(occurrences.save).not.toHaveBeenCalled();
+      expect(occurrences.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('contract: item response shape stays unchanged', () => {
+    it('GET /items rows keep exactly the documented fields', async () => {
+      items.findOne.mockResolvedValueOnce({
+        id: '10',
+        ownerId,
+        projectId: null,
+        payload: {},
+        status: 'open',
+        source: 'ios',
+        createdAt: NOW,
+        updatedAt: NOW,
+      } as Item);
+
+      const dto = await service.get(ownerId, '10');
+
+      expect(Object.keys(dto).sort()).toEqual(
+        [
+          'id', 'kind', 'title', 'notes', 'context', 'projectId', 'goalId', 'blockId',
+          'scheduledAt', 'durationMin', 'dueAt', 'notifyMinutesBefore', 'rrule', 'status',
+          'completedAt', 'payload', 'source', 'occursOn', 'createdAt', 'updatedAt',
+        ].sort(),
+      );
     });
   });
 });

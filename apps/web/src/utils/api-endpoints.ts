@@ -11,6 +11,14 @@ export const AUTH_ENDPOINTS = {
   ME_NAV_PREFERENCES: "/me/nav-preferences",
 };
 
+export const GOOGLE_AUTH_ENDPOINTS = {
+  CONFIG: "/auth/google/config",
+  START: "/auth/google/start",
+  EXCHANGE: "/auth/google/exchange",
+  LINK_START: "/auth/google/link/start",
+  IDENTITY: "/auth/google/identity",
+};
+
 // ─── Notes ────────────────────────────────────────────────────────────────────
 
 export const NOTE_ENDPOINTS = {

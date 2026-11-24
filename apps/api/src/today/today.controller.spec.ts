@@ -51,4 +51,15 @@ describe('TodayController', () => {
     expect(result.suggestion).toBeNull();
     expect(result.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
+
+  it('contract: GET /today keeps exactly its documented top-level fields', async () => {
+    today.dueToday.mockResolvedValueOnce([]);
+    today.timeline.mockResolvedValueOnce([]);
+
+    const result = await controller.get({ userId: '1', email: 'a@b.com', role: 'user' });
+
+    expect(Object.keys(result).sort()).toEqual(
+      ['currentBlock', 'date', 'dueToday', 'suggestion', 'timeline'].sort(),
+    );
+  });
 });

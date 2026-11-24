@@ -56,6 +56,21 @@ async function refreshAccessToken(): Promise<string> {
   return newAccessToken;
 }
 
+/**
+ * Refreshes the session through the shared single-flight lock. For callers
+ * outside the interceptor (e.g. the Google link callback, whose /auth/ URL the
+ * interceptor deliberately skips). Rejects when there is no refresh token or
+ * the refresh fails; it does not force a logout itself.
+ */
+export function refreshSession(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
 // Response Interceptor - auto-refresh on 401
 apiClient.interceptors.response.use(
   (response) => response,

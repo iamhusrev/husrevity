@@ -20,6 +20,7 @@ import { SlackModule } from './slack/slack.module';
 import { ItemMirrorModule } from './item-mirror/item-mirror.module';
 import { NoteLinkModule } from './note-link/note-link.module';
 import { TrashModule } from './trash/trash.module';
+import { AuthModule } from './auth/auth.module';
 
 /**
  * Guards the REAL module import graph. Per-service unit tests build isolated
@@ -63,6 +64,7 @@ const roots: Array<[string, Type<unknown>]> = [
   ['ItemMirrorModule', ItemMirrorModule],
   ['NoteLinkModule', NoteLinkModule],
   ['TrashModule', TrashModule],
+  ['AuthModule', AuthModule],
 ];
 
 describe('real module graph', () => {

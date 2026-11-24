@@ -93,6 +93,33 @@
     "welcomeText": "Welcome to Husrevity.",
     "emailPlaceholder": "you@example.com"
   },
+  "googleLogin": {
+    "continue": "Continue with Google",
+    "or": "or",
+    "signingIn": "Signing you in with Google…",
+    "backToSignIn": "Back to sign in",
+    "errors": {
+      "denied": "Google sign-in was cancelled. You can try again or sign in with your password.",
+      "existingEmail": "An account with this email already exists. Sign in with your password, then link Google from Settings.",
+      "liveInvite": "This email has a pending invitation. Use your invitation link to create your account.",
+      "conflict": "This Google account cannot be used here because it is already linked to another account.",
+      "disabled": "This account is disabled.",
+      "failed": "Google sign-in failed. Please try again.",
+      "badCode": "This sign-in request is invalid or has expired. Please start again from the sign-in page.",
+      "missingCode": "This sign-in link is no longer valid. Please start again from the sign-in page.",
+      "generic": "Something went wrong while signing in with Google. Please try again."
+    },
+    "settings": {
+      "title": "Google sign-in",
+      "linkedAs": "Linked to {{email}}.",
+      "notLinked": "Link your Google account to sign in with one click.",
+      "link": "Link Google account",
+      "unlink": "Unlink Google account",
+      "unlinkDisabled": "Unlinking is unavailable because Google is your only sign-in method.",
+      "linkedSuccess": "Your Google account is now linked.",
+      "unlinkedSuccess": "Your Google account has been unlinked."
+    }
+  },
   "errors": {
     "common": {
       "backHome": "Back Home",
@@ -1019,6 +1046,10 @@
   },
   "calendar": {
     "title": "Calendar",
+    "googleBadge": "Google",
+    "googleEventLabel": "Google Calendar event, read-only: {{title}}",
+    "googleAllDay": "All day",
+    "googleFeedError": "Google Calendar events could not be loaded right now. Your own items are still shown.",
     "refresh": "Refresh",
     "newEvent": "New Event",
     "editEvent": "Edit Event",
@@ -1648,10 +1679,33 @@
     },
     "google": {
       "title": "Google Calendar",
-      "desc": "The Husrevity calendar syncs both ways with Google Calendar.",
+      "descLegacy": "This legacy connection syncs the Husrevity calendar both ways with Google Calendar.",
+      "descReadOnly": "Events from the Google calendars you pick appear in Husrevity. This is read-only; writing Husrevity events to a separate Husrevity Planner calendar is an optional opt-in.",
+      "descDisconnected": "Connect Google Calendar to see your Google events in Husrevity.",
       "connect": "Connect with Google",
       "connectedToast": "Google Calendar connected",
       "errorToast": "Could not connect Google Calendar"
+    },
+    "googleCalendars": {
+      "title": "Calendars to show",
+      "note": "Events from the calendars you pick appear in your Husrevity calendar. This is read-only: Husrevity never changes, moves or deletes your Google events. The only thing it can write is an optional, separate Husrevity Planner calendar, and only if you turn that on.",
+      "loading": "Loading your Google calendars…",
+      "loadError": "Could not load your Google calendars.",
+      "retry": "Try again",
+      "empty": "No Google calendars were found.",
+      "primary": "Primary",
+      "managed": "Managed by Husrevity",
+      "freeBusy": "Free/busy only",
+      "selectedCount": "{{count}} selected",
+      "lastSync": "Last sync: {{time}}",
+      "neverSynced": "Not synced yet",
+      "lastError": "Last sync problem: {{error}}",
+      "needsReconnect": "Google access must be renewed. Reconnect to keep your calendars up to date.",
+      "reconnect": "Reconnect Google",
+      "save": "Save selection",
+      "saving": "Saving…",
+      "saved": "Calendar selection saved",
+      "saveError": "Could not save the calendar selection"
     },
     "mcp": {
       "title": "Claude / MCP access",
@@ -1680,6 +1734,63 @@
         "tooLong": "The range can be at most 366 days."
       },
       "note": "Completed occurrences of recurring items still appear in an external calendar; only skipped ones are removed."
+    },
+    "googleCallback": {
+      "working": "Finishing the Google connection…"
+    },
+    "googleNarrow": {
+      "title": "Narrow permissions",
+      "explain": "Switch Husrevity to read-only access. Your current Google permission is revoked, syncing pauses, and you approve a new consent that only lets Husrevity read your calendar list and events. Events already synced stay visible.",
+      "action": "Narrow permissions",
+      "confirm": "Revoke and continue",
+      "cancel": "Cancel",
+      "working": "Working…",
+      "error": "Could not start the permission change. Try again."
+    },
+    "googleWrite": {
+      "title": "Write to Google (optional)",
+      "explain": "Off by default. When on, the personal events you create in Husrevity are copied to a separate calendar named \"Husrevity Planner\" in your Google account, with title and time only. Notes, project items and anything shared with others are never sent. Google asks for one extra permission that only covers calendars Husrevity creates itself. Turning this off deletes those managed copies from the Husrevity Planner calendar shortly afterwards; nothing else in Google is touched. Events Husrevity already wrote to Google stay in your Google account after you disconnect; to remove them, delete the Husrevity Planner calendar or the events in Google Calendar.",
+      "toggle": "Write my Husrevity events to Google",
+      "needsNarrow": "To optionally write your events to Google, switch to read-only permissions first.",
+      "enabledToast": "Writing to Google is on",
+      "disabledToast": "Writing to Google is off",
+      "migrateExplain": "Your existing Husrevity events are not copied automatically. Copy them to the new calendar now if you want them there too.",
+      "migrateAction": "Move to new calendar",
+      "migrating": "Copying…",
+      "migrated": "{{published}} events copied to the new calendar",
+      "migratedPartial": "{{published}} events copied, {{pending}} still pending. Run it again to continue."
+    },
+    "googleRevokeFailed": {
+      "title": "Google access may still be active",
+      "body": "Husrevity deleted its stored Google credentials, but Google could not be asked to revoke the permission. It may still be listed in your Google Account. To remove it, open your Google Account, go to the third-party access list and remove Husrevity.",
+      "link": "Open Google Account permissions"
+    },
+    "googlePaused": {
+      "title": "Google sync is paused",
+      "body": "The old Google sync is paused because your narrowed permission no longer matches it. Events already synced stay visible. Reconnect Google, or turn on the new calendar feature, to continue."
+    },
+    "googleLegacyCopies": {
+      "title": "Delete synced Google copies",
+      "explain": "Removes the Google events that the old sync copied into Husrevity. Events you created in Husrevity are never touched, and nothing is deleted in your Google account. This cannot be undone.",
+      "count": "{{count}} synced Google copies found",
+      "none": "There are no synced Google copies to delete.",
+      "action": "Delete synced Google copies",
+      "confirmText": "Permanently delete {{count}} synced Google copies from Husrevity?",
+      "confirmNote": "The count includes copies you may have already deleted in Husrevity. They are removed permanently and this cannot be undone.",
+      "confirm": "Yes, delete them",
+      "cancel": "Cancel",
+      "deleted": "{{count}} synced Google copies deleted",
+      "disconnectFirst": "Disconnect Google Calendar first. While it is connected the next sync would import the copies again."
+    },
+    "googleDisconnect": {
+      "title": "Disconnect Google Calendar?",
+      "explain": "Synced Google events and your selection are deleted and Husrevity's Google access is revoked. Records created in Husrevity are kept, and so are older synced copies unless you confirm deleting them below; you can also delete them later from Settings > Integrations. Events Husrevity wrote to Google stay in your Google account.",
+      "loading": "Checking for older Google copies…",
+      "previewError": "Could not check for older Google copies. Older copies will be kept.",
+      "deleteCopies": "Also permanently delete {{count}} older Google event copies stored as Husrevity items (includes copies you may have already deleted in Husrevity)",
+      "noCopies": "There are no older Google copies to delete.",
+      "confirm": "Disconnect",
+      "cancel": "Cancel"
     }
   },
   "goals": {

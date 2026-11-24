@@ -9,10 +9,17 @@ import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
 import {
   ChatProvider,
+  GoogleStatus,
   PAT_SCOPES,
   PatScope,
   integrationsService,
 } from "@/services/integrations-service";
+import { useGoogleStatus } from "@/hooks/useGoogleCalendars";
+import GoogleCalendarSection from "./GoogleCalendarSection";
+import GoogleDisconnectPanel from "./GoogleDisconnectPanel";
+import GooglePausedNotice from "./GooglePausedNotice";
+import GoogleLegacyCopiesCard from "./GoogleLegacyCopiesCard";
+import GoogleRevokeFailedNotice from "./GoogleRevokeFailedNotice";
 import IcsExportCard from "./IcsExportCard";
 
 const CARD =
@@ -21,6 +28,17 @@ const BTN =
   "rounded-xl px-4 py-2 text-sm font-medium bg-husrev-ink text-husrev-cream hover:bg-husrev-ember disabled:opacity-50 dark:bg-husrev-cream dark:text-husrev-ink";
 const BTN_GHOST =
   "rounded-xl px-4 py-2 text-sm font-medium ring-1 ring-husrev-sand hover:bg-husrev-sand/40 disabled:opacity-50 dark:ring-white/10";
+
+/**
+ * Two-way wording only for a connected, running legacy connection; read-only for v2/narrowed;
+ * neutral when disconnected or paused (a paused sync syncs nothing, so no "both ways").
+ */
+function googleDescKey(status: GoogleStatus | undefined): string {
+  if (!status?.connected || status.paused === true) return "integrations.google.descDisconnected";
+  return status.mode === "v2_read" || status.mode === "narrowed"
+    ? "integrations.google.descReadOnly"
+    : "integrations.google.descLegacy";
+}
 
 function useErrorAlert() {
   const show = alertStore((s) => s.show);
@@ -117,9 +135,14 @@ function GoogleCard() {
     queryKey: ["integrations", "google"],
     queryFn: integrationsService.googleStatus,
   });
+  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
   const disconnect = useMutation({
-    mutationFn: integrationsService.googleDisconnect,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations", "google"] }),
+    mutationFn: (deleteLegacyCopies: boolean) =>
+      integrationsService.googleDisconnect(deleteLegacyCopies),
+    onSuccess: () => {
+      setConfirmingDisconnect(false);
+      qc.invalidateQueries({ queryKey: ["integrations", "google"] });
+    },
     onError,
   });
   const connect = useMutation({
@@ -155,20 +178,32 @@ function GoogleCard() {
     <section className={CARD}>
       <h2 className="text-lg font-semibold">{t("integrations.google.title")}</h2>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {t("integrations.google.desc")}
+        {t(googleDescKey(data))}
       </p>
+      <GooglePausedNotice paused={data?.paused} connected={data?.connected === true} />
+      <GoogleRevokeFailedNotice revokeFailed={data?.revokeFailed} connected={data?.connected === true} />
       {data && !data.configured ? (
         <p className="mt-4 text-sm text-amber-600">{t("integrations.notConfigured")}</p>
       ) : data?.connected ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-green-600">{t("integrations.connected")}</span>
-          <button
-            className={BTN_GHOST}
-            disabled={disconnect.isPending}
-            onClick={() => disconnect.mutate()}
-          >
-            {t("integrations.disconnect")}
-          </button>
+          {!confirmingDisconnect && (
+            <button
+              className={BTN_GHOST}
+              disabled={disconnect.isPending}
+              // In every mode a confirmation (with the legacy copy count) comes first.
+              onClick={() => setConfirmingDisconnect(true)}
+            >
+              {t("integrations.disconnect")}
+            </button>
+          )}
+          {confirmingDisconnect && (
+            <GoogleDisconnectPanel
+              pending={disconnect.isPending}
+              onConfirm={(deleteLegacyCopies) => disconnect.mutate(deleteLegacyCopies)}
+              onCancel={() => setConfirmingDisconnect(false)}
+            />
+          )}
         </div>
       ) : (
         <button
@@ -284,6 +319,7 @@ function McpCard() {
 
 export default function IntegrationsPage() {
   const { t } = useTranslation();
+  const { data: google } = useGoogleStatus();
   return (
     <div className="space-y-6">
       <PageBreadcrumb
@@ -295,6 +331,10 @@ export default function IntegrationsPage() {
         <ChatLinkCard provider="telegram" />
         <ChatLinkCard provider="slack" />
         <GoogleCard />
+        <GoogleLegacyCopiesCard
+          legacyEngineActive={google?.connected === true && google.mode === "legacy" && google.paused !== true}
+        />
+        <GoogleCalendarSection />
         <McpCard />
         <IcsExportCard />
       </div>

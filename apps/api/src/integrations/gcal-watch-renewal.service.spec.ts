@@ -2,11 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GcalWatchRenewalService } from './gcal-watch-renewal.service';
 import { IntegrationAccountService } from './integration-account.service';
 import { GoogleCalendarService } from './google-calendar.service';
+import { GoogleCalendarEngineService } from './google-calendar-engine.service';
 
 describe('GcalWatchRenewalService', () => {
   let service: GcalWatchRenewalService;
   let mockIntegrationAccountService: jest.Mocked<Partial<IntegrationAccountService>>;
   let mockGoogleCalendarService: jest.Mocked<Partial<GoogleCalendarService>>;
+  let mockEngine: { ownerUsesV2Engine: jest.Mock; legacyEngineAllowed: jest.Mock };
 
   const mockAccounts = [
     { id: 'acc-1', ownerId: 'user-10', provider: 'google_calendar', status: 'connected' },
@@ -28,9 +30,17 @@ describe('GcalWatchRenewalService', () => {
       }),
     };
 
+    const ownerUsesV2Engine = jest.fn().mockResolvedValue(false);
+    mockEngine = {
+      ownerUsesV2Engine,
+      // Mirrors the real helper for an owner without a narrowed grant: allowed unless v2 is live.
+      legacyEngineAllowed: jest.fn(async (id: string) => !(await ownerUsesV2Engine(id))),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GcalWatchRenewalService,
+        { provide: GoogleCalendarEngineService, useValue: mockEngine },
         { provide: IntegrationAccountService, useValue: mockIntegrationAccountService },
         { provide: GoogleCalendarService, useValue: mockGoogleCalendarService },
       ],
@@ -40,6 +50,26 @@ describe('GcalWatchRenewalService', () => {
   });
 
   describe('renewWatchChannels', () => {
+    it('never renews the legacy watch channel of an owner on the v2 engine', async () => {
+      mockEngine.ownerUsesV2Engine.mockImplementation(async (id: string) => id === 'user-10');
+
+      const count = await service.renewWatchChannels();
+
+      expect(mockGoogleCalendarService.registerWatchChannel).toHaveBeenCalledTimes(1);
+      expect(mockGoogleCalendarService.registerWatchChannel).toHaveBeenCalledWith('user-20');
+      expect(count).toBe(1);
+    });
+
+    it('rollback: never renews the watch channel of an owner the engine helper does not allow (narrowed grant, flag off)', async () => {
+      mockEngine.legacyEngineAllowed.mockImplementation(async (id: string) => id !== 'user-10');
+
+      const count = await service.renewWatchChannels();
+
+      expect(mockGoogleCalendarService.registerWatchChannel).toHaveBeenCalledTimes(1);
+      expect(mockGoogleCalendarService.registerWatchChannel).toHaveBeenCalledWith('user-20');
+      expect(count).toBe(1);
+    });
+
     it('should query accounts needing renewal and register watch channels for each', async () => {
       const count = await service.renewWatchChannels();
 

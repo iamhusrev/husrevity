@@ -38,6 +38,7 @@ import { SlackModule } from './slack/slack.module';
 import { ItemMirrorModule } from './item-mirror/item-mirror.module';
 import { NoteLinkModule } from './note-link/note-link.module';
 import { TrashModule } from './trash/trash.module';
+import { PublicModule } from './public/public.module';
 import { HealthController } from './common/health.controller';
 
 @Module({
@@ -77,6 +78,7 @@ import { HealthController } from './common/health.controller';
     SlackModule,
     NoteLinkModule,
     TrashModule,
+    PublicModule,
   ],
   controllers: [HealthController],
   providers: [

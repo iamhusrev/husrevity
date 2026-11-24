@@ -35,3 +35,6 @@ coverage/
 
 # bun
 bun.lockb
+
+# local Claude Code settings
+**/.claude/settings.local.json

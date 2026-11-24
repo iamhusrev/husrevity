@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import GoogleSignInCard from "@/components/settings/GoogleSignInCard";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import NotificationDiagnosticsPanel from "@/components/notifications/NotificationDiagnosticsPanel";
 import { useAuth } from "@/providers/AuthProvider";
@@ -496,6 +497,8 @@ function EditCards({
           </div>
         </form>
       </section>
+
+      <GoogleSignInCard />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { EyeCloseIcon, EyeIcon } from "@/icons";
 import { useAuth } from "@/providers/AuthProvider";
 
 import Button from "@/components/button/Button";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import FormFieldText from "@/components/form/FormFieldText";
 import { alertStore } from "@/stores/alert-store";
 import { parseAxiosError } from "@/utils/handleError";
@@ -84,6 +85,8 @@ export default function SignIn() {
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">{t("auth.signInSubtitle")}</p>
           </div>
+
+          <GoogleSignInButton />
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-6">

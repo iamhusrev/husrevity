@@ -30,6 +30,9 @@ import { minutesOfDayIstanbul, slotToIso } from "@/utils/today-board";
 import { ItemResponse, ItemKind } from "@/types/item/item";
 import ScheduleModal, { ScheduleModalItem } from "@/components/items/ScheduleModal";
 import Dialog from "@/components/ui/Dialog";
+import { GoogleEventChip, GoogleFeedNotice } from "./GoogleEventChip";
+import { GoogleDayEvent, hideLegacyGcalItems } from "./merge-google-events";
+import { useGoogleDayFeed } from "./useGoogleDayFeed";
 
 const DND_TYPE = "MONTH_ITEM";
 
@@ -88,7 +91,19 @@ export function MonthPageView({ initialYear, initialMonth }: MonthPageProps) {
 
   // Grid range & items fetching
   const { fromYmd, toYmd } = useMemo(() => monthRange(year, month), [year, month]);
-  const { data: items, isLoading, isFetching, isError, refetch } = useItemsInRange(fromYmd, toYmd);
+  const {
+    data: rawItems,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useItemsInRange(fromYmd, toYmd);
+  const { googleByDay, hiddenLegacyItemIds, feedError } = useGoogleDayFeed(fromYmd, toYmd);
+  const items = useMemo(
+    () => (rawItems ? hideLegacyGcalItems(rawItems, hiddenLegacyItemIds) : rawItems),
+    [rawItems, hiddenLegacyItemIds],
+  );
+  const hasGoogleEvents = Object.keys(googleByDay).length > 0;
 
   // buildMonthGrid reads the clock for `isToday`, so the grid depends on todayYmd too.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -387,7 +402,8 @@ export function MonthPageView({ initialYear, initialMonth }: MonthPageProps) {
         </div>
       ) : (
         <>
-          {(!items || items.length === 0) && (
+          {feedError && <GoogleFeedNotice />}
+          {(!items || items.length === 0) && !hasGoogleEvents && (
             <div className="rounded-xl border border-dashed border-gray-200 p-3 text-center text-xs text-gray-500 dark:border-white/10 dark:text-gray-400">
               {t("month.empty")}
             </div>
@@ -427,6 +443,7 @@ export function MonthPageView({ initialYear, initialMonth }: MonthPageProps) {
                         cell={cell}
                         dayNumber={dayNumber}
                         dayItems={dayItems}
+                        googleEvents={googleByDay[cell.ymd] ?? []}
                         formattedDate={formattedDate}
                         index={idx}
                         focusedIndex={focusedCellIndex}
@@ -492,12 +509,18 @@ export function MonthPageView({ initialYear, initialMonth }: MonthPageProps) {
 
           {/* Items List */}
           <div className="flex-1 py-4 space-y-2.5 overflow-y-auto">
-            {(groupedItems[selectedDayYmd] || []).length === 0 ? (
+            {(groupedItems[selectedDayYmd] || []).length === 0 &&
+            (googleByDay[selectedDayYmd] ?? []).length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                 {t("month.panel.empty")}
               </p>
             ) : (
               <ul className="space-y-2">
+                {(googleByDay[selectedDayYmd] ?? []).map((entry) => (
+                  <li key={`google-${entry.event.id}`}>
+                    <GoogleEventChip entry={entry} />
+                  </li>
+                ))}
                 {(groupedItems[selectedDayYmd] || []).map((item) => (
                   <li
                     key={`${item.id}-${item.occursOn ?? ""}-${item.scheduledAt ?? item.dueAt ?? ""}`}
@@ -678,6 +701,7 @@ interface MonthCellProps {
   cell: MonthGridCell;
   dayNumber: number;
   dayItems: ItemResponse[];
+  googleEvents: GoogleDayEvent[];
   formattedDate: string;
   index: number;
   focusedIndex: number;
@@ -691,6 +715,7 @@ function MonthCell({
   cell,
   dayNumber,
   dayItems,
+  googleEvents,
   formattedDate,
   index,
   focusedIndex,
@@ -719,8 +744,10 @@ function MonthCell({
     [cell.ymd, onDropItem],
   );
 
+  const totalCount = dayItems.length + googleEvents.length;
   const displayChips = dayItems.slice(0, 3);
-  const overflowCount = dayItems.length > 3 ? dayItems.length - 3 : 0;
+  const displayGoogle = googleEvents.slice(0, Math.max(0, 3 - displayChips.length));
+  const overflowCount = totalCount > 3 ? totalCount - 3 : 0;
 
   return (
     <div
@@ -734,7 +761,7 @@ function MonthCell({
       data-today={cell.isToday ? "true" : undefined}
       aria-label={t("month.cellAriaLabel", {
         date: formattedDate,
-        count: dayItems.length,
+        count: totalCount,
       })}
       onClick={onClick}
       onKeyDown={onKeyDown}
@@ -761,9 +788,9 @@ function MonthCell({
         </span>
 
         {/* Density dots (mobile & desktop) */}
-        {dayItems.length > 0 && (
+        {totalCount > 0 && (
           <div className="flex items-center gap-0.5">
-            {Array.from({ length: Math.min(dayItems.length, 3) }).map((_, i) => (
+            {Array.from({ length: Math.min(totalCount, 3) }).map((_, i) => (
               <span key={i} className="h-1.5 w-1.5 rounded-full bg-brand-500/70" />
             ))}
           </div>
@@ -778,6 +805,10 @@ function MonthCell({
             item={item}
             cellYmd={cell.ymd}
           />
+        ))}
+
+        {displayGoogle.map((entry) => (
+          <GoogleEventChip key={`google-${entry.event.id}-${cell.ymd}`} entry={entry} compact />
         ))}
 
         {overflowCount > 0 && (
