@@ -13,6 +13,7 @@ import { ACTIVITY_TYPES, ActivityType, FITNESS_LEVELS, FitnessLevel } from "@/ty
 import { BiEditAlt, BiRun, BiTargetLock } from "react-icons/bi";
 import Dialog from "@/components/ui/Dialog";
 import SportErrorRow from "./SportErrorRow";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 const profileSchema = z.object({
   fitnessLevel: z.enum(FITNESS_LEVELS),
@@ -311,7 +312,7 @@ export default function SportProfileCard() {
 
         {profile.notes && (
           <p className="mt-3 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-            {profile.notes}
+            <LinkifiedText text={profile.notes} />
           </p>
         )}
       </div>

@@ -45,6 +45,7 @@ import {
 import { Edge } from "./learning-order";
 import LearningItemRow from "./LearningItemRow";
 import { useLearningSensors } from "./useLearningSensors";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 /** A drop zone around one item list; it also lights up while an item hovers an empty list. */
 function ItemList({
@@ -364,7 +365,7 @@ export default function TopicCard({
           <p
             className={`mt-0.5 pl-6 text-sm leading-6 text-gray-500 dark:text-gray-400 ${isOpen ? "" : "line-clamp-2"}`}
           >
-            {topic.description}
+            <LinkifiedText text={topic.description} />
           </p>
         )}
         <div

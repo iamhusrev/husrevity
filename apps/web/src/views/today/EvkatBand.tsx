@@ -7,6 +7,7 @@ import { BiX } from "react-icons/bi";
 import Dialog from "@/components/ui/Dialog";
 import { RoutineColorToken, RoutineSegmentResponse } from "@/types/routine/routine";
 import { formatMinuteRange, minutesToTop } from "@/utils/today-board";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 const TOTAL_MINUTES = 1440;
 
@@ -196,7 +197,7 @@ function EvkatSegmentDialog({
               {t("today.board.evkatNotes")}
             </h3>
             <p className="mt-1 whitespace-pre-line text-sm text-gray-600 dark:text-gray-300">
-              {segment.notes}
+              <LinkifiedText text={segment.notes} />
             </p>
           </section>
         )}
@@ -220,7 +221,9 @@ function EvkatSegmentDialog({
                     aria-hidden="true"
                     className={`mt-[7px] h-1.5 w-1.5 flex-none rounded-full ${styles.dot}`}
                   />
-                  <span className="min-w-0 flex-1 break-words">{activity.text}</span>
+                  <span className="min-w-0 flex-1 break-words">
+                    <LinkifiedText text={activity.text} />
+                  </span>
                 </li>
               ))}
             </ul>

@@ -13,6 +13,7 @@ import { ItemResponse } from "@/types/item/item";
 import { errorMessage } from "@/utils/mutation-error";
 import { progressLabel, progressPercent } from "@/utils/goal-tree";
 import { formatYmdRange, itemWhenLabel } from "./goal-format";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 /** The goal items endpoint caps at 200 and returns recurring items as templates. */
 const GOAL_ITEMS_LIMIT = 200;
@@ -106,7 +107,7 @@ export default function GoalDetailPanel({ goal, onClose }: GoalDetailPanelProps)
 
       {goal.notes && (
         <p className="mt-3 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
-          {goal.notes}
+          <LinkifiedText text={goal.notes} />
         </p>
       )}
 

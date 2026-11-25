@@ -27,6 +27,7 @@ import { formatMinuteRange } from "@/utils/today-board";
 import { BiPlus, BiTrash, BiPencil, BiChevronUp, BiChevronDown, BiX } from "react-icons/bi";
 import DeleteConfirmModal from "@/components/modal/DeleteConfirmModal";
 import Dialog from "@/components/ui/Dialog";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
@@ -323,7 +324,7 @@ function SegmentCard({
 
         {segment.notes && (
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line">
-            {segment.notes}
+            <LinkifiedText text={segment.notes} />
           </p>
         )}
 
@@ -337,7 +338,9 @@ function SegmentCard({
                 aria-hidden="true"
                 className={`h-1.5 w-1.5 flex-none rounded-full ${COLOR_STRIPE_CLASS[color]}`}
               />
-              <span className="min-w-0 flex-1 truncate">{a.text}</span>
+              <span className="min-w-0 flex-1 truncate">
+                <LinkifiedText text={a.text} />
+              </span>
               <button
                 type="button"
                 onClick={() => removeActivity(a)}

@@ -8,6 +8,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { LearningItemResponse } from "@/types/learning/learning";
 import { formatDateTime } from "@/utils/i18n-date";
+import { linkLabel, toHref } from "@/utils/linkify";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 import { itemDndId } from "./learning-dnd";
 
 /**
@@ -73,23 +75,34 @@ export default function LearningItemRow({
           <BsCircle size={20} />
         )}
       </button>
-      <button
-        type="button"
-        onClick={onEdit}
-        className={`min-w-0 flex-1 py-1.5 text-left text-sm leading-6 ${
-          item.completedAt
-            ? "text-gray-400 line-through decoration-gray-300 dark:text-gray-500 dark:decoration-gray-600"
-            : "text-gray-800 dark:text-white/90"
-        }`}
-      >
-        <span className="block truncate">{item.text}</span>
+      {/* The text opens the editor; the link chip sits outside that button so it can be a real
+          anchor (an <a> inside a <button> is invalid and the click would open the editor). */}
+      <div className="min-w-0 flex-1 py-1.5">
+        <button
+          type="button"
+          onClick={onEdit}
+          className={`block w-full text-left text-sm leading-6 ${
+            item.completedAt
+              ? "text-gray-400 line-through decoration-gray-300 dark:text-gray-500 dark:decoration-gray-600"
+              : "text-gray-800 dark:text-white/90"
+          }`}
+        >
+          <span className="block truncate">{item.text}</span>
+        </button>
         {(item.url || item.estimatedMinutes !== null || item.reviewAt) && (
-          <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs leading-5 text-gray-500 no-underline dark:text-gray-400">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs leading-5 text-gray-500 dark:text-gray-400">
             {item.url && (
-              <span className="inline-flex items-center gap-1">
-                <BiLinkExternal />
-                {new URL(item.url).hostname || "Link"}
-              </span>
+              <a
+                href={toHref(item.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onPointerDown={(e) => e.stopPropagation()}
+                title={item.url}
+                className="inline-flex min-w-0 items-center gap-1 rounded text-brand-600 underline decoration-brand-500/40 underline-offset-2 transition hover:text-brand-700 hover:decoration-brand-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-husrev-amber dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <BiLinkExternal aria-hidden="true" className="shrink-0" />
+                <span className="truncate">{linkLabel(item.url)}</span>
+              </a>
             )}
             {item.estimatedMinutes !== null && <span>◷ {item.estimatedMinutes} dk</span>}
             {item.reviewAt && (
@@ -102,9 +115,14 @@ export default function LearningItemRow({
                 })}
               </span>
             )}
-          </span>
+          </div>
         )}
-      </button>
+        {item.notes && (
+          <p className="mt-0.5 line-clamp-2 whitespace-pre-line text-xs leading-5 text-gray-500 dark:text-gray-400">
+            <LinkifiedText text={item.notes} />
+          </p>
+        )}
+      </div>
       <button
         type="button"
         onClick={onDelete}

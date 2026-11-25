@@ -10,6 +10,7 @@ import { parseAxiosError } from "@/utils/handleError";
 import { formatDate } from "@/utils/i18n-date";
 import { BiTrash } from "react-icons/bi";
 import MemberAvatar from "./MemberAvatar";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 const DRAG_TYPE = "PROJECT_TASK";
 
@@ -104,7 +105,7 @@ function TaskCard({
       </div>
       {task.description && (
         <p className="mb-2 text-xs text-gray-500 line-clamp-2 dark:text-gray-400">
-          {task.description}
+          <LinkifiedText text={task.description} />
         </p>
       )}
       <div className="flex items-center justify-between gap-1.5">

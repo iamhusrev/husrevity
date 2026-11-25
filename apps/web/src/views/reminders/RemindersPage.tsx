@@ -48,6 +48,7 @@ import {
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 import DictateQuickAddModal from "@/components/ai/DictateQuickAddModal";
 import Dialog from "@/components/ui/Dialog";
+import LinkifiedText from "@/components/ui/LinkifiedText";
 
 // ─── Priority helpers ─────────────────────────────────────────────────────────
 
@@ -353,7 +354,9 @@ function ReminderRow({
           </Dropdown>
         </div>
         {reminder.notes && (
-          <span className="block w-full truncate text-xs text-gray-400">{reminder.notes}</span>
+          <span className="block w-full truncate text-xs text-gray-400">
+            <LinkifiedText text={reminder.notes} />
+          </span>
         )}
       </div>
 
