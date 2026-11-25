@@ -26,7 +26,6 @@ const ITEM_KEYS = {
       options?.context ?? "",
       options?.status ?? "",
     ] as const,
-  inbox: ["items", "inbox"] as const,
   goal: (goalId: string) => ["items", "goal", goalId] as const,
   detail: (id: string) => ["item", id] as const,
 };
@@ -65,18 +64,6 @@ export function useItemsInRange(fromYmd: string, toYmd: string, options?: UseIte
     select: (d) => d.data,
     enabled: options?.enabled !== false && Boolean(fromYmd) && Boolean(toYmd),
     placeholderData: keepPreviousData,
-  });
-}
-
-/**
- * Unsorted open tasks (no date, project, goal, block or rrule), newest first.
- * The key lives under ["items"], so every item mutation invalidates it.
- */
-export function useInboxItems() {
-  return useQuery({
-    queryKey: ITEM_KEYS.inbox,
-    queryFn: () => itemService.listItems({ inbox: true }),
-    select: (d) => d.data,
   });
 }
 

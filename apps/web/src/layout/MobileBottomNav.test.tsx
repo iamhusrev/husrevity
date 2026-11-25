@@ -77,12 +77,12 @@ describe("MobileBottomNav", () => {
     expect(screen.getByRole("button", { name: /More/i })).toBeInTheDocument();
   });
 
-  it("lists Inbox and Week in the More sheet", async () => {
+  it("no longer lists the removed Inbox and Week screens in the More sheet", async () => {
     const user = userEvent.setup();
     renderNav();
     await user.click(screen.getByRole("button", { name: /More/i }));
-    expect(screen.getByRole("link", { name: "Inbox" })).toHaveAttribute("href", "/inbox");
-    expect(screen.getByRole("link", { name: "Week" })).toHaveAttribute("href", "/week");
+    expect(screen.queryByRole("link", { name: "Inbox" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Week" })).toBeNull();
   });
 
   it("lists Goals in the More sheet", async () => {
@@ -130,7 +130,7 @@ describe("MobileBottomNav", () => {
     navPreferences = {
       sections: {
         core: ["vault", "notes", "reminders", "projects"],
-        daily: ["sport", "inbox", "week", "month", "goals", "evkat", "learning"],
+        daily: ["sport", "month", "goals", "evkat", "learning"],
       },
     };
     renderNav();

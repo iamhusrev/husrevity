@@ -21,8 +21,6 @@ export type NavItemId =
   | "notes"
   | "projects"
   | "vault"
-  | "inbox"
-  | "week"
   | "month"
   | "goals"
   | "evkat"

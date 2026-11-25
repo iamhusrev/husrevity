@@ -1,10 +1,8 @@
 import type { IconType } from "react-icons";
 import {
-  BiArchiveIn,
   BiBell,
   BiBookOpen,
   BiCalendar,
-  BiCalendarWeek,
   BiDumbbell,
   BiFolder,
   BiLockAlt,
@@ -28,8 +26,6 @@ export const NAV_REGISTRY: Record<NavItemId, NavRegistryEntry> = {
   notes: { key: "nav.notes", path: "/notes", icon: BiNote, defaultSection: "core" },
   projects: { key: "nav.projects", path: "/projects", icon: BiFolder, defaultSection: "core" },
   vault: { key: "nav.vault", path: "/vault", icon: BiLockAlt, defaultSection: "core" },
-  inbox: { key: "nav.inbox", path: "/inbox", icon: BiArchiveIn, defaultSection: "daily" },
-  week: { key: "nav.week", path: "/week", icon: BiCalendarWeek, defaultSection: "daily" },
   month: { key: "nav.calendar", path: "/month", icon: BiCalendar, defaultSection: "daily" },
   goals: { key: "nav.goals", path: "/goals", icon: BiTargetLock, defaultSection: "daily" },
   evkat: { key: "nav.evkat", path: "/evkat", icon: HiOutlineClock, defaultSection: "daily" },

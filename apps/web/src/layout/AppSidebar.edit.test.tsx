@@ -68,7 +68,7 @@ describe("AppSidebar menu order", () => {
     navPreferences = {
       sections: {
         core: ["vault", "notes", "reminders"],
-        daily: ["projects", "inbox", "week", "month", "goals", "evkat", "learning", "sport"],
+        daily: ["projects", "month", "goals", "evkat", "learning", "sport"],
       },
     };
     renderSidebar();
@@ -93,7 +93,7 @@ describe("AppSidebar edit mode", () => {
     expect(updateNavPreferences.mock.calls[0][0]).toEqual({
       sections: {
         core: ["notes", "reminders", "projects", "vault"],
-        daily: ["inbox", "week", "month", "goals", "evkat", "learning", "sport"],
+        daily: ["month", "goals", "evkat", "learning", "sport"],
       },
     });
     await waitFor(() => expect(applyUser).toHaveBeenCalledWith(saved));

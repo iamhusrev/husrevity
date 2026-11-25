@@ -13,7 +13,7 @@ describe("resolveNavOrder", () => {
     const prefs: NavPreferences = {
       sections: {
         core: ["vault", "notes", "reminders", "projects"],
-        daily: ["sport", "inbox", "week", "month", "goals", "evkat", "learning"],
+        daily: ["sport", "month", "goals", "evkat", "learning"],
       },
     };
     expect(resolveNavOrder(prefs).core).toEqual(["vault", "notes", "reminders", "projects"]);
@@ -50,13 +50,13 @@ describe("resolveNavOrder", () => {
     const order = resolveNavOrder(prefs);
     expect(order.core.slice(0, 1)).toEqual(["notes"]);
     expect(order.core).toContain("reminders");
-    expect(order.daily).toContain("inbox");
+    expect(order.daily).toContain("month");
     expect(allIds(order)).toEqual(allIds(DEFAULT_NAV_ORDER));
   });
 });
 
 describe("moveNavItem", () => {
-  const base = { core: ["reminders", "notes", "projects", "vault"], daily: ["inbox", "week"] };
+  const base = { core: ["reminders", "notes", "projects", "vault"], daily: ["goals", "sport"] };
 
   it("reorders within a section", () => {
     const next = moveNavItem(base as never, "vault", "core", 0);
@@ -66,7 +66,7 @@ describe("moveNavItem", () => {
   it("moves across sections at an index", () => {
     const next = moveNavItem(base as never, "notes", "daily", 1);
     expect(next.core).toEqual(["reminders", "projects", "vault"]);
-    expect(next.daily).toEqual(["inbox", "notes", "week"]);
+    expect(next.daily).toEqual(["goals", "notes", "sport"]);
   });
 
   it("can empty a section and fill an empty one", () => {
@@ -76,8 +76,8 @@ describe("moveNavItem", () => {
   });
 
   it("clamps an out-of-range index", () => {
-    const next = moveNavItem(base as never, "inbox", "core", 99);
-    expect(next.core[next.core.length - 1]).toBe("inbox");
+    const next = moveNavItem(base as never, "goals", "core", 99);
+    expect(next.core[next.core.length - 1]).toBe("goals");
   });
 
   it("does not mutate its input", () => {
@@ -92,7 +92,7 @@ describe("moveNavItem", () => {
 });
 
 describe("stepNavItem", () => {
-  const base = { core: ["reminders", "notes"], daily: ["inbox", "week"] };
+  const base = { core: ["reminders", "notes"], daily: ["goals", "sport"] };
 
   it("moves up and down inside a section", () => {
     expect(stepNavItem(base as never, "notes", -1).core).toEqual(["notes", "reminders"]);
@@ -102,17 +102,17 @@ describe("stepNavItem", () => {
   it("crosses into the next section when stepping down from the end", () => {
     const next = stepNavItem(base as never, "notes", 1);
     expect(next.core).toEqual(["reminders"]);
-    expect(next.daily).toEqual(["notes", "inbox", "week"]);
+    expect(next.daily).toEqual(["notes", "goals", "sport"]);
   });
 
   it("crosses into the previous section when stepping up from the start", () => {
-    const next = stepNavItem(base as never, "inbox", -1);
-    expect(next.core).toEqual(["reminders", "notes", "inbox"]);
-    expect(next.daily).toEqual(["week"]);
+    const next = stepNavItem(base as never, "goals", -1);
+    expect(next.core).toEqual(["reminders", "notes", "goals"]);
+    expect(next.daily).toEqual(["sport"]);
   });
 
   it("is a no-op at the very top and bottom", () => {
     expect(stepNavItem(base as never, "reminders", -1)).toEqual(base);
-    expect(stepNavItem(base as never, "week", 1)).toEqual(base);
+    expect(stepNavItem(base as never, "sport", 1)).toEqual(base);
   });
 });
