@@ -558,6 +558,20 @@
       "empty": "Set up your daily routine.",
       "error": "Couldn't load your routine.",
       "noActivities": "No tasks for this segment."
+    },
+    "focus": {
+      "now": "Now",
+      "next": "Next",
+      "nothingNow": "No Evkat block is running right now.",
+      "noActivities": "No items written for this block.",
+      "openEvkat": "Open Evkat",
+      "studyToday": "Study today",
+      "studyEmpty": "No learning items planned for today.",
+      "openLearning": "Open Learning",
+      "minutes": "{{count}} min",
+      "markDone": "Mark as done",
+      "markUndone": "Mark as not done",
+      "activity": "Claude activity"
     }
   },
   "quickAdd": {

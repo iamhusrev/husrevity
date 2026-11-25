@@ -20,6 +20,10 @@ vi.mock("@/components/dashboard/TodaySuggestionsCard", () => ({
   default: () => <div data-testid="today-suggestions" />,
 }));
 
+vi.mock("@/components/dashboard/TodayFocus", () => ({
+  default: () => <div data-testid="today-focus" />,
+}));
+
 vi.mock("react-i18next", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-i18next")>();
   return {

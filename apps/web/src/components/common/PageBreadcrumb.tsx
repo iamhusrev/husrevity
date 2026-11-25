@@ -7,6 +7,8 @@ interface BreadcrumbProps {
   flourish?: string;
   /** Optional eyebrow/kicker (mono uppercase) shown above the title. */
   kicker?: string;
+  /** Optional one-line description under the title. */
+  description?: string;
 }
 
 const PageBreadcrumb: React.FC<BreadcrumbProps> = (props) => {

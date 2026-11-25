@@ -99,8 +99,14 @@ export function MonthPageView({ initialYear, initialMonth }: MonthPageProps) {
     refetch,
   } = useItemsInRange(fromYmd, toYmd);
   const { googleByDay, hiddenLegacyItemIds, feedError } = useGoogleDayFeed(fromYmd, toYmd);
+  // Cancelled items are history, not plans: drawing them struck through only cluttered the grid.
   const items = useMemo(
-    () => (rawItems ? hideLegacyGcalItems(rawItems, hiddenLegacyItemIds) : rawItems),
+    () =>
+      rawItems
+        ? hideLegacyGcalItems(rawItems, hiddenLegacyItemIds).filter(
+            (item) => item.status !== "cancelled",
+          )
+        : rawItems,
     [rawItems, hiddenLegacyItemIds],
   );
   const hasGoogleEvents = Object.keys(googleByDay).length > 0;

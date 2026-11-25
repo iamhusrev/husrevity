@@ -163,7 +163,7 @@
     "projects": "Projeler",
     "calendar": "Takvim",
     "month": "Ay",
-    "vault": "Vault",
+    "vault": "Kasa",
     "evkat": "Evkat",
     "learning": "Öğrenme",
     "admin": "Yönetim",
@@ -558,6 +558,20 @@
       "empty": "Günlük rutinini oluştur.",
       "error": "Vakitler yüklenemedi.",
       "noActivities": "Bu vakte bağlı iş yok."
+    },
+    "focus": {
+      "now": "Şimdi",
+      "next": "Sonra",
+      "nothingNow": "Şu an Evkat'ta bir vakit yok.",
+      "noActivities": "Bu vakit için iş yazılmamış.",
+      "openEvkat": "Evkat'ı aç",
+      "studyToday": "Bugün çalışılacak",
+      "studyEmpty": "Bugüne planlanmış öğrenme maddesi yok.",
+      "openLearning": "Öğrenme'yi aç",
+      "minutes": "{{count}} dk",
+      "markDone": "Tamamlandı işaretle",
+      "markUndone": "Tamamlanmadı işaretle",
+      "activity": "Claude aktivitesi"
     }
   },
   "quickAdd": {
@@ -996,9 +1010,9 @@
     }
   },
   "vault": {
-    "title": "Vault",
-    "newEntity": "Yeni Entity",
-    "editEntity": "Entity Düzenle",
+    "title": "Kasa",
+    "newEntity": "Yeni kayıt",
+    "editEntity": "Kaydı düzenle",
     "namePlaceholder": "Production .env, AWS, Vercel…",
     "categoryPlaceholder": "Kategori (environment, credentials…)",
     "newItem": "Yeni Alan",
@@ -1073,12 +1087,12 @@
       "errorMessage": "Kopyalanamadı."
     },
     "confirmDeleteItem": "\"{{label}}\" silinsin mi?",
-    "confirmDeleteEntity": "Bu entity ve içindeki tüm alanlar silinsin mi?",
+    "confirmDeleteEntity": "Bu kayıt ve içindeki tüm alanlar silinsin mi?",
     "noItems": "Henüz alan yok.",
     "noItemsHint": "Alan ekle veya .env içe aktar.",
-    "noEntities": "Henüz entity yok.",
-    "startNew": "Başlamak için bir entity oluşturun.",
-    "selectEntity": "Bir entity seçin.",
+    "noEntities": "Henüz kayıt yok.",
+    "startNew": "Başlamak için bir kayıt oluştur (ör. bir sunucunun .env'i, bir hesabın bilgileri).",
+    "selectEntity": "Soldan bir kayıt seç.",
     "modal": {
       "kickerEditEntity": "Düzenle",
       "kickerNewEntity": "Yeni vault",
